@@ -110,15 +110,13 @@
                     </VerticalStackLayout>
 
                     <!-- Formular: Neues Ziel -->
-                    <Border StrokeShape="RoundRectangle 12"
-                            Stroke="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                            BackgroundColor="{AppThemeBinding Light={StaticResource CardBackground}, Dark={StaticResource CardBackgroundDark}}"
-                            Padding="16"
-                            IsVisible="{Binding ShowAddForm}">
+                    <controls:CreateFormCard Title="{loc:Translate Btn_NeuesZiel}"
+                                             IsVisible="{Binding ShowAddForm}"
+                                             CancelText="{loc:Translate Btn_Abbrechen}"
+                                             SaveText="{loc:Translate Btn_ZielHinzufuegen}"
+                                             CancelCommand="{Binding ToggleAddFormCommand}"
+                                             SaveCommand="{Binding SaveNewSparZielCommand}">
                         <VerticalStackLayout Spacing="14">
-
-                            <Label Text="{loc:Translate Btn_NeuesZiel}"
-                                   FontSize="16" FontAttributes="Bold" />
 
                             <!-- Titel -->
                             <VerticalStackLayout Spacing="4">
@@ -160,24 +158,8 @@
                                        Keyboard="Numeric" FontSize="16" />
                             </VerticalStackLayout>
 
-                            <!-- Buttons -->
-                            <Grid ColumnDefinitions="*, *" ColumnSpacing="10">
-                                <Button Grid.Column="0"
-                                        Text="{loc:Translate Btn_Abbrechen}"
-                                        BackgroundColor="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray900}}"
-                                        TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}"
-                                        CornerRadius="10" HeightRequest="44"
-                                        Command="{Binding ToggleAddFormCommand}" />
-                                <Button Grid.Column="1"
-                                        Text="{loc:Translate Btn_ZielHinzufuegen}"
-                                        BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                                        TextColor="White"
-                                        CornerRadius="10" HeightRequest="44"
-                                        Command="{Binding SaveNewSparZielCommand}" />
-                            </Grid>
-
                         </VerticalStackLayout>
-                    </Border>
+                    </controls:CreateFormCard>
 
                 </VerticalStackLayout>
             </ScrollView>
