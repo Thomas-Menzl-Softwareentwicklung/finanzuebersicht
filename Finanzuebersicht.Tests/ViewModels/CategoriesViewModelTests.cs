@@ -136,6 +136,58 @@ public class CategoriesViewModelTests
     }
 
     [Fact]
+    public async Task GoToDetail_WhenKontenTabAndNoItem_OpensInlineCreateForm()
+    {
+        var sut = CreateSut(
+            Substitute.For<ICategoryRepository>(),
+            Substitute.For<ITransactionRepository>(),
+            Substitute.For<IRecurringTransactionRepository>(),
+            Substitute.For<IAccountRepository>(),
+            Substitute.For<ITransactionTemplateRepository>(),
+            out _,
+            out var navigationService);
+
+        sut.SelectedSectionIndex = 1;
+
+        await sut.GoToDetailCommand.ExecuteAsync(null);
+
+        Assert.True(sut.ShowAddKontoForm);
+        await navigationService.DidNotReceive().GoToAsync(Arg.Any<string>(), Arg.Any<IDictionary<string, object>>());
+        await navigationService.DidNotReceive().GoToAsync(Arg.Any<string>());
+    }
+
+    [Fact]
+    public async Task SaveNewKonto_WhenValid_SavesAccountAndClosesForm()
+    {
+        var accountRepository = Substitute.For<IAccountRepository>();
+        accountRepository.GetAccountsAsync().Returns(Task.FromResult(new List<Account>()));
+        accountRepository.SaveAccountAsync(Arg.Any<Account>()).Returns(call => Task.FromResult(call.Arg<Account>()));
+
+        var sut = CreateSut(
+            Substitute.For<ICategoryRepository>(),
+            Substitute.For<ITransactionRepository>(),
+            Substitute.For<IRecurringTransactionRepository>(),
+            accountRepository,
+            Substitute.For<ITransactionTemplateRepository>(),
+            out _,
+            out _);
+
+        sut.SelectedSectionIndex = 1;
+        sut.ShowAddKontoForm = true;
+        sut.NeuerKontoName = "Sparkonto";
+        sut.SelectedKontoTypeOption = new AccountTypeOption(AccountType.Tagesgeld, "Tagesgeld");
+        sut.NeuerAnfangssaldoText = "1000";
+
+        await sut.SaveNewKontoCommand.ExecuteAsync(null);
+
+        await accountRepository.Received(1).SaveAccountAsync(Arg.Is<Account>(a =>
+            a.Name == "Sparkonto" &&
+            a.Type == AccountType.Tagesgeld &&
+            a.OpeningBalance == 1000m));
+        Assert.False(sut.ShowAddKontoForm);
+    }
+
+    [Fact]
     public async Task GoToDetail_NavigatesToCategoryDetailRoute()
     {
         var category = new Category { Id = "cat-1", Name = "Miete" };
@@ -207,6 +259,7 @@ public class CategoriesViewModelTests
             new LoadCategoriesUseCase(categoryRepository),
             new LoadAccountsUseCase(accountRepository),
             new GetAccountBalancesUseCase(accountRepository, transactionRepository),
+            new SaveAccountDetailUseCase(accountRepository),
             new ToggleAccountArchiveUseCase(accountRepository),
             new DeleteAccountUseCase(accountRepository, transactionRepository, templateRepository),
             localizationService,
