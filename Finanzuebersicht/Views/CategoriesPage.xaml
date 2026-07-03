@@ -122,8 +122,47 @@
                 <RefreshView Command="{Binding LoadKategorienCommand}"
                              IsRefreshing="{Binding IsLoading}"
                              IsVisible="{Binding IsKontenVisible}">
-                    <ScrollView>
+                    <ScrollView x:Name="KontenScrollView">
                         <VerticalStackLayout Spacing="12" Padding="16">
+
+                            <controls:CreateFormCard x:Name="AddKontoForm"
+                                                     Title="{Binding NeuesKontoFormTitle}"
+                                                     IsVisible="{Binding ShowAddKontoForm}"
+                                                     AccessibilityDescription="{loc:Translate A11y_CreateFormPanel}"
+                                                     CancelText="{loc:Translate Btn_Abbrechen}"
+                                                     SaveText="{loc:Translate Title_KontoHinzufuegen}"
+                                                     CancelCommand="{Binding ToggleAddKontoFormCommand}"
+                                                     SaveCommand="{Binding SaveNewKontoCommand}">
+                                <VerticalStackLayout Spacing="14">
+
+                                    <VerticalStackLayout Spacing="4">
+                                        <Label Text="{loc:Translate Lbl_Name}" FontSize="13"
+                                               TextColor="{AppThemeBinding Light=#8E8E93, Dark=#636366}" />
+                                        <Entry Text="{Binding NeuerKontoName}"
+                                               Placeholder="{loc:Translate Lbl_Konto}"
+                                               FontSize="16" />
+                                    </VerticalStackLayout>
+
+                                    <VerticalStackLayout Spacing="4">
+                                        <Label Text="{loc:Translate Lbl_Typ}" FontSize="13"
+                                               TextColor="{AppThemeBinding Light=#8E8E93, Dark=#636366}" />
+                                        <controls:SelectionField ItemsSource="{Binding VerfuegbareKontoTypen}"
+                                                                 SelectedItem="{Binding SelectedKontoTypeOption, Mode=TwoWay}"
+                                                                 DisplayMemberPath="DisplayName"
+                                                                 FieldLabel="{loc:Translate Lbl_Typ}" />
+                                    </VerticalStackLayout>
+
+                                    <VerticalStackLayout Spacing="4">
+                                        <Label Text="{loc:Translate Lbl_Anfangssaldo}" FontSize="13"
+                                               TextColor="{AppThemeBinding Light=#8E8E93, Dark=#636366}" />
+                                        <Entry Text="{Binding NeuerAnfangssaldoText}"
+                                               Placeholder="{loc:Translate Hint_Betrag}"
+                                               Keyboard="Numeric"
+                                               FontSize="16" />
+                                    </VerticalStackLayout>
+
+                                </VerticalStackLayout>
+                            </controls:CreateFormCard>
 
                             <controls:EmptyStateView IconImage="categories.png"
                                                      IconAccessibilityDescription="{loc:Translate Lbl_Konten}"
@@ -131,7 +170,7 @@
                                                      Hint="{loc:Translate Empty_KontenHinweis}"
                                                      ActionText="{loc:Translate Btn_Hinzufuegen}"
                                                      ActionCommand="{Binding GoToDetailCommand}"
-                                                     IsVisible="{Binding IsKontenEmpty}" />
+                                                     IsVisible="{Binding IsKontenEmptyStateVisible}" />
 
                             <Border StrokeShape="RoundRectangle 12"
                                     Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray900}}"

@@ -10,6 +10,18 @@ namespace Finanzuebersicht.Tests.ViewModels;
 public class SparZieleViewModelTests
 {
     [Fact]
+    public void ToggleAddForm_OpensFormAndHidesEmptyState()
+    {
+        var viewModel = CreateSut(Substitute.For<ISparZielRepository>(), out _, out _);
+        Assert.True(viewModel.IsEmptyStateVisible);
+
+        viewModel.ToggleAddFormCommand.Execute(null);
+
+        Assert.True(viewModel.ShowAddForm);
+        Assert.False(viewModel.IsEmptyStateVisible);
+    }
+
+    [Fact]
     public async Task SaveNewSparZiel_WithEmptyTitel_ShowsAlertAndDoesNotSave()
     {
         var repository = Substitute.For<ISparZielRepository>();

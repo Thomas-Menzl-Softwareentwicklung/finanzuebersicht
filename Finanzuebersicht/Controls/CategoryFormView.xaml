@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:Finanzuebersicht.ViewModels"
+             xmlns:loc="clr-namespace:Finanzuebersicht.Extensions"
+             xmlns:controls="clr-namespace:Finanzuebersicht.Controls"
+             x:Class="Finanzuebersicht.Controls.CategoryFormView"
+             x:DataType="vm:CategoryDetailViewModel">
+
+    <VerticalStackLayout Spacing="20">
+
+        <VerticalStackLayout Spacing="4">
+            <Label Text="{loc:Translate Lbl_Name}" FontSize="13"
+                   TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
+            <Entry Text="{Binding Name}" Placeholder="{loc:Translate Hint_Kategoriename}"
+                   FontSize="16" />
+        </VerticalStackLayout>
+
+        <VerticalStackLayout Spacing="4">
+            <Label Text="{loc:Translate Lbl_Icon}" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
+            <CollectionView ItemsSource="{Binding VerfuegbareIcons}"
+                            SelectionMode="Single"
+                            SelectedItem="{Binding Icon}">
+                <CollectionView.ItemsLayout>
+                    <GridItemsLayout Orientation="Vertical" Span="7"
+                                     HorizontalItemSpacing="8" VerticalItemSpacing="8" />
+                </CollectionView.ItemsLayout>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="x:String">
+                        <Border Padding="8" StrokeShape="RoundRectangle 10"
+                               Stroke="Transparent"
+                               BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}"
+                               HorizontalOptions="Center">
+                            <Label Text="{Binding .}" FontSize="22"
+                                   HorizontalOptions="Center" VerticalOptions="Center" />
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </VerticalStackLayout>
+
+        <VerticalStackLayout Spacing="4">
+            <Label Text="{loc:Translate Lbl_Farbe}" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
+            <CollectionView ItemsSource="{Binding VerfuegbareFarben}"
+                            SelectionMode="Single"
+                            SelectedItem="{Binding Color}">
+                <CollectionView.ItemsLayout>
+                    <GridItemsLayout Orientation="Vertical" Span="5"
+                                     HorizontalItemSpacing="10" VerticalItemSpacing="10" />
+                </CollectionView.ItemsLayout>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="x:String">
+                        <Border WidthRequest="40" HeightRequest="40"
+                               StrokeShape="RoundRectangle 20"
+                               Stroke="Transparent" Padding="0"
+                               BackgroundColor="{Binding .}"
+                               HorizontalOptions="Center" />
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </VerticalStackLayout>
+
+        <VerticalStackLayout Spacing="4">
+            <Label Text="{loc:Translate Lbl_Typ}" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
+            <controls:SelectionField ItemsSource="{Binding VerfuegbareTypen}"
+                                     SelectedItem="{Binding SelectedTypeOption, Mode=TwoWay}"
+                                     DisplayMemberPath="DisplayName"
+                                     FieldLabel="{loc:Translate Lbl_Typ}" />
+        </VerticalStackLayout>
+
+        <VerticalStackLayout Spacing="4">
+            <Label Text="{loc:Translate Lbl_MonatlichesBudget}" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
+            <Entry Text="{Binding MonthlyBudgetText}" Keyboard="Numeric"
+                   Placeholder="{loc:Translate Hint_BudgetOptional}" FontSize="16"
+                   SemanticProperties.Hint="{loc:Translate A11y_HintBudget}" />
+            <Label Text="{loc:Translate Hint_BudgetNull}" FontSize="11" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
+        </VerticalStackLayout>
+
+    </VerticalStackLayout>
+</ContentView>

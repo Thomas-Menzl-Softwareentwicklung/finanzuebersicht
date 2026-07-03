@@ -372,6 +372,8 @@ Please restart the app.</value></data>
   <data name="A11y_SelectionField" xml:space="preserve"><value>{0}, {1}, tap to change</value></data>
   <data name="A11y_SelectionFieldLeer" xml:space="preserve"><value>{0}, tap to select</value></data>
   <data name="A11y_SegmentUmschalten" xml:space="preserve"><value>Switch view</value></data>
+  <data name="A11y_CreateFormPanel" xml:space="preserve"><value>Form for creating a new entry</value></data>
+  <data name="A11y_FormSheetDialog" xml:space="preserve"><value>Dialog: {0}</value></data>
   <data name="RecurrenceInterval_Daily" xml:space="preserve"><value>Daily</value></data>
   <data name="RecurrenceInterval_Weekly" xml:space="preserve"><value>Weekly</value></data>
   <data name="RecurrenceInterval_Monthly" xml:space="preserve"><value>Monthly</value></data>

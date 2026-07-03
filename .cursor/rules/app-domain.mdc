@@ -20,6 +20,13 @@ alwaysApply: true
 - Native `Picker` durch `SelectionField` + `SelectionPopup` ersetzt (macOS 27 Beta Workaround, PR #218)
 - `DatePicker` bleibt nativ; Details: `.cursor/rules/maccatalyst-picker-investigation.mdc`
 
+## Einheitliches Anlegen (#265 ✅ v1.19)
+
+- **Inline:** `CreateFormCard` — Konten, Sparziele (Panel oben, Scroll-to-top)
+- **Sheet:** `FormSheetPopup` — Kategorien, Daueraufträge
+- **Bearbeiten:** weiter auf `*DetailPage`
+- Doku: `docs/CREATE_UX.md`
+
 ## Konten & Salden
 
 - `GetAccountBalancesUseCase`: Saldo = Anfangssaldo + Σ Buchungen (Transfers korrekt)

@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:Finanzuebersicht.ViewModels"
+             xmlns:conv="clr-namespace:Finanzuebersicht.Converters"
+             xmlns:controls="clr-namespace:Finanzuebersicht.Controls"
+             xmlns:loc="clr-namespace:Finanzuebersicht.Extensions"
+             x:Class="Finanzuebersicht.Controls.RecurringTransactionFormView"
+             x:DataType="vm:RecurringTransactionDetailViewModel">
+
+    <ContentView.Resources>
+        <conv:TypButtonColorConverter x:Key="TypButtonColor" />
+    </ContentView.Resources>
+
+    <VerticalStackLayout Spacing="20">
+
+        <Grid ColumnDefinitions="*, *" ColumnSpacing="8">
+            <Button Grid.Column="0" Text="{loc:Translate Lbl_Ausgabe}"
+                    BackgroundColor="{Binding Typ, Converter={StaticResource TypButtonColor}, ConverterParameter=Ausgabe}"
+                    TextColor="White" CornerRadius="10" HeightRequest="44"
+                    Command="{Binding SetTypCommand}" CommandParameter="Ausgabe" />
+            <Button Grid.Column="1" Text="{loc:Translate Lbl_Einnahme}"
+                    BackgroundColor="{Binding Typ, Converter={StaticResource TypButtonColor}, ConverterParameter=Einnahme}"
+                    TextColor="White" CornerRadius="10" HeightRequest="44"
+                    Command="{Binding SetTypCommand}" CommandParameter="Einnahme" />
+        </Grid>
+
+        <VerticalStackLayout Spacing="4">
+            <Label Text="{loc:Translate Lbl_Betrag}" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
+            <Entry Text="{Binding BetragText}" Placeholder="{loc:Translate Hint_Betrag}"
+                   Keyboard="Numeric" FontSize="28" FontAttributes="Bold"
+                   HorizontalTextAlignment="Center"
+                   SemanticProperties.Hint="{loc:Translate A11y_HintBetrag}" />
+        </VerticalStackLayout>
+
+        <VerticalStackLayout Spacing="4">
+            <Label Text="{loc:Translate Lbl_Titel}" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
+            <Entry Text="{Binding Titel}" Placeholder="{loc:Translate Hint_Titelbeispiel}"
+                   FontSize="16" />
+        </VerticalStackLayout>
+
+        <VerticalStackLayout Spacing="4">
+            <Label Text="{loc:Translate Lbl_Kategorie}" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
+            <controls:SelectionField ItemsSource="{Binding Kategorien}"
+                                     SelectedItem="{Binding SelectedKategorie, Mode=TwoWay}"
+                                     DisplayMemberPath="Name"
+                                     FieldLabel="{loc:Translate Lbl_Kategorie}"
+                                     Placeholder="{loc:Translate Hint_KategorieWaehlen}" />
+        </VerticalStackLayout>
+
+        <VerticalStackLayout Spacing="4">
+            <Label Text="{loc:Translate Lbl_Konto}" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
+            <controls:SelectionField ItemsSource="{Binding Accounts}"
+                                     SelectedItem="{Binding SelectedAccount, Mode=TwoWay}"
+                                     DisplayMemberPath="Name"
+                                     FieldLabel="{loc:Translate Lbl_Konto}"
+                                     Placeholder="{loc:Translate Hint_KontoWaehlen}" />
+        </VerticalStackLayout>
+
+        <VerticalStackLayout Spacing="4">
+            <Label Text="{loc:Translate Lbl_Startdatum}" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
+            <DatePicker Date="{Binding Startdatum, Mode=TwoWay}" FontSize="16"
+                        Format="dd. MMMM yyyy"
+                        controls:DatePickerProperties.ImmediateUpdate="True" />
+        </VerticalStackLayout>
+
+        <Grid ColumnDefinitions="*, Auto" Padding="0">
+            <Label Text="{loc:Translate Lbl_EnddatumFestlegen}" FontSize="16"
+                   VerticalTextAlignment="Center" />
+            <Switch Grid.Column="1" IsToggled="{Binding HatEnddatum}" />
+        </Grid>
+
+        <DatePicker Date="{Binding EnddatumWert, Mode=TwoWay}" FontSize="16"
+                    Format="dd. MMMM yyyy"
+                    IsVisible="{Binding HatEnddatum}"
+                    controls:DatePickerProperties.ImmediateUpdate="True" />
+
+        <Grid ColumnDefinitions="*, Auto" Padding="0">
+            <Label Text="{loc:Translate Lbl_Aktiv}" FontSize="16"
+                   VerticalTextAlignment="Center" />
+            <Switch Grid.Column="1" IsToggled="{Binding Aktiv}" />
+        </Grid>
+
+        <VerticalStackLayout Spacing="4">
+            <Label Text="{loc:Translate Lbl_Intervall}" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
+            <controls:SelectionField ItemsSource="{Binding VerfuegbareIntervalle}"
+                                     SelectedItem="{Binding SelectedIntervalOption, Mode=TwoWay}"
+                                     DisplayMemberPath="DisplayName"
+                                     FieldLabel="{loc:Translate Lbl_Intervall}"
+                                     Placeholder="{loc:Translate Hint_IntervallWaehlen}"
+                                     Margin="0,0,0,8" />
+        </VerticalStackLayout>
+
+        <Grid ColumnDefinitions="*, Auto" ColumnSpacing="8" Margin="0,8,0,0">
+            <VerticalStackLayout Grid.Column="0" Spacing="4">
+                <Label Text="{loc:Translate Lbl_IntervallFaktor}" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
+                <Entry Text="{Binding IntervalFactorText}" Keyboard="Numeric" />
+            </VerticalStackLayout>
+            <VerticalStackLayout Grid.Column="1" Spacing="4" HorizontalOptions="End">
+                <Label Text="{loc:Translate Lbl_ErinnerungTage}" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
+                <Entry Text="{Binding ReminderDaysBeforeText}" Keyboard="Numeric" WidthRequest="80" />
+            </VerticalStackLayout>
+        </Grid>
+
+    </VerticalStackLayout>
+</ContentView>
