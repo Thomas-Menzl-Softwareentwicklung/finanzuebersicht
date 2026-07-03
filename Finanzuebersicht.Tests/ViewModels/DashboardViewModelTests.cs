@@ -1,6 +1,7 @@
 using Finanzuebersicht.Application.UseCases.Accounts;
 using Finanzuebersicht.Application.UseCases.Dashboard;
 using Finanzuebersicht.Application.UseCases.RecurringTransactions;
+using Finanzuebersicht.Application.UseCases.Transactions;
 using Finanzuebersicht.Core.Services;
 using Finanzuebersicht.Navigation;
 using Finanzuebersicht.Models;
@@ -214,12 +215,12 @@ public class DashboardViewModelTests
             new GetDueRecurringWithHintsUseCase(recurringTransactionRepository),
             new BookDueRecurringInstanceUseCase(recurringTransactionRepository, transactionRepository, accountRepository),
             new SkipDueRecurringInstanceUseCase(new AddRecurringExceptionUseCase(recurringTransactionRepository)),
-            budgetRepository,
+            new GetDefaultBudgetTotalUseCase(budgetRepository),
+            new LoadActiveAccountsUseCase(accountRepository),
+            new GetEarliestTransactionYearUseCase(transactionRepository),
             localizationService,
             navigationService,
             Substitute.For<IDialogService>(),
-            transactionRepository,
-            accountRepository,
             new GetAccountBalancesUseCase(accountRepository, transactionRepository),
             settingsService,
             clock);

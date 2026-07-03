@@ -1,6 +1,8 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Finanzuebersicht.Application.UseCases.Accounts;
+using Finanzuebersicht.Application.UseCases.Categories;
 using Finanzuebersicht.Application.UseCases.Transactions;
 using Finanzuebersicht.Models;
 using Finanzuebersicht.Navigation;
@@ -22,8 +24,8 @@ public partial class TransactionsViewModel(
     IDialogService dialogService,
     IFeedbackService feedbackService,
     ILocalizationService localizationService,
-    ICategoryRepository categoryRepository,
-    IAccountRepository accountRepository,
+    LoadCategoriesUseCase loadCategoriesUseCase,
+    LoadAccountsUseCase loadAccountsUseCase,
     IMainThreadDispatcher dispatcher,
     IFilePicker filePicker,
     IAppEvents appEvents,
@@ -44,8 +46,8 @@ public partial class TransactionsViewModel(
     private readonly IDialogService _dialogService = dialogService;
     private readonly IFeedbackService _feedbackService = feedbackService;
     private readonly ILocalizationService _loc = localizationService;
-    private readonly ICategoryRepository _categoryRepository = categoryRepository;
-    private readonly IAccountRepository _accountRepository = accountRepository;
+    private readonly LoadCategoriesUseCase _loadCategoriesUseCase = loadCategoriesUseCase;
+    private readonly LoadAccountsUseCase _loadAccountsUseCase = loadAccountsUseCase;
     private readonly IMainThreadDispatcher _dispatcher = dispatcher;
     private readonly IFilePicker _filePicker = filePicker;
     private readonly IAppEvents _appEvents = appEvents;
@@ -354,7 +356,7 @@ public partial class TransactionsViewModel(
 
     private async Task LoadKategorienAsync()
     {
-        var kategorien = await _categoryRepository.GetCategoriesAsync();
+        var kategorien = await _loadCategoriesUseCase.ExecuteAsync();
         var items = new ObservableCollection<KategorieFilterItem>
         {
             new(null, _loc.GetString(ResourceKeys.Lbl_AlleKategorien), ResourceKeys.Lbl_AlleKategorien)
@@ -368,7 +370,7 @@ public partial class TransactionsViewModel(
 
     private async Task LoadKontenAsync()
     {
-        var konten = await _accountRepository.GetAccountsAsync();
+        var konten = await _loadAccountsUseCase.ExecuteAsync();
         var items = new ObservableCollection<KategorieFilterItem>
         {
             new(null, _loc.GetString(ResourceKeys.Lbl_AlleKonten), ResourceKeys.Lbl_AlleKonten)

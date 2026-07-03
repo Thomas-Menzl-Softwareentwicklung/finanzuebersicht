@@ -217,4 +217,97 @@ public class RecurringScheduleCalculatorTests
         var r = Make(RecurrenceInterval.Monthly, start: new DateTime(2025, 1, 1), end: new DateTime(2025, 3, 31));
         Assert.Null(RecurringScheduleCalculator.GetNextDueDate(r, new DateTime(2025, 5, 1)));
     }
+
+    // ── OccursOnDate / OccursInRange ─────────────────────────────────────────
+
+    [Fact]
+    public void OccursOnDate_MonthlyOnFifteenth_ReturnsTrueOnDueDay()
+    {
+        var r = Make(RecurrenceInterval.Monthly, start: new DateTime(2026, 3, 15));
+        Assert.True(RecurringScheduleCalculator.OccursOnDate(r, new DateTime(2026, 3, 15)));
+        Assert.False(RecurringScheduleCalculator.OccursOnDate(r, new DateTime(2026, 3, 14)));
+    }
+
+    [Fact]
+    public void OccursInRange_MonthlyRecurring_ReturnsTrueForMonthContainingDueDate()
+    {
+        var r = Make(RecurrenceInterval.Monthly, start: new DateTime(2026, 1, 1));
+        Assert.True(RecurringScheduleCalculator.OccursInRange(
+            r,
+            new DateTime(2026, 3, 1),
+            new DateTime(2026, 3, 31)));
+    }
+
+    [Fact]
+    public void OccursInRange_SkippedMonthInstance_ReturnsFalseForThatMonth()
+    {
+        var r = Make(RecurrenceInterval.Monthly, start: new DateTime(2026, 1, 1), exceptions:
+        [
+            new RecurringException
+            {
+                InstanceDate = new DateTime(2026, 3, 1),
+                Type = RecurringExceptionType.Skip
+            }
+        ]);
+
+        Assert.False(RecurringScheduleCalculator.OccursInRange(
+            r,
+            new DateTime(2026, 3, 1),
+            new DateTime(2026, 3, 31)));
+        Assert.True(RecurringScheduleCalculator.OccursInRange(
+            r,
+            new DateTime(2026, 4, 1),
+            new DateTime(2026, 4, 30)));
+    }
+
+    [Fact]
+    public void OccursOnDate_ShiftLaterMonthInstance_ReturnsTrueOnShiftTargetDate()
+    {
+        var r = Make(
+            RecurrenceInterval.Monthly,
+            start: new DateTime(2026, 1, 31),
+            exceptions:
+            [
+                new RecurringException
+                {
+                    InstanceDate = new DateTime(2026, 2, 28),
+                    Type = RecurringExceptionType.Shift,
+                    ShiftToDate = new DateTime(2026, 3, 2)
+                }
+            ]);
+
+        Assert.False(RecurringScheduleCalculator.OccursOnDate(r, new DateTime(2026, 2, 28)));
+        Assert.True(RecurringScheduleCalculator.OccursOnDate(r, new DateTime(2026, 3, 2)));
+    }
+
+    [Fact]
+    public void OccursInRange_AgreesWithDayByDayOccursOnDateScan()
+    {
+        var r = Make(
+            RecurrenceInterval.Monthly,
+            start: new DateTime(2026, 1, 31),
+            exceptions:
+            [
+                new RecurringException
+                {
+                    InstanceDate = new DateTime(2026, 2, 28),
+                    Type = RecurringExceptionType.Shift,
+                    ShiftToDate = new DateTime(2026, 3, 2)
+                }
+            ]);
+
+        var rangeStart = new DateTime(2026, 2, 1);
+        var rangeEnd = new DateTime(2026, 3, 31);
+        var dayScan = false;
+        for (var day = rangeStart; day <= rangeEnd; day = day.AddDays(1))
+        {
+            if (RecurringScheduleCalculator.OccursOnDate(r, day))
+            {
+                dayScan = true;
+                break;
+            }
+        }
+
+        Assert.Equal(dayScan, RecurringScheduleCalculator.OccursInRange(r, rangeStart, rangeEnd));
+    }
 }

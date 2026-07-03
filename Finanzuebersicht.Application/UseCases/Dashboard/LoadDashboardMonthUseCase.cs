@@ -1,4 +1,4 @@
-using System;
+using Finanzuebersicht.Core.Services;
 using Finanzuebersicht.Models;
 
 namespace Finanzuebersicht.Application.UseCases.Dashboard;
@@ -37,7 +37,7 @@ public class LoadDashboardMonthUseCase(
                 if (da.Startdatum <= bis && (!da.Enddatum.HasValue || da.Enddatum.Value >= von))
                 {
                     // Only add a forecast transaction for this month if the recurrence actually occurs in the month
-                    if (!transaktionen.Any(t => t.DauerauftragId == da.Id) && OccursInRange(da, von, bis))
+                    if (!transaktionen.Any(t => t.DauerauftragId == da.Id) && RecurringScheduleCalculator.OccursInRange(da, von, bis))
                     {
                         transaktionen.Add(new Transaction
                         {
@@ -171,108 +171,6 @@ public class LoadDashboardMonthUseCase(
             item.PercentageAmount = item.Total / total * 100;
     }
 
-    private static bool OccursInRange(RecurringTransaction da, DateTime rangeStart, DateTime rangeEnd)
-    {
-        // Grundlegende Plausibilitätsprüfung: Zeitraum vollständig vor/nach dem Dauerauftrag
-        if (da.Startdatum > rangeEnd) return false;
-        if (da.Enddatum.HasValue && da.Enddatum.Value < rangeStart) return false;
-
-        // Starte bei der letzten Ausführung oder dem Startdatum
-        var candidate = da.LetzteAusfuehrung ?? da.Startdatum;
-        if (candidate < da.Startdatum) candidate = da.Startdatum;
-
-        var safety = 0;
-
-        // Iteriere über Basis-Vorkommen bis zum Ende des betrachteten Zeitraums
-        while (candidate <= rangeEnd && safety++ < 1000)
-        {
-            // Nur innerhalb der generellen Lebensdauer des Dauerauftrags berücksichtigen
-            if (candidate >= da.Startdatum && (!da.Enddatum.HasValue || candidate <= da.Enddatum.Value))
-            {
-                if (TryGetEffectiveDateWithExceptions(da, candidate, out var effectiveDate))
-                {
-                    if (effectiveDate >= rangeStart && effectiveDate <= rangeEnd)
-                    {
-                        return true;
-                    }
-                }
-            }
-
-            candidate = GetNextInstance(da, candidate);
-        }
-
-        return false;
-    }
-
-    private static bool TryGetEffectiveDateWithExceptions(RecurringTransaction recurring, DateTime baseDate, out DateTime effectiveDate)
-    {
-        // Standardfall: kein Eintrag in den Ausnahmen → Basisdatum ist das effektive Datum
-        effectiveDate = baseDate.Date;
-
-        // Wenn keine Ausnahmen definiert sind, direkt zurück
-        if (recurring.Exceptions == null)
-        {
-            return true;
-        }
-
-        RecurringException? matchingException = null;
-
-        foreach (var ex in recurring.Exceptions)
-        {
-            // Vergleich nur auf Datumsebene
-            if (ex.InstanceDate.Date == baseDate.Date)
-            {
-                matchingException = ex;
-                break;
-            }
-        }
-
-        if (matchingException == null)
-        {
-            // Keine Ausnahme für dieses Vorkommen → Basisdatum bleibt gültig
-            return true;
-        }
-
-        // Skip → dieses Vorkommen existiert nicht
-        if (matchingException.Type == RecurringExceptionType.Skip)
-        {
-            return false;
-        }
-
-        // Shift → effektives Datum ist das hinterlegte Shift-Datum, falls vorhanden
-        if (matchingException.Type == RecurringExceptionType.Shift && matchingException.ShiftToDate.HasValue)
-        {
-            effectiveDate = matchingException.ShiftToDate.Value.Date;
-            return true;
-        }
-
-        // Fallback: falls Ausnahme-Typ unbekannt oder Shift ohne Ziel-Datum, Basisdatum verwenden
-        return true;
-    }
-
-    private static DateTime GetNextInstance(RecurringTransaction recurring, DateTime fromDate)
-    {
-        var factor = Math.Max(1, recurring.IntervalFactor);
-        return recurring.Interval switch
-        {
-            RecurrenceInterval.Weekly => fromDate.Date.AddDays(7L * factor),
-            RecurrenceInterval.Monthly => AddMonthsPreserveDay(fromDate.Date, 1 * factor),
-            RecurrenceInterval.Quarterly => AddMonthsPreserveDay(fromDate.Date, 3 * factor),
-            RecurrenceInterval.Yearly => AddMonthsPreserveDay(fromDate.Date, 12 * factor),
-            RecurrenceInterval.Daily => fromDate.Date.AddDays(1 * factor),
-            _ => AddMonthsPreserveDay(fromDate.Date, 1 * factor),
-        };
-    }
-
-    private static DateTime AddMonthsPreserveDay(DateTime date, int months)
-    {
-        var target = date.AddMonths(months);
-        var day = date.Day;
-        var daysInTarget = DateTime.DaysInMonth(target.Year, target.Month);
-        if (day > daysInTarget)
-            day = daysInTarget;
-        return new DateTime(target.Year, target.Month, day);
-    }
 }
 
 public class DashboardMonthData

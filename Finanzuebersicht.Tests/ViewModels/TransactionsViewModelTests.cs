@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
+using Finanzuebersicht.Application.UseCases.Accounts;
+using Finanzuebersicht.Application.UseCases.Categories;
 using Finanzuebersicht.Application.UseCases.Transactions;
 using Finanzuebersicht.Models;
 using Finanzuebersicht.Navigation;
@@ -333,8 +335,8 @@ public class TransactionsViewModelTests
             dialogService,
             feedbackService,
             localizationService,
-            loadCategoryRepository,
-            loadAccountRepository,
+            new LoadCategoriesUseCase(loadCategoryRepository),
+            new LoadAccountsUseCase(loadAccountRepository),
             dispatcher,
             filePicker,
             appEvents,
