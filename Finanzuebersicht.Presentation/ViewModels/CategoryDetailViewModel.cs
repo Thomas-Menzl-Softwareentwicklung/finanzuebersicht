@@ -16,6 +16,7 @@ public partial class CategoryDetailViewModel(
     ILocalizationService localizationService,
     IFeedbackService feedbackService,
     IAppEvents appEvents,
+    IDialogService dialogService,
     SaveCategoryBudgetUseCase? saveCategoryBudgetUseCase = null,
     IBudgetRepository? budgetRepository = null,
     ILogger<CategoryDetailViewModel>? logger = null) : ObservableObject, IApplyQueryAttributes, ILocalizableViewModel
@@ -25,6 +26,7 @@ public partial class CategoryDetailViewModel(
     private readonly ILocalizationService _loc = localizationService;
     private readonly IFeedbackService _feedbackService = feedbackService;
     private readonly IAppEvents _appEvents = appEvents;
+    private readonly IDialogService _dialogService = dialogService;
     private readonly SaveCategoryBudgetUseCase? _saveCategoryBudgetUseCase = saveCategoryBudgetUseCase;
     private readonly IBudgetRepository? _budgetRepository = budgetRepository;
     private readonly ILogger<CategoryDetailViewModel>? _logger = logger;
@@ -140,17 +142,55 @@ public partial class CategoryDetailViewModel(
     [RelayCommand]
     private async Task Save()
     {
-        if (string.IsNullOrWhiteSpace(Name)) return;
+        if (await TrySaveAsync())
+            await _navigationService.GoBackAsync();
+    }
 
-        var savedCategory = await _saveCategoryDetailUseCase.ExecuteAsync(_existingCategory, Name, Icon, Color, Typ);
-        if (_saveCategoryBudgetUseCase != null && !string.IsNullOrEmpty(savedCategory.Id))
+    public void ResetForCreate()
+    {
+        _existingCategory = null;
+        Name = string.Empty;
+        Icon = "💰";
+        Color = "#007AFF";
+        Typ = TransactionType.Ausgabe;
+        MonthlyBudgetText = string.Empty;
+        SelectedTypeOption = VerfuegbareTypen.FirstOrDefault(option => option.Value == Typ);
+        OnPropertyChanged(nameof(PageTitle));
+    }
+
+    public async Task<bool> TrySaveAsync()
+    {
+        if (string.IsNullOrWhiteSpace(Name))
         {
-            decimal.TryParse(MonthlyBudgetText, NumberStyles.Any, CultureInfo.CurrentCulture, out var budget);
-            await _saveCategoryBudgetUseCase.ExecuteAsync(savedCategory.Id, budget);
+            await _dialogService.ShowAlertAsync(
+                _loc.GetString(ResourceKeys.Err_Titel),
+                _loc.GetString(ResourceKeys.Err_TitelErforderlich),
+                _loc.GetString(ResourceKeys.Btn_OK));
+            return false;
         }
-        _appEvents.NotifyDataChanged();
-        await _navigationService.GoBackAsync();
-        await _feedbackService.ShowSnackbarAsync(_loc.GetString(ResourceKeys.Msg_Gespeichert));
+
+        try
+        {
+            var savedCategory = await _saveCategoryDetailUseCase.ExecuteAsync(_existingCategory, Name, Icon, Color, Typ);
+            if (_saveCategoryBudgetUseCase != null && !string.IsNullOrEmpty(savedCategory.Id))
+            {
+                decimal.TryParse(MonthlyBudgetText, NumberStyles.Any, CultureInfo.CurrentCulture, out var budget);
+                await _saveCategoryBudgetUseCase.ExecuteAsync(savedCategory.Id, budget);
+            }
+
+            _appEvents.NotifyDataChanged();
+            await _feedbackService.ShowSnackbarAsync(_loc.GetString(ResourceKeys.Msg_Gespeichert));
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogError(ex, "CategoryDetailViewModel: {Context}", nameof(TrySaveAsync));
+            await _dialogService.ShowAlertAsync(
+                _loc.GetString(ResourceKeys.Err_Titel),
+                _loc.GetString(ResourceKeys.Err_SpeichernFehlgeschlagen, ex.Message),
+                _loc.GetString(ResourceKeys.Btn_OK));
+            return false;
+        }
     }
 }
 

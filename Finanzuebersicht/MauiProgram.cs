@@ -88,6 +88,7 @@ public static class MauiProgram
 		builder.Services.AddSingleton<IMainThreadDispatcher, MauiMainThreadDispatcher>();
 		builder.Services.AddSingleton<Finanzuebersicht.Presentation.Services.IFilePicker, MauiFilePicker>();
 		builder.Services.AddSingleton<IAppEvents, MauiAppEvents>();
+		builder.Services.AddSingleton<ICategoryCreateSheetService, CategoryCreateSheetService>();
 		builder.Services.AddSingleton<IImportSessionStore, ImportSessionStore>();
 		builder.Services.AddSingleton<IFolderPicker, MauiFolderPicker>();
 		builder.Services.AddSingleton<IFileSaver, MauiFileSaver>();

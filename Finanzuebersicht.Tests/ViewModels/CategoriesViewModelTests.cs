@@ -188,6 +188,29 @@ public class CategoriesViewModelTests
     }
 
     [Fact]
+    public async Task GoToDetail_WhenKategorienTabAndNoItem_ShowsCreateSheet()
+    {
+        var categoryCreateSheet = Substitute.For<ICategoryCreateSheetService>();
+        categoryCreateSheet.ShowAsync(Arg.Any<CategoryDetailViewModel>()).Returns(Task.FromResult(false));
+
+        var sut = CreateSut(
+            Substitute.For<ICategoryRepository>(),
+            Substitute.For<ITransactionRepository>(),
+            Substitute.For<IRecurringTransactionRepository>(),
+            Substitute.For<IAccountRepository>(),
+            Substitute.For<ITransactionTemplateRepository>(),
+            categoryCreateSheet,
+            out _,
+            out var navigationService);
+
+        await sut.GoToDetailCommand.ExecuteAsync(null);
+
+        await categoryCreateSheet.Received(1).ShowAsync(Arg.Any<CategoryDetailViewModel>());
+        await navigationService.DidNotReceive().GoToAsync(Arg.Any<string>());
+        await navigationService.DidNotReceive().GoToAsync(Arg.Any<string>(), Arg.Any<IDictionary<string, object>>());
+    }
+
+    [Fact]
     public async Task GoToDetail_NavigatesToCategoryDetailRoute()
     {
         var category = new Category { Id = "cat-1", Name = "Miete" };
@@ -242,6 +265,27 @@ public class CategoriesViewModelTests
         out IDialogService dialogService,
         out INavigationService navigationService)
     {
+        return CreateSut(
+            categoryRepository,
+            transactionRepository,
+            recurringTransactionRepository,
+            accountRepository,
+            templateRepository,
+            Substitute.For<ICategoryCreateSheetService>(),
+            out dialogService,
+            out navigationService);
+    }
+
+    private static CategoriesViewModel CreateSut(
+        ICategoryRepository categoryRepository,
+        ITransactionRepository transactionRepository,
+        IRecurringTransactionRepository recurringTransactionRepository,
+        IAccountRepository accountRepository,
+        ITransactionTemplateRepository templateRepository,
+        ICategoryCreateSheetService categoryCreateSheetService,
+        out IDialogService dialogService,
+        out INavigationService navigationService)
+    {
         dialogService = Substitute.For<IDialogService>();
         dialogService.ShowAlertAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>())
             .Returns(Task.CompletedTask);
@@ -254,6 +298,14 @@ public class CategoriesViewModelTests
 
         navigationService = Substitute.For<INavigationService>();
 
+        var createCategoryViewModel = new CategoryDetailViewModel(
+            new SaveCategoryDetailUseCase(categoryRepository),
+            navigationService,
+            localizationService,
+            Substitute.For<IFeedbackService>(),
+            Substitute.For<IAppEvents>(),
+            dialogService);
+
         return new CategoriesViewModel(
             new DeleteCategoryUseCase(categoryRepository, transactionRepository, recurringTransactionRepository),
             new LoadCategoriesUseCase(categoryRepository),
@@ -262,6 +314,8 @@ public class CategoriesViewModelTests
             new SaveAccountDetailUseCase(accountRepository),
             new ToggleAccountArchiveUseCase(accountRepository),
             new DeleteAccountUseCase(accountRepository, transactionRepository, templateRepository),
+            createCategoryViewModel,
+            categoryCreateSheetService,
             localizationService,
             navigationService,
             dialogService,

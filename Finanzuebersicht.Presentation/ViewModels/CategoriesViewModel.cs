@@ -22,6 +22,8 @@ public partial class CategoriesViewModel(
     SaveAccountDetailUseCase saveAccountDetailUseCase,
     ToggleAccountArchiveUseCase toggleAccountArchiveUseCase,
     DeleteAccountUseCase deleteAccountUseCase,
+    CategoryDetailViewModel createCategoryViewModel,
+    ICategoryCreateSheetService categoryCreateSheetService,
     ILocalizationService localizationService,
     INavigationService navigationService,
     IDialogService dialogService,
@@ -36,6 +38,8 @@ public partial class CategoriesViewModel(
     private readonly SaveAccountDetailUseCase _saveAccountDetailUseCase = saveAccountDetailUseCase;
     private readonly ToggleAccountArchiveUseCase _toggleAccountArchiveUseCase = toggleAccountArchiveUseCase;
     private readonly DeleteAccountUseCase _deleteAccountUseCase = deleteAccountUseCase;
+    private readonly CategoryDetailViewModel _createCategoryViewModel = createCategoryViewModel;
+    private readonly ICategoryCreateSheetService _categoryCreateSheetService = categoryCreateSheetService;
     private readonly ILocalizationService _loc = localizationService;
     private readonly INavigationService _navigationService = navigationService;
     private readonly IDialogService _dialogService = dialogService;
@@ -345,11 +349,22 @@ public partial class CategoriesViewModel(
             return;
         }
 
-        var parameter = new Dictionary<string, object>();
-        if (item is Category kategorie)
-            parameter["Category"] = kategorie;
+        if (item == null && IsKategorienVisible)
+        {
+            _createCategoryViewModel.ResetForCreate();
+            if (await _categoryCreateSheetService.ShowAsync(_createCategoryViewModel))
+                await LoadKategorienCore(force: true);
+            return;
+        }
 
-        await _navigationService.GoToAsync(Routes.CategoryDetail, parameter);
+        if (item is Category kategorie)
+        {
+            var parameter = new Dictionary<string, object> { ["Category"] = kategorie };
+            await _navigationService.GoToAsync(Routes.CategoryDetail, parameter);
+            return;
+        }
+
+        await _navigationService.GoToAsync(Routes.CategoryDetail);
     }
 
     private bool TryParseAnfangssaldo(out decimal openingBalance)
