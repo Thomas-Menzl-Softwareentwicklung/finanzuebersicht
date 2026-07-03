@@ -15,6 +15,8 @@ public partial class RecurringTransactionsViewModel(
     DeleteRecurringTransactionUseCase deleteRecurringTransactionUseCase,
     LoadRecurringTransactionsUseCase loadRecurringTransactionsUseCase,
     ToggleRecurringTransactionActiveUseCase toggleRecurringTransactionActiveUseCase,
+    RecurringTransactionDetailViewModel createRecurringTransactionViewModel,
+    IRecurringTransactionCreateSheetService recurringTransactionCreateSheetService,
     ILocalizationService localizationService,
     INavigationService navigationService,
     IDialogService dialogService,
@@ -25,6 +27,8 @@ public partial class RecurringTransactionsViewModel(
     private readonly DeleteRecurringTransactionUseCase _deleteRecurringTransactionUseCase = deleteRecurringTransactionUseCase;
     private readonly LoadRecurringTransactionsUseCase _loadRecurringTransactionsUseCase = loadRecurringTransactionsUseCase;
     private readonly ToggleRecurringTransactionActiveUseCase _toggleRecurringTransactionActiveUseCase = toggleRecurringTransactionActiveUseCase;
+    private readonly RecurringTransactionDetailViewModel _createRecurringTransactionViewModel = createRecurringTransactionViewModel;
+    private readonly IRecurringTransactionCreateSheetService _recurringTransactionCreateSheetService = recurringTransactionCreateSheetService;
     private readonly ILocalizationService _loc = localizationService;
     private readonly INavigationService _navigationService = navigationService;
     private readonly IDialogService _dialogService = dialogService;
@@ -103,11 +107,18 @@ public partial class RecurringTransactionsViewModel(
     [RelayCommand]
     private async Task GoToDetail(RecurringTransaction? dauerauftrag)
     {
-        var parameter = new Dictionary<string, object>();
-        if (dauerauftrag != null)
+        if (dauerauftrag == null)
         {
-            parameter["RecurringTransaction"] = dauerauftrag;
+            await _createRecurringTransactionViewModel.ResetForCreateAsync();
+            if (await _recurringTransactionCreateSheetService.ShowAsync(_createRecurringTransactionViewModel))
+                await LoadDauerauftraege();
+            return;
         }
+
+        var parameter = new Dictionary<string, object>
+        {
+            ["RecurringTransaction"] = dauerauftrag
+        };
 
         await _navigationService.GoToAsync(Routes.RecurringTransactionDetail, parameter);
     }

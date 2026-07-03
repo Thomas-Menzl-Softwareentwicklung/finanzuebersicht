@@ -4,143 +4,41 @@
              xmlns:views="clr-namespace:Finanzuebersicht.Views"
              xmlns:vm="clr-namespace:Finanzuebersicht.ViewModels"
              xmlns:models="clr-namespace:Finanzuebersicht.Models"
-             xmlns:conv="clr-namespace:Finanzuebersicht.Converters"
              xmlns:controls="clr-namespace:Finanzuebersicht.Controls"
              xmlns:loc="clr-namespace:Finanzuebersicht.Extensions"
              x:Class="Finanzuebersicht.Views.RecurringTransactionDetailPage"
              x:DataType="vm:RecurringTransactionDetailViewModel"
-             Title="{loc:Translate Title_Dauerauftrag}">
-
-    <views:BaseContentPage.Resources>
-        <conv:TypButtonColorConverter x:Key="TypButtonColor" />
-    </views:BaseContentPage.Resources>
+             Title="{Binding PageTitle}">
 
     <Grid RowDefinitions="*, Auto">
         <ScrollView Grid.Row="0" Padding="16">
             <VerticalStackLayout Spacing="20" Padding="0,0,0,24">
 
-            <!-- Typ-Auswahl -->
-            <Grid ColumnDefinitions="*, *" ColumnSpacing="8">
-                <Button Grid.Column="0" Text="{loc:Translate Lbl_Ausgabe}"
-                        BackgroundColor="{Binding Typ, Converter={StaticResource TypButtonColor}, ConverterParameter=Ausgabe}"
-                        TextColor="White" CornerRadius="10" HeightRequest="44"
-                        Command="{Binding SetTypCommand}" CommandParameter="Ausgabe" />
-                <Button Grid.Column="1" Text="{loc:Translate Lbl_Einnahme}"
-                        BackgroundColor="{Binding Typ, Converter={StaticResource TypButtonColor}, ConverterParameter=Einnahme}"
-                        TextColor="White" CornerRadius="10" HeightRequest="44"
-                        Command="{Binding SetTypCommand}" CommandParameter="Einnahme" />
-            </Grid>
+                <controls:RecurringTransactionFormView BindingContext="{Binding .}" />
 
-            <!-- Betrag -->
-            <VerticalStackLayout Spacing="4">
-                <Label Text="{loc:Translate Lbl_Betrag}" FontSize="13" TextColor="Gray" />
-                  <Entry Text="{Binding BetragText}" Placeholder="{loc:Translate Hint_Betrag}"
-                       Keyboard="Numeric" FontSize="28" FontAttributes="Bold"
-                       HorizontalTextAlignment="Center"
-                       SemanticProperties.Hint="{loc:Translate A11y_HintBetrag}" />
-            </VerticalStackLayout>
+                <VerticalStackLayout Spacing="4" IsVisible="{Binding IsEditing}">
+                    <Label Text="{loc:Translate Lbl_Ausnahmen}" FontSize="13" TextColor="Gray" />
+                    <CollectionView ItemsSource="{Binding Exceptions}" SelectionMode="None" HeightRequest="180" VerticalOptions="Start" Margin="0,6,0,0">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="models:RecurringException">
+                                <Grid ColumnDefinitions="*, Auto" Padding="8">
+                                    <Label Text="{Binding InstanceDate, StringFormat='{}{0:dd.MM.yyyy}'}" VerticalTextAlignment="Center" />
+                                    <Button Grid.Column="1" Text="{loc:Translate Btn_Loeschen}" BackgroundColor="{StaticResource Ausgabe}" TextColor="White" Command="{Binding Source={RelativeSource AncestorType={x:Type vm:RecurringTransactionDetailViewModel}}, Path=RemoveExceptionCommand}" CommandParameter="{Binding .}" />
+                                </Grid>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
 
-            <!-- Titel -->
-            <VerticalStackLayout Spacing="4">
-                <Label Text="{loc:Translate Lbl_Titel}" FontSize="13" TextColor="Gray" />
-                <Entry Text="{Binding Titel}" Placeholder="{loc:Translate Hint_Titelbeispiel}"
-                       FontSize="16" />
-            </VerticalStackLayout>
-
-            <!-- Kategorie -->
-            <VerticalStackLayout Spacing="4">
-                <Label Text="{loc:Translate Lbl_Kategorie}" FontSize="13" TextColor="Gray" />
-                <controls:SelectionField ItemsSource="{Binding Kategorien}"
-                                         SelectedItem="{Binding SelectedKategorie, Mode=TwoWay}"
-                                         DisplayMemberPath="Name"
-                                         FieldLabel="{loc:Translate Lbl_Kategorie}"
-                                         Placeholder="{loc:Translate Hint_KategorieWaehlen}" />
-            </VerticalStackLayout>
-
-            <VerticalStackLayout Spacing="4">
-                <Label Text="{loc:Translate Lbl_Konto}" FontSize="13" TextColor="Gray" />
-                <controls:SelectionField ItemsSource="{Binding Accounts}"
-                                         SelectedItem="{Binding SelectedAccount, Mode=TwoWay}"
-                                         DisplayMemberPath="Name"
-                                         FieldLabel="{loc:Translate Lbl_Konto}"
-                                         Placeholder="{loc:Translate Hint_KontoWaehlen}" />
-            </VerticalStackLayout>
-
-            <!-- Startdatum -->
-            <VerticalStackLayout Spacing="4">
-                <Label Text="{loc:Translate Lbl_Startdatum}" FontSize="13" TextColor="Gray" />
-                <DatePicker Date="{Binding Startdatum, Mode=TwoWay}" FontSize="16"
-                            Format="dd. MMMM yyyy"
-                            controls:DatePickerProperties.ImmediateUpdate="True" />
-            </VerticalStackLayout>
-
-            <!-- Enddatum (optional) -->
-            <Grid ColumnDefinitions="*, Auto" Padding="0">
-                <Label Text="{loc:Translate Lbl_EnddatumFestlegen}" FontSize="16"
-                       VerticalTextAlignment="Center" />
-                <Switch Grid.Column="1" IsToggled="{Binding HatEnddatum}" />
-            </Grid>
-
-            <DatePicker Date="{Binding EnddatumWert, Mode=TwoWay}" FontSize="16"
-                        Format="dd. MMMM yyyy"
-                        IsVisible="{Binding HatEnddatum}"
-                        controls:DatePickerProperties.ImmediateUpdate="True" />
-
-            <!-- Aktiv -->
-            <Grid ColumnDefinitions="*, Auto" Padding="0">
-                <Label Text="{loc:Translate Lbl_Aktiv}" FontSize="16"
-                       VerticalTextAlignment="Center" />
-                <Switch Grid.Column="1" IsToggled="{Binding Aktiv}" />
-            </Grid>
-
-            <!-- Intervall (Täglich/Wöchentlich/Monatlich/Quartal/Jährlich) -->
-            <VerticalStackLayout Spacing="4">
-                <Label Text="{loc:Translate Lbl_Intervall}" FontSize="13" TextColor="Gray" />
-                <controls:SelectionField ItemsSource="{Binding VerfuegbareIntervalle}"
-                                         SelectedItem="{Binding SelectedIntervalOption, Mode=TwoWay}"
-                                         DisplayMemberPath="DisplayName"
-                                         FieldLabel="{loc:Translate Lbl_Intervall}"
-                                         Placeholder="{loc:Translate Hint_IntervallWaehlen}"
-                                         Margin="0,0,0,8" />
-            </VerticalStackLayout>
-
-            <!-- Interval-Factor -->
-            <Grid ColumnDefinitions="*, Auto" ColumnSpacing="8" Margin="0,8,0,0">
-                <VerticalStackLayout Grid.Column="0" Spacing="4">
-                    <Label Text="{loc:Translate Lbl_IntervallFaktor}" FontSize="13" TextColor="Gray" />
-                    <Entry Text="{Binding IntervalFactorText}" Keyboard="Numeric" />
+                    <Button Text="{loc:Translate Btn_SkipNextInstance}" Command="{Binding AddSkipNextInstanceCommand}" BackgroundColor="{StaticResource Warning}" TextColor="White" />
                 </VerticalStackLayout>
-                <VerticalStackLayout Grid.Column="1" Spacing="4" HorizontalOptions="End">
-                    <Label Text="{loc:Translate Lbl_ErinnerungTage}" FontSize="13" TextColor="Gray" />
-                    <Entry Text="{Binding ReminderDaysBeforeText}" Keyboard="Numeric" WidthRequest="80" />
-                </VerticalStackLayout>
-            </Grid>
 
-            <!-- Exceptions -->
-            <VerticalStackLayout Spacing="4">
-                <Label Text="{loc:Translate Lbl_Ausnahmen}" FontSize="13" TextColor="Gray" />
-                <CollectionView ItemsSource="{Binding Exceptions}" SelectionMode="None" HeightRequest="180" VerticalOptions="Start" Margin="0,6,0,0">
-                    <CollectionView.ItemTemplate>
-                        <DataTemplate x:DataType="models:RecurringException">
-                            <Grid ColumnDefinitions="*, Auto" Padding="8">
-                                <Label Text="{Binding InstanceDate, StringFormat='{}{0:dd.MM.yyyy}'}" VerticalTextAlignment="Center" />
-                                <Button Grid.Column="1" Text="{loc:Translate Btn_Loeschen}" BackgroundColor="{StaticResource Ausgabe}" TextColor="White" Command="{Binding Source={RelativeSource AncestorType={x:Type vm:RecurringTransactionDetailViewModel}}, Path=RemoveExceptionCommand}" CommandParameter="{Binding .}" />
-                            </Grid>
-                        </DataTemplate>
-                    </CollectionView.ItemTemplate>
-                </CollectionView>
-
-                <Button Text="{loc:Translate Btn_SkipNextInstance}" Command="{Binding AddSkipNextInstanceCommand}" BackgroundColor="{StaticResource Warning}" TextColor="White" />
-            </VerticalStackLayout>
-
-                <!-- Speichern -->
                 <Button Text="{loc:Translate Btn_Speichern}" Command="{Binding SaveCommand}"
-                    BackgroundColor="{StaticResource Primary}" TextColor="White"
-                    CornerRadius="12" HeightRequest="50"
-                    FontSize="16" FontAttributes="Bold"
-                    Margin="0,20,0,0" />
+                        BackgroundColor="{StaticResource Primary}" TextColor="White"
+                        CornerRadius="12" HeightRequest="50"
+                        FontSize="16" FontAttributes="Bold"
+                        Margin="0,20,0,0" />
 
-                <HorizontalStackLayout Spacing="8" Margin="0,8,0,0">
+                <HorizontalStackLayout Spacing="8" Margin="0,8,0,0" IsVisible="{Binding IsEditing}">
                     <Button Text="{loc:Translate Btn_ShiftInstance}" Command="{Binding GoToShiftCommand}" BackgroundColor="{StaticResource Einnahme}" TextColor="White" />
                 </HorizontalStackLayout>
 
