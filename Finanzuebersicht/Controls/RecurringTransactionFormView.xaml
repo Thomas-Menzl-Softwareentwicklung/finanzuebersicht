@@ -26,7 +26,7 @@
         </Grid>
 
         <VerticalStackLayout Spacing="4">
-            <Label Text="{loc:Translate Lbl_Betrag}" FontSize="13" TextColor="Gray" />
+            <Label Text="{loc:Translate Lbl_Betrag}" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
             <Entry Text="{Binding BetragText}" Placeholder="{loc:Translate Hint_Betrag}"
                    Keyboard="Numeric" FontSize="28" FontAttributes="Bold"
                    HorizontalTextAlignment="Center"
@@ -34,13 +34,13 @@
         </VerticalStackLayout>
 
         <VerticalStackLayout Spacing="4">
-            <Label Text="{loc:Translate Lbl_Titel}" FontSize="13" TextColor="Gray" />
+            <Label Text="{loc:Translate Lbl_Titel}" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
             <Entry Text="{Binding Titel}" Placeholder="{loc:Translate Hint_Titelbeispiel}"
                    FontSize="16" />
         </VerticalStackLayout>
 
         <VerticalStackLayout Spacing="4">
-            <Label Text="{loc:Translate Lbl_Kategorie}" FontSize="13" TextColor="Gray" />
+            <Label Text="{loc:Translate Lbl_Kategorie}" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
             <controls:SelectionField ItemsSource="{Binding Kategorien}"
                                      SelectedItem="{Binding SelectedKategorie, Mode=TwoWay}"
                                      DisplayMemberPath="Name"
@@ -49,7 +49,7 @@
         </VerticalStackLayout>
 
         <VerticalStackLayout Spacing="4">
-            <Label Text="{loc:Translate Lbl_Konto}" FontSize="13" TextColor="Gray" />
+            <Label Text="{loc:Translate Lbl_Konto}" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
             <controls:SelectionField ItemsSource="{Binding Accounts}"
                                      SelectedItem="{Binding SelectedAccount, Mode=TwoWay}"
                                      DisplayMemberPath="Name"
@@ -58,7 +58,7 @@
         </VerticalStackLayout>
 
         <VerticalStackLayout Spacing="4">
-            <Label Text="{loc:Translate Lbl_Startdatum}" FontSize="13" TextColor="Gray" />
+            <Label Text="{loc:Translate Lbl_Startdatum}" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
             <DatePicker Date="{Binding Startdatum, Mode=TwoWay}" FontSize="16"
                         Format="dd. MMMM yyyy"
                         controls:DatePickerProperties.ImmediateUpdate="True" />
@@ -82,7 +82,7 @@
         </Grid>
 
         <VerticalStackLayout Spacing="4">
-            <Label Text="{loc:Translate Lbl_Intervall}" FontSize="13" TextColor="Gray" />
+            <Label Text="{loc:Translate Lbl_Intervall}" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
             <controls:SelectionField ItemsSource="{Binding VerfuegbareIntervalle}"
                                      SelectedItem="{Binding SelectedIntervalOption, Mode=TwoWay}"
                                      DisplayMemberPath="DisplayName"
@@ -93,11 +93,11 @@
 
         <Grid ColumnDefinitions="*, Auto" ColumnSpacing="8" Margin="0,8,0,0">
             <VerticalStackLayout Grid.Column="0" Spacing="4">
-                <Label Text="{loc:Translate Lbl_IntervallFaktor}" FontSize="13" TextColor="Gray" />
+                <Label Text="{loc:Translate Lbl_IntervallFaktor}" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
                 <Entry Text="{Binding IntervalFactorText}" Keyboard="Numeric" />
             </VerticalStackLayout>
             <VerticalStackLayout Grid.Column="1" Spacing="4" HorizontalOptions="End">
-                <Label Text="{loc:Translate Lbl_ErinnerungTage}" FontSize="13" TextColor="Gray" />
+                <Label Text="{loc:Translate Lbl_ErinnerungTage}" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
                 <Entry Text="{Binding ReminderDaysBeforeText}" Keyboard="Numeric" WidthRequest="80" />
             </VerticalStackLayout>
         </Grid>

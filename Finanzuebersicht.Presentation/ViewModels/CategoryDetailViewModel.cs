@@ -172,6 +172,9 @@ public partial class CategoryDetailViewModel(
         try
         {
             var savedCategory = await _saveCategoryDetailUseCase.ExecuteAsync(_existingCategory, Name, Icon, Color, Typ);
+            _existingCategory = savedCategory;
+            OnPropertyChanged(nameof(PageTitle));
+
             if (_saveCategoryBudgetUseCase != null && !string.IsNullOrEmpty(savedCategory.Id))
             {
                 decimal.TryParse(MonthlyBudgetText, NumberStyles.Any, CultureInfo.CurrentCulture, out var budget);

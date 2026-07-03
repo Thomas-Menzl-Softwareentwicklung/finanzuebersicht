@@ -201,6 +201,8 @@ public partial class RecurringTransactionDetailViewModel(
         ReminderDaysBefore = 0;
         ReminderDaysBeforeText = "0";
         Exceptions = [];
+        SelectedKategorie = null;
+        SelectedAccount = null;
         SelectedIntervalOption = VerfuegbareIntervalle.FirstOrDefault(option => option.Value == Interval);
         OnPropertyChanged(nameof(IsEditing));
         await LoadKategorienCommand.ExecuteAsync(null);

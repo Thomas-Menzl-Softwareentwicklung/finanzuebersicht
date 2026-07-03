@@ -10,13 +10,14 @@
     <VerticalStackLayout Spacing="20">
 
         <VerticalStackLayout Spacing="4">
-            <Label Text="{loc:Translate Lbl_Name}" FontSize="13" TextColor="Gray" />
+            <Label Text="{loc:Translate Lbl_Name}" FontSize="13"
+                   TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
             <Entry Text="{Binding Name}" Placeholder="{loc:Translate Hint_Kategoriename}"
                    FontSize="16" />
         </VerticalStackLayout>
 
         <VerticalStackLayout Spacing="4">
-            <Label Text="{loc:Translate Lbl_Icon}" FontSize="13" TextColor="Gray" />
+            <Label Text="{loc:Translate Lbl_Icon}" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
             <CollectionView ItemsSource="{Binding VerfuegbareIcons}"
                             SelectionMode="Single"
                             SelectedItem="{Binding Icon}">
@@ -28,7 +29,7 @@
                     <DataTemplate x:DataType="x:String">
                         <Border Padding="8" StrokeShape="RoundRectangle 10"
                                Stroke="Transparent"
-                               BackgroundColor="#F2F2F7"
+                               BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}"
                                HorizontalOptions="Center">
                             <Label Text="{Binding .}" FontSize="22"
                                    HorizontalOptions="Center" VerticalOptions="Center" />
@@ -39,7 +40,7 @@
         </VerticalStackLayout>
 
         <VerticalStackLayout Spacing="4">
-            <Label Text="{loc:Translate Lbl_Farbe}" FontSize="13" TextColor="Gray" />
+            <Label Text="{loc:Translate Lbl_Farbe}" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
             <CollectionView ItemsSource="{Binding VerfuegbareFarben}"
                             SelectionMode="Single"
                             SelectedItem="{Binding Color}">
@@ -60,7 +61,7 @@
         </VerticalStackLayout>
 
         <VerticalStackLayout Spacing="4">
-            <Label Text="{loc:Translate Lbl_Typ}" FontSize="13" TextColor="Gray" />
+            <Label Text="{loc:Translate Lbl_Typ}" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
             <controls:SelectionField ItemsSource="{Binding VerfuegbareTypen}"
                                      SelectedItem="{Binding SelectedTypeOption, Mode=TwoWay}"
                                      DisplayMemberPath="DisplayName"
@@ -68,11 +69,11 @@
         </VerticalStackLayout>
 
         <VerticalStackLayout Spacing="4">
-            <Label Text="{loc:Translate Lbl_MonatlichesBudget}" FontSize="13" TextColor="Gray" />
+            <Label Text="{loc:Translate Lbl_MonatlichesBudget}" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
             <Entry Text="{Binding MonthlyBudgetText}" Keyboard="Numeric"
                    Placeholder="{loc:Translate Hint_BudgetOptional}" FontSize="16"
                    SemanticProperties.Hint="{loc:Translate A11y_HintBudget}" />
-            <Label Text="{loc:Translate Hint_BudgetNull}" FontSize="11" TextColor="Gray" />
+            <Label Text="{loc:Translate Hint_BudgetNull}" FontSize="11" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
         </VerticalStackLayout>
 
     </VerticalStackLayout>

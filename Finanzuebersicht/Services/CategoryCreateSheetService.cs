@@ -17,18 +17,10 @@ public sealed class CategoryCreateSheetService : ICategoryCreateSheetService
 
         var form = new CategoryFormView { BindingContext = viewModel };
 
-        while (true)
-        {
-            var result = await page.ShowFormSheetAsync(
-                viewModel.PageTitle,
-                form,
-                saveText: LocalizationResourceManager.Current[ResourceKeys.Btn_Speichern]);
-
-            if (result == FormSheetResult.Cancelled)
-                return false;
-
-            if (await viewModel.TrySaveAsync())
-                return true;
-        }
+        return await page.ShowFormSheetAsync(
+            viewModel.PageTitle,
+            form,
+            viewModel.TrySaveAsync,
+            saveText: LocalizationResourceManager.Current[ResourceKeys.Btn_Speichern]);
     }
 }
