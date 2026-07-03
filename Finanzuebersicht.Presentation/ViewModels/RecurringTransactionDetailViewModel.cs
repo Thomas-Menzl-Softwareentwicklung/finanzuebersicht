@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Finanzuebersicht.Application.UseCases.RecurringTransactions;
+using Finanzuebersicht.Core.Services;
 using Finanzuebersicht.Models;
 using Finanzuebersicht.Navigation;
 using Finanzuebersicht.Presentation.Services;
@@ -243,7 +244,7 @@ public partial class RecurringTransactionDetailViewModel(
         DateTime next;
         if (_existing.LetzteAusfuehrung.HasValue)
         {
-            next = GetNextInstanceLocal(_existing, _existing.LetzteAusfuehrung.Value, IntervalFactor);
+            next = RecurringScheduleCalculator.GetNextInstance(_existing, _existing.LetzteAusfuehrung.Value);
         }
         else
         {
@@ -264,7 +265,7 @@ public partial class RecurringTransactionDetailViewModel(
         DateTime next;
         if (_existing.LetzteAusfuehrung.HasValue)
         {
-            next = GetNextInstanceLocal(_existing, _existing.LetzteAusfuehrung.Value, IntervalFactor);
+            next = RecurringScheduleCalculator.GetNextInstance(_existing, _existing.LetzteAusfuehrung.Value);
         }
         else
         {
@@ -278,30 +279,6 @@ public partial class RecurringTransactionDetailViewModel(
         };
 
         await _navigationService.GoToAsync(Routes.RecurringInstanceShift, parameters);
-    }
-
-    private static DateTime GetNextInstanceLocal(RecurringTransaction recurring, DateTime fromDate, int intervalFactor)
-    {
-        var factor = Math.Max(1, intervalFactor);
-        return recurring.Interval switch
-        {
-            RecurrenceInterval.Weekly => fromDate.Date.AddDays(7L * factor),
-            RecurrenceInterval.Monthly => AddMonthsPreserveDay(fromDate.Date, 1 * factor),
-            RecurrenceInterval.Quarterly => AddMonthsPreserveDay(fromDate.Date, 3 * factor),
-            RecurrenceInterval.Yearly => AddMonthsPreserveDay(fromDate.Date, 12 * factor),
-            RecurrenceInterval.Daily => fromDate.Date.AddDays(1 * factor),
-            _ => AddMonthsPreserveDay(fromDate.Date, 1 * factor),
-        };
-    }
-
-    private static DateTime AddMonthsPreserveDay(DateTime date, int months)
-    {
-        var target = date.AddMonths(months);
-        var day = date.Day;
-        var daysInTarget = DateTime.DaysInMonth(target.Year, target.Month);
-        if (day > daysInTarget)
-            day = daysInTarget;
-        return new DateTime(target.Year, target.Month, day);
     }
 
     [RelayCommand]

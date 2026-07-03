@@ -52,7 +52,7 @@ public class LoadCashflowOutlookUseCase(
 
             for (var day = from; day <= to; day = day.AddDays(1))
             {
-                if (!OccursOnDate(recurring, day))
+                if (!RecurringScheduleCalculator.OccursOnDate(recurring, day))
                     continue;
 
                 if (IsRecurringBooked(allTransactions, recurring.Id, day))
@@ -143,9 +143,4 @@ public class LoadCashflowOutlookUseCase(
     private static bool IsRecurringBooked(IEnumerable<Transaction> transactions, string recurringId, DateTime day)
         => transactions.Any(t => t.DauerauftragId == recurringId && t.Datum.Date == day.Date);
 
-    private static bool OccursOnDate(RecurringTransaction recurring, DateTime date)
-    {
-        var instance = RecurringScheduleCalculator.GetNextDueInstance(recurring, date);
-        return instance.HasValue && instance.Value.EffectiveDate.Date == date.Date;
-    }
 }

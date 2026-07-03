@@ -5,8 +5,8 @@ namespace Finanzuebersicht.Core.Services;
 /// <summary>
 /// Pure domain component for calculating recurring transaction schedules.
 /// Single source of truth for: next-due calculation, exception application,
-/// and active-range checks. Used by both <see cref="RecurringGenerationService"/>
-/// and <c>GetDueRecurringWithHintsUseCase</c>.
+/// active-range checks, and occurrence-on-date/range queries. Used by
+/// <see cref="RecurringGenerationService"/>, dashboard month forecast, and cashflow outlook.
 /// </summary>
 public static class RecurringScheduleCalculator
 {
@@ -110,6 +110,36 @@ public static class RecurringScheduleCalculator
 
         var effective = ApplyExceptions(recurring, candidate);
         return (candidate.Date, effective);
+    }
+
+    /// <summary>
+    /// Returns true if the recurring transaction has an effective occurrence on <paramref name="date"/>.
+    /// </summary>
+    public static bool OccursOnDate(RecurringTransaction recurring, DateTime date)
+    {
+        var instance = GetNextDueInstance(recurring, date);
+        return instance.HasValue && instance.Value.EffectiveDate.Date == date.Date;
+    }
+
+    /// <summary>
+    /// Returns true if any effective occurrence falls within
+    /// [<paramref name="rangeStart"/>, <paramref name="rangeEnd"/>] (inclusive).
+    /// </summary>
+    public static bool OccursInRange(RecurringTransaction recurring, DateTime rangeStart, DateTime rangeEnd)
+    {
+        if (recurring.Startdatum.Date > rangeEnd.Date)
+            return false;
+
+        if (recurring.Enddatum.HasValue && recurring.Enddatum.Value.Date < rangeStart.Date)
+            return false;
+
+        for (var day = rangeStart.Date; day <= rangeEnd.Date; day = day.AddDays(1))
+        {
+            if (OccursOnDate(recurring, day))
+                return true;
+        }
+
+        return false;
     }
 
     /// <summary>
