@@ -261,6 +261,26 @@ public class RecurringScheduleCalculatorTests
     }
 
     [Fact]
+    public void OccursOnDate_ShiftLaterMonthInstance_ReturnsTrueOnShiftTargetDate()
+    {
+        var r = Make(
+            RecurrenceInterval.Monthly,
+            start: new DateTime(2026, 1, 31),
+            exceptions:
+            [
+                new RecurringException
+                {
+                    InstanceDate = new DateTime(2026, 2, 28),
+                    Type = RecurringExceptionType.Shift,
+                    ShiftToDate = new DateTime(2026, 3, 2)
+                }
+            ]);
+
+        Assert.False(RecurringScheduleCalculator.OccursOnDate(r, new DateTime(2026, 2, 28)));
+        Assert.True(RecurringScheduleCalculator.OccursOnDate(r, new DateTime(2026, 3, 2)));
+    }
+
+    [Fact]
     public void OccursInRange_AgreesWithDayByDayOccursOnDateScan()
     {
         var r = Make(
