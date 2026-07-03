@@ -31,8 +31,10 @@
                                              IsVisible="{Binding IsEmptyStateVisible}" />
 
                     <!-- Formular: Neues Ziel -->
-                    <controls:CreateFormCard Title="{loc:Translate Btn_NeuesZiel}"
+                    <controls:CreateFormCard x:Name="AddSparZielForm"
+                                             Title="{loc:Translate Btn_NeuesZiel}"
                                              IsVisible="{Binding ShowAddForm}"
+                                             AccessibilityDescription="{loc:Translate A11y_CreateFormPanel}"
                                              CancelText="{loc:Translate Btn_Abbrechen}"
                                              SaveText="{loc:Translate Btn_ZielHinzufuegen}"
                                              CancelCommand="{Binding ToggleAddFormCommand}"

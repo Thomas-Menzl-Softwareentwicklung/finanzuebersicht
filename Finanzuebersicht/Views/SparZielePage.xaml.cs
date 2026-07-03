@@ -37,5 +37,6 @@ public partial class SparZielePage : BaseContentPage
             return;
 
         await SparZieleScrollView.ScrollToAsync(0, 0, false);
+        AddSparZielForm.FocusForm();
     }
 }

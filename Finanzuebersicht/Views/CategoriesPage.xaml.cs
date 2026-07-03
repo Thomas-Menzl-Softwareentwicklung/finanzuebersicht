@@ -37,5 +37,6 @@ public partial class CategoriesPage : BaseContentPage
             return;
 
         await KontenScrollView.ScrollToAsync(0, 0, false);
+        AddKontoForm.FocusForm();
     }
 }

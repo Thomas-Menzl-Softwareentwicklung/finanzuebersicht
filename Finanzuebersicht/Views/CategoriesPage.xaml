@@ -125,8 +125,10 @@
                     <ScrollView x:Name="KontenScrollView">
                         <VerticalStackLayout Spacing="12" Padding="16">
 
-                            <controls:CreateFormCard Title="{Binding NeuesKontoFormTitle}"
+                            <controls:CreateFormCard x:Name="AddKontoForm"
+                                                     Title="{Binding NeuesKontoFormTitle}"
                                                      IsVisible="{Binding ShowAddKontoForm}"
+                                                     AccessibilityDescription="{loc:Translate A11y_CreateFormPanel}"
                                                      CancelText="{loc:Translate Btn_Abbrechen}"
                                                      SaveText="{loc:Translate Title_KontoHinzufuegen}"
                                                      CancelCommand="{Binding ToggleAddKontoFormCommand}"

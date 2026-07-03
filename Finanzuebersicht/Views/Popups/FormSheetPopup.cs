@@ -31,6 +31,9 @@ public class FormSheetPopup : Popup<FormSheetResult>
         CanBeDismissedByTappingOutsideOfPopup = true;
 
         var maxFormHeight = ComputeMaxFormHeight();
+        var sheetDescription = string.Format(
+            LocalizationResourceManager.Current[ResourceKeys.A11y_FormSheetDialog],
+            title);
 
         var card = new CreateFormCard
         {
@@ -40,6 +43,7 @@ public class FormSheetPopup : Popup<FormSheetResult>
             SaveText = saveText,
             ScrollFormContent = true,
             MaxFormHeight = maxFormHeight,
+            AccessibilityDescription = sheetDescription,
             CancelCommand = new Command(() => _ = CloseWithResultAsync(FormSheetResult.Cancelled)),
             SaveCommand = new Command(() => _ = CloseWithResultAsync(FormSheetResult.Saved))
         };
@@ -68,6 +72,10 @@ public class FormSheetPopup : Popup<FormSheetResult>
                 Children = { card }
             }
         };
+
+        Microsoft.Maui.Controls.Application.Current?.Dispatcher.DispatchDelayed(
+            TimeSpan.FromMilliseconds(200),
+            () => FormFocusHelper.TryFocusFirstInput(formContent));
     }
 
     private async Task CloseWithResultAsync(FormSheetResult result)

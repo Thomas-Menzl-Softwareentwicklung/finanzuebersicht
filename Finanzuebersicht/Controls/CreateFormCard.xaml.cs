@@ -35,6 +35,10 @@ public partial class CreateFormCard : ContentView
         BindableProperty.Create(nameof(MaxFormHeight), typeof(double), typeof(CreateFormCard), -1d,
             propertyChanged: OnScrollSettingsChanged);
 
+    public static readonly BindableProperty AccessibilityDescriptionProperty =
+        BindableProperty.Create(nameof(AccessibilityDescription), typeof(string), typeof(CreateFormCard), string.Empty,
+            propertyChanged: OnAccessibilityDescriptionChanged);
+
     public CreateFormCard()
     {
         InitializeComponent();
@@ -95,6 +99,12 @@ public partial class CreateFormCard : ContentView
         set => SetValue(MaxFormHeightProperty, value);
     }
 
+    public string AccessibilityDescription
+    {
+        get => (string)GetValue(AccessibilityDescriptionProperty);
+        set => SetValue(AccessibilityDescriptionProperty, value);
+    }
+
     public bool HasTitle => !string.IsNullOrWhiteSpace(Title);
 
     public bool HasActions => CancelCommand is not null || SaveCommand is not null;
@@ -117,6 +127,20 @@ public partial class CreateFormCard : ContentView
     {
         if (bindable is CreateFormCard card)
             card.UpdateScrollBehavior();
+    }
+
+    private static void OnAccessibilityDescriptionChanged(BindableObject bindable, object oldValue, object newValue)
+    {
+        if (bindable is CreateFormCard card)
+            SemanticProperties.SetDescription(card, (string)newValue);
+    }
+
+    public void FocusForm()
+    {
+        if (FormContent is Element formRoot)
+            FormFocusHelper.TryFocusFirstInput(formRoot);
+        else if (FormPresenter?.Content is Element presenterRoot)
+            FormFocusHelper.TryFocusFirstInput(presenterRoot);
     }
 
     private void UpdateScrollBehavior()

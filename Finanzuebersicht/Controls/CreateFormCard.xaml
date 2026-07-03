@@ -4,10 +4,12 @@
              x:Class="Finanzuebersicht.Controls.CreateFormCard"
              x:Name="Root">
 
-    <Border StrokeShape="RoundRectangle 12"
+    <Border x:Name="CardBorder"
+            StrokeShape="RoundRectangle 12"
             Stroke="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
             BackgroundColor="{AppThemeBinding Light={StaticResource CardBackground}, Dark={StaticResource CardBackgroundDark}}"
-            Padding="16">
+            Padding="16"
+            SemanticProperties.Description="{Binding Source={x:Reference Root}, Path=AccessibilityDescription}">
         <VerticalStackLayout Spacing="14">
 
             <Label Text="{Binding Source={x:Reference Root}, Path=Title}"
@@ -27,6 +29,7 @@
                 <Button Grid.Column="0"
                         Text="{Binding Source={x:Reference Root}, Path=CancelText}"
                         Command="{Binding Source={x:Reference Root}, Path=CancelCommand}"
+                        SemanticProperties.Hint="{Binding Source={x:Reference Root}, Path=CancelText}"
                         BackgroundColor="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray900}}"
                         TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}"
                         CornerRadius="10"
@@ -34,6 +37,7 @@
                 <Button Grid.Column="1"
                         Text="{Binding Source={x:Reference Root}, Path=SaveText}"
                         Command="{Binding Source={x:Reference Root}, Path=SaveCommand}"
+                        SemanticProperties.Hint="{Binding Source={x:Reference Root}, Path=SaveText}"
                         IsEnabled="{Binding Source={x:Reference Root}, Path=IsSaveEnabled}"
                         BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
                         TextColor="White"

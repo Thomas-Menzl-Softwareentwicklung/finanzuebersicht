@@ -423,4 +423,6 @@ public static class ResourceKeys
     public const string A11y_SelectionField = nameof(A11y_SelectionField);
     public const string A11y_SelectionFieldLeer = nameof(A11y_SelectionFieldLeer);
     public const string A11y_SegmentUmschalten = nameof(A11y_SegmentUmschalten);
+    public const string A11y_CreateFormPanel = nameof(A11y_CreateFormPanel);
+    public const string A11y_FormSheetDialog = nameof(A11y_FormSheetDialog);
 }
