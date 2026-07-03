@@ -19,7 +19,7 @@
     <Grid>
         <RefreshView Command="{Binding LoadSparZieleCommand}"
                      IsRefreshing="{Binding IsLoading}">
-            <ScrollView>
+            <ScrollView x:Name="SparZieleScrollView">
                 <VerticalStackLayout Spacing="16" Padding="16">
 
                     <controls:EmptyStateView IconImage="savings.png"
@@ -28,7 +28,59 @@
                                              Hint="{loc:Translate Empty_HintSparZiele}"
                                              ActionText="{loc:Translate Btn_NeuesZiel}"
                                              ActionCommand="{Binding ToggleAddFormCommand}"
-                                             IsVisible="{Binding IsEmpty}" />
+                                             IsVisible="{Binding IsEmptyStateVisible}" />
+
+                    <!-- Formular: Neues Ziel -->
+                    <controls:CreateFormCard Title="{loc:Translate Btn_NeuesZiel}"
+                                             IsVisible="{Binding ShowAddForm}"
+                                             CancelText="{loc:Translate Btn_Abbrechen}"
+                                             SaveText="{loc:Translate Btn_ZielHinzufuegen}"
+                                             CancelCommand="{Binding ToggleAddFormCommand}"
+                                             SaveCommand="{Binding SaveNewSparZielCommand}">
+                        <VerticalStackLayout Spacing="14">
+
+                            <!-- Titel -->
+                            <VerticalStackLayout Spacing="4">
+                                <Label Text="{loc:Translate Lbl_Titel}" FontSize="13"
+                                       TextColor="{AppThemeBinding Light=#8E8E93, Dark=#636366}" />
+                                <Entry Text="{Binding NeuerTitel}"
+                                       Placeholder="{loc:Translate Hint_ZielTitel}"
+                                       FontSize="16" />
+                            </VerticalStackLayout>
+
+                            <!-- Icon -->
+                            <VerticalStackLayout Spacing="4">
+                                <Label Text="{loc:Translate Lbl_Icon}" FontSize="13"
+                                       TextColor="{AppThemeBinding Light=#8E8E93, Dark=#636366}" />
+                                <Entry Text="{Binding NeuerIcon}" FontSize="24" MaxLength="2" />
+                            </VerticalStackLayout>
+
+                            <!-- Zielbetrag -->
+                            <VerticalStackLayout Spacing="4">
+                                <Label Text="{loc:Translate Lbl_ZielBetrag}" FontSize="13"
+                                       TextColor="{AppThemeBinding Light=#8E8E93, Dark=#636366}" />
+                                <Entry Text="{Binding NeuesZielBetrag}"
+                                       Keyboard="Numeric" FontSize="16" />
+                            </VerticalStackLayout>
+
+                            <!-- Aktueller Betrag -->
+                            <VerticalStackLayout Spacing="4">
+                                <Label Text="{loc:Translate Lbl_AktuellerBetrag}" FontSize="13"
+                                       TextColor="{AppThemeBinding Light=#8E8E93, Dark=#636366}" />
+                                <Entry Text="{Binding NeuerAktuellerBetrag}"
+                                       Keyboard="Numeric" FontSize="16" />
+                            </VerticalStackLayout>
+
+                            <!-- Monatliche Sparrate -->
+                            <VerticalStackLayout Spacing="4">
+                                <Label Text="{loc:Translate Lbl_MonatlicheSparrate}" FontSize="13"
+                                       TextColor="{AppThemeBinding Light=#8E8E93, Dark=#636366}" />
+                                <Entry Text="{Binding NeueMonatlicheSparrate}"
+                                       Keyboard="Numeric" FontSize="16" />
+                            </VerticalStackLayout>
+
+                        </VerticalStackLayout>
+                    </controls:CreateFormCard>
 
                     <!-- Ziele-Liste -->
                     <VerticalStackLayout BindableLayout.ItemsSource="{Binding SparZiele}" Spacing="12">
@@ -108,58 +160,6 @@
                             </DataTemplate>
                         </BindableLayout.ItemTemplate>
                     </VerticalStackLayout>
-
-                    <!-- Formular: Neues Ziel -->
-                    <controls:CreateFormCard Title="{loc:Translate Btn_NeuesZiel}"
-                                             IsVisible="{Binding ShowAddForm}"
-                                             CancelText="{loc:Translate Btn_Abbrechen}"
-                                             SaveText="{loc:Translate Btn_ZielHinzufuegen}"
-                                             CancelCommand="{Binding ToggleAddFormCommand}"
-                                             SaveCommand="{Binding SaveNewSparZielCommand}">
-                        <VerticalStackLayout Spacing="14">
-
-                            <!-- Titel -->
-                            <VerticalStackLayout Spacing="4">
-                                <Label Text="{loc:Translate Lbl_Titel}" FontSize="13"
-                                       TextColor="{AppThemeBinding Light=#8E8E93, Dark=#636366}" />
-                                <Entry Text="{Binding NeuerTitel}"
-                                       Placeholder="{loc:Translate Hint_ZielTitel}"
-                                       FontSize="16" />
-                            </VerticalStackLayout>
-
-                            <!-- Icon -->
-                            <VerticalStackLayout Spacing="4">
-                                <Label Text="{loc:Translate Lbl_Icon}" FontSize="13"
-                                       TextColor="{AppThemeBinding Light=#8E8E93, Dark=#636366}" />
-                                <Entry Text="{Binding NeuerIcon}" FontSize="24" MaxLength="2" />
-                            </VerticalStackLayout>
-
-                            <!-- Zielbetrag -->
-                            <VerticalStackLayout Spacing="4">
-                                <Label Text="{loc:Translate Lbl_ZielBetrag}" FontSize="13"
-                                       TextColor="{AppThemeBinding Light=#8E8E93, Dark=#636366}" />
-                                <Entry Text="{Binding NeuesZielBetrag}"
-                                       Keyboard="Numeric" FontSize="16" />
-                            </VerticalStackLayout>
-
-                            <!-- Aktueller Betrag -->
-                            <VerticalStackLayout Spacing="4">
-                                <Label Text="{loc:Translate Lbl_AktuellerBetrag}" FontSize="13"
-                                       TextColor="{AppThemeBinding Light=#8E8E93, Dark=#636366}" />
-                                <Entry Text="{Binding NeuerAktuellerBetrag}"
-                                       Keyboard="Numeric" FontSize="16" />
-                            </VerticalStackLayout>
-
-                            <!-- Monatliche Sparrate -->
-                            <VerticalStackLayout Spacing="4">
-                                <Label Text="{loc:Translate Lbl_MonatlicheSparrate}" FontSize="13"
-                                       TextColor="{AppThemeBinding Light=#8E8E93, Dark=#636366}" />
-                                <Entry Text="{Binding NeueMonatlicheSparrate}"
-                                       Keyboard="Numeric" FontSize="16" />
-                            </VerticalStackLayout>
-
-                        </VerticalStackLayout>
-                    </controls:CreateFormCard>
 
                 </VerticalStackLayout>
             </ScrollView>
