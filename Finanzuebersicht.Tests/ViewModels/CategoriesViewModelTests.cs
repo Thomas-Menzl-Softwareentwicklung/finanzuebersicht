@@ -174,7 +174,7 @@ public class CategoriesViewModelTests
         Assert.Null(accountSwipeView.Attribute("IsEnabled"));
 
         var deleteSwipeItem = Assert.Single(accountSwipeView.Descendants(maui + "SwipeItem"));
-        Assert.Equal("{Binding CanDelete}", (string?)deleteSwipeItem.Attribute("IsEnabled"));
+        Assert.Equal("{Binding CanDelete}", (string?)deleteSwipeItem.Attribute("IsVisible"));
     }
 
     [Fact]
