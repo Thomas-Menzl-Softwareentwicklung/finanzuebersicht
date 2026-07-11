@@ -155,11 +155,12 @@
                             <VerticalStackLayout BindableLayout.ItemsSource="{Binding Konten}" Spacing="12">
                                 <BindableLayout.ItemTemplate>
                                     <DataTemplate x:DataType="vm:AccountListItem">
-                                        <SwipeView IsEnabled="{Binding CanDelete}">
+                                        <SwipeView>
                                             <SwipeView.RightItems>
                                                 <SwipeItems>
                                                     <SwipeItem Text="{loc:Translate Btn_Loeschen}"
                                                                BackgroundColor="{AppThemeBinding Light={StaticResource Ausgabe}, Dark={StaticResource AusgabeDark}}"
+                                                               IsEnabled="{Binding CanDelete}"
                                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:CategoriesViewModel}}, Path=DeleteKontoCommand}"
                                                                CommandParameter="{Binding .}" />
                                                 </SwipeItems>

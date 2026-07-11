@@ -1,3 +1,4 @@
+using System.Xml.Linq;
 using System.Collections.ObjectModel;
 using Finanzuebersicht.Application.UseCases.Categories;
 using Finanzuebersicht.Application.UseCases.Accounts;
@@ -159,6 +160,24 @@ public class CategoriesViewModelTests
     }
 
     [Fact]
+    public void CategoriesPage_AccountRows_DoNotDisableSwipeViewForSystemAccounts()
+    {
+        var page = XDocument.Load(FindWorkspaceFile("Finanzuebersicht/Views/CategoriesPage.xaml"));
+        XNamespace maui = "http://schemas.microsoft.com/dotnet/2021/maui";
+
+        var accountSwipeView = Assert.Single(page
+            .Descendants(maui + "SwipeView")
+            .Where(element => element
+                .Descendants(maui + "SwipeItem")
+                .Any(item => ((string?)item.Attribute("Command"))?.Contains("DeleteKontoCommand", StringComparison.Ordinal) == true)));
+
+        Assert.Null(accountSwipeView.Attribute("IsEnabled"));
+
+        var deleteSwipeItem = Assert.Single(accountSwipeView.Descendants(maui + "SwipeItem"));
+        Assert.Equal("{Binding CanDelete}", (string?)deleteSwipeItem.Attribute("IsEnabled"));
+    }
+
+    [Fact]
     public async Task ToggleKontoArchivierung_WhenConfirmed_UpdatesAccount()
     {
         var accountRepository = Substitute.For<IAccountRepository>();
@@ -214,6 +233,21 @@ public class CategoriesViewModelTests
             dialogService,
             Substitute.For<IFeedbackService>(),
             Substitute.For<IAppEvents>());
+    }
+
+    private static string FindWorkspaceFile(string relativePath)
+    {
+        var directory = new DirectoryInfo(AppContext.BaseDirectory);
+        while (directory is not null)
+        {
+            var candidate = Path.Combine(directory.FullName, relativePath);
+            if (File.Exists(candidate))
+                return candidate;
+
+            directory = directory.Parent;
+        }
+
+        throw new FileNotFoundException($"Could not locate {relativePath} from {AppContext.BaseDirectory}");
     }
 
     private static CategoriesViewModel CreateSut(
