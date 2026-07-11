@@ -165,11 +165,11 @@ public class CategoriesViewModelTests
         var page = XDocument.Load(FindWorkspaceFile("Finanzuebersicht/Views/CategoriesPage.xaml"));
         XNamespace maui = "http://schemas.microsoft.com/dotnet/2021/maui";
 
-        var accountSwipeView = Assert.Single(page
-            .Descendants(maui + "SwipeView")
-            .Where(element => element
+        var accountSwipeView = Assert.Single(
+            page.Descendants(maui + "SwipeView"),
+            element => element
                 .Descendants(maui + "SwipeItem")
-                .Any(item => ((string?)item.Attribute("Command"))?.Contains("DeleteKontoCommand", StringComparison.Ordinal) == true)));
+                .Any(item => ((string?)item.Attribute("Command"))?.Contains("DeleteKontoCommand", StringComparison.Ordinal) == true));
 
         Assert.Null(accountSwipeView.Attribute("IsEnabled"));
 
