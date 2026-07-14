@@ -51,7 +51,8 @@ public class SparZielDetailViewModelTests
 
         await viewModel.SaveCommand.ExecuteAsync(null);
 
-        await repository.Received(1).SaveSparZielAsync(Arg.Is<SparZiel>(z => z.Titel == "Neu" && z.ZielBetrag == 1500m));
+        await repository.Received(1).SaveSparZielAsync(Arg.Is<SparZiel>(z =>
+            z != null && z.Titel == "Neu" && z.ZielBetrag == 1500m));
         await navigationService.Received(1).GoBackAsync();
     }
 

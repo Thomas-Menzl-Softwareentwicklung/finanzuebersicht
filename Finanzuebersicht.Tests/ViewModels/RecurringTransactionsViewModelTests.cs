@@ -81,7 +81,7 @@ public class RecurringTransactionsViewModelTests
 
         Assert.False(recurringTransaction.Aktiv);
         await recurringTransactionRepository.Received(1).SaveRecurringTransactionAsync(
-            Arg.Is<RecurringTransaction>(item => item.Id == "rec-1" && item.Aktiv == false));
+            Arg.Is<RecurringTransaction>(item => item != null && item.Id == "rec-1" && item.Aktiv == false));
     }
 
     [Fact]
@@ -118,6 +118,7 @@ public class RecurringTransactionsViewModelTests
         await navigationService.Received(1).GoToAsync(
             Routes.RecurringTransactionDetail,
             Arg.Is<IDictionary<string, object>>(parameters =>
+                parameters != null &&
                 parameters.ContainsKey("RecurringTransaction") &&
                 object.ReferenceEquals(parameters["RecurringTransaction"], recurringTransaction)));
     }

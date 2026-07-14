@@ -27,6 +27,7 @@ public class SaveTransactionDetailUseCaseTests
 
         await transactionRepository.Received(1).SaveTransactionAsync(
             Arg.Is<Transaction>(t =>
+                t != null &&
                 t.Betrag == 120.50m &&
                 t.Titel == "Einkauf" &&
                 t.Datum == new DateTime(2026, 3, 1) &&
@@ -96,7 +97,7 @@ public class SaveTransactionDetailUseCaseTests
             verwendungszweck: string.Empty);
 
         await transactionRepository.Received(1).SaveTransactionAsync(
-            Arg.Is<Transaction>(t => t.AccountId == "acc-default"));
+            Arg.Is<Transaction>(t => t != null && t.AccountId == "acc-default"));
     }
 
     [Fact]

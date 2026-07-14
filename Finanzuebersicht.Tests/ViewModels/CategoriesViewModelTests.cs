@@ -181,6 +181,7 @@ public class CategoriesViewModelTests
         await sut.SaveNewKontoCommand.ExecuteAsync(null);
 
         await accountRepository.Received(1).SaveAccountAsync(Arg.Is<Account>(a =>
+            a != null &&
             a.Name == "Sparkonto" &&
             a.Type == AccountType.Tagesgeld &&
             a.OpeningBalance == 1000m));
@@ -253,7 +254,8 @@ public class CategoriesViewModelTests
 
         await sut.ToggleKontoArchivierungCommand.ExecuteAsync(new AccountListItem(account));
 
-        await accountRepository.Received(1).SaveAccountAsync(Arg.Is<Account>(a => a.Id == "acc-1" && a.IsArchived));
+        await accountRepository.Received(1).SaveAccountAsync(Arg.Is<Account>(a =>
+            a != null && a.Id == "acc-1" && a.IsArchived));
     }
 
     private static CategoriesViewModel CreateSut(

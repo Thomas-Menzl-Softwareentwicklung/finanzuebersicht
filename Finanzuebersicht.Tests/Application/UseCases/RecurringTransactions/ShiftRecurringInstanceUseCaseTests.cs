@@ -20,7 +20,8 @@ public class ShiftRecurringInstanceUseCaseTests
 
         await sut.ExecuteAsync("r-1", new System.DateTime(2026,3,1), new System.DateTime(2026,3,5), "note");
 
-        await repo.Received(1).SaveRecurringTransactionAsync(Arg.Is<RecurringTransaction>(r => r.Exceptions.Count == 1 && r.Exceptions[0].Type == RecurringExceptionType.Shift && r.Exceptions[0].ShiftToDate == new System.DateTime(2026,3,5)));
+        await repo.Received(1).SaveRecurringTransactionAsync(Arg.Is<RecurringTransaction>(r =>
+            r != null && r.Exceptions.Count == 1 && r.Exceptions[0].Type == RecurringExceptionType.Shift && r.Exceptions[0].ShiftToDate == new System.DateTime(2026,3,5)));
     }
 
     [Fact]
@@ -35,6 +36,7 @@ public class ShiftRecurringInstanceUseCaseTests
 
         await sut.ExecuteAsync("r-1", new System.DateTime(2026,3,1), new System.DateTime(2026,3,6), "updated");
 
-        await repo.Received(1).SaveRecurringTransactionAsync(Arg.Is<RecurringTransaction>(r => r.Exceptions.Count == 1 && r.Exceptions[0].ShiftToDate == new System.DateTime(2026,3,6) && r.Exceptions[0].Note == "updated"));
+        await repo.Received(1).SaveRecurringTransactionAsync(Arg.Is<RecurringTransaction>(r =>
+            r != null && r.Exceptions.Count == 1 && r.Exceptions[0].ShiftToDate == new System.DateTime(2026,3,6) && r.Exceptions[0].Note == "updated"));
     }
 }

@@ -41,6 +41,7 @@ public class ReconcileAccountBalanceUseCaseTests
         Assert.Equal(200m, result.ActualBalance);
         Assert.Equal(50m, result.Delta);
         Assert.Equal(150m, result.NewOpeningBalance);
-        await accountRepository.Received(1).SaveAccountAsync(Arg.Is<Account>(a => a.OpeningBalance == 150m));
+        await accountRepository.Received(1).SaveAccountAsync(Arg.Is<Account>(a =>
+            a != null && a.OpeningBalance == 150m));
     }
 }

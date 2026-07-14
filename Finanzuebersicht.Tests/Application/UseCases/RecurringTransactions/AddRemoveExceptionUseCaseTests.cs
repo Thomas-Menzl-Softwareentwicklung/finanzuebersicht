@@ -21,7 +21,8 @@ public class AddRemoveExceptionUseCaseTests
 
         await sut.ExecuteAsync("r-1", ex);
 
-        await repo.Received(1).SaveRecurringTransactionAsync(Arg.Is<RecurringTransaction>(r => r.Exceptions.Count == 1 && r.Exceptions[0].Id == "e-1"));
+        await repo.Received(1).SaveRecurringTransactionAsync(Arg.Is<RecurringTransaction>(r =>
+            r != null && r.Exceptions.Count == 1 && r.Exceptions[0].Id == "e-1"));
     }
 
     [Fact]
@@ -37,6 +38,7 @@ public class AddRemoveExceptionUseCaseTests
 
         await sut.ExecuteAsync("r-1", newEx);
 
-        await repo.Received(1).SaveRecurringTransactionAsync(Arg.Is<RecurringTransaction>(r => r.Exceptions.Count == 1 && r.Exceptions[0].Id == "e-new" && r.Exceptions[0].Type == RecurringExceptionType.Shift && r.Exceptions[0].ShiftToDate == new System.DateTime(2026,3,2)));
+        await repo.Received(1).SaveRecurringTransactionAsync(Arg.Is<RecurringTransaction>(r =>
+            r != null && r.Exceptions.Count == 1 && r.Exceptions[0].Id == "e-new" && r.Exceptions[0].Type == RecurringExceptionType.Shift && r.Exceptions[0].ShiftToDate == new System.DateTime(2026,3,2)));
     }
 }

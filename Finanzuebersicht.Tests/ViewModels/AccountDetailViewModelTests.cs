@@ -54,7 +54,8 @@ public class AccountDetailViewModelTests
 
         await viewModel.SaveCommand.ExecuteAsync(null);
 
-        await accountRepository.Received(1).SaveAccountAsync(Arg.Is<Account>(a => a.Name == "Neues Konto"));
+        await accountRepository.Received(1).SaveAccountAsync(Arg.Is<Account>(a =>
+            a != null && a.Name == "Neues Konto"));
         await navigationService.Received(1).GoBackAsync();
     }
 

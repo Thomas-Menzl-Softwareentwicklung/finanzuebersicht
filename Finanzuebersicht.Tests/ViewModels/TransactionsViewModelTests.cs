@@ -300,7 +300,7 @@ public class TransactionsViewModelTests
 
         dispatcher = Substitute.For<IMainThreadDispatcher>();
         dispatcher.InvokeAsync(Arg.Any<Func<Task>>())
-            .Returns(call => call.Arg<Func<Task>>()());
+            .Returns(call => call.Arg<Func<Task>>()!());
 
         navigationService = Substitute.For<INavigationService>();
         navigationService.GoToAsync(Arg.Any<string>(), Arg.Any<IDictionary<string, object>>()).Returns(Task.CompletedTask);

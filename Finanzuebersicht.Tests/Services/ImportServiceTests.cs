@@ -118,8 +118,8 @@ namespace Finanzuebersicht.Tests.Services
 
             Assert.Single(result.Imported);
             Assert.Equal("t2", result.Imported[0].Id);
-            await repo.Received(1).SaveTransactionAsync(Arg.Is<Transaction>(t => t.Id == "t2"));
-            await repo.DidNotReceive().SaveTransactionAsync(Arg.Is<Transaction>(t => t.Id == "t1"));
+            await repo.Received(1).SaveTransactionAsync(Arg.Is<Transaction>(t => t != null && t.Id == "t2"));
+            await repo.DidNotReceive().SaveTransactionAsync(Arg.Is<Transaction>(t => t != null && t.Id == "t1"));
         }
 
         [Fact]
@@ -162,7 +162,8 @@ namespace Finanzuebersicht.Tests.Services
             Assert.Single(result.Imported);
             Assert.NotNull(savedCategory);
             await categories.Received(1).SaveCategoryAsync(Arg.Any<Category>());
-            await repo.Received(1).SaveTransactionAsync(Arg.Is<Transaction>(t => t.KategorieId == savedCategory!.Id));
+            await repo.Received(1).SaveTransactionAsync(Arg.Is<Transaction>(t =>
+                t != null && t.KategorieId == savedCategory!.Id));
         }
 
         [Fact]

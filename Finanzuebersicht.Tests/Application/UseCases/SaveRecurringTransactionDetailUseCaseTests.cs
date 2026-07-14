@@ -28,6 +28,7 @@ public class SaveRecurringTransactionDetailUseCaseTests
 
         await recurringRepository.Received(1).SaveRecurringTransactionAsync(
             Arg.Is<RecurringTransaction>(r =>
+                r != null &&
                 r.Betrag == 49.99m &&
                 r.Titel == "Streaming" &&
                 r.KategorieId == "cat-1" &&

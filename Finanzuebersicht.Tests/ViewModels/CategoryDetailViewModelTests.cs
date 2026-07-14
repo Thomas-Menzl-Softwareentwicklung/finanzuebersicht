@@ -16,7 +16,7 @@ public class CategoryDetailViewModelTests
         categoryRepository.SaveCategoryAsync(Arg.Any<Category>())
             .Returns(call =>
             {
-                var category = call.Arg<Category>();
+                var category = call.Arg<Category>()!;
                 savedCategories.Add(category);
                 category.Id = "cat-new";
                 return Task.FromResult(category);

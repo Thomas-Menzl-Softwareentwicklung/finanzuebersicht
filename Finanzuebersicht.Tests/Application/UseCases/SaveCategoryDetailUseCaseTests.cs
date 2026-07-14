@@ -16,6 +16,7 @@ public class SaveCategoryDetailUseCaseTests
 
         await categoryRepository.Received(1).SaveCategoryAsync(
             Arg.Is<Category>(c =>
+                c != null &&
                 c.Name == "Lebensmittel" &&
                 c.Icon == "🛒" &&
                 c.Color == "#34C759" &&

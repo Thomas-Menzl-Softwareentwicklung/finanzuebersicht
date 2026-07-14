@@ -67,7 +67,8 @@ public class TransactionDetailViewModelTests
 
         await viewModel.SaveCommand.ExecuteAsync(null);
 
-        await transactionRepository.Received(1).SaveTransactionAsync(Arg.Is<Transaction>(t => t.Titel == "Test"));
+        await transactionRepository.Received(1).SaveTransactionAsync(Arg.Is<Transaction>(t =>
+            t != null && t.Titel == "Test"));
         await navigationService.Received(1).GoBackAsync();
     }
 

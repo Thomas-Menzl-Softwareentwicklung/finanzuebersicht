@@ -33,9 +33,9 @@ public class DeleteCategoryUseCaseTests
         await sut.ExecuteAsync("cat-delete");
 
         await transactionRepository.Received(1).SaveTransactionAsync(
-            Arg.Is<Transaction>(t => t.Id == "tx-1" && t.KategorieId == "cat-default"));
+            Arg.Is<Transaction>(t => t != null && t.Id == "tx-1" && t.KategorieId == "cat-default"));
         await recurringRepository.Received(1).SaveRecurringTransactionAsync(
-            Arg.Is<RecurringTransaction>(r => r.Id == "r-1" && r.KategorieId == "cat-default"));
+            Arg.Is<RecurringTransaction>(r => r != null && r.Id == "r-1" && r.KategorieId == "cat-default"));
         await categoryRepository.Received(1).DeleteCategoryAsync("cat-delete");
     }
 
@@ -60,7 +60,7 @@ public class DeleteCategoryUseCaseTests
         await sut.ExecuteAsync("cat-delete");
 
         await categoryRepository.Received(1).SaveCategoryAsync(
-            Arg.Is<Category>(c => c.SystemKey == Finanzuebersicht.Constants.SystemCategoryKeys.Sonstiges));
+            Arg.Is<Category>(c => c != null && c.SystemKey == Finanzuebersicht.Constants.SystemCategoryKeys.Sonstiges));
         await transactionRepository.Received(1).SaveTransactionAsync(Arg.Any<Transaction>());
         await categoryRepository.Received(1).DeleteCategoryAsync("cat-delete");
     }
