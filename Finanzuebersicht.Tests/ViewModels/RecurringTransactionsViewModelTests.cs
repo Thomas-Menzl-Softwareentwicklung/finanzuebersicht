@@ -81,7 +81,7 @@ public class RecurringTransactionsViewModelTests
 
         Assert.False(recurringTransaction.Aktiv);
         await recurringTransactionRepository.Received(1).SaveRecurringTransactionAsync(
-            Arg.Is<RecurringTransaction>(item => item.Id == "rec-1" && item.Aktiv == false));
+            NonNullArg.Is<RecurringTransaction>(item => item.Id == "rec-1" && item.Aktiv == false));
     }
 
     [Fact]
@@ -117,7 +117,7 @@ public class RecurringTransactionsViewModelTests
 
         await navigationService.Received(1).GoToAsync(
             Routes.RecurringTransactionDetail,
-            Arg.Is<IDictionary<string, object>>(parameters =>
+            NonNullArg.Is<IDictionary<string, object>>(parameters =>
                 parameters.ContainsKey("RecurringTransaction") &&
                 object.ReferenceEquals(parameters["RecurringTransaction"], recurringTransaction)));
     }
@@ -147,8 +147,8 @@ public class RecurringTransactionsViewModelTests
             .Returns(Task.FromResult(false));
 
         var localizationService = Substitute.For<ILocalizationService>();
-        localizationService.GetString(Arg.Any<string>()).Returns(call => call.Arg<string>());
-        localizationService.GetString(Arg.Any<string>(), Arg.Any<object[]>()).Returns(call => call.ArgAt<string>(0));
+        localizationService.GetString(Arg.Any<string>()).Returns(call => call.ArgNotNull<string>());
+        localizationService.GetString(Arg.Any<string>(), Arg.Any<object[]>()).Returns(call => call.ArgAtNotNull<string>(0));
 
         navigationService = Substitute.For<INavigationService>();
 

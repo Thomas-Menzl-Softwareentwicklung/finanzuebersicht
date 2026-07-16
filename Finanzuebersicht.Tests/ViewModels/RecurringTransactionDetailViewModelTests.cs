@@ -40,7 +40,7 @@ public class RecurringTransactionDetailViewModelTests
         IAccountRepository accountRepository)
     {
         var localizationService = Substitute.For<ILocalizationService>();
-        localizationService.GetString(Arg.Any<string>()).Returns(call => call.Arg<string>());
+        localizationService.GetString(Arg.Any<string>()).Returns(call => call.ArgNotNull<string>());
 
         return new RecurringTransactionDetailViewModel(
             new SaveRecurringTransactionDetailUseCase(

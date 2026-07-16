@@ -45,8 +45,8 @@ public class ImportPreviewViewModelTests
         ]);
 
         var localization = Substitute.For<ILocalizationService>();
-        localization.GetString(Arg.Any<string>()).Returns(call => call.Arg<string>());
-        localization.GetString(Arg.Any<string>(), Arg.Any<object[]>()).Returns(call => call.Arg<string>());
+        localization.GetString(Arg.Any<string>()).Returns(call => call.ArgNotNull<string>());
+        localization.GetString(Arg.Any<string>(), Arg.Any<object[]>()).Returns(call => call.ArgNotNull<string>());
 
         var navigation = Substitute.For<INavigationService>();
         navigation.GoBackAsync().Returns(Task.CompletedTask);
@@ -97,7 +97,7 @@ public class ImportPreviewViewModelTests
 
         var categoryRepository = Substitute.For<ICategoryRepository>();
         var localization = Substitute.For<ILocalizationService>();
-        localization.GetString(Arg.Any<string>()).Returns(call => call.Arg<string>());
+        localization.GetString(Arg.Any<string>()).Returns(call => call.ArgNotNull<string>());
         var vm = new ImportPreviewViewModel(
             new ImportService([], Substitute.For<ITransactionRepository>(), Substitute.For<ILogger<ImportService>>(), categoryRepository),
             sessionStore,

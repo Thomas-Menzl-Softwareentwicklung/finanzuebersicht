@@ -161,7 +161,7 @@ public class CategoriesViewModelTests
     {
         var accountRepository = Substitute.For<IAccountRepository>();
         accountRepository.GetAccountsAsync().Returns(Task.FromResult(new List<Account>()));
-        accountRepository.SaveAccountAsync(Arg.Any<Account>()).Returns(call => Task.FromResult(call.Arg<Account>()));
+        accountRepository.SaveAccountAsync(Arg.Any<Account>()).Returns(call => Task.FromResult(call.ArgNotNull<Account>()));
 
         var sut = CreateSut(
             Substitute.For<ICategoryRepository>(),
@@ -180,7 +180,7 @@ public class CategoriesViewModelTests
 
         await sut.SaveNewKontoCommand.ExecuteAsync(null);
 
-        await accountRepository.Received(1).SaveAccountAsync(Arg.Is<Account>(a =>
+        await accountRepository.Received(1).SaveAccountAsync(NonNullArg.Is<Account>(a =>
             a.Name == "Sparkonto" &&
             a.Type == AccountType.Tagesgeld &&
             a.OpeningBalance == 1000m));
@@ -253,7 +253,7 @@ public class CategoriesViewModelTests
 
         await sut.ToggleKontoArchivierungCommand.ExecuteAsync(new AccountListItem(account));
 
-        await accountRepository.Received(1).SaveAccountAsync(Arg.Is<Account>(a => a.Id == "acc-1" && a.IsArchived));
+        await accountRepository.Received(1).SaveAccountAsync(NonNullArg.Is<Account>(a => a.Id == "acc-1" && a.IsArchived));
     }
 
     private static CategoriesViewModel CreateSut(
@@ -293,8 +293,8 @@ public class CategoriesViewModelTests
             .Returns(Task.FromResult(false));
 
         var localizationService = Substitute.For<ILocalizationService>();
-        localizationService.GetString(Arg.Any<string>()).Returns(call => call.Arg<string>());
-        localizationService.GetString(Arg.Any<string>(), Arg.Any<object[]>()).Returns(call => call.ArgAt<string>(0));
+        localizationService.GetString(Arg.Any<string>()).Returns(call => call.ArgNotNull<string>());
+        localizationService.GetString(Arg.Any<string>(), Arg.Any<object[]>()).Returns(call => call.ArgAtNotNull<string>(0));
 
         navigationService = Substitute.For<INavigationService>();
 

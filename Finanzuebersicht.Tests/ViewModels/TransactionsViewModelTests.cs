@@ -295,12 +295,12 @@ public class TransactionsViewModelTests
             .Returns(Task.FromResult(false));
 
         localizationService = Substitute.For<ILocalizationService>();
-        localizationService.GetString(Arg.Any<string>()).Returns(call => call.Arg<string>());
-        localizationService.GetString(Arg.Any<string>(), Arg.Any<object[]>()).Returns(call => call.Arg<string>());
+        localizationService.GetString(Arg.Any<string>()).Returns(call => call.ArgNotNull<string>());
+        localizationService.GetString(Arg.Any<string>(), Arg.Any<object[]>()).Returns(call => call.ArgNotNull<string>());
 
         dispatcher = Substitute.For<IMainThreadDispatcher>();
         dispatcher.InvokeAsync(Arg.Any<Func<Task>>())
-            .Returns(call => call.Arg<Func<Task>>()());
+            .Returns(call => call.ArgNotNull<Func<Task>>()());
 
         navigationService = Substitute.For<INavigationService>();
         navigationService.GoToAsync(Arg.Any<string>(), Arg.Any<IDictionary<string, object>>()).Returns(Task.CompletedTask);

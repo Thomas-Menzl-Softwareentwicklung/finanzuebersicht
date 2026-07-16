@@ -22,7 +22,7 @@ public class InitializationServiceTests
 
         // 7 Standardkategorien werden erstellt
         await _categoryRepository.Received(7).SaveCategoryAsync(Arg.Any<Category>());
-        await _accountRepository.Received(1).SaveAccountAsync(Arg.Is<Account>(a =>
+        await _accountRepository.Received(1).SaveAccountAsync(NonNullArg.Is<Account>(a =>
             a.SystemKey == SystemAccountKeys.Default &&
             a.Type == AccountType.Girokonto &&
             a.Name == "Girokonto"));
@@ -63,13 +63,13 @@ public class InitializationServiceTests
 
         string? defaultAccountId = null;
         _accountRepository.When(x => x.SaveAccountAsync(Arg.Any<Account>()))
-            .Do(callInfo => defaultAccountId = callInfo.Arg<Account>().Id);
+            .Do(callInfo => defaultAccountId = callInfo.ArgNotNull<Account>().Id);
 
         var service = new InitializationService(_categoryRepository, _accountRepository, _transactionRepository);
         await service.InitializeAsync();
 
         Assert.NotNull(defaultAccountId);
-        await _transactionRepository.Received(1).ReplaceAllTransactionsAsync(Arg.Is<IEnumerable<Transaction>>(txs =>
+        await _transactionRepository.Received(1).ReplaceAllTransactionsAsync(NonNullArg.Is<IEnumerable<Transaction>>(txs =>
             txs.Single().AccountId == defaultAccountId));
     }
 }

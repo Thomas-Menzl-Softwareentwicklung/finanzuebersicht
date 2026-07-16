@@ -35,7 +35,7 @@ public class RecurringGenerationServiceTests
 
         var saved = new List<Transaction>();
         transactionRepository.When(x => x.SaveTransactionAsync(Arg.Any<Transaction>()))
-            .Do(call => saved.Add(call.Arg<Transaction>()));
+            .Do(call => saved.Add(call.ArgNotNull<Transaction>()));
 
         var service = new RecurringGenerationService(recurringRepository, transactionRepository);
         await service.GeneratePendingRecurringTransactionsAsync();
@@ -54,7 +54,7 @@ public class RecurringGenerationServiceTests
         while (expected.AddDays(7) <= DateTime.Today)
             expected = expected.AddDays(7);
 
-        await recurringRepository.Received(1).SaveRecurringTransactionAsync(Arg.Is<RecurringTransaction>(r => r.LetzteAusfuehrung.HasValue && r.LetzteAusfuehrung.Value.Date == expected.Date));
+        await recurringRepository.Received(1).SaveRecurringTransactionAsync(NonNullArg.Is<RecurringTransaction>(r => r.LetzteAusfuehrung.HasValue && r.LetzteAusfuehrung.Value.Date == expected.Date));
     }
 
     [Fact]
@@ -81,7 +81,7 @@ public class RecurringGenerationServiceTests
 
         var saved = new List<Transaction>();
         transactionRepository.When(x => x.SaveTransactionAsync(Arg.Any<Transaction>()))
-            .Do(call => saved.Add(call.Arg<Transaction>()));
+            .Do(call => saved.Add(call.ArgNotNull<Transaction>()));
 
         var service = new RecurringGenerationService(recurringRepository, transactionRepository);
         await service.GeneratePendingRecurringTransactionsAsync();
@@ -121,7 +121,7 @@ public class RecurringGenerationServiceTests
 
         var saved = new List<Transaction>();
         transactionRepository.When(x => x.SaveTransactionAsync(Arg.Any<Transaction>()))
-            .Do(call => saved.Add(call.Arg<Transaction>()));
+            .Do(call => saved.Add(call.ArgNotNull<Transaction>()));
 
         var service = new RecurringGenerationService(recurringRepository, transactionRepository);
         await service.GeneratePendingRecurringTransactionsAsync();
@@ -130,7 +130,7 @@ public class RecurringGenerationServiceTests
         Assert.DoesNotContain(saved, t => t.Datum.Date == instanceToSkip.Date);
 
         // But repository should be saved with LetzteAusfuehrung at least up to that skipped instance
-        await recurringRepository.Received(1).SaveRecurringTransactionAsync(Arg.Is<RecurringTransaction>(r => r.LetzteAusfuehrung.HasValue && r.LetzteAusfuehrung.Value.Date >= instanceToSkip.Date));
+        await recurringRepository.Received(1).SaveRecurringTransactionAsync(NonNullArg.Is<RecurringTransaction>(r => r.LetzteAusfuehrung.HasValue && r.LetzteAusfuehrung.Value.Date >= instanceToSkip.Date));
     }
 
     [Fact]
@@ -164,13 +164,13 @@ public class RecurringGenerationServiceTests
 
         var saved = new List<Transaction>();
         transactionRepository.When(x => x.SaveTransactionAsync(Arg.Any<Transaction>()))
-            .Do(call => saved.Add(call.Arg<Transaction>()));
+            .Do(call => saved.Add(call.ArgNotNull<Transaction>()));
 
         var service = new RecurringGenerationService(recurringRepository, transactionRepository);
         await service.GeneratePendingRecurringTransactionsAsync();
 
         Assert.Contains(saved, t => t.Datum.Date == shifted.Date && t.DauerauftragId == recurring.Id);
-        await recurringRepository.Received(1).SaveRecurringTransactionAsync(Arg.Is<RecurringTransaction>(r => r.LetzteAusfuehrung.HasValue));
+        await recurringRepository.Received(1).SaveRecurringTransactionAsync(NonNullArg.Is<RecurringTransaction>(r => r.LetzteAusfuehrung.HasValue));
     }
 
     [Fact]
@@ -201,14 +201,14 @@ public class RecurringGenerationServiceTests
 
         var saved = new List<Transaction>();
         transactionRepository.When(x => x.SaveTransactionAsync(Arg.Any<Transaction>()))
-            .Do(call => saved.Add(call.Arg<Transaction>()));
+            .Do(call => saved.Add(call.ArgNotNull<Transaction>()));
 
         var service = new RecurringGenerationService(recurringRepository, transactionRepository, accountRepository: accountRepository);
         await service.GeneratePendingRecurringTransactionsAsync();
 
         Assert.NotEmpty(saved);
         Assert.All(saved, t => Assert.Equal("acc-default", t.AccountId));
-        await recurringRepository.Received(1).SaveRecurringTransactionAsync(Arg.Is<RecurringTransaction>(r => r.AccountId == "acc-default"));
+        await recurringRepository.Received(1).SaveRecurringTransactionAsync(NonNullArg.Is<RecurringTransaction>(r => r.AccountId == "acc-default"));
     }
 
     [Fact]
@@ -267,7 +267,7 @@ public class RecurringGenerationServiceTests
 
         var saved = new List<Transaction>();
         transactionRepository.When(x => x.SaveTransactionAsync(Arg.Any<Transaction>()))
-            .Do(call => saved.Add(call.Arg<Transaction>()));
+            .Do(call => saved.Add(call.ArgNotNull<Transaction>()));
 
         var service = new RecurringGenerationService(recurringRepository, transactionRepository, clock);
         await service.GeneratePendingRecurringTransactionsAsync();
@@ -275,6 +275,6 @@ public class RecurringGenerationServiceTests
         Assert.Equal(500, saved.Count);
         // LetzteAusfuehrung must be updated to the last generated instance
         await recurringRepository.Received(1).SaveRecurringTransactionAsync(
-            Arg.Is<RecurringTransaction>(r => r.LetzteAusfuehrung.HasValue));
+            NonNullArg.Is<RecurringTransaction>(r => r.LetzteAusfuehrung.HasValue));
     }
 }

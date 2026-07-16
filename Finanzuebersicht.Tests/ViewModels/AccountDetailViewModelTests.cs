@@ -54,7 +54,7 @@ public class AccountDetailViewModelTests
 
         await viewModel.SaveCommand.ExecuteAsync(null);
 
-        await accountRepository.Received(1).SaveAccountAsync(Arg.Is<Account>(a => a.Name == "Neues Konto"));
+        await accountRepository.Received(1).SaveAccountAsync(NonNullArg.Is<Account>(a => a.Name == "Neues Konto"));
         await navigationService.Received(1).GoBackAsync();
     }
 
@@ -100,8 +100,8 @@ public class AccountDetailViewModelTests
         navigationService.GoBackAsync().Returns(Task.CompletedTask);
 
         var localizationService = Substitute.For<ILocalizationService>();
-        localizationService.GetString(Arg.Any<string>()).Returns(call => call.Arg<string>());
-        localizationService.GetString(Arg.Any<string>(), Arg.Any<object[]>()).Returns(call => call.Arg<string>());
+        localizationService.GetString(Arg.Any<string>()).Returns(call => call.ArgNotNull<string>());
+        localizationService.GetString(Arg.Any<string>(), Arg.Any<object[]>()).Returns(call => call.ArgNotNull<string>());
 
         dialogService = Substitute.For<IDialogService>();
         dialogService.ShowAlertAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>())

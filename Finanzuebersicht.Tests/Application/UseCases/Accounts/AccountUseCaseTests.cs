@@ -15,7 +15,7 @@ public class AccountUseCaseTests
 
         var saved = await sut.ExecuteAsync(null, "Tagesgeld", AccountType.Tagesgeld);
 
-        await repository.Received(1).SaveAccountAsync(Arg.Is<Account>(a =>
+        await repository.Received(1).SaveAccountAsync(NonNullArg.Is<Account>(a =>
             a.Name == "Tagesgeld" &&
             a.Type == AccountType.Tagesgeld));
         Assert.Equal("Tagesgeld", saved.Name);
@@ -51,8 +51,8 @@ public class AccountUseCaseTests
 
         await sut.ExecuteAsync("acc-old");
 
-        await transactionRepository.Received(1).SaveTransactionAsync(Arg.Is<Transaction>(t => t.AccountId == "acc-default"));
-        await templateRepository.Received(1).SaveTransactionTemplateAsync(Arg.Is<TransactionTemplate>(t => t.AccountId == "acc-default"));
+        await transactionRepository.Received(1).SaveTransactionAsync(NonNullArg.Is<Transaction>(t => t.AccountId == "acc-default"));
+        await templateRepository.Received(1).SaveTransactionTemplateAsync(NonNullArg.Is<TransactionTemplate>(t => t.AccountId == "acc-default"));
         await accountRepository.Received(1).DeleteAccountAsync("acc-old");
     }
 
@@ -183,7 +183,7 @@ public class AccountUseCaseTests
 
         var saved = await sut.ExecuteAsync(null, "Tagesgeld", AccountType.Tagesgeld, false, 2500m, stichtag);
 
-        await repository.Received(1).SaveAccountAsync(Arg.Is<Account>(a =>
+        await repository.Received(1).SaveAccountAsync(NonNullArg.Is<Account>(a =>
             a.Name == "Tagesgeld" &&
             a.Type == AccountType.Tagesgeld &&
             a.OpeningBalance == 2500m &&

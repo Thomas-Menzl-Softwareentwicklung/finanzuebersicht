@@ -51,7 +51,7 @@ public class SparZielDetailViewModelTests
 
         await viewModel.SaveCommand.ExecuteAsync(null);
 
-        await repository.Received(1).SaveSparZielAsync(Arg.Is<SparZiel>(z => z.Titel == "Neu" && z.ZielBetrag == 1500m));
+        await repository.Received(1).SaveSparZielAsync(NonNullArg.Is<SparZiel>(z => z.Titel == "Neu" && z.ZielBetrag == 1500m));
         await navigationService.Received(1).GoBackAsync();
     }
 
@@ -93,8 +93,8 @@ public class SparZielDetailViewModelTests
             .Returns(Task.CompletedTask);
 
         var localizationService = Substitute.For<ILocalizationService>();
-        localizationService.GetString(Arg.Any<string>()).Returns(call => call.Arg<string>());
-        localizationService.GetString(Arg.Any<string>(), Arg.Any<object[]>()).Returns(call => call.Arg<string>());
+        localizationService.GetString(Arg.Any<string>()).Returns(call => call.ArgNotNull<string>());
+        localizationService.GetString(Arg.Any<string>(), Arg.Any<object[]>()).Returns(call => call.ArgNotNull<string>());
 
         var dialogService = Substitute.For<IDialogService>();
         dialogService.ShowAlertAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>())

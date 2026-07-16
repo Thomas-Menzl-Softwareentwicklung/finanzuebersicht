@@ -15,7 +15,7 @@ public class SaveCategoryDetailUseCaseTests
         await sut.ExecuteAsync(null, "Lebensmittel", "🛒", "#34C759", TransactionType.Ausgabe);
 
         await categoryRepository.Received(1).SaveCategoryAsync(
-            Arg.Is<Category>(c =>
+            NonNullArg.Is<Category>(c =>
                 c.Name == "Lebensmittel" &&
                 c.Icon == "🛒" &&
                 c.Color == "#34C759" &&

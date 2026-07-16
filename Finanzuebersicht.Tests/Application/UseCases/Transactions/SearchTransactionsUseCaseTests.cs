@@ -16,8 +16,8 @@ public class SearchTransactionsUseCaseTests
         transactionRepo.GetTransactionsAsync(Arg.Any<DateTime>(), Arg.Any<DateTime>())
             .Returns(callInfo =>
             {
-                var von = (DateTime)callInfo[0];
-                var bis = (DateTime)callInfo[1];
+                var von = callInfo.ArgAt<DateTime>(0);
+                var bis = callInfo.ArgAt<DateTime>(1);
                 return allTransactions.Where(t => t.Datum >= von && t.Datum <= bis).ToList();
             });
 

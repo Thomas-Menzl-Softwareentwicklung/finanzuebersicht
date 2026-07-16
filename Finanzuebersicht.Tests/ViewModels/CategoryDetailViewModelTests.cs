@@ -16,7 +16,7 @@ public class CategoryDetailViewModelTests
         categoryRepository.SaveCategoryAsync(Arg.Any<Category>())
             .Returns(call =>
             {
-                var category = call.Arg<Category>();
+                var category = call.ArgNotNull<Category>();
                 savedCategories.Add(category);
                 category.Id = "cat-new";
                 return Task.FromResult(category);
@@ -32,8 +32,8 @@ public class CategoryDetailViewModelTests
             .Returns(Task.CompletedTask);
 
         var localizationService = Substitute.For<ILocalizationService>();
-        localizationService.GetString(Arg.Any<string>()).Returns(call => call.Arg<string>());
-        localizationService.GetString(Arg.Any<string>(), Arg.Any<object[]>()).Returns(call => call.ArgAt<string>(0));
+        localizationService.GetString(Arg.Any<string>()).Returns(call => call.ArgNotNull<string>());
+        localizationService.GetString(Arg.Any<string>(), Arg.Any<object[]>()).Returns(call => call.ArgAtNotNull<string>(0));
 
         var sut = new CategoryDetailViewModel(
             new SaveCategoryDetailUseCase(categoryRepository),
