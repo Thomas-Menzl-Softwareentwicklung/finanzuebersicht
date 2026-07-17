@@ -301,6 +301,9 @@ public class CategoriesViewModelTests
 
         Assert.True(sut.IsKontenEmptyStateVisible);
         Assert.Contains(nameof(CategoriesViewModel.IsKontenEmptyStateVisible), propertyChanges);
+    }
+
+    [Fact]
     public void CategoriesPage_AccountRows_DoNotDisableSwipeViewForSystemAccounts()
     {
         var page = XDocument.Load(FindWorkspaceFile("Finanzuebersicht/Views/CategoriesPage.xaml"));
