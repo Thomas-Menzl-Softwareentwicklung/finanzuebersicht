@@ -137,8 +137,7 @@ public static class RecurringScheduleCalculator
         if (candidate.Date < recurring.Startdatum.Date)
             candidate = recurring.Startdatum;
 
-        var safety = 0;
-        while (candidate.Date <= rangeEnd.Date && safety++ < 1000)
+        while (candidate.Date <= rangeEnd.Date)
         {
             if (candidate.Date >= recurring.Startdatum.Date &&
                 (!recurring.Enddatum.HasValue || candidate.Date <= recurring.Enddatum.Value.Date) &&
@@ -149,7 +148,11 @@ public static class RecurringScheduleCalculator
                 return true;
             }
 
-            candidate = GetNextInstance(recurring, candidate);
+            var nextCandidate = GetNextInstance(recurring, candidate);
+            if (nextCandidate.Date <= candidate.Date)
+                return false;
+
+            candidate = nextCandidate;
         }
 
         return false;
