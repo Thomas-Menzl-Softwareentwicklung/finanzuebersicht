@@ -137,7 +137,7 @@
 
                                     <VerticalStackLayout Spacing="4">
                                         <Label Text="{loc:Translate Lbl_Name}" FontSize="13"
-                                               TextColor="{AppThemeBinding Light=#8E8E93, Dark=#636366}" />
+                                               TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
                                         <Entry Text="{Binding NeuerKontoName}"
                                                Placeholder="{loc:Translate Lbl_Konto}"
                                                FontSize="16" />
@@ -145,7 +145,7 @@
 
                                     <VerticalStackLayout Spacing="4">
                                         <Label Text="{loc:Translate Lbl_Typ}" FontSize="13"
-                                               TextColor="{AppThemeBinding Light=#8E8E93, Dark=#636366}" />
+                                               TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
                                         <controls:SelectionField ItemsSource="{Binding VerfuegbareKontoTypen}"
                                                                  SelectedItem="{Binding SelectedKontoTypeOption, Mode=TwoWay}"
                                                                  DisplayMemberPath="DisplayName"
@@ -154,7 +154,7 @@
 
                                     <VerticalStackLayout Spacing="4">
                                         <Label Text="{loc:Translate Lbl_Anfangssaldo}" FontSize="13"
-                                               TextColor="{AppThemeBinding Light=#8E8E93, Dark=#636366}" />
+                                               TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
                                         <Entry Text="{Binding NeuerAnfangssaldoText}"
                                                Placeholder="{loc:Translate Hint_Betrag}"
                                                Keyboard="Numeric"
