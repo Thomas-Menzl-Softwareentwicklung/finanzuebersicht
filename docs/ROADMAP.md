@@ -4,7 +4,7 @@
 
 > **Hinweis:** Die Milestone-Bezeichnungen (v1.14, v1.2, v2.0) sind thematische GitHub-Planungslabels, keine sequenziellen Release-Versionen. Tatsächliche Releases (v1.0, v1.6, v1.12 …) werden durch Git-Commit-Höhe via Nerdbank.GitVersioning bestimmt.
 
-**Aktueller Stand:** Release **v1.18** (Latest). Nächster thematischer Backlog: **Milestone 22** (vor v2.0).
+**Aktueller Stand:** Release **v1.19** (Latest). Nächster thematischer Backlog: **Milestone 22** (vor v2.0).
 
 ---
 
@@ -131,9 +131,19 @@ Weitere Umsetzungen in v1.17: Live-Währungsrefresh (`CurrencyRefreshRegistry`),
 
 ---
 
+## ✅ v1.19 — Einheitliches Anlegen *(abgeschlossen)*
+
+- Inline-Anlegen für Konten und Sparziele (`CreateFormCard`, Scroll-to-top)
+- Sheet-Anlegen für Kategorien und Daueraufträge (`FormSheetPopup`)
+- Bearbeiten bleibt auf den jeweiligen Detailseiten
+- Architektur: Recurring-Schedule konsolidiert, Repository-Reads in Use Cases (#275)
+- Fixes: Systemkonto-Löschen (#277), Shift-Ausnahmen, Test-Stabilität (#282)
+
+---
+
 ## 💡 Weiterer Backlog — Milestone 22 *(vor v2)* · [Milestone](https://github.com/tom4711/finanzuebersicht/milestone/22)
 
-Größere Features — Priorisierung nach v1.18.
+Größere Features — Priorisierung nach v1.19.
 
 | Issue | Thema | Aufwand |
 |-------|-------|---------|
@@ -161,7 +171,7 @@ Technische Schulden — parallel zu UX-Releases möglich.
 
 ## 🔐 v2.0 — Sicherheit & erweiterte Finanzen *(geplant)* · [Milestone](https://github.com/tom4711/finanzuebersicht/milestone/17)
 
-Größere Architekturänderungen — nach v1.14–v1.18.
+Größere Architekturänderungen — nach v1.14–v1.19.
 
 | Issue | Thema | Aufwand |
 |-------|-------|---------|

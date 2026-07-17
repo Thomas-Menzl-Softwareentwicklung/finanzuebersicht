@@ -198,8 +198,8 @@ Neue Migratoren als `IDataMigrator`-Implementierungen in DI registrieren.
 
 ## 11. Versionierung
 
-- **System:** Nerdbank.GitVersioning (`version.json`, aktuell Basis `1.18`)
-- **Format:** `<major>.<minor>.<git-height>` (z.B. `1.18.3`)
+- **System:** Nerdbank.GitVersioning (`version.json`, aktuell Basis `1.19`)
+- **Format:** `<major>.<minor>.<git-height>` (z.B. `1.19.3`)
 - **MAUI-Version:** Automatisch gesetzt via `ApplicationDisplayVersion` und `ApplicationVersion` zur Buildzeit
 
 ```bash
