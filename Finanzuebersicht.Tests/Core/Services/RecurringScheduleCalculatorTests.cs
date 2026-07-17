@@ -229,6 +229,14 @@ public class RecurringScheduleCalculatorTests
     }
 
     [Fact]
+    public void OccursOnDate_DailyMoreThanThousandDaysAfterStart_ReturnsTrue()
+    {
+        var r = Make(RecurrenceInterval.Daily, start: new DateTime(2020, 1, 1));
+
+        Assert.True(RecurringScheduleCalculator.OccursOnDate(r, new DateTime(2026, 4, 1)));
+    }
+
+    [Fact]
     public void OccursInRange_MonthlyRecurring_ReturnsTrueForMonthContainingDueDate()
     {
         var r = Make(RecurrenceInterval.Monthly, start: new DateTime(2026, 1, 1));
