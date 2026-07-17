@@ -203,6 +203,7 @@ public class CategoriesViewModelTests
             Substitute.For<IRecurringTransactionRepository>(),
             Substitute.For<IAccountRepository>(),
             Substitute.For<ITransactionTemplateRepository>(),
+            Substitute.For<ICategoryCreateSheetService>(),
             out _,
             out _,
             localizationService);
