@@ -118,7 +118,7 @@ public partial class OnboardingViewModel(
 
         await _navigationService.GoToAsync(Routes.AccountDetail, new Dictionary<string, object>
         {
-            ["Account"] = account
+            [NavigationQueryKeys.Account] = account
         });
     }
 

@@ -24,7 +24,7 @@ public class SparZielDetailViewModelTests
             Faelligkeitsdatum = new DateTime(2027, 6, 1)
         };
 
-        viewModel.ApplyQueryAttributes(new Dictionary<string, object> { ["SparZiel"] = sparZiel });
+        viewModel.ApplyQueryAttributes(new Dictionary<string, object> { [NavigationQueryKeys.SparZiel] = sparZiel });
 
         Assert.Equal("Urlaub", viewModel.Titel);
         Assert.Equal("🏖️", viewModel.Icon);
@@ -44,7 +44,7 @@ public class SparZielDetailViewModelTests
         var viewModel = CreateSut(repository, out var navigationService);
         viewModel.ApplyQueryAttributes(new Dictionary<string, object>
         {
-            ["SparZiel"] = new SparZiel { Id = "goal-1", Titel = "Alt", ZielBetrag = 1000m }
+            [NavigationQueryKeys.SparZiel] = new SparZiel { Id = "goal-1", Titel = "Alt", ZielBetrag = 1000m }
         });
         viewModel.Titel = "Neu";
         viewModel.ZielBetragText = "1500";
@@ -60,7 +60,7 @@ public class SparZielDetailViewModelTests
     {
         var viewModel = CreateSut(out var navigationService);
         var sparZiel = new SparZiel { Id = "goal-1", Titel = "Urlaub", MonatlicheSparrate = 100m };
-        viewModel.ApplyQueryAttributes(new Dictionary<string, object> { ["SparZiel"] = sparZiel });
+        viewModel.ApplyQueryAttributes(new Dictionary<string, object> { [NavigationQueryKeys.SparZiel] = sparZiel });
 
         await viewModel.BookContributionCommand.ExecuteAsync(null);
 
@@ -70,7 +70,7 @@ public class SparZielDetailViewModelTests
         var call = navigationService.ReceivedCalls()
             .Last(c => c.GetMethodInfo().Name == nameof(INavigationService.GoToAsync));
         var args = (IDictionary<string, object>)call.GetArguments()[1]!;
-        Assert.True(args.TryGetValue("SparZielContribution", out var value));
+        Assert.True(args.TryGetValue(NavigationQueryKeys.SparZielContribution, out var value));
         Assert.IsType<SparZiel>(value);
         Assert.Equal("goal-1", ((SparZiel)value).Id);
     }

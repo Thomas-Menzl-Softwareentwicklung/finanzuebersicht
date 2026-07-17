@@ -103,19 +103,19 @@ public partial class TransactionDetailViewModel(
 
     public void ApplyQueryAttributes(IDictionary<string, object> query)
     {
-        if (query.TryGetValue("Transaction", out var val) && val is Transaction t)
+        if (query.TryGetValue(NavigationQueryKeys.Transaction, out var val) && val is Transaction t)
         {
             Transaction = t;
         }
-        else if (query.TryGetValue("DuplicateTransaction", out var duplicateVal) && duplicateVal is Transaction duplicate)
+        else if (query.TryGetValue(NavigationQueryKeys.DuplicateTransaction, out var duplicateVal) && duplicateVal is Transaction duplicate)
         {
             ApplyTransactionDraft(duplicate, _clock.Today);
         }
-        else if (query.TryGetValue("TransactionTemplate", out var templateVal) && templateVal is TransactionTemplate template)
+        else if (query.TryGetValue(NavigationQueryKeys.TransactionTemplate, out var templateVal) && templateVal is TransactionTemplate template)
         {
             ApplyTemplateDraft(template);
         }
-        else if (query.TryGetValue("SparZielContribution", out var contributionVal) && contributionVal is SparZiel sparZiel)
+        else if (query.TryGetValue(NavigationQueryKeys.SparZielContribution, out var contributionVal) && contributionVal is SparZiel sparZiel)
         {
             ApplySparZielContribution(sparZiel);
         }

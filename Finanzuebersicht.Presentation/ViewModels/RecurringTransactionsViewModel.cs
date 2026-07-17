@@ -117,7 +117,7 @@ public partial class RecurringTransactionsViewModel(
 
         var parameter = new Dictionary<string, object>
         {
-            ["RecurringTransaction"] = dauerauftrag
+            [NavigationQueryKeys.RecurringTransaction] = dauerauftrag
         };
 
         await _navigationService.GoToAsync(Routes.RecurringTransactionDetail, parameter);

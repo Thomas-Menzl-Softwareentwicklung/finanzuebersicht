@@ -43,9 +43,9 @@ public partial class RecurringInstanceShiftViewModel(
 
     public void ApplyQueryAttributes(IDictionary<string, object> query)
     {
-        if (query.TryGetValue("RecurringId", out var id) && id is string recurringId)
+        if (query.TryGetValue(NavigationQueryKeys.RecurringId, out var id) && id is string recurringId)
             RecurringId = recurringId;
-        if (query.TryGetValue("InstanceDate", out var date) && date is DateTime instanceDate)
+        if (query.TryGetValue(NavigationQueryKeys.InstanceDate, out var date) && date is DateTime instanceDate)
             InstanceDate = instanceDate;
     }
 

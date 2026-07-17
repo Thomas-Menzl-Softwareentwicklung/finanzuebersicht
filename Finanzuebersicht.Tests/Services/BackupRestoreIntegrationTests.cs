@@ -1,4 +1,5 @@
 using Xunit;
+using Finanzuebersicht.Core.Constants;
 using Finanzuebersicht.Models;
 using System.IO.Compression;
 using System.Text.Json;
@@ -97,13 +98,13 @@ namespace Finanzuebersicht.Tests.Services
 
             // Assert 1: Backup created with correct data
             Assert.NotNull(backup);
-            Assert.Equal(2, backup.EntityCounts["categories"]);
-            Assert.Equal(1, backup.EntityCounts["accounts"]);
-            Assert.Equal(2, backup.EntityCounts["transactions"]);
-            Assert.Equal(1, backup.EntityCounts["recurring"]);
-            Assert.Equal(1, backup.EntityCounts["budgets"]);
-            Assert.Equal(1, backup.EntityCounts["sparziele"]);
-            Assert.Equal(1, backup.EntityCounts["transactionTemplates"]);
+            Assert.Equal(2, backup.EntityCounts[BackupEntityKeys.Categories]);
+            Assert.Equal(1, backup.EntityCounts[BackupEntityKeys.Accounts]);
+            Assert.Equal(2, backup.EntityCounts[BackupEntityKeys.Transactions]);
+            Assert.Equal(1, backup.EntityCounts[BackupEntityKeys.Recurring]);
+            Assert.Equal(1, backup.EntityCounts[BackupEntityKeys.Budgets]);
+            Assert.Equal(1, backup.EntityCounts[BackupEntityKeys.Sparziele]);
+            Assert.Equal(1, backup.EntityCounts[BackupEntityKeys.TransactionTemplates]);
             Assert.True(File.Exists(Path.Combine(backupPath, backup.FileName)));
 
             // Act 2: Restore backup — clear state first to verify data is re-saved
@@ -182,9 +183,9 @@ namespace Finanzuebersicht.Tests.Services
 
             // Assert
             Assert.NotNull(backup);
-            Assert.Equal(0, backup.EntityCounts["categories"]);
-            Assert.Equal(0, backup.EntityCounts["transactions"]);
-            Assert.Equal(0, backup.EntityCounts["recurring"]);
+            Assert.Equal(0, backup.EntityCounts[BackupEntityKeys.Categories]);
+            Assert.Equal(0, backup.EntityCounts[BackupEntityKeys.Transactions]);
+            Assert.Equal(0, backup.EntityCounts[BackupEntityKeys.Recurring]);
         }
 
         [Fact]
@@ -257,12 +258,12 @@ namespace Finanzuebersicht.Tests.Services
 
             // Act
             var backup1 = await service.CreateBackupAsync(backupPath);
-            var lastBackupTime1 = _mockSettingsService.Get("LastBackupTime");
+            var lastBackupTime1 = _mockSettingsService.Get(SettingsKeys.LastBackupTime);
 
             await Task.Delay(100);
 
             var backup2 = await service.CreateBackupAsync(backupPath);
-            var lastBackupTime2 = _mockSettingsService.Get("LastBackupTime");
+            var lastBackupTime2 = _mockSettingsService.Get(SettingsKeys.LastBackupTime);
 
             // Assert
             Assert.NotNull(lastBackupTime1);

@@ -93,7 +93,7 @@ public partial class SparZielDetailViewModel(
 
     public void ApplyQueryAttributes(IDictionary<string, object> query)
     {
-        if (query.TryGetValue("SparZiel", out var val) && val is SparZiel sz)
+        if (query.TryGetValue(NavigationQueryKeys.SparZiel, out var val) && val is SparZiel sz)
             SparZiel = sz;
     }
 
@@ -223,7 +223,7 @@ public partial class SparZielDetailViewModel(
 
         await _navigationService.GoToAsync(Routes.TransactionDetail, new Dictionary<string, object>
         {
-            ["SparZielContribution"] = _sparZiel
+            [NavigationQueryKeys.SparZielContribution] = _sparZiel
         });
     }
 

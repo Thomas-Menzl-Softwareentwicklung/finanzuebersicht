@@ -903,8 +903,8 @@ public partial class DashboardViewModel : MonthNavigationViewModel, ILocalizable
 
         await _navigationService.GoToAsync(Routes.RecurringInstanceShift, new Dictionary<string, object>
         {
-            ["RecurringId"] = item.Recurring.Id,
-            ["InstanceDate"] = item.InstanceDate
+            [NavigationQueryKeys.RecurringId] = item.Recurring.Id,
+            [NavigationQueryKeys.InstanceDate] = item.InstanceDate
         });
     }
 

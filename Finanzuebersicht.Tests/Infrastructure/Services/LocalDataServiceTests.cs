@@ -14,7 +14,7 @@ public class LocalDataServiceTests : IDisposable
         Directory.CreateDirectory(_testDir);
 
         var settings = new SettingsService(Path.Combine(_testDir, "settings.json"));
-        settings.Set("DataPath", _testDir);
+        settings.Set(SettingsKeys.DataPath, _testDir);
         _service = new LocalDataService(settings, new Finanzuebersicht.Core.Services.SystemClock());
     }
 

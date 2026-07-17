@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Finanzuebersicht.Core.Constants;
 using Finanzuebersicht.Navigation;
 using Finanzuebersicht.Resources.Strings;
 using Microsoft.Extensions.Logging;
@@ -59,9 +60,9 @@ public partial class BackupViewModel : ObservableObject
                 _loc.GetString(ResourceKeys.Msg_BackupSuccessTitle),
                 string.Format(
                     _loc.GetString(ResourceKeys.Msg_BackupCreatedBody),
-                    metadata.EntityCounts["categories"],
-                    metadata.EntityCounts["transactions"],
-                    metadata.EntityCounts["recurring"]),
+                    metadata.EntityCounts[BackupEntityKeys.Categories],
+                    metadata.EntityCounts[BackupEntityKeys.Transactions],
+                    metadata.EntityCounts[BackupEntityKeys.Recurring]),
                 _loc.GetString(ResourceKeys.Btn_OK));
         }
         catch (Exception ex)
@@ -179,7 +180,7 @@ public partial class BackupViewModel : ObservableObject
 
     private void UpdateLastBackupInfo()
     {
-        var lastBackupStr = _settings.Get("LastBackupTime", string.Empty);
+        var lastBackupStr = _settings.Get(SettingsKeys.LastBackupTime, string.Empty);
         if (string.IsNullOrEmpty(lastBackupStr))
         {
             LastBackupInfo = _loc.GetString(ResourceKeys.Stn_NoBackupYet);

@@ -9,7 +9,7 @@ public class StorageViewModelTests
     [Fact]
     public void Constructor_LoadsDataPathFromSettings()
     {
-        using var settingsScope = new SettingsScope(nameof(StorageViewModelTests), ("DataPath", "/Users/test/custom-data"));
+        using var settingsScope = new SettingsScope(nameof(StorageViewModelTests), (SettingsKeys.DataPath, "/Users/test/custom-data"));
 
         var sut = new StorageViewModel(
             settingsScope.Settings,
@@ -22,7 +22,7 @@ public class StorageViewModelTests
     [Fact]
     public void Constructor_UsesDefaultPath_WhenSettingsEmpty()
     {
-        using var settingsScope = new SettingsScope(nameof(StorageViewModelTests), ("DataPath", string.Empty));
+        using var settingsScope = new SettingsScope(nameof(StorageViewModelTests), (SettingsKeys.DataPath, string.Empty));
 
         var sut = new StorageViewModel(
             settingsScope.Settings,
@@ -36,7 +36,7 @@ public class StorageViewModelTests
     [Fact]
     public async Task ResetDataPath_ClearsSettingsAndRestoresDefault()
     {
-        using var settingsScope = new SettingsScope(nameof(StorageViewModelTests), ("DataPath", "/Users/test/custom-data"));
+        using var settingsScope = new SettingsScope(nameof(StorageViewModelTests), (SettingsKeys.DataPath, "/Users/test/custom-data"));
         var dialogService = CreateDialogService();
         var sut = new StorageViewModel(
             settingsScope.Settings,
@@ -45,7 +45,7 @@ public class StorageViewModelTests
 
         await sut.ResetDataPathCommand.ExecuteAsync(null);
 
-        Assert.Equal(string.Empty, settingsScope.Settings.Get("DataPath"));
+        Assert.Equal(string.Empty, settingsScope.Settings.Get(SettingsKeys.DataPath));
         Assert.Equal(AppPaths.GetDefaultDataDir(), sut.DataPath);
         await dialogService.Received(1).ShowAlertAsync(
             ResourceKeys.Stn_SpeicherortZurueckgesetzt,
@@ -68,7 +68,7 @@ public class StorageViewModelTests
 
         await sut.ChooseDataPathCommand.ExecuteAsync(null);
 
-        Assert.Equal("__missing__", settingsScope.Settings.Get("DataPath", "__missing__"));
+        Assert.Equal("__missing__", settingsScope.Settings.Get(SettingsKeys.DataPath, "__missing__"));
         await dialogService.DidNotReceive().ShowAlertAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>());
     }
 
@@ -106,7 +106,7 @@ public class StorageViewModelTests
 
         await sut.ChooseDataPathCommand.ExecuteAsync(null);
 
-        Assert.Equal("__missing__", settingsScope.Settings.Get("DataPath", "__missing__"));
+        Assert.Equal("__missing__", settingsScope.Settings.Get(SettingsKeys.DataPath, "__missing__"));
         await dialogService.Received(1).ShowAlertAsync(
             ResourceKeys.Stn_UngueltigerOrdner,
             ResourceKeys.Stn_UngueltigerOrdnerDesc,

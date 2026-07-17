@@ -45,7 +45,7 @@ public partial class App : global::Microsoft.Maui.Controls.Application
 		_logger = logger;
 
 		// Gespeichertes Theme anwenden (MAUI-Ebene)
-		_savedTheme = settings.Get("Theme", "System");
+		_savedTheme = settings.Get(SettingsKeys.Theme, "System");
 		_themeService.Apply(_savedTheme);
 	}
 

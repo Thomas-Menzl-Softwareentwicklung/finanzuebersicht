@@ -25,7 +25,7 @@ public partial class StorageViewModel : ObservableObject
         _loc = localizationService;
         _folderPicker = folderPicker;
 
-        DataPath = _settings.Get("DataPath", "");
+        DataPath = _settings.Get(SettingsKeys.DataPath, "");
         if (string.IsNullOrWhiteSpace(DataPath))
         {
             DataPath = GetDefaultDataDir();
@@ -63,7 +63,7 @@ public partial class StorageViewModel : ObservableObject
                 return;
             }
 
-            _settings.Set("DataPath", newPath);
+            _settings.Set(SettingsKeys.DataPath, newPath);
             DataPath = newPath;
 
             await _dialogService.ShowAlertAsync(
@@ -83,7 +83,7 @@ public partial class StorageViewModel : ObservableObject
     [RelayCommand]
     private async Task ResetDataPath()
     {
-        _settings.Set("DataPath", string.Empty);
+        _settings.Set(SettingsKeys.DataPath, string.Empty);
         DataPath = GetDefaultDataDir();
 
         await _dialogService.ShowAlertAsync(

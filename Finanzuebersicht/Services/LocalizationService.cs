@@ -10,8 +10,6 @@ namespace Finanzuebersicht.Services;
 /// </summary>
 public class LocalizationService(ISettingsService settings) : ILocalizationService
 {
-    private const string LanguageKey = "LanguageCode";
-
     private readonly ISettingsService _settings = settings;
     private string _currentLanguageCode = string.Empty;
 
@@ -23,7 +21,7 @@ public class LocalizationService(ISettingsService settings) : ILocalizationServi
     {
         LocalizationResourceManager.Current.Init(AppResources.ResourceManager);
 
-        var saved = _settings.Get(LanguageKey);
+        var saved = _settings.Get(SettingsKeys.LanguageCode);
         var culture = string.IsNullOrEmpty(saved)
             ? CultureInfo.CurrentUICulture
             : new CultureInfo(saved);
@@ -33,7 +31,7 @@ public class LocalizationService(ISettingsService settings) : ILocalizationServi
 
     public void SetLanguage(string? cultureCode)
     {
-        _settings.Set(LanguageKey, cultureCode ?? string.Empty);
+        _settings.Set(SettingsKeys.LanguageCode, cultureCode ?? string.Empty);
 
         var culture = string.IsNullOrEmpty(cultureCode)
             ? CultureInfo.InstalledUICulture

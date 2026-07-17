@@ -340,7 +340,7 @@ public partial class CategoriesViewModel(
         {
             var kontoParameter = new Dictionary<string, object>
             {
-                ["Account"] = kontoItem.Account
+                [NavigationQueryKeys.Account] = kontoItem.Account
             };
             await _navigationService.GoToAsync(Routes.AccountDetail, kontoParameter);
             return;
@@ -362,7 +362,7 @@ public partial class CategoriesViewModel(
 
         if (item is Category kategorie)
         {
-            var parameter = new Dictionary<string, object> { ["Category"] = kategorie };
+            var parameter = new Dictionary<string, object> { [NavigationQueryKeys.Category] = kategorie };
             await _navigationService.GoToAsync(Routes.CategoryDetail, parameter);
             return;
         }
