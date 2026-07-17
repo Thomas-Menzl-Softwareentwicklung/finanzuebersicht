@@ -234,6 +234,42 @@ public class CategoriesViewModelTests
     }
 
     [Fact]
+    public async Task DeleteKonto_WhenLastAccountIsRemoved_NotifiesEmptyStateVisibility()
+    {
+        var account = new Account { Id = "acc-1", Name = "Giro" };
+        var accountRepository = Substitute.For<IAccountRepository>();
+        accountRepository.GetAccountsAsync().Returns(new List<Account> { account });
+
+        var transactionRepository = Substitute.For<ITransactionRepository>();
+        transactionRepository.GetTransactionsAsync(DateTime.MinValue, DateTime.MaxValue)
+            .Returns(new List<Transaction>());
+
+        var templateRepository = Substitute.For<ITransactionTemplateRepository>();
+        templateRepository.GetTransactionTemplatesAsync().Returns(new List<TransactionTemplate>());
+
+        var sut = CreateSut(
+            Substitute.For<ICategoryRepository>(),
+            transactionRepository,
+            Substitute.For<IRecurringTransactionRepository>(),
+            accountRepository,
+            templateRepository,
+            out var dialogService);
+
+        var accountItem = new AccountListItem(account);
+        sut.Konten = new ObservableCollection<AccountListItem> { accountItem };
+        dialogService.ShowConfirmationAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>())
+            .Returns(true);
+
+        var propertyChanges = new List<string?>();
+        sut.PropertyChanged += (_, args) => propertyChanges.Add(args.PropertyName);
+
+        await sut.DeleteKontoCommand.ExecuteAsync(accountItem);
+
+        Assert.True(sut.IsKontenEmptyStateVisible);
+        Assert.Contains(nameof(CategoriesViewModel.IsKontenEmptyStateVisible), propertyChanges);
+    }
+
+    [Fact]
     public async Task ToggleKontoArchivierung_WhenConfirmed_UpdatesAccount()
     {
         var accountRepository = Substitute.For<IAccountRepository>();
