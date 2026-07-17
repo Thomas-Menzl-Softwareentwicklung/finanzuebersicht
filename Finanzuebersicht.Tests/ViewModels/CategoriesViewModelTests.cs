@@ -190,21 +190,32 @@ public class CategoriesViewModelTests
     [Fact]
     public void RefreshLocalizedStrings_RebindsSelectedAccountTypeByValue()
     {
+        var language = "de";
+        var localizationService = Substitute.For<ILocalizationService>();
+        localizationService.GetString(Arg.Any<string>())
+            .Returns(call => $"{call.ArgNotNull<string>()}-{language}");
+        localizationService.GetString(Arg.Any<string>(), Arg.Any<object[]>())
+            .Returns(call => call.ArgAtNotNull<string>(0));
+
         var sut = CreateSut(
             Substitute.For<ICategoryRepository>(),
             Substitute.For<ITransactionRepository>(),
             Substitute.For<IRecurringTransactionRepository>(),
             Substitute.For<IAccountRepository>(),
             Substitute.For<ITransactionTemplateRepository>(),
-            out _);
+            out _,
+            out _,
+            localizationService);
 
         var previousSelection = sut.VerfuegbareKontoTypen
             .Single(option => option.Value == AccountType.Tagesgeld);
         sut.SelectedKontoTypeOption = previousSelection;
 
+        language = "en";
         sut.RefreshLocalizedStrings();
 
         Assert.Equal(AccountType.Tagesgeld, sut.SelectedKontoTypeOption?.Value);
+        Assert.EndsWith("-en", sut.SelectedKontoTypeOption?.DisplayName);
         Assert.NotSame(previousSelection, sut.SelectedKontoTypeOption);
     }
 
@@ -341,7 +352,8 @@ public class CategoriesViewModelTests
         ITransactionTemplateRepository templateRepository,
         ICategoryCreateSheetService categoryCreateSheetService,
         out IDialogService dialogService,
-        out INavigationService navigationService)
+        out INavigationService navigationService,
+        ILocalizationService? localizationService = null)
     {
         dialogService = Substitute.For<IDialogService>();
         dialogService.ShowAlertAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>())
@@ -349,9 +361,12 @@ public class CategoriesViewModelTests
         dialogService.ShowConfirmationAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>())
             .Returns(Task.FromResult(false));
 
-        var localizationService = Substitute.For<ILocalizationService>();
-        localizationService.GetString(Arg.Any<string>()).Returns(call => call.ArgNotNull<string>());
-        localizationService.GetString(Arg.Any<string>(), Arg.Any<object[]>()).Returns(call => call.ArgAtNotNull<string>(0));
+        if (localizationService is null)
+        {
+            localizationService = Substitute.For<ILocalizationService>();
+            localizationService.GetString(Arg.Any<string>()).Returns(call => call.ArgNotNull<string>());
+            localizationService.GetString(Arg.Any<string>(), Arg.Any<object[]>()).Returns(call => call.ArgAtNotNull<string>(0));
+        }
 
         navigationService = Substitute.For<INavigationService>();
 
