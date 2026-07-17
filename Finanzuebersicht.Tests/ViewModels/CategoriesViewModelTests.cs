@@ -188,6 +188,27 @@ public class CategoriesViewModelTests
     }
 
     [Fact]
+    public void RefreshLocalizedStrings_RebindsSelectedAccountTypeByValue()
+    {
+        var sut = CreateSut(
+            Substitute.For<ICategoryRepository>(),
+            Substitute.For<ITransactionRepository>(),
+            Substitute.For<IRecurringTransactionRepository>(),
+            Substitute.For<IAccountRepository>(),
+            Substitute.For<ITransactionTemplateRepository>(),
+            out _);
+
+        var previousSelection = sut.VerfuegbareKontoTypen
+            .Single(option => option.Value == AccountType.Tagesgeld);
+        sut.SelectedKontoTypeOption = previousSelection;
+
+        sut.RefreshLocalizedStrings();
+
+        Assert.Equal(AccountType.Tagesgeld, sut.SelectedKontoTypeOption?.Value);
+        Assert.NotSame(previousSelection, sut.SelectedKontoTypeOption);
+    }
+
+    [Fact]
     public async Task GoToDetail_WhenKategorienTabAndNoItem_ShowsCreateSheet()
     {
         var categoryCreateSheet = Substitute.For<ICategoryCreateSheetService>();
