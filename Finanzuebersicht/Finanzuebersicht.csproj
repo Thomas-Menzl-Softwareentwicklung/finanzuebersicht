@@ -50,7 +50,7 @@
 		<!-- Suppress MT4162 warning from mtouch (but not via ILLink) -->
 		<!-- Note: passing -nowarn:MT4162 directly to MtouchExtraArgs might be picked up by ILLink and fail -->
 		<!-- We rely on MtouchLink=None to disable ILLink instead -->
-		
+
 		<!-- Disable ILLink completely to avoid MT2301/NETSDK1144 crash -->
 		<MtouchLink>SdkOnly</MtouchLink>
 		<UserDialogs>false</UserDialogs>
@@ -68,7 +68,7 @@
 		<!-- Images -->
 		<MauiImage Include="Resources\Images\*" />
 		<MauiImage Update="Resources\Images\dotnet_bot.png" Resize="True" BaseSize="300,185" />
-		
+
 		<!-- Custom Fonts -->
 		<MauiFont Include="Resources\Fonts\*" />
 
