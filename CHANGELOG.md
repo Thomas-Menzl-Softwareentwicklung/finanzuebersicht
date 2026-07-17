@@ -1,5 +1,24 @@
 # Änderungsverlauf
 
+## [1.19] - 2026-07-17
+
+### Hinzugefügt
+
+- Einheitliches Anlegen (#265): Inline-Panel (`CreateFormCard`) für Konten und Sparziele
+- Sheet-Anlegen (`FormSheetPopup`) für Kategorien und Daueraufträge
+- Doku: `docs/CREATE_UX.md`
+
+### Geändert
+
+- Recurring-Schedule-Logik konsolidiert; Repository-Zugriffe in Use Cases (#275)
+- Microsoft.Maui.Controls 10.0.80, Nerdbank.GitVersioning, Test-SDK
+
+### Behoben
+
+- Systemkonten: Löschen-Aktion ausgeblendet, Zeilen weiter bearbeitbar (#277)
+- Dauerauftrag-`OccursOnDate` berücksichtigt Shift-Ausnahmen korrekt
+- NSubstitute-6-kompatible Test-Matcher (#282)
+
 ## [1.18] - 2026-06-29
 
 ### Hinzugefügt
