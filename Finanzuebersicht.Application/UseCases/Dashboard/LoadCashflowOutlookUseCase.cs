@@ -116,9 +116,14 @@ public class LoadCashflowOutlookUseCase(
         DateTime? latestUnbookedDue = null;
         while (candidate < from)
         {
-            var effective = RecurringScheduleCalculator.ApplyExceptions(recurring, candidate);
-            if (!IsRecurringBooked(transactions, recurring.Id, effective))
-                latestUnbookedDue = effective;
+            var exception = recurring.Exceptions?
+                .FirstOrDefault(item => item.InstanceDate.Date == candidate.Date);
+            if (exception?.Type != RecurringExceptionType.Skip)
+            {
+                var effective = RecurringScheduleCalculator.ApplyExceptions(recurring, candidate);
+                if (effective < from && !IsRecurringBooked(transactions, recurring.Id, effective))
+                    latestUnbookedDue = effective;
+            }
 
             candidate = RecurringScheduleCalculator.GetNextInstance(recurring, candidate);
         }
