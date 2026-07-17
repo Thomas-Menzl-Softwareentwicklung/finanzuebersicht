@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Finanzuebersicht.Application.UseCases.RecurringTransactions;
+using Finanzuebersicht.Core.Services;
 using Finanzuebersicht.Models;
 using Finanzuebersicht.Navigation;
 using Finanzuebersicht.Presentation.Services;
@@ -105,6 +106,10 @@ public partial class RecurringTransactionDetailViewModel(
     public IReadOnlyList<RecurrenceIntervalOption> VerfuegbareIntervalle =>
         _verfuegbareIntervalle ??= BuildIntervalOptions();
 
+    public string PageTitle => _loc.GetString(ResourceKeys.Title_Dauerauftrag);
+
+    public bool IsEditing => _existing != null;
+
     partial void OnIntervalChanged(RecurrenceInterval value)
     {
         SelectedIntervalOption = VerfuegbareIntervalle.FirstOrDefault(option => option.Value == value);
@@ -143,6 +148,7 @@ public partial class RecurringTransactionDetailViewModel(
                 ReminderDaysBefore = value.ReminderDaysBefore;
                 ReminderDaysBeforeText = value.ReminderDaysBefore.ToString();
                 Exceptions = new ObservableCollection<RecurringException>(value.Exceptions ?? new List<RecurringException>());
+                OnPropertyChanged(nameof(IsEditing));
             }
         }
     }
@@ -175,6 +181,35 @@ public partial class RecurringTransactionDetailViewModel(
     [RelayCommand]
     private async Task Save()
     {
+        if (await TrySaveAsync())
+            await _navigationService.GoBackAsync();
+    }
+
+    public async Task ResetForCreateAsync()
+    {
+        _existing = null;
+        BetragText = string.Empty;
+        Titel = string.Empty;
+        Typ = TransactionType.Ausgabe;
+        Startdatum = _clock.Today;
+        HatEnddatum = false;
+        EnddatumWert = _clock.Today.AddYears(1);
+        Aktiv = true;
+        Interval = RecurrenceInterval.Monthly;
+        IntervalFactor = 1;
+        IntervalFactorText = "1";
+        ReminderDaysBefore = 0;
+        ReminderDaysBeforeText = "0";
+        Exceptions = [];
+        SelectedKategorie = null;
+        SelectedAccount = null;
+        SelectedIntervalOption = VerfuegbareIntervalle.FirstOrDefault(option => option.Value == Interval);
+        OnPropertyChanged(nameof(IsEditing));
+        await LoadKategorienCommand.ExecuteAsync(null);
+    }
+
+    public async Task<bool> TrySaveAsync()
+    {
         if (!_validationService.TryValidate(
                 BetragText,
                 Titel,
@@ -195,20 +230,17 @@ public partial class RecurringTransactionDetailViewModel(
                 _loc.GetString(ResourceKeys.Err_Titel),
                 message,
                 _loc.GetString(ResourceKeys.Btn_OK));
-            return;
+            return false;
         }
 
-        // parse numeric text fields (Entry bindings)
         if (!int.TryParse(IntervalFactorText, out var parsedFactor) || parsedFactor <= 0)
         {
-            // Ungültige oder zu kleine Werte auf 1 clampen und im UI anzeigen
             parsedFactor = 1;
             IntervalFactorText = "1";
         }
 
         if (!int.TryParse(ReminderDaysBeforeText, out var parsedReminder) || parsedReminder < 0)
         {
-            // Ungültige oder negative Werte auf 0 clampen und im UI anzeigen
             parsedReminder = 0;
             ReminderDaysBeforeText = "0";
         }
@@ -216,23 +248,35 @@ public partial class RecurringTransactionDetailViewModel(
         IntervalFactor = parsedFactor;
         ReminderDaysBefore = parsedReminder;
 
-        await _saveRecurringTransactionDetailUseCase.ExecuteAsync(
-            _existing,
-            betrag,
-            Titel,
-            SelectedKategorie!.Id,
-            SelectedAccount?.Id,
-            Typ,
-            Startdatum,
-            HatEnddatum ? EnddatumWert : null,
-            Aktiv,
-            Interval,
-            IntervalFactor,
-            ReminderDaysBefore,
-            Exceptions.ToList());
-        _appEvents.NotifyDataChanged();
-        await _navigationService.GoBackAsync();
-        await _feedbackService.ShowSnackbarAsync(_loc.GetString(ResourceKeys.Msg_Gespeichert));
+        try
+        {
+            await _saveRecurringTransactionDetailUseCase.ExecuteAsync(
+                _existing,
+                betrag,
+                Titel,
+                SelectedKategorie!.Id,
+                SelectedAccount?.Id,
+                Typ,
+                Startdatum,
+                HatEnddatum ? EnddatumWert : null,
+                Aktiv,
+                Interval,
+                IntervalFactor,
+                ReminderDaysBefore,
+                Exceptions.ToList());
+            _appEvents.NotifyDataChanged();
+            await _feedbackService.ShowSnackbarAsync(_loc.GetString(ResourceKeys.Msg_Gespeichert));
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogError(ex, "RecurringTransactionDetailViewModel: {Context}", nameof(TrySaveAsync));
+            await _dialogService.ShowAlertAsync(
+                _loc.GetString(ResourceKeys.Err_Titel),
+                _loc.GetString(ResourceKeys.Err_SpeichernFehlgeschlagen, ex.Message),
+                _loc.GetString(ResourceKeys.Btn_OK));
+            return false;
+        }
     }
 
     [RelayCommand]
@@ -243,7 +287,7 @@ public partial class RecurringTransactionDetailViewModel(
         DateTime next;
         if (_existing.LetzteAusfuehrung.HasValue)
         {
-            next = GetNextInstanceLocal(_existing, _existing.LetzteAusfuehrung.Value, IntervalFactor);
+            next = RecurringScheduleCalculator.GetNextInstance(_existing, _existing.LetzteAusfuehrung.Value);
         }
         else
         {
@@ -264,7 +308,7 @@ public partial class RecurringTransactionDetailViewModel(
         DateTime next;
         if (_existing.LetzteAusfuehrung.HasValue)
         {
-            next = GetNextInstanceLocal(_existing, _existing.LetzteAusfuehrung.Value, IntervalFactor);
+            next = RecurringScheduleCalculator.GetNextInstance(_existing, _existing.LetzteAusfuehrung.Value);
         }
         else
         {
@@ -278,30 +322,6 @@ public partial class RecurringTransactionDetailViewModel(
         };
 
         await _navigationService.GoToAsync(Routes.RecurringInstanceShift, parameters);
-    }
-
-    private static DateTime GetNextInstanceLocal(RecurringTransaction recurring, DateTime fromDate, int intervalFactor)
-    {
-        var factor = Math.Max(1, intervalFactor);
-        return recurring.Interval switch
-        {
-            RecurrenceInterval.Weekly => fromDate.Date.AddDays(7L * factor),
-            RecurrenceInterval.Monthly => AddMonthsPreserveDay(fromDate.Date, 1 * factor),
-            RecurrenceInterval.Quarterly => AddMonthsPreserveDay(fromDate.Date, 3 * factor),
-            RecurrenceInterval.Yearly => AddMonthsPreserveDay(fromDate.Date, 12 * factor),
-            RecurrenceInterval.Daily => fromDate.Date.AddDays(1 * factor),
-            _ => AddMonthsPreserveDay(fromDate.Date, 1 * factor),
-        };
-    }
-
-    private static DateTime AddMonthsPreserveDay(DateTime date, int months)
-    {
-        var target = date.AddMonths(months);
-        var day = date.Day;
-        var daysInTarget = DateTime.DaysInMonth(target.Year, target.Month);
-        if (day > daysInTarget)
-            day = daysInTarget;
-        return new DateTime(target.Year, target.Month, day);
     }
 
     [RelayCommand]
@@ -357,6 +377,7 @@ public partial class RecurringTransactionDetailViewModel(
     {
         _verfuegbareIntervalle = null;
         OnPropertyChanged(nameof(VerfuegbareIntervalle));
+        OnPropertyChanged(nameof(PageTitle));
         SelectedIntervalOption = VerfuegbareIntervalle.FirstOrDefault(option => option.Value == Interval);
     }
 }

@@ -5,8 +5,8 @@ namespace Finanzuebersicht.Core.Services;
 /// <summary>
 /// Pure domain component for calculating recurring transaction schedules.
 /// Single source of truth for: next-due calculation, exception application,
-/// and active-range checks. Used by both <see cref="RecurringGenerationService"/>
-/// and <c>GetDueRecurringWithHintsUseCase</c>.
+/// active-range checks, and occurrence-on-date/range queries. Used by
+/// <see cref="RecurringGenerationService"/>, dashboard month forecast, and cashflow outlook.
 /// </summary>
 public static class RecurringScheduleCalculator
 {
@@ -110,6 +110,75 @@ public static class RecurringScheduleCalculator
 
         var effective = ApplyExceptions(recurring, candidate);
         return (candidate.Date, effective);
+    }
+
+    /// <summary>
+    /// Returns true if the recurring transaction has an effective occurrence on <paramref name="date"/>.
+    /// </summary>
+    public static bool OccursOnDate(RecurringTransaction recurring, DateTime date)
+        => OccursInRange(recurring, date.Date, date.Date);
+
+    /// <summary>
+    /// Returns true if any effective occurrence falls within
+    /// [<paramref name="rangeStart"/>, <paramref name="rangeEnd"/>] (inclusive).
+    /// </summary>
+    public static bool OccursInRange(RecurringTransaction recurring, DateTime rangeStart, DateTime rangeEnd)
+    {
+        if (!recurring.Aktiv)
+            return false;
+
+        if (recurring.Startdatum.Date > rangeEnd.Date)
+            return false;
+
+        if (recurring.Enddatum.HasValue && recurring.Enddatum.Value.Date < rangeStart.Date)
+            return false;
+
+        var candidate = recurring.LetzteAusfuehrung ?? recurring.Startdatum;
+        if (candidate.Date < recurring.Startdatum.Date)
+            candidate = recurring.Startdatum;
+
+        while (candidate.Date <= rangeEnd.Date)
+        {
+            if (candidate.Date >= recurring.Startdatum.Date &&
+                (!recurring.Enddatum.HasValue || candidate.Date <= recurring.Enddatum.Value.Date) &&
+                TryGetEffectiveDate(recurring, candidate, out var effectiveDate) &&
+                effectiveDate >= rangeStart.Date &&
+                effectiveDate <= rangeEnd.Date)
+            {
+                return true;
+            }
+
+            var nextCandidate = GetNextInstance(recurring, candidate);
+            if (nextCandidate.Date <= candidate.Date)
+                return false;
+
+            candidate = nextCandidate;
+        }
+
+        return false;
+    }
+
+    private static bool TryGetEffectiveDate(
+        RecurringTransaction recurring,
+        DateTime candidate,
+        out DateTime effectiveDate)
+    {
+        effectiveDate = candidate.Date;
+
+        var exception = recurring.Exceptions?.FirstOrDefault(e => e.InstanceDate.Date == candidate.Date);
+        if (exception is null)
+            return true;
+
+        if (exception.Type == RecurringExceptionType.Skip)
+            return false;
+
+        if (exception.Type == RecurringExceptionType.Shift && exception.ShiftToDate.HasValue)
+        {
+            effectiveDate = exception.ShiftToDate.Value.Date;
+            return true;
+        }
+
+        return true;
     }
 
     /// <summary>

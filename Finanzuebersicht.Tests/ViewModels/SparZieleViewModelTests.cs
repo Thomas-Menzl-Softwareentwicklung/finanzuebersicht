@@ -10,6 +10,18 @@ namespace Finanzuebersicht.Tests.ViewModels;
 public class SparZieleViewModelTests
 {
     [Fact]
+    public void ToggleAddForm_OpensFormAndHidesEmptyState()
+    {
+        var viewModel = CreateSut(Substitute.For<ISparZielRepository>(), out _, out _);
+        Assert.True(viewModel.IsEmptyStateVisible);
+
+        viewModel.ToggleAddFormCommand.Execute(null);
+
+        Assert.True(viewModel.ShowAddForm);
+        Assert.False(viewModel.IsEmptyStateVisible);
+    }
+
+    [Fact]
     public async Task SaveNewSparZiel_WithEmptyTitel_ShowsAlertAndDoesNotSave()
     {
         var repository = Substitute.For<ISparZielRepository>();
@@ -75,8 +87,8 @@ public class SparZieleViewModelTests
             .Returns(Task.FromResult(false));
 
         localizationService = Substitute.For<ILocalizationService>();
-        localizationService.GetString(Arg.Any<string>()).Returns(call => call.Arg<string>());
-        localizationService.GetString(Arg.Any<string>(), Arg.Any<object[]>()).Returns(call => call.Arg<string>());
+        localizationService.GetString(Arg.Any<string>()).Returns(call => call.ArgNotNull<string>());
+        localizationService.GetString(Arg.Any<string>(), Arg.Any<object[]>()).Returns(call => call.ArgNotNull<string>());
 
         var transactionRepository = Substitute.For<ITransactionRepository>();
         transactionRepository.GetTransactionsAsync(Arg.Any<DateTime>(), Arg.Any<DateTime>())

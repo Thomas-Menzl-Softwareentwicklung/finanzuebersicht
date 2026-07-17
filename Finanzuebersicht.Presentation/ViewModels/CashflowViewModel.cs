@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Finanzuebersicht.Application.UseCases.Accounts;
 using Finanzuebersicht.Application.UseCases.Dashboard;
 using Finanzuebersicht.Models;
 using Finanzuebersicht.Presentation;
@@ -12,13 +13,13 @@ namespace Finanzuebersicht.ViewModels;
 
 public partial class CashflowViewModel(
     LoadCashflowOutlookUseCase loadCashflowOutlookUseCase,
-    IAccountRepository accountRepository,
+    LoadActiveAccountsUseCase loadActiveAccountsUseCase,
     ILocalizationService localizationService,
     IDialogService dialogService,
     ILogger<CashflowViewModel>? logger = null) : ObservableObject, IAutoLoadViewModel, ICurrencyRefreshViewModel
 {
     private readonly LoadCashflowOutlookUseCase _loadCashflowOutlookUseCase = loadCashflowOutlookUseCase;
-    private readonly IAccountRepository _accountRepository = accountRepository;
+    private readonly LoadActiveAccountsUseCase _loadActiveAccountsUseCase = loadActiveAccountsUseCase;
     private readonly ILocalizationService _loc = localizationService;
     private readonly IDialogService _dialogService = dialogService;
     private readonly ILogger<CashflowViewModel>? _logger = logger;
@@ -91,13 +92,13 @@ public partial class CashflowViewModel(
     {
         if (AvailableKonten.Count > 0) return;
 
-        var accounts = await _accountRepository.GetAccountsAsync();
+        var accounts = await _loadActiveAccountsUseCase.ExecuteAsync();
         var items = new ObservableCollection<KategorieFilterItem>
         {
             new(null, _loc.GetString(ResourceKeys.Lbl_AlleKonten), ResourceKeys.Lbl_AlleKonten)
         };
 
-        foreach (var account in accounts.Where(a => !a.IsArchived).OrderBy(a => a.Name))
+        foreach (var account in accounts)
             items.Add(new KategorieFilterItem(account.Id, account.Name));
 
         AvailableKonten = items;

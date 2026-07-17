@@ -124,8 +124,8 @@ public class StorageViewModelTests
     private static ILocalizationService CreateLocalizationService()
     {
         var localizationService = Substitute.For<ILocalizationService>();
-        localizationService.GetString(Arg.Any<string>()).Returns(call => call.Arg<string>());
-        localizationService.GetString(Arg.Any<string>(), Arg.Any<object[]>()).Returns(call => call.ArgAt<string>(0));
+        localizationService.GetString(Arg.Any<string>()).Returns(call => call.ArgNotNull<string>());
+        localizationService.GetString(Arg.Any<string>(), Arg.Any<object[]>()).Returns(call => call.ArgAtNotNull<string>(0));
         return localizationService;
     }
 

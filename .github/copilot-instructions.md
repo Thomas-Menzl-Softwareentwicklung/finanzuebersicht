@@ -146,6 +146,19 @@ Layered clean architecture with MVVM (`CommunityToolkit.Mvvm` source generators)
 
 Native `Picker` controls freeze on **macOS 27 Beta** when scrolling inside picker dialogs in `ScrollView` forms. Workaround: **`SelectionField`** + **`SelectionPopup`** (`Finanzuebersicht/Controls/`, `Finanzuebersicht/Views/Popups/`). Used across detail pages, filters, and import preview. `DatePicker` remains native. Revert to native `Picker` when MAUI SR6 ([#33146](https://github.com/dotnet/maui/pull/33146)) is available. Details: `.cursor/rules/maccatalyst-picker-investigation.mdc`
 
+### Create UX (#265, v1.19)
+
+Unified **create** flows — no navigation push for new entries from list FAB/empty state:
+
+| Entity | Create | Edit |
+|--------|--------|------|
+| Konto | `CreateFormCard` inline top (`CategoriesPage`) | `AccountDetailPage` |
+| Sparziel | `CreateFormCard` inline top (`SparZielePage`) | `SparZielDetailPage` |
+| Kategorie | `FormSheetPopup` + `CategoryFormView` | `CategoryDetailPage` |
+| Dauerauftrag | `FormSheetPopup` + `RecurringTransactionFormView` | `RecurringTransactionDetailPage` |
+
+Components: `CreateFormCard`, `FormSheetPopup`, `CategoryCreateSheetService`, `RecurringTransactionCreateSheetService`. Full reference: `docs/CREATE_UX.md`.
+
 ## Versioning
 
 Automatic **SemVer** via **Nerdbank.GitVersioning** (`version.json`):

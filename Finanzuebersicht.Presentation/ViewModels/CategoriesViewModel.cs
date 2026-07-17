@@ -19,8 +19,11 @@ public partial class CategoriesViewModel(
     LoadCategoriesUseCase loadCategoriesUseCase,
     LoadAccountsUseCase loadAccountsUseCase,
     GetAccountBalancesUseCase getAccountBalancesUseCase,
+    SaveAccountDetailUseCase saveAccountDetailUseCase,
     ToggleAccountArchiveUseCase toggleAccountArchiveUseCase,
     DeleteAccountUseCase deleteAccountUseCase,
+    CategoryDetailViewModel createCategoryViewModel,
+    ICategoryCreateSheetService categoryCreateSheetService,
     ILocalizationService localizationService,
     INavigationService navigationService,
     IDialogService dialogService,
@@ -32,8 +35,11 @@ public partial class CategoriesViewModel(
     private readonly LoadCategoriesUseCase _loadCategoriesUseCase = loadCategoriesUseCase;
     private readonly LoadAccountsUseCase _loadAccountsUseCase = loadAccountsUseCase;
     private readonly GetAccountBalancesUseCase _getAccountBalancesUseCase = getAccountBalancesUseCase;
+    private readonly SaveAccountDetailUseCase _saveAccountDetailUseCase = saveAccountDetailUseCase;
     private readonly ToggleAccountArchiveUseCase _toggleAccountArchiveUseCase = toggleAccountArchiveUseCase;
     private readonly DeleteAccountUseCase _deleteAccountUseCase = deleteAccountUseCase;
+    private readonly CategoryDetailViewModel _createCategoryViewModel = createCategoryViewModel;
+    private readonly ICategoryCreateSheetService _categoryCreateSheetService = categoryCreateSheetService;
     private readonly ILocalizationService _loc = localizationService;
     private readonly INavigationService _navigationService = navigationService;
     private readonly IDialogService _dialogService = dialogService;
@@ -54,6 +60,7 @@ public partial class CategoriesViewModel(
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ShowGesamtSaldoHeader))]
     [NotifyPropertyChangedFor(nameof(IsKontenEmpty))]
+    [NotifyPropertyChangedFor(nameof(IsKontenEmptyStateVisible))]
     private ObservableCollection<AccountListItem> konten = [];
 
     public bool IsKontenEmpty => Konten.Count == 0;
@@ -79,11 +86,17 @@ public partial class CategoriesViewModel(
     partial void OnSelectedSectionIndexChanged(int value)
     {
         OnPropertyChanged(nameof(FabAccessibilityDescription));
+        if (value == 0)
+            ShowAddKontoForm = false;
     }
 
     public void RefreshLocalizedStrings()
     {
         OnPropertyChanged(nameof(FabAccessibilityDescription));
+        OnPropertyChanged(nameof(NeuesKontoFormTitle));
+        OnPropertyChanged(nameof(VerfuegbareKontoTypen));
+        SelectedKontoTypeOption = VerfuegbareKontoTypen
+            .FirstOrDefault(option => option.Value == SelectedKontoTypeOption?.Value);
         _ = LoadKategorienCore();
     }
 
@@ -91,6 +104,33 @@ public partial class CategoriesViewModel(
 
     [ObservableProperty]
     private bool isLoading;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsKontenEmptyStateVisible))]
+    private bool showAddKontoForm;
+
+    [ObservableProperty]
+    private string neuerKontoName = string.Empty;
+
+    [ObservableProperty]
+    private AccountTypeOption? selectedKontoTypeOption;
+
+    [ObservableProperty]
+    private string neuerAnfangssaldoText = string.Empty;
+
+    public bool IsKontenEmptyStateVisible => IsKontenEmpty && !ShowAddKontoForm;
+
+    public string NeuesKontoFormTitle => _loc.GetString(ResourceKeys.Title_KontoHinzufuegen);
+
+    public List<AccountTypeOption> VerfuegbareKontoTypen =>
+    [
+        new(AccountType.Girokonto, _loc.GetString(EnumResourceKeys.GetAccountType(AccountType.Girokonto))),
+        new(AccountType.Tagesgeld, _loc.GetString(EnumResourceKeys.GetAccountType(AccountType.Tagesgeld))),
+        new(AccountType.Kreditkarte, _loc.GetString(EnumResourceKeys.GetAccountType(AccountType.Kreditkarte))),
+        new(AccountType.Bargeld, _loc.GetString(EnumResourceKeys.GetAccountType(AccountType.Bargeld))),
+        new(AccountType.Depot, _loc.GetString(EnumResourceKeys.GetAccountType(AccountType.Depot))),
+        new(AccountType.Sonstiges, _loc.GetString(EnumResourceKeys.GetAccountType(AccountType.Sonstiges)))
+    ];
 
     [RelayCommand]
     private void ShowKategorien() => SelectedSectionIndex = 0;
@@ -190,6 +230,7 @@ public partial class CategoriesViewModel(
             await _deleteAccountUseCase.ExecuteAsync(konto.Account.Id);
             Konten.Remove(konto);
             OnPropertyChanged(nameof(IsKontenEmpty));
+            OnPropertyChanged(nameof(IsKontenEmptyStateVisible));
             OnPropertyChanged(nameof(ShowGesamtSaldoHeader));
             _appEvents.NotifyDataChanged();
             await _feedbackService.ShowSnackbarAsync(_loc.GetString(ResourceKeys.Msg_Geloescht));
@@ -239,6 +280,60 @@ public partial class CategoriesViewModel(
     }
 
     [RelayCommand]
+    private void ToggleAddKontoForm()
+    {
+        ShowAddKontoForm = !ShowAddKontoForm;
+        if (!ShowAddKontoForm)
+            return;
+
+        NeuerKontoName = string.Empty;
+        NeuerAnfangssaldoText = string.Empty;
+        SelectedKontoTypeOption = VerfuegbareKontoTypen.FirstOrDefault(t => t.Value == AccountType.Girokonto)
+            ?? VerfuegbareKontoTypen.FirstOrDefault();
+    }
+
+    [RelayCommand]
+    private async Task SaveNewKonto()
+    {
+        if (string.IsNullOrWhiteSpace(NeuerKontoName))
+        {
+            await _dialogService.ShowAlertAsync(
+                _loc.GetString(ResourceKeys.Err_Titel),
+                _loc.GetString(ResourceKeys.Err_TitelErforderlich),
+                _loc.GetString(ResourceKeys.Btn_OK));
+            return;
+        }
+
+        if (!TryParseAnfangssaldo(out var openingBalance))
+        {
+            await _dialogService.ShowAlertAsync(
+                _loc.GetString(ResourceKeys.Err_Titel),
+                _loc.GetString(ResourceKeys.Err_UngueltigerBetrag),
+                _loc.GetString(ResourceKeys.Btn_OK));
+            return;
+        }
+
+        try
+        {
+            var type = SelectedKontoTypeOption?.Value ?? AccountType.Girokonto;
+            await _saveAccountDetailUseCase.ExecuteAsync(
+                null, NeuerKontoName.Trim(), type, openingBalance: openingBalance);
+            ShowAddKontoForm = false;
+            _appEvents.NotifyDataChanged();
+            await LoadKategorienCore(force: true);
+            await _feedbackService.ShowSnackbarAsync(_loc.GetString(ResourceKeys.Msg_Gespeichert));
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogError(ex, "CategoriesViewModel: {Context}", nameof(SaveNewKonto));
+            await _dialogService.ShowAlertAsync(
+                _loc.GetString(ResourceKeys.Err_Titel),
+                _loc.GetString(ResourceKeys.Err_SpeichernFehlgeschlagen, ex.Message),
+                _loc.GetString(ResourceKeys.Btn_OK));
+        }
+    }
+
+    [RelayCommand]
     private async Task GoToDetail(object? item = null)
     {
         if (item is AccountListItem kontoItem)
@@ -253,14 +348,40 @@ public partial class CategoriesViewModel(
 
         if (item == null && IsKontenVisible)
         {
-            await _navigationService.GoToAsync(Routes.AccountDetail);
+            ToggleAddKontoForm();
             return;
         }
 
-        var parameter = new Dictionary<string, object>();
-        if (item is Category kategorie)
-            parameter["Category"] = kategorie;
+        if (item == null && IsKategorienVisible)
+        {
+            _createCategoryViewModel.ResetForCreate();
+            if (await _categoryCreateSheetService.ShowAsync(_createCategoryViewModel))
+                await LoadKategorienCore(force: true);
+            return;
+        }
 
-        await _navigationService.GoToAsync(Routes.CategoryDetail, parameter);
+        if (item is Category kategorie)
+        {
+            var parameter = new Dictionary<string, object> { ["Category"] = kategorie };
+            await _navigationService.GoToAsync(Routes.CategoryDetail, parameter);
+            return;
+        }
+
+        await _navigationService.GoToAsync(Routes.CategoryDetail);
+    }
+
+    private bool TryParseAnfangssaldo(out decimal openingBalance)
+    {
+        if (string.IsNullOrWhiteSpace(NeuerAnfangssaldoText))
+        {
+            openingBalance = 0m;
+            return true;
+        }
+
+        return decimal.TryParse(
+            NeuerAnfangssaldoText,
+            NumberStyles.Number,
+            CultureInfo.CurrentCulture,
+            out openingBalance);
     }
 }

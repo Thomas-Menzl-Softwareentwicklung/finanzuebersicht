@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Finanzuebersicht.Application.UseCases.Accounts;
 using Finanzuebersicht.Application.UseCases.Transactions;
 using Finanzuebersicht.Models;
 using Finanzuebersicht.Navigation;
@@ -12,7 +13,7 @@ namespace Finanzuebersicht.ViewModels;
 
 public partial class TransferDetailViewModel(
     SaveTransferUseCase saveTransferUseCase,
-    IAccountRepository accountRepository,
+    LoadActiveAccountsUseCase loadActiveAccountsUseCase,
     INavigationService navigationService,
     IDialogService dialogService,
     ILocalizationService localizationService,
@@ -22,7 +23,7 @@ public partial class TransferDetailViewModel(
     Finanzuebersicht.Core.Services.IClock? clock = null) : ObservableObject, IAutoLoadViewModel
 {
     private readonly SaveTransferUseCase _saveTransferUseCase = saveTransferUseCase;
-    private readonly IAccountRepository _accountRepository = accountRepository;
+    private readonly LoadActiveAccountsUseCase _loadActiveAccountsUseCase = loadActiveAccountsUseCase;
     private readonly INavigationService _navigationService = navigationService;
     private readonly IDialogService _dialogService = dialogService;
     private readonly ILocalizationService _loc = localizationService;
@@ -61,13 +62,12 @@ public partial class TransferDetailViewModel(
         if (string.IsNullOrWhiteSpace(Title))
             Title = _loc.GetString(ResourceKeys.Title_Umbuchung);
 
-        var accounts = await _accountRepository.GetAccountsAsync();
-        var active = accounts.Where(a => !a.IsArchived).OrderBy(a => a.Name).ToList();
-        Accounts = new ObservableCollection<Account>(active);
+        var accounts = await _loadActiveAccountsUseCase.ExecuteAsync();
+        Accounts = new ObservableCollection<Account>(accounts);
 
-        SourceAccount = active.FirstOrDefault(a => a.SystemKey == Finanzuebersicht.Constants.SystemAccountKeys.Default)
-            ?? active.FirstOrDefault();
-        TargetAccount = active.FirstOrDefault(a => a.Id != SourceAccount?.Id);
+        SourceAccount = accounts.FirstOrDefault(a => a.SystemKey == Finanzuebersicht.Constants.SystemAccountKeys.Default)
+            ?? accounts.FirstOrDefault();
+        TargetAccount = accounts.FirstOrDefault(a => a.Id != SourceAccount?.Id);
     }
 
     [RelayCommand]

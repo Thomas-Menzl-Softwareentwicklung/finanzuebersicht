@@ -32,12 +32,12 @@ public class BookDueRecurringInstanceUseCaseTests
 
         await sut.ExecuteAsync("rec-1", instanceDate);
 
-        await transactionRepository.Received(1).SaveTransactionAsync(Arg.Is<Transaction>(t =>
+        await transactionRepository.Received(1).SaveTransactionAsync(NonNullArg.Is<Transaction>(t =>
             t.DauerauftragId == "rec-1"
             && t.Betrag == 800m
             && t.AccountId == "acc-1"
             && t.Datum == instanceDate));
-        await recurringRepository.Received(1).SaveRecurringTransactionAsync(Arg.Is<RecurringTransaction>(r =>
+        await recurringRepository.Received(1).SaveRecurringTransactionAsync(NonNullArg.Is<RecurringTransaction>(r =>
             r.LetzteAusfuehrung == instanceDate));
     }
 
@@ -69,7 +69,7 @@ public class BookDueRecurringInstanceUseCaseTests
 
         await sut.ExecuteAsync("rec-1", new DateTime(2026, 3, 1));
 
-        await transactionRepository.Received(1).SaveTransactionAsync(Arg.Is<Transaction>(t => t.AccountId == "acc-default"));
+        await transactionRepository.Received(1).SaveTransactionAsync(NonNullArg.Is<Transaction>(t => t.AccountId == "acc-default"));
     }
 
     [Fact]

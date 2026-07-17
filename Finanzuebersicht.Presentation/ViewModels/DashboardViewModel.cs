@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.Input;
 using Finanzuebersicht.Application.UseCases.Accounts;
 using Finanzuebersicht.Application.UseCases.Dashboard;
 using Finanzuebersicht.Application.UseCases.RecurringTransactions;
+using Finanzuebersicht.Application.UseCases.Transactions;
 using Finanzuebersicht.Core.Services;
 using Finanzuebersicht.Models;
 using Finanzuebersicht.Navigation;
@@ -25,8 +26,9 @@ public partial class DashboardViewModel : MonthNavigationViewModel, ILocalizable
     private readonly LoadCashflowOutlookUseCase _loadCashflowOutlookUseCase;
     private readonly ISettingsService _settingsService;
     private readonly IDialogService _dialogService;
-    private readonly IBudgetRepository _budgetRepository;
-    private readonly IAccountRepository _accountRepository;
+    private readonly GetDefaultBudgetTotalUseCase _getDefaultBudgetTotalUseCase;
+    private readonly LoadActiveAccountsUseCase _loadActiveAccountsUseCase;
+    private readonly GetEarliestTransactionYearUseCase _getEarliestTransactionYearUseCase;
     private readonly GetAccountBalancesUseCase _getAccountBalancesUseCase;
     private readonly ILocalizationService _loc;
     private readonly INavigationService _navigationService;
@@ -301,7 +303,6 @@ public partial class DashboardViewModel : MonthNavigationViewModel, ILocalizable
         ? _loc.GetString(ResourceKeys.Lbl_DauerauftraegeFaellig_Singular, DueRecurringCount)
         : _loc.GetString(ResourceKeys.Lbl_DauerauftraegeFaellig, DueRecurringCount);
 
-    private readonly ITransactionRepository _transactionRepository;
     private int _aktuellesJahr;
     private int _minJahr;
     private bool _minJahrLoaded;
@@ -377,12 +378,12 @@ public partial class DashboardViewModel : MonthNavigationViewModel, ILocalizable
         GetDueRecurringWithHintsUseCase getDueRecurringUseCase,
         BookDueRecurringInstanceUseCase bookDueRecurringUseCase,
         SkipDueRecurringInstanceUseCase skipDueRecurringUseCase,
-        IBudgetRepository budgetRepository,
+        GetDefaultBudgetTotalUseCase getDefaultBudgetTotalUseCase,
+        LoadActiveAccountsUseCase loadActiveAccountsUseCase,
+        GetEarliestTransactionYearUseCase getEarliestTransactionYearUseCase,
         ILocalizationService localizationService,
         INavigationService navigationService,
         IDialogService dialogService,
-        ITransactionRepository transactionRepository,
-        IAccountRepository accountRepository,
         GetAccountBalancesUseCase getAccountBalancesUseCase,
         ISettingsService settingsService,
         IClock? clock = null,
@@ -398,12 +399,12 @@ public partial class DashboardViewModel : MonthNavigationViewModel, ILocalizable
         _getDueRecurringUseCase = getDueRecurringUseCase;
         _bookDueRecurringUseCase = bookDueRecurringUseCase;
         _skipDueRecurringUseCase = skipDueRecurringUseCase;
-        _budgetRepository = budgetRepository;
+        _getDefaultBudgetTotalUseCase = getDefaultBudgetTotalUseCase;
+        _loadActiveAccountsUseCase = loadActiveAccountsUseCase;
+        _getEarliestTransactionYearUseCase = getEarliestTransactionYearUseCase;
         _loc = localizationService;
         _navigationService = navigationService;
         _dialogService = dialogService;
-        _transactionRepository = transactionRepository;
-        _accountRepository = accountRepository;
         _getAccountBalancesUseCase = getAccountBalancesUseCase;
         _settingsService = settingsService;
         _logger = logger;
@@ -471,10 +472,10 @@ public partial class DashboardViewModel : MonthNavigationViewModel, ILocalizable
         _minJahrLoaded = true;
         try
         {
-            var all = await _transactionRepository.GetTransactionsAsync(DateTime.MinValue, DateTime.MaxValue);
-            if (all.Count > 0)
+            var earliestYear = await _getEarliestTransactionYearUseCase.ExecuteAsync();
+            if (earliestYear.HasValue)
             {
-                _minJahr = all.Min(t => t.Datum.Year);
+                _minJahr = earliestYear.Value;
                 _foundTransactions = true;
             }
             else
@@ -558,13 +559,13 @@ public partial class DashboardViewModel : MonthNavigationViewModel, ILocalizable
     {
         if (AvailableKonten.Count > 0) return;
 
-        var accounts = await _accountRepository.GetAccountsAsync();
+        var accounts = await _loadActiveAccountsUseCase.ExecuteAsync();
         var items = new ObservableCollection<KategorieFilterItem>
         {
             new(null, _loc.GetString(ResourceKeys.Lbl_AlleKonten), ResourceKeys.Lbl_AlleKonten)
         };
 
-        foreach (var account in accounts.Where(a => !a.IsArchived).OrderBy(a => a.Name))
+        foreach (var account in accounts)
             items.Add(new KategorieFilterItem(account.Id, account.Name));
 
         AvailableKonten = items;
@@ -641,10 +642,7 @@ public partial class DashboardViewModel : MonthNavigationViewModel, ILocalizable
         // Summe der Default-Kategorie-Budgets (monat=null, jahr=null) als Referenzlinie
         // Hinweis: Monat- oder jahresspezifische Budget-Overrides werden bewusst nicht einberechnet,
         // da die Linie einen stabilen Jahres-Richtwert darstellen soll.
-        var budgets = await _budgetRepository.GetBudgetsAsync();
-        JahrBudgetTotal = budgets
-            .Where(b => b.Monat == null && b.Jahr == null && b.Betrag > 0)
-            .Sum(b => b.Betrag);
+        JahrBudgetTotal = await _getDefaultBudgetTotalUseCase.ExecuteAsync();
 
         // Forecast-Balken für nächsten Monat (nur im aktuellen Jahr)
         var today = _clock.Today;

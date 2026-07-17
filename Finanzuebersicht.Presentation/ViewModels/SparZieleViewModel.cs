@@ -27,9 +27,12 @@ public partial class SparZieleViewModel : ObservableObject, IAutoLoadViewModel, 
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsEmpty))]
+    [NotifyPropertyChangedFor(nameof(IsEmptyStateVisible))]
     private ObservableCollection<SparZielSummary> sparZiele = [];
 
     public bool IsEmpty => SparZiele.Count == 0;
+
+    public bool IsEmptyStateVisible => IsEmpty && !ShowAddForm;
 
     [ObservableProperty]
     private bool isLoading;
@@ -53,6 +56,7 @@ public partial class SparZieleViewModel : ObservableObject, IAutoLoadViewModel, 
     private decimal neueMonatlicheSparrate;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsEmptyStateVisible))]
     private bool showAddForm;
 
     public SparZieleViewModel(
