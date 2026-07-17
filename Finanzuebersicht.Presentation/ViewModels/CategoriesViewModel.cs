@@ -95,6 +95,8 @@ public partial class CategoriesViewModel(
         OnPropertyChanged(nameof(FabAccessibilityDescription));
         OnPropertyChanged(nameof(NeuesKontoFormTitle));
         OnPropertyChanged(nameof(VerfuegbareKontoTypen));
+        SelectedKontoTypeOption = VerfuegbareKontoTypen
+            .FirstOrDefault(option => option.Value == SelectedKontoTypeOption?.Value);
         _ = LoadKategorienCore();
     }
 
