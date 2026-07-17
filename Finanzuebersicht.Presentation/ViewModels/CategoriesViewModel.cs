@@ -228,6 +228,7 @@ public partial class CategoriesViewModel(
             await _deleteAccountUseCase.ExecuteAsync(konto.Account.Id);
             Konten.Remove(konto);
             OnPropertyChanged(nameof(IsKontenEmpty));
+            OnPropertyChanged(nameof(IsKontenEmptyStateVisible));
             OnPropertyChanged(nameof(ShowGesamtSaldoHeader));
             _appEvents.NotifyDataChanged();
             await _feedbackService.ShowSnackbarAsync(_loc.GetString(ResourceKeys.Msg_Geloescht));
