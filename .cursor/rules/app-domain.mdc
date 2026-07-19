@@ -39,6 +39,10 @@ alwaysApply: true
 
 Aktiver thematischer Milestone: **v1.20 – Architektur-Fundament** (vor Feature-Backlog / v2.0). Details: `docs/ROADMAP.md`.
 
+- Welle 0: DataPath-Restart (#289 ✅), DataFileNames (#290 ✅), Doc-Drift (#291)
+- Als Nächstes: Legacy `IDataService` (#268), dann Import/Backup Use Cases
+- CloudKit nur als Idee (#243); kein Sync-Code im Tree
+
 ## Nicht wiederholen
 
 #212, #213 und #214 sind umgesetzt. Vor neuen Konten-/Saldo-Vorschlägen: `copilot-instructions.md` prüfen.

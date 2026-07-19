@@ -13,7 +13,7 @@
 
 </div>
 
-Finanzübersicht ist eine Open‑Source App zur lokalen Verwaltung von Einnahmen, Ausgaben und wiederkehrenden Buchungen. Die App speichert Daten lokal als JSON; Cloud‑Funktionen (z. B. CloudKit) sind vorhanden, aber optional und können weitere Voraussetzungen (Apple Developer Account) erfordern.
+Finanzübersicht ist eine Open‑Source App zur lokalen Verwaltung von Einnahmen, Ausgaben und wiederkehrenden Buchungen. Die App speichert Daten lokal als JSON. Cloud-Sync (z. B. CloudKit) ist eine Backlog-Idee ([#243](https://github.com/tom4711/finanzuebersicht/issues/243)), derzeit nicht im Code enthalten.
 
 Kurz: .NET 10 + MAUI, Multi-Language UI (Deutsch & Englisch), MVVM-Architektur.
 
