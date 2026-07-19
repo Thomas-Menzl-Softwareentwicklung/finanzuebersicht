@@ -22,7 +22,7 @@ public static class InfrastructureServiceCollectionExtensions
         string GetDataDir(IServiceProvider sp)
         {
             var settings = sp.GetRequiredService<ISettingsService>();
-            var customPath = settings.Get("DataPath", "");
+            var customPath = settings.Get(SettingsKeys.DataPath, "");
             return string.IsNullOrWhiteSpace(customPath) ? AppPaths.GetDefaultDataDir() : customPath;
         }
 

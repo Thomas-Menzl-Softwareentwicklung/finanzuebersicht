@@ -118,8 +118,8 @@ public class RecurringTransactionsViewModelTests
         await navigationService.Received(1).GoToAsync(
             Routes.RecurringTransactionDetail,
             NonNullArg.Is<IDictionary<string, object>>(parameters =>
-                parameters.ContainsKey("RecurringTransaction") &&
-                object.ReferenceEquals(parameters["RecurringTransaction"], recurringTransaction)));
+                parameters.ContainsKey(NavigationQueryKeys.RecurringTransaction) &&
+                object.ReferenceEquals(parameters[NavigationQueryKeys.RecurringTransaction], recurringTransaction)));
     }
 
     private static RecurringTransactionsViewModel CreateSut(

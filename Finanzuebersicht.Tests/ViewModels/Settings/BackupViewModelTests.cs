@@ -1,3 +1,4 @@
+using Finanzuebersicht.Core.Constants;
 using Finanzuebersicht.Navigation;
 using Finanzuebersicht.Resources.Strings;
 using Finanzuebersicht.Tests.TestHelpers;
@@ -37,9 +38,9 @@ public class BackupViewModelTests
             {
                 EntityCounts = new Dictionary<string, int>
                 {
-                    ["categories"] = 2,
-                    ["transactions"] = 3,
-                    ["recurring"] = 4
+                    [BackupEntityKeys.Categories] = 2,
+                    [BackupEntityKeys.Transactions] = 3,
+                    [BackupEntityKeys.Recurring] = 4
                 }
             }));
 

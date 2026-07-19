@@ -118,7 +118,7 @@ public partial class CategoryDetailViewModel(
 
     public void ApplyQueryAttributes(IDictionary<string, object> query)
     {
-        if (query.TryGetValue("Category", out var val) && val is Category c)
+        if (query.TryGetValue(NavigationQueryKeys.Category, out var val) && val is Category c)
             Category = c;
     }
 

@@ -126,7 +126,7 @@ public partial class AccountDetailViewModel(
 
     public void ApplyQueryAttributes(IDictionary<string, object> query)
     {
-        if (query.TryGetValue("Account", out var val) && val is Account a)
+        if (query.TryGetValue(NavigationQueryKeys.Account, out var val) && val is Account a)
             Account = a;
     }
 

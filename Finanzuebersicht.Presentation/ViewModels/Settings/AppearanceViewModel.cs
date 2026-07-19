@@ -30,7 +30,7 @@ public partial class AppearanceViewModel : ObservableObject
         _loc = localizationService;
         _displayCurrency = displayCurrency;
 
-        var theme = _settings.Get("Theme", "System");
+        var theme = _settings.Get(SettingsKeys.Theme, "System");
         selectedThemeIndex = theme switch
         {
             "Light" => 1,
@@ -58,7 +58,7 @@ public partial class AppearanceViewModel : ObservableObject
             _ => "System"
         };
 
-        _settings.Set("Theme", themeKey);
+        _settings.Set(SettingsKeys.Theme, themeKey);
         _themeService.Apply(themeKey);
     }
 

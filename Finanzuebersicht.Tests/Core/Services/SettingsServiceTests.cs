@@ -50,8 +50,8 @@ public class SettingsServiceTests : IDisposable
 
         var settings = new SettingsService(path);
 
-        Assert.Equal("Dark", settings.Get("Theme"));
-        Assert.Equal("EUR", settings.Get("Currency"));
+        Assert.Equal("Dark", settings.Get(SettingsKeys.Theme));
+        Assert.Equal("EUR", settings.Get(SettingsKeys.Currency));
     }
 
     [Fact]
@@ -65,7 +65,7 @@ public class SettingsServiceTests : IDisposable
         Assert.Null(exception);
 
         var settings = new SettingsService(path);
-        Assert.Equal("fallback", settings.Get("Theme", "fallback"));
+        Assert.Equal("fallback", settings.Get(SettingsKeys.Theme, "fallback"));
     }
 
     [Fact]

@@ -10,7 +10,7 @@ public class DisplayCurrencyServiceTests
     {
         var settings = Substitute.For<ISettingsService>();
         settings.Get(SettingsKeys.DisplayCurrency, "").Returns("");
-        settings.Get("Currency", "EUR").Returns("EUR");
+        settings.Get(SettingsKeys.Currency, "EUR").Returns("EUR");
 
         var service = new DisplayCurrencyService(settings);
 
@@ -24,7 +24,7 @@ public class DisplayCurrencyServiceTests
     {
         var settings = Substitute.For<ISettingsService>();
         settings.Get(SettingsKeys.DisplayCurrency, "").Returns("");
-        settings.Get("Currency", "EUR").Returns("USD");
+        settings.Get(SettingsKeys.Currency, "EUR").Returns("USD");
 
         var service = new DisplayCurrencyService(settings);
 
@@ -37,7 +37,7 @@ public class DisplayCurrencyServiceTests
     {
         var settings = Substitute.For<ISettingsService>();
         settings.Get(SettingsKeys.DisplayCurrency, "").Returns("");
-        settings.Get("Currency", "EUR").Returns("EUR");
+        settings.Get(SettingsKeys.Currency, "EUR").Returns("EUR");
 
         var service = new DisplayCurrencyService(settings);
         var changed = false;
@@ -75,7 +75,7 @@ public class DisplayCurrencyServiceTests
     {
         var settings = Substitute.For<ISettingsService>();
         settings.Get(SettingsKeys.DisplayCurrency, "").Returns("");
-        settings.Get("Currency", "EUR").Returns("EUR");
+        settings.Get(SettingsKeys.Currency, "EUR").Returns("EUR");
 
         var service = new DisplayCurrencyService(settings);
         service.SelectedIndex = index;

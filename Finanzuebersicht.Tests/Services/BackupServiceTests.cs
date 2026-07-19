@@ -1,4 +1,5 @@
 using Xunit;
+using Finanzuebersicht.Core.Constants;
 using Finanzuebersicht.Models;
 using System.IO.Compression;
 using System.Text.Json;
@@ -116,10 +117,10 @@ namespace Finanzuebersicht.Tests.Services
             var metadata = await service.CreateBackupAsync(_testBackupDir);
 
             // Assert
-            Assert.Equal(2, metadata.EntityCounts["categories"]);
-            Assert.Equal(1, metadata.EntityCounts["accounts"]);
-            Assert.Equal(3, metadata.EntityCounts["transactions"]);
-            Assert.Equal(1, metadata.EntityCounts["recurring"]);
+            Assert.Equal(2, metadata.EntityCounts[BackupEntityKeys.Categories]);
+            Assert.Equal(1, metadata.EntityCounts[BackupEntityKeys.Accounts]);
+            Assert.Equal(3, metadata.EntityCounts[BackupEntityKeys.Transactions]);
+            Assert.Equal(1, metadata.EntityCounts[BackupEntityKeys.Recurring]);
         }
 
         [Fact]
@@ -149,8 +150,8 @@ namespace Finanzuebersicht.Tests.Services
             }
 
             // Assert: EntityCounts enthält budgets und sparziele
-            Assert.Equal(2, metadata.EntityCounts["budgets"]);
-            Assert.Equal(1, metadata.EntityCounts["sparziele"]);
+            Assert.Equal(2, metadata.EntityCounts[BackupEntityKeys.Budgets]);
+            Assert.Equal(1, metadata.EntityCounts[BackupEntityKeys.Sparziele]);
         }
 
         [Fact]
@@ -264,7 +265,12 @@ namespace Finanzuebersicht.Tests.Services
                 Id = "test",
                 CreatedAt = DateTime.UtcNow,
                 SchemaVersion = 999, // Wrong version!
-                EntityCounts = new Dictionary<string, int> { { "categories", 0 }, { "transactions", 0 }, { "recurring", 0 } },
+                EntityCounts = new Dictionary<string, int>
+                {
+                    { BackupEntityKeys.Categories, 0 },
+                    { BackupEntityKeys.Transactions, 0 },
+                    { BackupEntityKeys.Recurring, 0 }
+                },
                 FileName = "backup_wrongversion.zip"
             };
 

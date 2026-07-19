@@ -14,7 +14,7 @@ public class LocalDataServiceEdgeCaseTests : IDisposable
         Directory.CreateDirectory(_tempDir);
 
         var settings = new SettingsService(Path.Combine(_tempDir, "settings.json"));
-        settings.Set("DataPath", _tempDir);
+        settings.Set(SettingsKeys.DataPath, _tempDir);
         _service = new LocalDataService(settings, new Finanzuebersicht.Core.Services.SystemClock());
     }
 

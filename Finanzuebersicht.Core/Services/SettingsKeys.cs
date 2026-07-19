@@ -5,6 +5,23 @@ namespace Finanzuebersicht.Core.Services
     /// </summary>
     public static class SettingsKeys
     {
+        // Darstellung und Lokalisierung
+        /// <summary>
+        /// Ausgewähltes App-Theme (System, Light oder Dark).
+        /// </summary>
+        public const string Theme = "Theme";
+
+        /// <summary>
+        /// Ausgewählter Sprachcode; leer bedeutet Systemsprache.
+        /// </summary>
+        public const string LanguageCode = "LanguageCode";
+
+        /// <summary>
+        /// Legacy-Key für den Anzeige-Währungscode.
+        /// Neue Werte werden unter <see cref="DisplayCurrency"/> gespeichert.
+        /// </summary>
+        public const string Currency = "Currency";
+
         // Daten und Pfade
         /// <summary>
         /// Benutzerdefinierter Pfad für Datenspeicher.

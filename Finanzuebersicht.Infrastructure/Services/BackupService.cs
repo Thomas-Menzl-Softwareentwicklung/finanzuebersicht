@@ -5,6 +5,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Finanzuebersicht.Core.Constants;
 using Microsoft.Extensions.Logging;
 using Finanzuebersicht.Models;
 
@@ -97,13 +98,13 @@ namespace Finanzuebersicht.Infrastructure.Services
                     FileName = fileName,
                     EntityCounts = new Dictionary<string, int>
                     {
-                        { "categories", categories.Count() },
-                        { "accounts", accounts.Count() },
-                        { "transactions", transactions.Count() },
-                        { "recurring", recurring.Count() },
-                        { "budgets", budgets.Count },
-                        { "sparziele", sparziele.Count },
-                        { "transactionTemplates", transactionTemplates.Count }
+                        { BackupEntityKeys.Categories, categories.Count() },
+                        { BackupEntityKeys.Accounts, accounts.Count() },
+                        { BackupEntityKeys.Transactions, transactions.Count() },
+                        { BackupEntityKeys.Recurring, recurring.Count() },
+                        { BackupEntityKeys.Budgets, budgets.Count },
+                        { BackupEntityKeys.Sparziele, sparziele.Count },
+                        { BackupEntityKeys.TransactionTemplates, transactionTemplates.Count }
                     }
                 };
 
@@ -122,7 +123,13 @@ namespace Finanzuebersicht.Infrastructure.Services
                 }
 
                 _logger?.LogInformation("Backup erstellt: {FileName} mit {CatCount} Kategorien, {TxnCount} Transaktionen, {RecCount} Daueraufträgen, {BudCount} Budgets, {SparCount} Sparzielen, {TemplateCount} Vorlagen",
-                    fileName, metadata.EntityCounts["categories"], metadata.EntityCounts["transactions"], metadata.EntityCounts["recurring"], metadata.EntityCounts["budgets"], metadata.EntityCounts["sparziele"], metadata.EntityCounts["transactionTemplates"]);
+                    fileName,
+                    metadata.EntityCounts[BackupEntityKeys.Categories],
+                    metadata.EntityCounts[BackupEntityKeys.Transactions],
+                    metadata.EntityCounts[BackupEntityKeys.Recurring],
+                    metadata.EntityCounts[BackupEntityKeys.Budgets],
+                    metadata.EntityCounts[BackupEntityKeys.Sparziele],
+                    metadata.EntityCounts[BackupEntityKeys.TransactionTemplates]);
 
                 // Speichere Zeitstempel in Settings
                 _settingsService.SetLastBackupTime(_clock.UtcNow);
@@ -245,10 +252,10 @@ namespace Finanzuebersicht.Infrastructure.Services
                 return new RestoreResult
                 {
                     Success = true,
-                    Details = $"Wiederhergestellt: {counts.GetValueOrDefault("categories")} Kategorien, " +
-                              $"{counts.GetValueOrDefault("transactions")} Transaktionen, " +
-                              $"{counts.GetValueOrDefault("recurring")} Daueraufträge, " +
-                              $"{counts.GetValueOrDefault("transactionTemplates")} Vorlagen",
+                    Details = $"Wiederhergestellt: {counts.GetValueOrDefault(BackupEntityKeys.Categories)} Kategorien, " +
+                              $"{counts.GetValueOrDefault(BackupEntityKeys.Transactions)} Transaktionen, " +
+                              $"{counts.GetValueOrDefault(BackupEntityKeys.Recurring)} Daueraufträge, " +
+                              $"{counts.GetValueOrDefault(BackupEntityKeys.TransactionTemplates)} Vorlagen",
                     RestoredMetadata = archiveData.Metadata
                 };
             }

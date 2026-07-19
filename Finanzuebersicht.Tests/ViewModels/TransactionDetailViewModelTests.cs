@@ -28,7 +28,7 @@ public class TransactionDetailViewModelTests
             Verwendungszweck = "Wocheneinkauf"
         };
 
-        viewModel.ApplyQueryAttributes(new Dictionary<string, object> { ["Transaction"] = transaction });
+        viewModel.ApplyQueryAttributes(new Dictionary<string, object> { [NavigationQueryKeys.Transaction] = transaction });
 
         Assert.Equal("Supermarkt", viewModel.Titel);
         Assert.Equal(42.50m.ToString("F2", CultureInfo.CurrentCulture), viewModel.BetragText);

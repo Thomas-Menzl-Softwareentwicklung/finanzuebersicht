@@ -22,7 +22,7 @@ public class AccountDetailViewModelTests
             OpeningBalanceDate = new DateTime(2026, 1, 1)
         };
 
-        viewModel.ApplyQueryAttributes(new Dictionary<string, object> { ["Account"] = account });
+        viewModel.ApplyQueryAttributes(new Dictionary<string, object> { [NavigationQueryKeys.Account] = account });
 
         Assert.Equal("Giro", viewModel.Name);
         Assert.Equal(AccountType.Girokonto, viewModel.Type);
@@ -64,7 +64,7 @@ public class AccountDetailViewModelTests
         var viewModel = CreateSut(out _, out var dialogService);
         viewModel.ApplyQueryAttributes(new Dictionary<string, object>
         {
-            ["Account"] = new Account { Id = "acc-1", Name = "Giro", OpeningBalance = 1000m }
+            [NavigationQueryKeys.Account] = new Account { Id = "acc-1", Name = "Giro", OpeningBalance = 1000m }
         });
         viewModel.ActualBalanceText = "abc";
 
