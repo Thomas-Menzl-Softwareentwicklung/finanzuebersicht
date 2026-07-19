@@ -12,13 +12,13 @@ public class DataMigrationTests
         var data = new BackupArchiveData
         {
             Metadata = new BackupMetadata { SchemaVersion = 1 },
-            Files = { ["categories.json"] = "[]", ["transactions.json"] = "[]" }
+            Files = { [DataFileNames.Categories] = "[]", [DataFileNames.Transactions] = "[]" }
         };
 
         var result = await migrator.MigrateAsync(data);
 
-        Assert.True(result.Files.ContainsKey("budgets.json"));
-        Assert.Equal("[]", result.Files["budgets.json"]);
+        Assert.True(result.Files.ContainsKey(DataFileNames.Budgets));
+        Assert.Equal("[]", result.Files[DataFileNames.Budgets]);
     }
 
     [Fact]
@@ -28,13 +28,13 @@ public class DataMigrationTests
         var data = new BackupArchiveData
         {
             Metadata = new BackupMetadata { SchemaVersion = 1 },
-            Files = { ["categories.json"] = "[]" }
+            Files = { [DataFileNames.Categories] = "[]" }
         };
 
         var result = await migrator.MigrateAsync(data);
 
-        Assert.True(result.Files.ContainsKey("sparziele.json"));
-        Assert.Equal("[]", result.Files["sparziele.json"]);
+        Assert.True(result.Files.ContainsKey(DataFileNames.Sparziele));
+        Assert.Equal("[]", result.Files[DataFileNames.Sparziele]);
     }
 
     [Fact]
@@ -45,12 +45,12 @@ public class DataMigrationTests
         var data = new BackupArchiveData
         {
             Metadata = new BackupMetadata { SchemaVersion = 1 },
-            Files = { ["budgets.json"] = existingBudgets, ["sparziele.json"] = "[]" }
+            Files = { [DataFileNames.Budgets] = existingBudgets, [DataFileNames.Sparziele] = "[]" }
         };
 
         var result = await migrator.MigrateAsync(data);
 
-        Assert.Equal(existingBudgets, result.Files["budgets.json"]);
+        Assert.Equal(existingBudgets, result.Files[DataFileNames.Budgets]);
     }
 
     [Fact]
@@ -86,7 +86,7 @@ public class DataMigrationTests
         var data = new BackupArchiveData
         {
             Metadata = new BackupMetadata { SchemaVersion = 1 },
-            Files = { ["categories.json"] = "[]" }
+            Files = { [DataFileNames.Categories] = "[]" }
         };
 
         var result = await service.MigrateAsync(data, targetVersion: 2);

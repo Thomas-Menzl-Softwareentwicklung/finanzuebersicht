@@ -27,7 +27,7 @@ public class LocalDataServiceEdgeCaseTests : IDisposable
     [Fact]
     public async Task LoadAsync_KorrupteJSON_WirftDataCorruptionException()
     {
-        await File.WriteAllTextAsync(Path.Combine(_tempDir, "categories.json"), "{ not valid json [[[");
+        await File.WriteAllTextAsync(Path.Combine(_tempDir, DataFileNames.Categories), "{ not valid json [[[");
 
         await Assert.ThrowsAsync<DataCorruptionException>(
             () => _service.GetCategoriesAsync());

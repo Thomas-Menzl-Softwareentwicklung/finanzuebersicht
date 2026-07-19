@@ -5,7 +5,7 @@ namespace Finanzuebersicht.Infrastructure.Services;
 
 public class SparZielStore : JsonDataStoreBase, ISparZielRepository
 {
-    private string SparZieleFile => Path.Combine(DataDir, "sparziele.json");
+    private string SparZieleFile => Path.Combine(DataDir, DataFileNames.Sparziele);
 
     public SparZielStore(string dataDir, ILogger<SparZielStore>? logger = null)
         : base(dataDir, logger) { }

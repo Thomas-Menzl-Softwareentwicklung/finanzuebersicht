@@ -6,7 +6,7 @@ namespace Finanzuebersicht.Infrastructure.Services;
 public class TransactionTemplateStore(string dataDir, ILogger<TransactionTemplateStore>? logger = null)
     : JsonDataStoreBase(dataDir, logger), ITransactionTemplateRepository
 {
-    private string TemplatesFile => Path.Combine(DataDir, "transaction-templates.json");
+    private string TemplatesFile => Path.Combine(DataDir, DataFileNames.TransactionTemplates);
 
     public async Task<List<TransactionTemplate>> GetTransactionTemplatesAsync()
     {

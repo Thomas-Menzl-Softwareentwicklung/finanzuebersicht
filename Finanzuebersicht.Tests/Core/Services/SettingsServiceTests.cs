@@ -50,7 +50,7 @@ public class SettingsServiceTests : IDisposable
 
         var settings = new SettingsService(path);
 
-        Assert.Equal("Dark", settings.Get(SettingsKeys.Theme));
+        Assert.Equal(ThemeValues.Dark, settings.Get(SettingsKeys.Theme));
         Assert.Equal("EUR", settings.Get(SettingsKeys.Currency));
     }
 

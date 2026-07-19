@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Finanzuebersicht.Core.Constants;
 
 namespace Finanzuebersicht.ViewModels;
 
@@ -30,11 +31,11 @@ public partial class AppearanceViewModel : ObservableObject
         _loc = localizationService;
         _displayCurrency = displayCurrency;
 
-        var theme = _settings.Get(SettingsKeys.Theme, "System");
+        var theme = _settings.Get(SettingsKeys.Theme, ThemeValues.System);
         selectedThemeIndex = theme switch
         {
-            "Light" => 1,
-            "Dark" => 2,
+            ThemeValues.Light => 1,
+            ThemeValues.Dark => 2,
             _ => 0
         };
 
@@ -53,9 +54,9 @@ public partial class AppearanceViewModel : ObservableObject
     {
         var themeKey = value switch
         {
-            1 => "Light",
-            2 => "Dark",
-            _ => "System"
+            1 => ThemeValues.Light,
+            2 => ThemeValues.Dark,
+            _ => ThemeValues.System
         };
 
         _settings.Set(SettingsKeys.Theme, themeKey);

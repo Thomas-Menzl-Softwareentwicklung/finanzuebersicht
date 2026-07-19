@@ -1,4 +1,5 @@
-﻿using Finanzuebersicht.Core.Services;
+﻿using Finanzuebersicht.Core.Constants;
+using Finanzuebersicht.Core.Services;
 using Finanzuebersicht.Presentation;
 using Finanzuebersicht.Services;
 using Microsoft.Extensions.Logging;
@@ -45,7 +46,7 @@ public partial class App : global::Microsoft.Maui.Controls.Application
 		_logger = logger;
 
 		// Gespeichertes Theme anwenden (MAUI-Ebene)
-		_savedTheme = settings.Get(SettingsKeys.Theme, "System");
+		_savedTheme = settings.Get(SettingsKeys.Theme, ThemeValues.System);
 		_themeService.Apply(_savedTheme);
 	}
 

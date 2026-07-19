@@ -9,7 +9,7 @@ namespace Finanzuebersicht.Infrastructure.Services;
 /// </summary>
 public class RecurringStore : JsonDataStoreBase, IRecurringTransactionRepository
 {
-    private string RecurringFile => Path.Combine(DataDir, "recurring.json");
+    private string RecurringFile => Path.Combine(DataDir, DataFileNames.Recurring);
 
     public RecurringStore(string dataDir, ILogger<RecurringStore>? logger = null)
         : base(dataDir, logger)
