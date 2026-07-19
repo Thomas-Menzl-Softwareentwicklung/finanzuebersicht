@@ -1,3 +1,5 @@
+using Finanzuebersicht.Core.Constants;
+
 namespace Finanzuebersicht.Services;
 
 /// <summary>
@@ -11,8 +13,8 @@ public class ThemeService : IThemeService
 
         global::Microsoft.Maui.Controls.Application.Current.UserAppTheme = themeKey switch
         {
-            "Light" => AppTheme.Light,
-            "Dark" => AppTheme.Dark,
+            ThemeValues.Light => AppTheme.Light,
+            ThemeValues.Dark => AppTheme.Dark,
             _ => AppTheme.Unspecified
         };
 
@@ -22,8 +24,8 @@ public class ThemeService : IThemeService
         {
             var style = themeKey switch
             {
-                "Light" => UIKit.UIUserInterfaceStyle.Light,
-                "Dark" => UIKit.UIUserInterfaceStyle.Dark,
+                ThemeValues.Light => UIKit.UIUserInterfaceStyle.Light,
+                ThemeValues.Dark => UIKit.UIUserInterfaceStyle.Dark,
                 _ => UIKit.UIUserInterfaceStyle.Unspecified
             };
 

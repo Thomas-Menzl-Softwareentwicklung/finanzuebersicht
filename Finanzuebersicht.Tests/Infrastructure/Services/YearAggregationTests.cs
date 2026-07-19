@@ -35,8 +35,8 @@ namespace Finanzuebersicht.Tests.Services
             };
 
             var jsonOptions = new JsonSerializerOptions { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
-            await File.WriteAllTextAsync(Path.Combine(_tempDir, "categories.json"), JsonSerializer.Serialize(categories, jsonOptions));
-            await File.WriteAllTextAsync(Path.Combine(_tempDir, "transactions.json"), JsonSerializer.Serialize(transactions, jsonOptions));
+            await File.WriteAllTextAsync(Path.Combine(_tempDir, DataFileNames.Categories), JsonSerializer.Serialize(categories, jsonOptions));
+            await File.WriteAllTextAsync(Path.Combine(_tempDir, DataFileNames.Transactions), JsonSerializer.Serialize(transactions, jsonOptions));
 
             // Use SettingsService to point LocalDataService to temp dir
             var settings = new SettingsService(Path.Combine(_tempDir, "settings.json"));

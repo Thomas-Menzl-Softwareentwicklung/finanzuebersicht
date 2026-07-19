@@ -12,7 +12,7 @@ namespace Finanzuebersicht.Infrastructure.Services;
 /// </summary>
 public class TransactionStore : JsonDataStoreBase, ITransactionRepository
 {
-    private string TransactionsFile => Path.Combine(DataDir, "transactions.json");
+    private string TransactionsFile => Path.Combine(DataDir, DataFileNames.Transactions);
     private readonly CategoryStore? _categoryStore;
 
     public TransactionStore(string dataDir, ILogger<TransactionStore>? logger = null, CategoryStore? categoryStore = null)
@@ -187,7 +187,7 @@ public class TransactionStore : JsonDataStoreBase, ITransactionRepository
             }
             else
             {
-                var categoriesFile = Path.Combine(DataDir, "categories.json");
+                var categoriesFile = Path.Combine(DataDir, DataFileNames.Categories);
                 categories = await LoadAsync<Category>(categoriesFile);
             }
 

@@ -75,14 +75,14 @@ namespace Finanzuebersicht.Tests.Services
             // Assert
             using (var zipArchive = ZipFile.OpenRead(zipPath))
             {
-                Assert.NotNull(zipArchive.GetEntry("categories.json"));
-                Assert.NotNull(zipArchive.GetEntry("accounts.json"));
-                Assert.NotNull(zipArchive.GetEntry("transactions.json"));
-                Assert.NotNull(zipArchive.GetEntry("recurring.json"));
-                Assert.NotNull(zipArchive.GetEntry("budgets.json"));
-                Assert.NotNull(zipArchive.GetEntry("sparziele.json"));
-                Assert.NotNull(zipArchive.GetEntry("transaction-templates.json"));
-                Assert.NotNull(zipArchive.GetEntry("backup.metadata.json"));
+                Assert.NotNull(zipArchive.GetEntry(DataFileNames.Categories));
+                Assert.NotNull(zipArchive.GetEntry(DataFileNames.Accounts));
+                Assert.NotNull(zipArchive.GetEntry(DataFileNames.Transactions));
+                Assert.NotNull(zipArchive.GetEntry(DataFileNames.Recurring));
+                Assert.NotNull(zipArchive.GetEntry(DataFileNames.Budgets));
+                Assert.NotNull(zipArchive.GetEntry(DataFileNames.Sparziele));
+                Assert.NotNull(zipArchive.GetEntry(DataFileNames.TransactionTemplates));
+                Assert.NotNull(zipArchive.GetEntry(DataFileNames.BackupMetadata));
             }
         }
 
@@ -145,8 +145,8 @@ namespace Finanzuebersicht.Tests.Services
             // Assert: ZIP enthält budgets.json und sparziele.json
             using (var zipArchive = ZipFile.OpenRead(zipPath))
             {
-                Assert.NotNull(zipArchive.GetEntry("budgets.json"));
-                Assert.NotNull(zipArchive.GetEntry("sparziele.json"));
+                Assert.NotNull(zipArchive.GetEntry(DataFileNames.Budgets));
+                Assert.NotNull(zipArchive.GetEntry(DataFileNames.Sparziele));
             }
 
             // Assert: EntityCounts enthält budgets und sparziele
@@ -228,13 +228,13 @@ namespace Finanzuebersicht.Tests.Services
             // Create incomplete ZIP (missing files)
             using (var zipArchive = ZipFile.Open(incompleteZipPath, ZipArchiveMode.Create))
             {
-                var entry = zipArchive.CreateEntry("categories.json");
+                var entry = zipArchive.CreateEntry(DataFileNames.Categories);
                 using (var stream = entry.Open())
                 using (var writer = new StreamWriter(stream))
                 {
                     writer.Write("[]");
                 }
-                WriteJsonToZip(zipArchive, "backup.metadata.json", new BackupMetadata
+                WriteJsonToZip(zipArchive, DataFileNames.BackupMetadata, new BackupMetadata
                 {
                     Id = "incomplete",
                     CreatedAt = DateTime.UtcNow,
@@ -276,10 +276,10 @@ namespace Finanzuebersicht.Tests.Services
 
             using (var zipArchive = ZipFile.Open(wrongVersionZipPath, ZipArchiveMode.Create))
             {
-                WriteJsonToZip(zipArchive, "categories.json", new List<object>());
-                WriteJsonToZip(zipArchive, "transactions.json", new List<object>());
-                WriteJsonToZip(zipArchive, "recurring.json", new List<object>());
-                WriteJsonToZip(zipArchive, "backup.metadata.json", wrongMetadata);
+                WriteJsonToZip(zipArchive, DataFileNames.Categories, new List<object>());
+                WriteJsonToZip(zipArchive, DataFileNames.Transactions, new List<object>());
+                WriteJsonToZip(zipArchive, DataFileNames.Recurring, new List<object>());
+                WriteJsonToZip(zipArchive, DataFileNames.BackupMetadata, wrongMetadata);
             }
 
             // Act

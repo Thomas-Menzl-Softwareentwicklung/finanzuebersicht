@@ -1,3 +1,5 @@
+using Finanzuebersicht.Core.Constants;
+
 namespace Finanzuebersicht.Core.Services.Migrations;
 
 /// <summary>
@@ -11,11 +13,11 @@ public class V1ToV2Migrator : IDataMigrator
 
     public Task<BackupArchiveData> MigrateAsync(BackupArchiveData data)
     {
-        if (!data.Files.ContainsKey("budgets.json"))
-            data.Files["budgets.json"] = "[]";
+        if (!data.Files.ContainsKey(DataFileNames.Budgets))
+            data.Files[DataFileNames.Budgets] = "[]";
 
-        if (!data.Files.ContainsKey("sparziele.json"))
-            data.Files["sparziele.json"] = "[]";
+        if (!data.Files.ContainsKey(DataFileNames.Sparziele))
+            data.Files[DataFileNames.Sparziele] = "[]";
 
         return Task.FromResult(data);
     }

@@ -5,7 +5,7 @@ namespace Finanzuebersicht.Infrastructure.Services;
 
 public class BudgetStore : JsonDataStoreBase, IBudgetRepository
 {
-    private string BudgetsFile => Path.Combine(DataDir, "budgets.json");
+    private string BudgetsFile => Path.Combine(DataDir, DataFileNames.Budgets);
 
     public BudgetStore(string dataDir, ILogger<BudgetStore>? logger = null)
         : base(dataDir, logger) { }
