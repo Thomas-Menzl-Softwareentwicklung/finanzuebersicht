@@ -392,6 +392,8 @@ public class CategoriesViewModelTests
 
         var createCategoryViewModel = new CategoryDetailViewModel(
             new SaveCategoryDetailUseCase(categoryRepository),
+            new SaveCategoryBudgetUseCase(Substitute.For<IBudgetRepository>()),
+            new LoadCategoryBudgetUseCase(Substitute.For<IBudgetRepository>()),
             navigationService,
             localizationService,
             Substitute.For<IFeedbackService>(),

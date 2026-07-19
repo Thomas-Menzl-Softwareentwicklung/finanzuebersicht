@@ -16,6 +16,7 @@ public static class ApplicationServiceCollectionExtensions
         services.AddTransient<LoadCategoriesUseCase>();
         services.AddTransient<SaveCategoryDetailUseCase>();
         services.AddTransient<SaveCategoryBudgetUseCase>();
+        services.AddTransient<LoadCategoryBudgetUseCase>();
         services.AddTransient<LoadAccountsUseCase>();
         services.AddTransient<LoadActiveAccountsUseCase>();
         services.AddTransient<SaveAccountDetailUseCase>();

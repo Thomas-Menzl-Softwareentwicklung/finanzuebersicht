@@ -12,23 +12,23 @@ namespace Finanzuebersicht.ViewModels;
 
 public partial class CategoryDetailViewModel(
     SaveCategoryDetailUseCase saveCategoryDetailUseCase,
+    SaveCategoryBudgetUseCase saveCategoryBudgetUseCase,
+    LoadCategoryBudgetUseCase loadCategoryBudgetUseCase,
     INavigationService navigationService,
     ILocalizationService localizationService,
     IFeedbackService feedbackService,
     IAppEvents appEvents,
     IDialogService dialogService,
-    SaveCategoryBudgetUseCase? saveCategoryBudgetUseCase = null,
-    IBudgetRepository? budgetRepository = null,
     ILogger<CategoryDetailViewModel>? logger = null) : ObservableObject, IApplyQueryAttributes, ILocalizableViewModel
 {
     private readonly SaveCategoryDetailUseCase _saveCategoryDetailUseCase = saveCategoryDetailUseCase;
+    private readonly SaveCategoryBudgetUseCase _saveCategoryBudgetUseCase = saveCategoryBudgetUseCase;
+    private readonly LoadCategoryBudgetUseCase _loadCategoryBudgetUseCase = loadCategoryBudgetUseCase;
     private readonly INavigationService _navigationService = navigationService;
     private readonly ILocalizationService _loc = localizationService;
     private readonly IFeedbackService _feedbackService = feedbackService;
     private readonly IAppEvents _appEvents = appEvents;
     private readonly IDialogService _dialogService = dialogService;
-    private readonly SaveCategoryBudgetUseCase? _saveCategoryBudgetUseCase = saveCategoryBudgetUseCase;
-    private readonly IBudgetRepository? _budgetRepository = budgetRepository;
     private readonly ILogger<CategoryDetailViewModel>? _logger = logger;
     private Category? _existingCategory;
 
@@ -81,8 +81,8 @@ public partial class CategoryDetailViewModel(
     [ObservableProperty]
     private string monthlyBudgetText = string.Empty;
 
-    public string PageTitle => _existingCategory == null 
-        ? _loc.GetString(ResourceKeys.Title_NeueKategorie) 
+    public string PageTitle => _existingCategory == null
+        ? _loc.GetString(ResourceKeys.Title_NeueKategorie)
         : _loc.GetString(ResourceKeys.Title_KategorieBearbeiten);
 
     public List<string> VerfuegbareIcons { get; } =
@@ -126,11 +126,8 @@ public partial class CategoryDetailViewModel(
     {
         try
         {
-            if (_budgetRepository == null || string.IsNullOrEmpty(kategorieId)) return;
-            // Always load the default budget (monat=null, jahr=null) — consistent with Save
-            var budgets = await _budgetRepository.GetBudgetsAsync();
-            var budget = budgets.FirstOrDefault(b => b.KategorieId == kategorieId && b.Monat == null && b.Jahr == null);
-            var betrag = budget?.Betrag ?? 0;
+            if (string.IsNullOrEmpty(kategorieId)) return;
+            var betrag = await _loadCategoryBudgetUseCase.ExecuteAsync(kategorieId);
             MonthlyBudgetText = betrag > 0 ? betrag.ToString("F2", CultureInfo.CurrentCulture) : string.Empty;
         }
         catch (Exception ex)
@@ -175,7 +172,7 @@ public partial class CategoryDetailViewModel(
             _existingCategory = savedCategory;
             OnPropertyChanged(nameof(PageTitle));
 
-            if (_saveCategoryBudgetUseCase != null && !string.IsNullOrEmpty(savedCategory.Id))
+            if (!string.IsNullOrEmpty(savedCategory.Id))
             {
                 decimal.TryParse(MonthlyBudgetText, NumberStyles.Any, CultureInfo.CurrentCulture, out var budget);
                 await _saveCategoryBudgetUseCase.ExecuteAsync(savedCategory.Id, budget);
