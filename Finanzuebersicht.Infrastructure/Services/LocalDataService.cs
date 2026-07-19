@@ -55,9 +55,9 @@ public class LocalDataService : IDataService, IAccountRepository, ITransactionTe
     /// </summary>
     public LocalDataService(ISettingsService? settings, IClock clock)
     {
-        var defaultDataDir = AppPaths.GetDefaultDataDir();
-        var customPath = settings?.Get(SettingsKeys.DataPath, "");
-        var dataDir = string.IsNullOrWhiteSpace(customPath) ? defaultDataDir : customPath;
+        var dataDir = settings is null
+            ? AppPaths.GetDefaultDataDir()
+            : DataPathResolver.ResolveDataDir(settings);
 
         _categoryStore = new CategoryStore(dataDir);
         _accountStore = new AccountStore(dataDir);

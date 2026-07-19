@@ -9,7 +9,7 @@ public class StorageViewModelTests
     [Fact]
     public void Constructor_LoadsDataPathFromSettings()
     {
-        using var settingsScope = new SettingsScope(nameof(StorageViewModelTests), (SettingsKeys.DataPath, "/Users/test/custom-data"));
+        using var settingsScope = new SettingsScope(nameof(StorageViewModelTests), ("DataPath", "/Users/test/custom-data"));
 
         var sut = new StorageViewModel(
             settingsScope.Settings,
@@ -17,12 +17,13 @@ public class StorageViewModelTests
             CreateLocalizationService());
 
         Assert.Equal("/Users/test/custom-data", sut.DataPath);
+        Assert.False(sut.RequiresRestart);
     }
 
     [Fact]
     public void Constructor_UsesDefaultPath_WhenSettingsEmpty()
     {
-        using var settingsScope = new SettingsScope(nameof(StorageViewModelTests), (SettingsKeys.DataPath, string.Empty));
+        using var settingsScope = new SettingsScope(nameof(StorageViewModelTests), ("DataPath", string.Empty));
 
         var sut = new StorageViewModel(
             settingsScope.Settings,
@@ -31,12 +32,31 @@ public class StorageViewModelTests
 
         Assert.Equal(AppPaths.GetDefaultDataDir(), sut.DataPath);
         Assert.False(string.IsNullOrWhiteSpace(sut.DataPath));
+        Assert.False(sut.RequiresRestart);
     }
 
     [Fact]
-    public async Task ResetDataPath_ClearsSettingsAndRestoresDefault()
+    public void Constructor_ShowsPendingPath_WhenRestartRequired()
     {
-        using var settingsScope = new SettingsScope(nameof(StorageViewModelTests), (SettingsKeys.DataPath, "/Users/test/custom-data"));
+        using var settingsScope = new SettingsScope(
+            nameof(StorageViewModelTests),
+            ("DataPath", "/Users/test/active"),
+            (SettingsKeys.DataPathPending, "/Users/test/pending"));
+
+        var sut = new StorageViewModel(
+            settingsScope.Settings,
+            CreateDialogService(),
+            CreateLocalizationService());
+
+        Assert.Equal("/Users/test/pending", sut.DataPath);
+        Assert.True(sut.RequiresRestart);
+        Assert.Equal("/Users/test/active", settingsScope.Settings.Get(SettingsKeys.DataPath));
+    }
+
+    [Fact]
+    public async Task ResetDataPath_SetsPendingDefault_KeepsActiveDataPath()
+    {
+        using var settingsScope = new SettingsScope(nameof(StorageViewModelTests), ("DataPath", "/Users/test/custom-data"));
         var dialogService = CreateDialogService();
         var sut = new StorageViewModel(
             settingsScope.Settings,
@@ -45,8 +65,11 @@ public class StorageViewModelTests
 
         await sut.ResetDataPathCommand.ExecuteAsync(null);
 
-        Assert.Equal(string.Empty, settingsScope.Settings.Get(SettingsKeys.DataPath));
+        Assert.Equal("/Users/test/custom-data", settingsScope.Settings.Get(SettingsKeys.DataPath));
+        Assert.True(settingsScope.Settings.Contains(SettingsKeys.DataPathPending));
+        Assert.Equal(string.Empty, settingsScope.Settings.Get(SettingsKeys.DataPathPending));
         Assert.Equal(AppPaths.GetDefaultDataDir(), sut.DataPath);
+        Assert.True(sut.RequiresRestart);
         await dialogService.Received(1).ShowAlertAsync(
             ResourceKeys.Stn_SpeicherortZurueckgesetzt,
             ResourceKeys.Stn_SpeicherortZurueckgesetztDesc,
@@ -68,7 +91,8 @@ public class StorageViewModelTests
 
         await sut.ChooseDataPathCommand.ExecuteAsync(null);
 
-        Assert.Equal("__missing__", settingsScope.Settings.Get(SettingsKeys.DataPath, "__missing__"));
+        Assert.Equal("__missing__", settingsScope.Settings.Get("DataPath", "__missing__"));
+        Assert.False(settingsScope.Settings.Contains(SettingsKeys.DataPathPending));
         await dialogService.DidNotReceive().ShowAlertAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>());
     }
 
@@ -106,10 +130,39 @@ public class StorageViewModelTests
 
         await sut.ChooseDataPathCommand.ExecuteAsync(null);
 
-        Assert.Equal("__missing__", settingsScope.Settings.Get(SettingsKeys.DataPath, "__missing__"));
+        Assert.Equal("__missing__", settingsScope.Settings.Get("DataPath", "__missing__"));
+        Assert.False(settingsScope.Settings.Contains(SettingsKeys.DataPathPending));
         await dialogService.Received(1).ShowAlertAsync(
             ResourceKeys.Stn_UngueltigerOrdner,
             ResourceKeys.Stn_UngueltigerOrdnerDesc,
+            ResourceKeys.Btn_OK);
+    }
+
+    [Fact]
+    public async Task ChooseDataPath_SetsPending_KeepsActiveDataPath()
+    {
+        using var settingsScope = new SettingsScope(
+            nameof(StorageViewModelTests),
+            (SettingsKeys.DataPath, "/Users/test/active"));
+        var dialogService = CreateDialogService();
+        var folderPicker = Substitute.For<IFolderPicker>();
+        const string newPath = "/Users/test/new-storage";
+        folderPicker.PickAsync().Returns(Task.FromResult<string?>(newPath));
+        var sut = new StorageViewModel(
+            settingsScope.Settings,
+            dialogService,
+            CreateLocalizationService(),
+            folderPicker);
+
+        await sut.ChooseDataPathCommand.ExecuteAsync(null);
+
+        Assert.Equal("/Users/test/active", settingsScope.Settings.Get(SettingsKeys.DataPath));
+        Assert.Equal(newPath, settingsScope.Settings.Get(SettingsKeys.DataPathPending));
+        Assert.Equal(newPath, sut.DataPath);
+        Assert.True(sut.RequiresRestart);
+        await dialogService.Received(1).ShowAlertAsync(
+            ResourceKeys.Stn_SpeicherortGeaendert,
+            ResourceKeys.Stn_SpeicherortGeaendertDesc,
             ResourceKeys.Btn_OK);
     }
 
@@ -124,9 +177,8 @@ public class StorageViewModelTests
     private static ILocalizationService CreateLocalizationService()
     {
         var localizationService = Substitute.For<ILocalizationService>();
-        localizationService.GetString(Arg.Any<string>()).Returns(call => call.ArgNotNull<string>());
-        localizationService.GetString(Arg.Any<string>(), Arg.Any<object[]>()).Returns(call => call.ArgAtNotNull<string>(0));
+        localizationService.GetString(Arg.Any<string>()).Returns(call => call.Arg<string>());
+        localizationService.GetString(Arg.Any<string>(), Arg.Any<object[]>()).Returns(call => call.ArgAt<string>(0));
         return localizationService;
     }
-
 }

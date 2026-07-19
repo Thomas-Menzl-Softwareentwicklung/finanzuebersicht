@@ -143,6 +143,11 @@
                                TextColor="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}" />
                     </Border>
 
+                    <Label Text="{loc:Translate Hint_SpeicherortNeustart}"
+                           IsVisible="{Binding Storage.RequiresRestart}"
+                           FontSize="12"
+                           TextColor="{StaticResource TextTertiary}" />
+
                     <HorizontalStackLayout Spacing="8">
                         <Button Text="{loc:Translate Btn_OrdnerWaehlen}"
                                 Command="{Binding Storage.ChooseDataPathCommand}"

@@ -44,6 +44,24 @@ public class SettingsService : ISettingsService
         }
     }
 
+    public bool Contains(string key)
+    {
+        lock (_lock)
+        {
+            return _settings.ContainsKey(key);
+        }
+    }
+
+    public void Remove(string key)
+    {
+        lock (_lock)
+        {
+            if (!_settings.Remove(key))
+                return;
+            Save();
+        }
+    }
+
     private void Load()
     {
         try

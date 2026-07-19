@@ -152,6 +152,7 @@ public static class ResourceKeys
     public const string Stn_SpeicherortGeaendertDesc = nameof(Stn_SpeicherortGeaendertDesc);
     public const string Stn_SpeicherortZurueckgesetzt = nameof(Stn_SpeicherortZurueckgesetzt);
     public const string Stn_SpeicherortZurueckgesetztDesc = nameof(Stn_SpeicherortZurueckgesetztDesc);
+    public const string Hint_SpeicherortNeustart = nameof(Hint_SpeicherortNeustart);
     public const string Stn_SpracheDeutsch = nameof(Stn_SpracheDeutsch);
     public const string Stn_SpracheEnglisch = nameof(Stn_SpracheEnglisch);
     public const string Stn_SpracheSystem = nameof(Stn_SpracheSystem);
