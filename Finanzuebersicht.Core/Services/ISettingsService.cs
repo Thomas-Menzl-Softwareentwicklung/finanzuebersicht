@@ -12,6 +12,12 @@ public interface ISettingsService
     /// <summary>Sets a setting value and persists asynchronously in the background.</summary>
     void Set(string key, string value);
 
+    /// <summary>Returns whether the key exists in the settings store.</summary>
+    bool Contains(string key);
+
+    /// <summary>Removes a setting key if present and persists the change.</summary>
+    void Remove(string key);
+
     string GetBackupPath();
     void SetBackupPath(string path);
 

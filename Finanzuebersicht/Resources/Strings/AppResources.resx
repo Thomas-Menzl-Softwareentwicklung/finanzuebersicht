@@ -165,7 +165,10 @@ from the next restart.
 
 Please restart the app.</value></data>
   <data name="Stn_SpeicherortZurueckgesetzt" xml:space="preserve"><value>Storage Location Reset</value></data>
-  <data name="Stn_SpeicherortZurueckgesetztDesc" xml:space="preserve"><value>Data will be stored in the default directory from the next restart.</value></data>
+  <data name="Stn_SpeicherortZurueckgesetztDesc" xml:space="preserve"><value>Data will be stored in the default directory from the next restart.
+
+Please restart the app.</value></data>
+  <data name="Hint_SpeicherortNeustart" xml:space="preserve"><value>Restart required: Until then, data stays at the current storage location.</value></data>
   <data name="Stn_SpracheDeutsch" xml:space="preserve"><value>German</value></data>
   <data name="Stn_SpracheEnglisch" xml:space="preserve"><value>English</value></data>
   <data name="Stn_SpracheSystem" xml:space="preserve"><value>System Language</value></data>

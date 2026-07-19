@@ -28,6 +28,12 @@ namespace Finanzuebersicht.Core.Services
         /// </summary>
         public const string DataPath = "DataPath";
 
+        /// <summary>
+        /// Ausstehender Datenpfad; wird beim nächsten App-Start auf <see cref="DataPath"/> übernommen.
+        /// Leerer Wert bedeutet Reset auf den Standardpfad. Fehlt der Key, gibt es keine ausstehende Änderung.
+        /// </summary>
+        public const string DataPathPending = "DataPathPending";
+
         // Backup-Einstellungen
         /// <summary>
         /// Pfad zum Backup-Verzeichnis (Standard: {DataPath}/backups).

@@ -165,7 +165,10 @@ gespeichert.
 
 Bitte starte die App neu.</value></data>
   <data name="Stn_SpeicherortZurueckgesetzt" xml:space="preserve"><value>Speicherort zurückgesetzt</value></data>
-  <data name="Stn_SpeicherortZurueckgesetztDesc" xml:space="preserve"><value>Daten werden ab dem nächsten Neustart im Standard-Verzeichnis gespeichert.</value></data>
+  <data name="Stn_SpeicherortZurueckgesetztDesc" xml:space="preserve"><value>Daten werden ab dem nächsten Neustart im Standard-Verzeichnis gespeichert.
+
+Bitte starte die App neu.</value></data>
+  <data name="Hint_SpeicherortNeustart" xml:space="preserve"><value>Neustart erforderlich: Bis dahin bleiben Daten am bisherigen Speicherort.</value></data>
   <data name="Stn_SpracheDeutsch" xml:space="preserve"><value>Deutsch</value></data>
   <data name="Stn_SpracheEnglisch" xml:space="preserve"><value>Englisch</value></data>
   <data name="Stn_SpracheSystem" xml:space="preserve"><value>Systemsprache</value></data>
