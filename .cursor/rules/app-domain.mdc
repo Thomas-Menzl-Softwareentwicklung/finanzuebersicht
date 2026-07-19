@@ -11,7 +11,7 @@ alwaysApply: true
 
 - **Stack:** .NET 10 MAUI, Clean Architecture + MVVM, JSON-Persistenz, DE/EN
 - **Tabs:** Dashboard · Transaktionen · Daueraufträge · Verwaltung (Kategorien/Konten) · Sparziele · Einstellungen (Toolbar)
-- **Neuer Code:** ViewModel → Use Case → `I*Repository` (nicht `IDataService`)
+- **Neuer Code:** ViewModel → Use Case → `I*Repository`
 - **ViewModels:** `Finanzuebersicht.Presentation/ViewModels/` — in `PresentationServiceCollectionExtensions` registrieren
 - **Build macOS:** `dotnet build Finanzuebersicht/Finanzuebersicht.csproj -f net10.0-maccatalyst` → kopiert nach `~/Applications/Finanzübersicht.app`
 
@@ -39,8 +39,8 @@ alwaysApply: true
 
 Aktiver thematischer Milestone: **v1.20 – Architektur-Fundament** (vor Feature-Backlog / v2.0). Details: `docs/ROADMAP.md`.
 
-- Welle 0: DataPath-Restart (#289 ✅), DataFileNames (#290 ✅), Doc-Drift (#291)
-- Als Nächstes: Legacy `IDataService` (#268), dann Import/Backup Use Cases
+- Welle 0: DataPath-Restart (#289 ✅), DataFileNames (#290 ✅), Doc-Drift (#291 ✅)
+- Welle 1: Legacy `IDataService` (#268), Budget Use Case (#270)
 - CloudKit nur als Idee (#243); kein Sync-Code im Tree
 
 ## Nicht wiederholen

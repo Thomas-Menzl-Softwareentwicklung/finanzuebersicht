@@ -184,7 +184,7 @@ Finanzuebersicht.Tests/            ← xUnit Tests (net10.0)
 - Converters bleiben in `Finanzuebersicht/Converters/` (MAUI App)
 - ViewModels sind in `Finanzuebersicht.Presentation/ViewModels/`
 - `FileLogger` wurde entfernt; Logging läuft über `ILogger<T>`
-- `IDataService` ist nur noch Legacy-Kompatibilität; neue Features nutzen spezifische Repository-Interfaces
+- Repositories über `I*Repository`-Interfaces; `LocalDataService` orchestriert die JSON-Stores
 - `MauiProgram.cs` ist ein schlanker Orchestrator für die layer-spezifischen DI-Extensions
 
 ## Lokalisierung & Ressourcen

@@ -41,10 +41,11 @@ namespace Finanzuebersicht.Tests.Services
             // Use SettingsService to point LocalDataService to temp dir
             var settings = new SettingsService(Path.Combine(_tempDir, "settings.json"));
             settings.Set(SettingsKeys.DataPath, _tempDir);
-            var ds = new LocalDataService(settings, new Finanzuebersicht.Core.Services.SystemClock());
+            var ds = new LocalDataService(settings);
+            var reporting = new ReportingService(ds, ds);
 
             // Act
-            var summary = await ds.GetYearSummaryAsync(2025);
+            var summary = await reporting.GetYearSummaryAsync(2025);
 
             // Assert
             Assert.Equal(175m, summary.Total);

@@ -7,6 +7,8 @@ public class LocalDataServiceEdgeCaseTests : IDisposable
 {
     private readonly string _tempDir;
     private readonly LocalDataService _service;
+    private readonly ReportingService _reporting;
+    private readonly RecurringGenerationService _recurringGeneration;
 
     public LocalDataServiceEdgeCaseTests()
     {
@@ -15,7 +17,10 @@ public class LocalDataServiceEdgeCaseTests : IDisposable
 
         var settings = new SettingsService(Path.Combine(_tempDir, "settings.json"));
         settings.Set(SettingsKeys.DataPath, _tempDir);
-        _service = new LocalDataService(settings, new Finanzuebersicht.Core.Services.SystemClock());
+        _service = new LocalDataService(settings);
+        var clock = new Finanzuebersicht.Core.Services.SystemClock();
+        _reporting = new ReportingService(_service, _service);
+        _recurringGeneration = new RecurringGenerationService(_service, _service, clock);
     }
 
     public void Dispose()
@@ -64,7 +69,7 @@ public class LocalDataServiceEdgeCaseTests : IDisposable
             KategorieId = catId, Typ = TransactionType.Einnahme
         });
 
-        var summary = await _service.GetMonthSummaryAsync(2025, 6);
+        var summary = await _reporting.GetMonthSummaryAsync(2025, 6);
 
         Assert.Equal(80m, summary.Total);
         Assert.Single(summary.ByCategory);
@@ -86,12 +91,12 @@ public class LocalDataServiceEdgeCaseTests : IDisposable
         };
         await _service.SaveRecurringTransactionAsync(r);
 
-        await _service.GeneratePendingRecurringTransactionsAsync();
+        await _recurringGeneration.GeneratePendingRecurringTransactionsAsync();
         var countAfterFirst = (await _service.GetTransactionsAsync(DateTime.MinValue, DateTime.MaxValue))
             .Count(t => t.DauerauftragId == r.Id);
 
         // Zweiter Aufruf darf keine doppelten Transaktionen erzeugen
-        await _service.GeneratePendingRecurringTransactionsAsync();
+        await _recurringGeneration.GeneratePendingRecurringTransactionsAsync();
         var countAfterSecond = (await _service.GetTransactionsAsync(DateTime.MinValue, DateTime.MaxValue))
             .Count(t => t.DauerauftragId == r.Id);
 
@@ -112,7 +117,7 @@ public class LocalDataServiceEdgeCaseTests : IDisposable
             Aktiv = true
         };
         await _service.SaveRecurringTransactionAsync(r);
-        await _service.GeneratePendingRecurringTransactionsAsync();
+        await _recurringGeneration.GeneratePendingRecurringTransactionsAsync();
 
         var transactions = await _service.GetTransactionsAsync(DateTime.MinValue, DateTime.MaxValue);
         Assert.DoesNotContain(transactions, t => t.DauerauftragId == r.Id);
