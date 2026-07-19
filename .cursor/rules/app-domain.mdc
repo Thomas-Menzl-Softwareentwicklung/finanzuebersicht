@@ -33,8 +33,12 @@ alwaysApply: true
 - Anfangssaldo: Konto bearbeiten (#212 ✅)
 - Dashboard: Kontenübersicht-Karte mit Gesamtsaldo (#213 ✅)
 - Cashflow: 30-Tage-Vorschau (`CashflowPage`, vom Dashboard)
-- Manueller Abgleich (ohne Bank-API) → Issue #214 (offen)
+- Manueller Abgleich (ohne Bank-API) → Issue #214 (✅)
+
+## Architektur-Backlog
+
+Aktiver thematischer Milestone: **v1.20 – Architektur-Fundament** (vor Feature-Backlog / v2.0). Details: `docs/ROADMAP.md`.
 
 ## Nicht wiederholen
 
-#212 und #213 sind umgesetzt. Vor neuen Konten-/Saldo-Vorschlägen: `copilot-instructions.md` + #214 prüfen.
+#212, #213 und #214 sind umgesetzt. Vor neuen Konten-/Saldo-Vorschlägen: `copilot-instructions.md` prüfen.
