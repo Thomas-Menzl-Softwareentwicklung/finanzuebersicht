@@ -148,22 +148,22 @@ Weitere Umsetzungen in v1.17: Live-Währungsrefresh (`CurrencyRefreshRegistry`),
 
 ## 🏗️ v1.20 — Architektur-Fundament *(aktiv)* · [Milestone](https://github.com/tom4711/finanzuebersicht/milestone/24)
 
-Ein großer thematischer Meilenstein **vor** Feature-Backlog und v2.0. Kein Zwischen-Release nötig — Reihenfolge unten abarbeiten.
+Ein großer thematischer Meilenstein **vor** Feature-Backlog und v2.0. Kein Zwischen-Release nötig — Reihenfolge unten abarbeiten. Architektur-Arbeit bewusst vor Mehrwährung/Verschlüsselung (v2.0).
 
-Setup-Hilfe (Milestone/Labels zuweisen, #272 schließen): `scripts/setup-v120-architecture-milestone.sh` (braucht Token mit Issue-Schreibrechten).
+Setup-Hilfe (Milestone/Labels): `scripts/setup-v120-architecture-milestone.sh` (einmalig mit Issue-Schreibrechten; #272 bereits geschlossen).
 
 ### Empfohlene Reihenfolge
 
-| Welle | Issues | Fokus |
-|-------|--------|--------|
-| 0 | [#289](https://github.com/tom4711/finanzuebersicht/issues/289), [#290](https://github.com/tom4711/finanzuebersicht/issues/290), [#291](https://github.com/tom4711/finanzuebersicht/issues/291) | DataPath-Remount, DataFileNames, Doc-Drift |
-| 1 | [#268](https://github.com/tom4711/finanzuebersicht/issues/268), [#270](https://github.com/tom4711/finanzuebersicht/issues/270) | Legacy `IDataService` raus, Budget Use Case |
-| 2 | [#269](https://github.com/tom4711/finanzuebersicht/issues/269), [#292](https://github.com/tom4711/finanzuebersicht/issues/292), [#273](https://github.com/tom4711/finanzuebersicht/issues/273) | Import-/Backup-Use-Cases, Vollscan-Queries |
-| 3 | [#267](https://github.com/tom4711/finanzuebersicht/issues/267), [#293](https://github.com/tom4711/finanzuebersicht/issues/293), [#294](https://github.com/tom4711/finanzuebersicht/issues/294) | Dashboard-/Transactions-/Categories-VM-Splits |
-| 4 | [#274](https://github.com/tom4711/finanzuebersicht/issues/274) | Fehler- & i18n-Grenze |
-| 5 | [#271](https://github.com/tom4711/finanzuebersicht/issues/271), [#295](https://github.com/tom4711/finanzuebersicht/issues/295) | IAppEvents, Navigation härten |
-| 6 | [#296](https://github.com/tom4711/finanzuebersicht/issues/296)–[#299](https://github.com/tom4711/finanzuebersicht/issues/299) | MAUI-Readiness (Listen, Nested Scroll, Theme, Storage-UI) |
-| 7 | [#300](https://github.com/tom4711/finanzuebersicht/issues/300) | Sync-Persistenz-Prep (`ExternalId`/`Source`) für später #243/#245 |
+| Welle | Issues | Fokus | Stand |
+|-------|--------|--------|-------|
+| 0 | [#289](https://github.com/tom4711/finanzuebersicht/issues/289) ✅, [#290](https://github.com/tom4711/finanzuebersicht/issues/290) ✅, [#291](https://github.com/tom4711/finanzuebersicht/issues/291) | DataPath-Restart, DataFileNames, Doc-Drift | Welle 0 fast fertig |
+| 1 | [#268](https://github.com/tom4711/finanzuebersicht/issues/268), [#270](https://github.com/tom4711/finanzuebersicht/issues/270) | Legacy `IDataService` raus, Budget Use Case | offen |
+| 2 | [#269](https://github.com/tom4711/finanzuebersicht/issues/269), [#292](https://github.com/tom4711/finanzuebersicht/issues/292), [#273](https://github.com/tom4711/finanzuebersicht/issues/273) | Import-/Backup-Use-Cases, Vollscan-Queries | offen |
+| 3 | [#267](https://github.com/tom4711/finanzuebersicht/issues/267), [#293](https://github.com/tom4711/finanzuebersicht/issues/293), [#294](https://github.com/tom4711/finanzuebersicht/issues/294) | Dashboard-/Transactions-/Categories-VM-Splits | offen |
+| 4 | [#274](https://github.com/tom4711/finanzuebersicht/issues/274) | Fehler- & i18n-Grenze | offen |
+| 5 | [#271](https://github.com/tom4711/finanzuebersicht/issues/271), [#295](https://github.com/tom4711/finanzuebersicht/issues/295) | IAppEvents, Navigation härten | offen |
+| 6 | [#296](https://github.com/tom4711/finanzuebersicht/issues/296)–[#299](https://github.com/tom4711/finanzuebersicht/issues/299) | MAUI-Readiness (Listen, Nested Scroll, Theme, Storage-UI) | offen |
+| 7 | [#300](https://github.com/tom4711/finanzuebersicht/issues/300) | Sync-Persistenz-Prep (`ExternalId`/`Source`) für später #243/#245 | offen |
 
 ---
 
