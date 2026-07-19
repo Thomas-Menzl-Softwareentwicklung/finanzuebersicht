@@ -4,7 +4,7 @@
 
 > **Hinweis:** Die Milestone-Bezeichnungen (v1.14, v1.2, v2.0) sind thematische GitHub-Planungslabels, keine sequenziellen Release-Versionen. Tatsächliche Releases (v1.0, v1.6, v1.12 …) werden durch Git-Commit-Höhe via Nerdbank.GitVersioning bestimmt.
 
-**Aktueller Stand:** Release **v1.19** (Latest). Nächster thematischer Backlog: **Milestone 22** (vor v2.0).
+**Aktueller Stand:** Release **v1.19** (Latest). Als Nächstes thematisch: **[v1.20 – Architektur-Fundament](https://github.com/tom4711/finanzuebersicht/milestone/24)** (ein Meilenstein, kein Zwischen-Release nötig). Danach Feature-Ideen (**Milestone 22**), dann **v2.0** (Verschlüsselung, echte Mehrwährung).
 
 ---
 
@@ -131,19 +131,45 @@ Weitere Umsetzungen in v1.17: Live-Währungsrefresh (`CurrencyRefreshRegistry`),
 
 ---
 
-## ✅ v1.19 — Einheitliches Anlegen *(abgeschlossen)*
+## ✅ v1.19 — Einheitliches Anlegen *(Release abgeschlossen; Rest-Issue offen)* · [Milestone](https://github.com/tom4711/finanzuebersicht/milestone/23)
 
 - Inline-Anlegen für Konten und Sparziele (`CreateFormCard`, Scroll-to-top)
 - Sheet-Anlegen für Kategorien und Daueraufträge (`FormSheetPopup`)
 - Bearbeiten bleibt auf den jeweiligen Detailseiten
 - Architektur: Recurring-Schedule konsolidiert, Repository-Reads in Use Cases (#275)
 - Fixes: Systemkonto-Löschen (#277), Shift-Ausnahmen, Test-Stabilität (#282)
+- Magic Strings zentralisiert (#272 / PR #285)
+
+| Issue | Thema | Status |
+|-------|-------|--------|
+| [#266](https://github.com/tom4711/finanzuebersicht/issues/266) | Transaktionen & Umbuchen per Sheet + „Häufig verwendet“ | Offen (UX, getrennt von Architektur) |
 
 ---
 
-## 💡 Weiterer Backlog — Milestone 22 *(vor v2)* · [Milestone](https://github.com/tom4711/finanzuebersicht/milestone/22)
+## 🏗️ v1.20 — Architektur-Fundament *(aktiv)* · [Milestone](https://github.com/tom4711/finanzuebersicht/milestone/24)
 
-Größere Features — Priorisierung nach v1.19.
+Ein großer thematischer Meilenstein **vor** Feature-Backlog und v2.0. Kein Zwischen-Release nötig — Reihenfolge unten abarbeiten.
+
+Setup-Hilfe (Milestone/Labels zuweisen, #272 schließen): `scripts/setup-v120-architecture-milestone.sh` (braucht Token mit Issue-Schreibrechten).
+
+### Empfohlene Reihenfolge
+
+| Welle | Issues | Fokus |
+|-------|--------|--------|
+| 0 | [#289](https://github.com/tom4711/finanzuebersicht/issues/289), [#290](https://github.com/tom4711/finanzuebersicht/issues/290), [#291](https://github.com/tom4711/finanzuebersicht/issues/291) | DataPath-Remount, DataFileNames, Doc-Drift |
+| 1 | [#268](https://github.com/tom4711/finanzuebersicht/issues/268), [#270](https://github.com/tom4711/finanzuebersicht/issues/270) | Legacy `IDataService` raus, Budget Use Case |
+| 2 | [#269](https://github.com/tom4711/finanzuebersicht/issues/269), [#292](https://github.com/tom4711/finanzuebersicht/issues/292), [#273](https://github.com/tom4711/finanzuebersicht/issues/273) | Import-/Backup-Use-Cases, Vollscan-Queries |
+| 3 | [#267](https://github.com/tom4711/finanzuebersicht/issues/267), [#293](https://github.com/tom4711/finanzuebersicht/issues/293), [#294](https://github.com/tom4711/finanzuebersicht/issues/294) | Dashboard-/Transactions-/Categories-VM-Splits |
+| 4 | [#274](https://github.com/tom4711/finanzuebersicht/issues/274) | Fehler- & i18n-Grenze |
+| 5 | [#271](https://github.com/tom4711/finanzuebersicht/issues/271), [#295](https://github.com/tom4711/finanzuebersicht/issues/295) | IAppEvents, Navigation härten |
+| 6 | [#296](https://github.com/tom4711/finanzuebersicht/issues/296)–[#299](https://github.com/tom4711/finanzuebersicht/issues/299) | MAUI-Readiness (Listen, Nested Scroll, Theme, Storage-UI) |
+| 7 | [#300](https://github.com/tom4711/finanzuebersicht/issues/300) | Sync-Persistenz-Prep (`ExternalId`/`Source`) für später #243/#245 |
+
+---
+
+## 💡 Weiterer Backlog — Milestone 22 *(nach v1.20, vor v2)* · [Milestone](https://github.com/tom4711/finanzuebersicht/milestone/22)
+
+Größere Produkt-Features. Sync/Open Banking setzen idealerweise #300 (und stabile Import-Grenze #269) voraus.
 
 | Issue | Thema | Aufwand |
 |-------|-------|---------|
@@ -156,22 +182,9 @@ Größere Features — Priorisierung nach v1.19.
 
 ---
 
-## 🔧 v1.1 — Qualität & Performance *(Backlog)* · [Milestone](https://github.com/tom4711/finanzuebersicht/milestone/5)
+## 🔐 v2.0 — Sicherheit & erweiterte Finanzen *(geplant, nach v1.20)* · [Milestone](https://github.com/tom4711/finanzuebersicht/milestone/17)
 
-Technische Schulden — parallel zu UX-Releases möglich.
-
-| Issue | Thema | Aufwand |
-|-------|-------|---------|
-| [#101](https://github.com/tom4711/finanzuebersicht/issues/101) | Store-Basisklasse (`JsonStore<T>`) | M |
-| [#102](https://github.com/tom4711/finanzuebersicht/issues/102) | `YearOverviewViewModel`: ObservableCollection | S |
-| [#103](https://github.com/tom4711/finanzuebersicht/issues/103) | Namespace-Bereinigung | M |
-| [#100](https://github.com/tom4711/finanzuebersicht/issues/100) | Bulk-Replace API für Restore | M |
-
----
-
-## 🔐 v2.0 — Sicherheit & erweiterte Finanzen *(geplant)* · [Milestone](https://github.com/tom4711/finanzuebersicht/milestone/17)
-
-Größere Architekturänderungen — nach v1.14–v1.19.
+Größere Fach-Features **nach** dem Architektur-Fundament. (Anzeige-Währung gibt es bereits; hier geht es um echte Ledger-Mehrwährung.)
 
 | Issue | Thema | Aufwand |
 |-------|-------|---------|
