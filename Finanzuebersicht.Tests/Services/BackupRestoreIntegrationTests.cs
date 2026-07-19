@@ -13,14 +13,14 @@ namespace Finanzuebersicht.Tests.Services
     public class BackupRestoreIntegrationTests : IDisposable
     {
         private readonly string _testDir;
-        private readonly MockDataService _mockDataService;
+        private readonly InMemoryFinanceStore _mockDataService;
         private readonly MockSettingsService _mockSettingsService;
 
         public BackupRestoreIntegrationTests()
         {
             _testDir = Path.Combine(Path.GetTempPath(), $"integration_tests_{Guid.NewGuid()}");
             Directory.CreateDirectory(_testDir);
-            _mockDataService = new MockDataService();
+            _mockDataService = new InMemoryFinanceStore();
             _mockSettingsService = new MockSettingsService(_testDir);
         }
 
@@ -333,7 +333,7 @@ namespace Finanzuebersicht.Tests.Services
             var metadata = await service.CreateBackupAsync(backupPath);
 
             // Use a data service that fails on both write AND rollback
-            var failingDataService = new FailingMockDataService();
+            var failingDataService = new FailingInMemoryFinanceStore();
             var failingService = new BackupService(failingDataService, failingDataService, failingDataService, failingDataService, failingDataService, failingDataService, _mockSettingsService, new DataMigrationService([new V1ToV2Migrator(), new V2ToV3Migrator()]));
 
             // Act
@@ -344,119 +344,6 @@ namespace Finanzuebersicht.Tests.Services
             Assert.True(result.DataMayBeInconsistent);
         }
 
-        // Mock implementations
-#pragma warning disable CS0618
-        private class MockDataService : IDataService, IAccountRepository, ITransactionTemplateRepository
-        {
-            private List<Category> _categories = [];
-            private List<Account> _accounts = [];
-            private List<Transaction> _transactions = [];
-            private List<RecurringTransaction> _recurring = [];
-            private List<CategoryBudget> _budgets = [];
-            private List<SparZiel> _sparziele = [];
-            private List<TransactionTemplate> _transactionTemplates = [];
-
-            public void SetCategories(IEnumerable<Category> categories) => _categories = categories.ToList();
-            public void SetAccounts(IEnumerable<Account> accounts) => _accounts = accounts.ToList();
-            public void SetTransactions(IEnumerable<Transaction> transactions) => _transactions = transactions.ToList();
-            public void SetRecurring(IEnumerable<RecurringTransaction> recurring) => _recurring = recurring.ToList();
-            public void SetBudgets(IEnumerable<CategoryBudget> budgets) => _budgets = budgets.ToList();
-            public void SetSparZiele(IEnumerable<SparZiel> sparziele) => _sparziele = sparziele.ToList();
-            public void SetTransactionTemplates(IEnumerable<TransactionTemplate> templates) => _transactionTemplates = templates.ToList();
-
-            public Task<List<Category>> GetCategoriesAsync() => Task.FromResult(_categories.ToList());
-            public Task<List<Account>> GetAccountsAsync() => Task.FromResult(_accounts.ToList());
-            public Task SaveCategoryAsync(Category category)
-            {
-                var idx = _categories.FindIndex(c => c.Id == category.Id);
-                if (idx >= 0) _categories[idx] = category; else _categories.Add(category);
-                return Task.CompletedTask;
-            }
-            public Task DeleteCategoryAsync(string id) { _categories.RemoveAll(c => c.Id == id); return Task.CompletedTask; }
-            public Task ReplaceAllCategoriesAsync(IEnumerable<Category> categories) { _categories = categories.ToList(); return Task.CompletedTask; }
-            public Task SaveAccountAsync(Account account)
-            {
-                var idx = _accounts.FindIndex(a => a.Id == account.Id);
-                if (idx >= 0) _accounts[idx] = account; else _accounts.Add(account);
-                return Task.CompletedTask;
-            }
-            public Task DeleteAccountAsync(string id) { _accounts.RemoveAll(a => a.Id == id); return Task.CompletedTask; }
-            public Task ReplaceAllAccountsAsync(IEnumerable<Account> accounts) { _accounts = accounts.ToList(); return Task.CompletedTask; }
-
-            public Task<List<Transaction>> GetTransactionsAsync(DateTime vonDatum, DateTime bisDatum)
-                => Task.FromResult(_transactions.Where(t => t.Datum >= vonDatum && t.Datum <= bisDatum).ToList());
-            public Task SaveTransactionAsync(Transaction transaction)
-            {
-                var idx = _transactions.FindIndex(t => t.Id == transaction.Id);
-                if (idx >= 0) _transactions[idx] = transaction; else _transactions.Add(transaction);
-                return Task.CompletedTask;
-            }
-            public Task SaveTransactionsAsync(IEnumerable<Transaction> transactions)
-            {
-                foreach (var transaction in transactions)
-                {
-                    var idx = _transactions.FindIndex(t => t.Id == transaction.Id);
-                    if (idx >= 0) _transactions[idx] = transaction; else _transactions.Add(transaction);
-                }
-                return Task.CompletedTask;
-            }
-            public Task DeleteTransactionAsync(string id) { _transactions.RemoveAll(t => t.Id == id); return Task.CompletedTask; }
-            public Task DeleteTransferGroupAsync(string transferGroupId) { _transactions.RemoveAll(t => t.TransferGroupId == transferGroupId); return Task.CompletedTask; }
-            public Task ReplaceAllTransactionsAsync(IEnumerable<Transaction> transactions) { _transactions = transactions.ToList(); return Task.CompletedTask; }
-            public Task<Category?> GetMostCommonCategoryForPayeeAsync(
-                string payee,
-                double confidenceThreshold = 0.5,
-                CancellationToken cancellationToken = default)
-                => Task.FromResult<Category?>(null);
-
-            public Task<List<RecurringTransaction>> GetRecurringTransactionsAsync() => Task.FromResult(_recurring.ToList());
-            public Task SaveRecurringTransactionAsync(RecurringTransaction recurring)
-            {
-                var idx = _recurring.FindIndex(r => r.Id == recurring.Id);
-                if (idx >= 0) _recurring[idx] = recurring; else _recurring.Add(recurring);
-                return Task.CompletedTask;
-            }
-            public Task DeleteRecurringTransactionAsync(string id) { _recurring.RemoveAll(r => r.Id == id); return Task.CompletedTask; }
-            public Task ReplaceAllRecurringTransactionsAsync(IEnumerable<RecurringTransaction> recurring) { _recurring = recurring.ToList(); return Task.CompletedTask; }
-
-            public Task GeneratePendingRecurringTransactionsAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
-
-            public Task<YearSummary> GetYearSummaryAsync(int year) => Task.FromResult(new YearSummary());
-            public Task<MonthSummary> GetMonthSummaryAsync(int year, int month) => Task.FromResult(new MonthSummary());
-
-            public Task<List<CategoryBudget>> GetBudgetsAsync() => Task.FromResult(_budgets.ToList());
-            public Task SaveBudgetAsync(CategoryBudget budget)
-            {
-                var idx = _budgets.FindIndex(b => b.Id == budget.Id);
-                if (idx >= 0) _budgets[idx] = budget; else _budgets.Add(budget);
-                return Task.CompletedTask;
-            }
-            public Task DeleteBudgetAsync(string id) { _budgets.RemoveAll(b => b.Id == id); return Task.CompletedTask; }
-            public Task<CategoryBudget?> GetBudgetForCategoryAsync(string kategorieId, int year, int month) => Task.FromResult<CategoryBudget?>(null);
-            public Task ReplaceAllBudgetsAsync(IEnumerable<CategoryBudget> budgets) { _budgets = budgets.ToList(); return Task.CompletedTask; }
-
-            public Task<List<SparZiel>> GetSparZieleAsync() => Task.FromResult(_sparziele.ToList());
-            public Task SaveSparZielAsync(SparZiel sparZiel)
-            {
-                var idx = _sparziele.FindIndex(s => s.Id == sparZiel.Id);
-                if (idx >= 0) _sparziele[idx] = sparZiel; else _sparziele.Add(sparZiel);
-                return Task.CompletedTask;
-            }
-            public Task DeleteSparZielAsync(string id) { _sparziele.RemoveAll(s => s.Id == id); return Task.CompletedTask; }
-            public Task ReplaceAllSparZieleAsync(IEnumerable<SparZiel> sparziele) { _sparziele = sparziele.ToList(); return Task.CompletedTask; }
-
-            public Task<List<TransactionTemplate>> GetTransactionTemplatesAsync() => Task.FromResult(_transactionTemplates.ToList());
-            public Task SaveTransactionTemplateAsync(TransactionTemplate template)
-            {
-                var idx = _transactionTemplates.FindIndex(t => t.Id == template.Id);
-                if (idx >= 0) _transactionTemplates[idx] = template; else _transactionTemplates.Add(template);
-                return Task.CompletedTask;
-            }
-            public Task DeleteTransactionTemplateAsync(string id) { _transactionTemplates.RemoveAll(t => t.Id == id); return Task.CompletedTask; }
-            public Task ReplaceAllTransactionTemplatesAsync(IEnumerable<TransactionTemplate> templates) { _transactionTemplates = templates.ToList(); return Task.CompletedTask; }
-        }
-#pragma warning restore CS0618
-
         private class MockSettingsService : SettingsService
         {
             public MockSettingsService(string testDataDir) : base(Path.Combine(testDataDir, "settings.json"))
@@ -464,47 +351,5 @@ namespace Finanzuebersicht.Tests.Services
             }
         }
 
-        /// <summary>
-        /// A data service that always throws on ReplaceAll operations (both write and rollback).
-        /// Used to test the scenario where restore fails AND rollback also fails.
-        /// </summary>
-#pragma warning disable CS0618
-        private class FailingMockDataService : IDataService, IAccountRepository
-        {
-            public Task<List<Category>> GetCategoriesAsync() => Task.FromResult(new List<Category>());
-            public Task<List<Account>> GetAccountsAsync() => Task.FromResult(new List<Account>());
-            public Task<List<Transaction>> GetTransactionsAsync(DateTime v, DateTime b) => Task.FromResult(new List<Transaction>());
-            public Task<List<RecurringTransaction>> GetRecurringTransactionsAsync() => Task.FromResult(new List<RecurringTransaction>());
-            public Task<List<CategoryBudget>> GetBudgetsAsync() => Task.FromResult(new List<CategoryBudget>());
-            public Task<List<SparZiel>> GetSparZieleAsync() => Task.FromResult(new List<SparZiel>());
-
-            public Task ReplaceAllCategoriesAsync(IEnumerable<Category> c) => Task.FromException(new InvalidOperationException("Simulated write failure"));
-            public Task ReplaceAllAccountsAsync(IEnumerable<Account> a) => Task.FromException(new InvalidOperationException("Simulated write failure"));
-            public Task ReplaceAllTransactionsAsync(IEnumerable<Transaction> t) => Task.FromException(new InvalidOperationException("Simulated write failure"));
-            public Task ReplaceAllRecurringTransactionsAsync(IEnumerable<RecurringTransaction> r) => Task.FromException(new InvalidOperationException("Simulated write failure"));
-            public Task ReplaceAllBudgetsAsync(IEnumerable<CategoryBudget> b) => Task.FromException(new InvalidOperationException("Simulated write failure"));
-            public Task ReplaceAllSparZieleAsync(IEnumerable<SparZiel> s) => Task.FromException(new InvalidOperationException("Simulated write failure"));
-
-            public Task SaveCategoryAsync(Category c) => Task.CompletedTask;
-            public Task SaveAccountAsync(Account a) => Task.CompletedTask;
-            public Task DeleteCategoryAsync(string id) => Task.CompletedTask;
-            public Task DeleteAccountAsync(string id) => Task.CompletedTask;
-            public Task SaveTransactionAsync(Transaction t) => Task.CompletedTask;
-            public Task SaveTransactionsAsync(IEnumerable<Transaction> transactions) => Task.CompletedTask;
-            public Task DeleteTransactionAsync(string id) => Task.CompletedTask;
-            public Task DeleteTransferGroupAsync(string transferGroupId) => Task.CompletedTask;
-            public Task<Category?> GetMostCommonCategoryForPayeeAsync(string p, double c = 0.5, CancellationToken ct = default) => Task.FromResult<Category?>(null);
-            public Task SaveRecurringTransactionAsync(RecurringTransaction r) => Task.CompletedTask;
-            public Task DeleteRecurringTransactionAsync(string id) => Task.CompletedTask;
-            public Task GeneratePendingRecurringTransactionsAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
-            public Task<YearSummary> GetYearSummaryAsync(int y) => Task.FromResult(new YearSummary());
-            public Task<MonthSummary> GetMonthSummaryAsync(int y, int m) => Task.FromResult(new MonthSummary());
-            public Task SaveBudgetAsync(CategoryBudget b) => Task.CompletedTask;
-            public Task DeleteBudgetAsync(string id) => Task.CompletedTask;
-            public Task<CategoryBudget?> GetBudgetForCategoryAsync(string k, int y, int m) => Task.FromResult<CategoryBudget?>(null);
-            public Task SaveSparZielAsync(SparZiel s) => Task.CompletedTask;
-            public Task DeleteSparZielAsync(string id) => Task.CompletedTask;
-        }
-#pragma warning restore CS0618
     }
 }

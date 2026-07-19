@@ -14,7 +14,7 @@ namespace Finanzuebersicht.Tests.Services
         public async Task DeleteCategoryUseCase_WithTransactions_ReassignsToFallback()
         {
             // Arrange
-            var dataService = new InMemoryDataService();
+            var dataService = new InMemoryFinanceStore();
             
             var groceriesCategory = new Category
             {
@@ -87,7 +87,7 @@ namespace Finanzuebersicht.Tests.Services
         public async Task DeleteCategoryUseCase_WithRecurringTransactions_ReassignsToFallback()
         {
             // Arrange
-            var dataService = new InMemoryDataService();
+            var dataService = new InMemoryFinanceStore();
             
             var utilitiesCategory = new Category
             {
@@ -144,7 +144,7 @@ namespace Finanzuebersicht.Tests.Services
         public async Task DeleteCategoryUseCase_WithoutFallback_CreatesSystemFallback()
         {
             // Arrange - only have the category to delete, no fallback exists
-            var dataService = new InMemoryDataService();
+            var dataService = new InMemoryFinanceStore();
             
             var onlyCategory = new Category
             {
@@ -193,7 +193,7 @@ namespace Finanzuebersicht.Tests.Services
         public async Task DeleteCategoryUseCase_MixedData_HandlesBothTransactionsAndRecurring()
         {
             // Arrange - category used by both transactions and recurring
-            var dataService = new InMemoryDataService();
+            var dataService = new InMemoryFinanceStore();
             
             var entertainmentCategory = new Category
             {
@@ -261,160 +261,5 @@ namespace Finanzuebersicht.Tests.Services
             Assert.Equal("cat-sonstiges", recAfter.KategorieId);
         }
 
-        /// <summary>
-        /// In-memory implementation of IDataService for testing.
-        /// Provides isolated test environment without file I/O.
-        /// </summary>
-#pragma warning disable CS0618
-        private class InMemoryDataService : IDataService
-        {
-            private readonly List<Category> _categories = [];
-            private readonly List<Transaction> _transactions = [];
-            private readonly List<RecurringTransaction> _recurring = [];
-            private readonly List<CategoryBudget> _budgets = [];
-            private readonly List<SparZiel> _sparziele = [];
-
-            // ICategoryRepository
-            public Task<List<Category>> GetCategoriesAsync() =>
-                Task.FromResult(new List<Category>(_categories));
-
-            public Task SaveCategoryAsync(Category category)
-            {
-                var existing = _categories.FirstOrDefault(c => c.Id == category.Id);
-                if (existing != null)
-                    _categories.Remove(existing);
-
-                _categories.Add(category);
-                return Task.CompletedTask;
-            }
-
-            public Task DeleteCategoryAsync(string id)
-            {
-                _categories.RemoveAll(c => c.Id == id);
-                return Task.CompletedTask;
-            }
-
-            public Task ReplaceAllCategoriesAsync(IEnumerable<Category> categories)
-            {
-                _categories.Clear();
-                _categories.AddRange(categories);
-                return Task.CompletedTask;
-            }
-
-            // ITransactionRepository
-            public Task<List<Transaction>> GetTransactionsAsync(DateTime vonDatum, DateTime bisDatum) =>
-                Task.FromResult(_transactions
-                    .Where(t => t.Datum >= vonDatum && t.Datum <= bisDatum)
-                    .ToList());
-
-            public Task SaveTransactionAsync(Transaction transaction)
-            {
-                var existing = _transactions.FirstOrDefault(t => t.Id == transaction.Id);
-                if (existing != null)
-                    _transactions.Remove(existing);
-
-                _transactions.Add(transaction);
-                return Task.CompletedTask;
-            }
-
-            public Task SaveTransactionsAsync(IEnumerable<Transaction> transactions)
-            {
-                foreach (var transaction in transactions)
-                {
-                    var existing = _transactions.FirstOrDefault(t => t.Id == transaction.Id);
-                    if (existing != null)
-                        _transactions.Remove(existing);
-                    _transactions.Add(transaction);
-                }
-                return Task.CompletedTask;
-            }
-
-            public Task DeleteTransactionAsync(string id)
-            {
-                _transactions.RemoveAll(t => t.Id == id);
-                return Task.CompletedTask;
-            }
-
-            public Task DeleteTransferGroupAsync(string transferGroupId)
-            {
-                _transactions.RemoveAll(t => t.TransferGroupId == transferGroupId);
-                return Task.CompletedTask;
-            }
-
-            public Task ReplaceAllTransactionsAsync(IEnumerable<Transaction> transactions)
-            {
-                _transactions.Clear();
-                _transactions.AddRange(transactions);
-                return Task.CompletedTask;
-            }
-
-            public Task<Category?> GetMostCommonCategoryForPayeeAsync(
-                string payee,
-                double confidenceThreshold = 0.5,
-                CancellationToken cancellationToken = default) =>
-                Task.FromResult<Category?>(null);
-
-            // IRecurringTransactionRepository
-            public Task<List<RecurringTransaction>> GetRecurringTransactionsAsync() =>
-                Task.FromResult(new List<RecurringTransaction>(_recurring));
-
-            public Task SaveRecurringTransactionAsync(RecurringTransaction recurring)
-            {
-                var existing = _recurring.FirstOrDefault(r => r.Id == recurring.Id);
-                if (existing != null)
-                    _recurring.Remove(existing);
-
-                _recurring.Add(recurring);
-                return Task.CompletedTask;
-            }
-
-            public Task DeleteRecurringTransactionAsync(string id)
-            {
-                _recurring.RemoveAll(r => r.Id == id);
-                return Task.CompletedTask;
-            }
-
-            public Task ReplaceAllRecurringTransactionsAsync(IEnumerable<RecurringTransaction> recurring)
-            {
-                _recurring.Clear();
-                _recurring.AddRange(recurring);
-                return Task.CompletedTask;
-            }
-
-            // IRecurringGenerationService
-            public Task GeneratePendingRecurringTransactionsAsync(CancellationToken cancellationToken = default) =>
-                Task.CompletedTask;
-
-            // IReportingService
-            public Task<YearSummary> GetYearSummaryAsync(int year) =>
-                Task.FromResult(new YearSummary());
-
-            public Task<MonthSummary> GetMonthSummaryAsync(int year, int month) =>
-                Task.FromResult(new MonthSummary());
-
-            // IBudgetRepository
-            public Task<List<CategoryBudget>> GetBudgetsAsync() => Task.FromResult(new List<CategoryBudget>(_budgets));
-            public Task SaveBudgetAsync(CategoryBudget budget)
-            {
-                var idx = _budgets.FindIndex(b => b.Id == budget.Id);
-                if (idx >= 0) _budgets[idx] = budget; else _budgets.Add(budget);
-                return Task.CompletedTask;
-            }
-            public Task DeleteBudgetAsync(string id) { _budgets.RemoveAll(b => b.Id == id); return Task.CompletedTask; }
-            public Task<CategoryBudget?> GetBudgetForCategoryAsync(string kategorieId, int year, int month) => Task.FromResult<CategoryBudget?>(null);
-            public Task ReplaceAllBudgetsAsync(IEnumerable<CategoryBudget> budgets) { _budgets.Clear(); _budgets.AddRange(budgets); return Task.CompletedTask; }
-
-            // ISparZielRepository
-            public Task<List<SparZiel>> GetSparZieleAsync() => Task.FromResult(new List<SparZiel>(_sparziele));
-            public Task SaveSparZielAsync(SparZiel sparZiel)
-            {
-                var idx = _sparziele.FindIndex(s => s.Id == sparZiel.Id);
-                if (idx >= 0) _sparziele[idx] = sparZiel; else _sparziele.Add(sparZiel);
-                return Task.CompletedTask;
-            }
-            public Task DeleteSparZielAsync(string id) { _sparziele.RemoveAll(s => s.Id == id); return Task.CompletedTask; }
-            public Task ReplaceAllSparZieleAsync(IEnumerable<SparZiel> sparziele) { _sparziele.Clear(); _sparziele.AddRange(sparziele); return Task.CompletedTask; }
-        }
-#pragma warning restore CS0618
     }
 }

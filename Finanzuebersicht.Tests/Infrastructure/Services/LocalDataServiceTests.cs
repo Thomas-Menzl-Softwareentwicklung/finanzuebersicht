@@ -6,6 +6,9 @@ public class LocalDataServiceTests : IDisposable
 {
     private readonly string _testDir;
     private readonly LocalDataService _service;
+    private readonly IClock _clock;
+    private readonly ReportingService _reporting;
+    private readonly RecurringGenerationService _recurringGeneration;
 
     public LocalDataServiceTests()
     {
@@ -15,7 +18,10 @@ public class LocalDataServiceTests : IDisposable
 
         var settings = new SettingsService(Path.Combine(_testDir, "settings.json"));
         settings.Set(SettingsKeys.DataPath, _testDir);
-        _service = new LocalDataService(settings, new Finanzuebersicht.Core.Services.SystemClock());
+        _service = new LocalDataService(settings);
+        _clock = new Finanzuebersicht.Core.Services.SystemClock();
+        _reporting = new ReportingService(_service, _service);
+        _recurringGeneration = new RecurringGenerationService(_service, _service, _clock);
     }
 
     public void Dispose()
@@ -152,7 +158,7 @@ public class LocalDataServiceTests : IDisposable
         };
 
         await _service.SaveRecurringTransactionAsync(r);
-        await _service.GeneratePendingRecurringTransactionsAsync();
+        await _recurringGeneration.GeneratePendingRecurringTransactionsAsync();
 
         var transactions = await _service.GetTransactionsAsync(startdatum, DateTime.Today);
         Assert.True(transactions.Count >= 2, "Mindestens 2 Transaktionen sollten erzeugt worden sein");
@@ -173,7 +179,7 @@ public class LocalDataServiceTests : IDisposable
         };
 
         await _service.SaveRecurringTransactionAsync(r);
-        await _service.GeneratePendingRecurringTransactionsAsync();
+        await _recurringGeneration.GeneratePendingRecurringTransactionsAsync();
 
         var transactions = await _service.GetTransactionsAsync(DateTime.MinValue, DateTime.MaxValue);
         Assert.DoesNotContain(transactions, t => t.DauerauftragId == r.Id);

@@ -70,7 +70,7 @@ Layered clean architecture with MVVM (`CommunityToolkit.Mvvm` source generators)
 
 **Data flow:** View → ViewModel → Use Case → Repository (`I*Repository`) → JSON Store
 
-**Legacy:** `IDataService` / `DataServiceFacade` still registered for compatibility — **new code uses repository interfaces and use cases**.
+**Repositories:** Prefer `ICategoryRepository`, `IAccountRepository`, `ITransactionRepository`, `IRecurringTransactionRepository`, `IBudgetRepository`, `ISparZielRepository`, `ITransactionTemplateRepository`. Reporting/generation: `IReportingService`, `IRecurringGenerationService`.
 
 **DI entry points:**
 - `MauiProgram.cs` — app services, pages
@@ -119,7 +119,7 @@ Layered clean architecture with MVVM (`CommunityToolkit.Mvvm` source generators)
 - Sparziele with transaction linking and completion forecast
 - Backup/restore (ZIP/JSON), configurable data path
 - CloudKit sync is a backlog idea (#243); no active CloudKit implementation in tree
-- Active architecture milestone: **v1.20** (`docs/ROADMAP.md`) — before Milestone 22 features and v2.0 (encryption / multi-currency). Wave 0: #289/#290 done; next #268
+- Active architecture milestone: **v1.20** (`docs/ROADMAP.md`) — before Milestone 22 features and v2.0 (encryption / multi-currency). Wave 0 done (#289–#291); wave 1: #268/#270
 
 ## Data Persistence
 
