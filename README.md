@@ -4,16 +4,16 @@
 
 **Persönliche Finanzverwaltung für iOS und macOS (Mac Catalyst) und Windows**
 
-[![CI](https://github.com/tom4711/finanzuebersicht/actions/workflows/ci.yml/badge.svg)](https://github.com/tom4711/finanzuebersicht/actions/workflows/ci.yml)
-[![Pre-Release](https://github.com/tom4711/finanzuebersicht/actions/workflows/prerelease.yml/badge.svg)](https://github.com/tom4711/finanzuebersicht/actions/workflows/prerelease.yml)
-[![Release](https://github.com/tom4711/finanzuebersicht/actions/workflows/release.yml/badge.svg)](https://github.com/tom4711/finanzuebersicht/actions/workflows/release.yml)
-[![Downloads](https://img.shields.io/github/downloads/tom4711/finanzuebersicht/total)](https://github.com/tom4711/finanzuebersicht/releases)
+[![CI](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/actions/workflows/ci.yml/badge.svg)](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/actions/workflows/ci.yml)
+[![Pre-Release](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/actions/workflows/prerelease.yml/badge.svg)](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/actions/workflows/prerelease.yml)
+[![Release](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/actions/workflows/release.yml/badge.svg)](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/actions/workflows/release.yml)
+[![Downloads](https://img.shields.io/github/downloads/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/total)](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/releases)
 [![License: GPL-3.0 / Commercial](https://img.shields.io/badge/License-GPL--3.0%20%2F%20Commercial-blue.svg)](LICENSE-COMMERCIAL)
 [![.NET 10](https://img.shields.io/badge/.NET-10-blueviolet)](https://dotnet.microsoft.com/download)
 
 </div>
 
-Finanzübersicht ist eine Open‑Source App zur lokalen Verwaltung von Einnahmen, Ausgaben und wiederkehrenden Buchungen. Die App speichert Daten lokal als JSON. Cloud-Sync (z. B. CloudKit) ist eine Backlog-Idee ([#243](https://github.com/tom4711/finanzuebersicht/issues/243)), derzeit nicht im Code enthalten.
+Finanzübersicht ist eine Open‑Source App zur lokalen Verwaltung von Einnahmen, Ausgaben und wiederkehrenden Buchungen. Die App speichert Daten lokal als JSON. Cloud-Sync (z. B. CloudKit) ist eine Backlog-Idee ([#243](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/243)), derzeit nicht im Code enthalten.
 
 Kurz: .NET 10 + MAUI, Multi-Language UI (Deutsch & Englisch), MVVM-Architektur.
 
@@ -127,7 +127,7 @@ dotnet workload install maui
 Siehe [Entwickler-Leitfaden (docs/GUIDE.md)](docs/GUIDE.md) für detaillierte Setup- und Entwicklungsanweisungen.
 
 ```bash
-git clone https://github.com/tom4711/finanzuebersicht.git
+git clone https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht.git
 cd finanzuebersicht
 dotnet restore
 ```

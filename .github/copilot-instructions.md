@@ -270,6 +270,6 @@ Finanzuebersicht.Tests/              ← net10.0
 
 | Issue | Topic | Status |
 |-------|-------|--------|
-| [#212](https://github.com/tom4711/finanzuebersicht/issues/212) | Opening balance per account | ✅ Done |
-| [#213](https://github.com/tom4711/finanzuebersicht/issues/213) | Dashboard account overview with total balance | ✅ Done |
-| [#214](https://github.com/tom4711/finanzuebersicht/issues/214) | Manual balance reconciliation (no bank API) | ✅ Done |
+| [#212](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/212) | Opening balance per account | ✅ Done |
+| [#213](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/213) | Dashboard account overview with total balance | ✅ Done |
+| [#214](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/214) | Manual balance reconciliation (no bank API) | ✅ Done |
