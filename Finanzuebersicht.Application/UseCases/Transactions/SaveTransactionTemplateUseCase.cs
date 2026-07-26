@@ -1,14 +1,24 @@
+using Finanzuebersicht.Core.Licensing;
 using Finanzuebersicht.Models;
 
 namespace Finanzuebersicht.Application.UseCases.Transactions;
 
-public class SaveTransactionTemplateUseCase(ITransactionTemplateRepository repository)
+public class SaveTransactionTemplateUseCase(
+    ITransactionTemplateRepository repository,
+    ILicenseService? licenseService = null)
 {
     private readonly ITransactionTemplateRepository _repository = repository;
+    private readonly ILicenseService _licenseService = licenseService ?? UnrestrictedLicenseService.Instance;
 
-    public Task ExecuteAsync(TransactionTemplate template, CancellationToken cancellationToken = default)
+    public async Task ExecuteAsync(TransactionTemplate template, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        return _repository.SaveTransactionTemplateAsync(template);
+
+        var existing = await _repository.GetTransactionTemplatesAsync() ?? [];
+        var isNew = existing.All(t => t.Id != template.Id);
+        if (isNew)
+            _licenseService.EnsureCanCreate(LimitedResource.Templates, existing.Count);
+
+        await _repository.SaveTransactionTemplateAsync(template);
     }
 }

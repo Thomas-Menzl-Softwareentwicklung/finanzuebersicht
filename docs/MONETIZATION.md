@@ -4,6 +4,17 @@ Zielbild für den App Store: **attraktiver Free-Tier**, **Pro einmalig**, **Clou
 
 Keine StoreKit-Implementierung hier — nur Produkt-Schnitt. Preise sind Richtwerte (DE/AT/CH später lokalisiert).
 
+## Distribution: Direct vs Store
+
+| Build | Wie | Lokale Features | Cloud Sync |
+|-------|-----|-----------------|------------|
+| **Direct** (Default) | GitHub-Releases, selbst gebaut, Windows, sideload Mac | immer Pro (keine Soft-Limits) | **nie** |
+| **Store** | `-p:AppDistribution=Store` für iOS / Mac App Store | Free → Pro (IAP) | Jahresabo, **ohne Pro-Pflicht** |
+
+Compile-Flag: `APP_DISTRIBUTION_STORE` wenn `AppDistribution=Store`. CI/Release-Workflows bleiben auf **Direct**, damit bestehende Downloads unverändert voll nutzbar sind.
+
+---
+
 ## Modell in einem Satz
 
 > Free reicht für den Alltag auf einem Gerät. Pro schaltet Power-Features dauerhaft frei. Sync hält Daten optional über Geräte aktuell — und finanziert den laufenden Betrieb.

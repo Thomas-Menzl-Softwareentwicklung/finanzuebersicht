@@ -67,3 +67,11 @@ Siehe [`docs/MONETIZATION.md`](MONETIZATION.md):
 ## Lizenz
 
 Als Rechteinhaber darfst du Store-Binaries unter der kommerziellen Spur ([`LICENSE-COMMERCIAL`](../LICENSE-COMMERCIAL)) veröffentlichen. GPL bleibt für den offenen Quellcode.
+
+## 6. Feature-Gates (Implementierungsstand)
+
+- `ILicenseService` + Soft-Limits in Create-Use-Cases
+- Default-Build **Direct** (volle lokale Features, kein Sync)
+- Store-Build: Free-Limits + Stub-Entitlements in Einstellungen (bis StoreKit)
+- CloudKit-Engine: noch nicht (`IsCloudSyncImplemented = false`)
+

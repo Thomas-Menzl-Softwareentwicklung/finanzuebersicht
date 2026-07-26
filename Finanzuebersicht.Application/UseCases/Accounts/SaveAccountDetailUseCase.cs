@@ -1,10 +1,14 @@
+using Finanzuebersicht.Core.Licensing;
 using Finanzuebersicht.Models;
 
 namespace Finanzuebersicht.Application.UseCases.Accounts;
 
-public class SaveAccountDetailUseCase(IAccountRepository accountRepository)
+public class SaveAccountDetailUseCase(
+    IAccountRepository accountRepository,
+    ILicenseService? licenseService = null)
 {
     private readonly IAccountRepository _accountRepository = accountRepository;
+    private readonly ILicenseService _licenseService = licenseService ?? UnrestrictedLicenseService.Instance;
 
     public async Task<Account> ExecuteAsync(
         Account? existingAccount,
@@ -16,6 +20,12 @@ public class SaveAccountDetailUseCase(IAccountRepository accountRepository)
         CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
+
+        if (existingAccount == null)
+        {
+            var accounts = await _accountRepository.GetAccountsAsync() ?? [];
+            _licenseService.EnsureCanCreate(LimitedResource.Accounts, accounts.Count);
+        }
 
         var account = existingAccount ?? new Account();
         account.Name = name;

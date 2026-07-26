@@ -127,6 +127,24 @@
   <data name="Err_UmbuchungNichtBearbeitbar" xml:space="preserve"><value>Transfers cannot be edited as a single transaction.</value></data>
   <data name="Err_OrdnerNichtWaehlbar" xml:space="preserve"><value>Folder could not be selected: {0}</value></data>
   <data name="Err_SucheFehlgeschlagen" xml:space="preserve"><value>The search could not be completed.</value></data>
+  <data name="Err_ProErforderlich" xml:space="preserve"><value>This feature requires Finanzübersicht Pro.</value></data>
+  <data name="Err_LimitErreicht" xml:space="preserve"><value>Free limit reached ({0}/{1}). Unlock Pro for unlimited use.</value></data>
+
+  <data name="Lic_SectionTitle" xml:space="preserve"><value>License</value></data>
+  <data name="Lic_ChannelDirect" xml:space="preserve"><value>Distribution: Direct build (GitHub / self-built)</value></data>
+  <data name="Lic_ChannelStore" xml:space="preserve"><value>Distribution: App Store</value></data>
+  <data name="Lic_TierFree" xml:space="preserve"><value>Plan: Free</value></data>
+  <data name="Lic_TierPro" xml:space="preserve"><value>Plan: Pro</value></data>
+  <data name="Lic_SyncUnavailableDirect" xml:space="preserve"><value>Cloud Sync: not available for Direct builds</value></data>
+  <data name="Lic_SyncInactive" xml:space="preserve"><value>Cloud Sync: inactive</value></data>
+  <data name="Lic_SyncActive" xml:space="preserve"><value>Cloud Sync: active</value></data>
+  <data name="Lic_SyncEntitledComingSoon" xml:space="preserve"><value>Cloud Sync: entitled (engine coming soon)</value></data>
+  <data name="Lic_DirectFullLocal" xml:space="preserve"><value>All local features unlocked. Sync is only offered via App Store.</value></data>
+  <data name="Lic_FreeLimitsHint" xml:space="preserve"><value>Free limits: 3 accounts, 8 recurring, 1 savings goal, 3 templates. CSV import &amp; cashflow require Pro.</value></data>
+  <data name="Lic_StubHint" xml:space="preserve"><value>StoreKit stub (dev): toggle entitlements until real purchases are wired.</value></data>
+  <data name="Lic_StubPro" xml:space="preserve"><value>Stub: Pro unlocked</value></data>
+  <data name="Lic_StubSync" xml:space="preserve"><value>Stub: Sync subscription</value></data>
+  <data name="Lic_StubApply" xml:space="preserve"><value>Apply stub entitlements</value></data>
 
   <!-- Confirmation Dialogs -->
   <data name="Dlg_KategorieLoeschen" xml:space="preserve"><value>Delete Category</value></data>

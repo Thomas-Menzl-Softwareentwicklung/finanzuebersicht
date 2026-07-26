@@ -59,6 +59,16 @@ public static class MauiProgram
 		// Services
 		// Clock for testable current time
 		builder.Services.AddSingleton<Finanzuebersicht.Core.Services.IClock, Finanzuebersicht.Core.Services.SystemClock>();
+#if APP_DISTRIBUTION_STORE
+		builder.Services.AddSingleton<Finanzuebersicht.Core.Licensing.IDistributionChannelProvider>(
+			_ => new Finanzuebersicht.Core.Licensing.FixedDistributionChannelProvider(
+				Finanzuebersicht.Core.Licensing.DistributionChannel.Store));
+#else
+		// Default: Direct (GitHub / self-built Windows & Mac) — full local Pro, no Cloud Sync
+		builder.Services.AddSingleton<Finanzuebersicht.Core.Licensing.IDistributionChannelProvider>(
+			_ => new Finanzuebersicht.Core.Licensing.FixedDistributionChannelProvider(
+				Finanzuebersicht.Core.Licensing.DistributionChannel.Direct));
+#endif
 		builder.Services.AddInfrastructureServices();
 		builder.Services.AddSingleton<IRecurringGenerationService, RecurringGenerationService>();
 		builder.Services.AddSingleton<IReportingService, ReportingService>();

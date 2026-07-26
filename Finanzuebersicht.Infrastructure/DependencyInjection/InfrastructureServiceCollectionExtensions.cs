@@ -1,5 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Finanzuebersicht.Core.Licensing;
+using Finanzuebersicht.Infrastructure.Licensing;
 
 namespace Finanzuebersicht.Infrastructure;
 
@@ -10,6 +12,10 @@ public static class InfrastructureServiceCollectionExtensions
         // Settings (file-based JSON persistence)
         services.AddSingleton<ISettingsService, SettingsService>();
         services.AddSingleton<IDisplayCurrencyService, DisplayCurrencyService>();
+
+        // Licensing (IDistributionChannelProvider must be registered by the host before this call)
+        services.AddSingleton<ILicenseEntitlementStore, SettingsLicenseEntitlementStore>();
+        services.AddSingleton<ILicenseService, LicenseService>();
 
         // Backup
         services.AddSingleton<IDataMigrator, Finanzuebersicht.Core.Services.Migrations.V1ToV2Migrator>();

@@ -117,6 +117,25 @@ public static class ResourceKeys
     public const string Err_UmbuchungNichtBearbeitbar = nameof(Err_UmbuchungNichtBearbeitbar);
     public const string Err_OrdnerNichtWaehlbar = nameof(Err_OrdnerNichtWaehlbar);
     public const string Err_SucheFehlgeschlagen = nameof(Err_SucheFehlgeschlagen);
+    public const string Err_ProErforderlich = nameof(Err_ProErforderlich);
+    public const string Err_LimitErreicht = nameof(Err_LimitErreicht);
+
+    // Licensing
+    public const string Lic_SectionTitle = nameof(Lic_SectionTitle);
+    public const string Lic_ChannelDirect = nameof(Lic_ChannelDirect);
+    public const string Lic_ChannelStore = nameof(Lic_ChannelStore);
+    public const string Lic_TierFree = nameof(Lic_TierFree);
+    public const string Lic_TierPro = nameof(Lic_TierPro);
+    public const string Lic_SyncUnavailableDirect = nameof(Lic_SyncUnavailableDirect);
+    public const string Lic_SyncInactive = nameof(Lic_SyncInactive);
+    public const string Lic_SyncActive = nameof(Lic_SyncActive);
+    public const string Lic_SyncEntitledComingSoon = nameof(Lic_SyncEntitledComingSoon);
+    public const string Lic_DirectFullLocal = nameof(Lic_DirectFullLocal);
+    public const string Lic_FreeLimitsHint = nameof(Lic_FreeLimitsHint);
+    public const string Lic_StubHint = nameof(Lic_StubHint);
+    public const string Lic_StubPro = nameof(Lic_StubPro);
+    public const string Lic_StubSync = nameof(Lic_StubSync);
+    public const string Lic_StubApply = nameof(Lic_StubApply);
 
     // Confirmation Dialogs
     public const string Dlg_KategorieLoeschen = nameof(Dlg_KategorieLoeschen);

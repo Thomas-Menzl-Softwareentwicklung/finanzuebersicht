@@ -33,7 +33,8 @@ public partial class TransactionsViewModel(
     IImportSessionStore? importSessionStore = null,
     LoadTransactionTemplatesUseCase? loadTransactionTemplatesUseCase = null,
     DeleteTransactionTemplateUseCase? deleteTransactionTemplateUseCase = null,
-    UseTransactionTemplateUseCase? useTransactionTemplateUseCase = null) : MonthNavigationViewModel, IAutoLoadViewModel, ICurrencyRefreshViewModel
+    UseTransactionTemplateUseCase? useTransactionTemplateUseCase = null,
+    Finanzuebersicht.Core.Licensing.ILicenseService? licenseService = null) : MonthNavigationViewModel, IAutoLoadViewModel, ICurrencyRefreshViewModel
 {
     private readonly DeleteTransactionUseCase _deleteTransactionUseCase = deleteTransactionUseCase;
     private readonly RestoreTransactionUseCase _restoreTransactionUseCase = restoreTransactionUseCase;
@@ -56,6 +57,8 @@ public partial class TransactionsViewModel(
     private readonly LoadTransactionTemplatesUseCase? _loadTransactionTemplatesUseCase = loadTransactionTemplatesUseCase;
     private readonly DeleteTransactionTemplateUseCase? _deleteTransactionTemplateUseCase = deleteTransactionTemplateUseCase;
     private readonly UseTransactionTemplateUseCase? _useTransactionTemplateUseCase = useTransactionTemplateUseCase;
+    private readonly Finanzuebersicht.Core.Licensing.ILicenseService _licenseService =
+        licenseService ?? Finanzuebersicht.Core.Licensing.UnrestrictedLicenseService.Instance;
 
     private CancellationTokenSource? _searchDebounce;
     private int _searchVersion;
@@ -570,6 +573,15 @@ public partial class TransactionsViewModel(
     [RelayCommand]
     private async Task ImportCsv()
     {
+        if (!_licenseService.HasFeature(Finanzuebersicht.Core.Licensing.AppFeature.CsvImport))
+        {
+            await _dialogService.ShowAlertAsync(
+                _loc.GetString(ResourceKeys.Err_Titel),
+                _loc.GetString(ResourceKeys.Err_ProErforderlich),
+                _loc.GetString(ResourceKeys.Btn_OK));
+            return;
+        }
+
         // Defensive checks to avoid NullReferenceExceptions when DI failed
         if (_importService == null)
         {

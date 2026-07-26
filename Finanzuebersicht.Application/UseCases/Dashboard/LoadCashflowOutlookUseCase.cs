@@ -1,3 +1,4 @@
+using Finanzuebersicht.Core.Licensing;
 using Finanzuebersicht.Core.Services;
 using Finanzuebersicht.Models;
 
@@ -6,9 +7,11 @@ namespace Finanzuebersicht.Application.UseCases.Dashboard;
 public class LoadCashflowOutlookUseCase(
     ITransactionRepository transactionRepository,
     IRecurringTransactionRepository recurringTransactionRepository,
-    Finanzuebersicht.Core.Services.IClock? clock = null)
+    Finanzuebersicht.Core.Services.IClock? clock = null,
+    ILicenseService? licenseService = null)
 {
     private readonly Finanzuebersicht.Core.Services.IClock _clock = clock ?? SystemClock.Instance;
+    private readonly ILicenseService _licenseService = licenseService ?? UnrestrictedLicenseService.Instance;
     private const decimal NotableDayThreshold = 100m;
     private const int RecurringDedupLookbackDays = 120;
 
@@ -18,6 +21,7 @@ public class LoadCashflowOutlookUseCase(
         CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
+        _licenseService.EnsureFeature(AppFeature.Cashflow);
 
         var from = _clock.Today.Date;
         var to = from.AddDays(Math.Max(1, horizonDays));

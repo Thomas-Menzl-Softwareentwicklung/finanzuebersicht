@@ -19,6 +19,10 @@
 		<!-- App Identifier -->
 		<ApplicationId>com.thomasmenzl.finanzuebersicht</ApplicationId>
 
+		<!-- Direct = GitHub/self-built (default). Store = App Store / Mac App Store (-p:AppDistribution=Store). -->
+		<AppDistribution Condition="'$(AppDistribution)' == ''">Direct</AppDistribution>
+		<DefineConstants Condition="'$(AppDistribution)' == 'Store'">$(DefineConstants);APP_DISTRIBUTION_STORE</DefineConstants>
+
 		<!-- Nerdbank.GitVersioning: eigene MAUI-Versionierung unten (MajorMinor für Anzeige) -->
 		<NBGV_SetMauiVersionProperties>false</NBGV_SetMauiVersionProperties>
 
