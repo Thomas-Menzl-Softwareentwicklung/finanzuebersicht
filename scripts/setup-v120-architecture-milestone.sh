@@ -4,7 +4,7 @@
 # Usage: ./scripts/setup-v120-architecture-milestone.sh
 set -euo pipefail
 
-REPO="${REPO:-tom4711/finanzuebersicht}"
+REPO="${REPO:-Thomas-Menzl-Softwareentwicklung/finanzuebersicht}"
 MS_TITLE='v1.20 – Architektur-Fundament'
 
 echo "==> Ensure maui label exists"
