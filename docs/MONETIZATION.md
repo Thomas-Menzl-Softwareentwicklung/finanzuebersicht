@@ -18,7 +18,7 @@ Regeln:
 
 - **Kein Abo für Kernfunktionen** — Free/Pro bleiben lokal nutzbar ohne Abonnement.
 - **Keine Werbung, kein Tracking.**
-- **Sync setzt Pro nicht zwingend voraus** (auch Free-Daten dürfen syncen) — erhöht Abo-Basis; Pro bleibt Feature-Kauf.
+- **Sync setzt Pro nicht voraus** — wer nur Free braucht, kann trotzdem Geräte synchronisieren. Pro bleibt reiner Feature-Kauf.
 - Sync-Abo kann später „Family Sharing“ nutzen; Pro idealerweise ebenfalls shareable (Non-Consumable).
 
 ---
@@ -46,12 +46,12 @@ Leitlinie: **Buchungs-Alltag unbegrenzt**, Struktur leicht begrenzt, Power-Tools
 
 | Limit | Free | Begründung |
 |-------|------|------------|
-| Konten | **2** | Alltag (Giro + Bar/Kredit) reicht; 3.+ → Pro |
+| Konten | **3** | Giro + Spar + Bar/Kredit reicht den meisten; 4.+ → Pro |
 | Daueraufträge | **8** | Genug für Gehalt/Miete/Abos; Power-User → Pro |
 | Sparziele | **1** | Probieren möglich; mehrere Ziele → Pro |
 | Transaktions-Vorlagen | **3** | Schnellbuchungen andeuten; mehr → Pro |
 
-Anzeigen: Limit klar in UI („2 von 2 Konten · Pro für unbegrenzt“), nicht erst beim Speichern „kaputt“.
+Anzeigen: Limit klar in UI („3 von 3 Konten · Pro für unbegrenzt“), nicht erst beim Speichern „kaputt“.
 
 ### Explizit **nicht** in Free (→ Pro)
 
@@ -90,7 +90,7 @@ Produkt: **„Finanzübersicht Sync“** (Auto-Renewable, 1 Jahr).
 | Leistung | iCloud/CloudKit-Sync zwischen iPhone / iPad / Mac |
 | Ohne Abo | App bleibt voll lokal (Free oder Pro) |
 | Kündigung | Daten bleiben auf Geräten; Sync stoppt, kein Lock-out der lokalen App |
-| Pro-Bezug | Sync **nicht** an Pro koppeln (optional später Bundle „Pro + 1 Jahr Sync“) |
+| Pro-Bezug | **Unabhängig von Pro** — Free+Sync ist ein bewusst erlaubter Pfad; optional später Bundle „Pro + 1 Jahr Sync“ |
 
 Das Abo gegenfinanziert laufende Kosten (Developer Program, Support, Weiterentwicklung). CloudKit-Infrastruktur selbst ist günstig — der Preis ist vor allem **Wert für Mehrgeräte**, nicht Server-Marge.
 
@@ -119,9 +119,9 @@ Open Banking (#245) **nicht** in dieses Modell mischen — später eigenes Premi
 
 ## Offene Produktentscheidungen (kurz)
 
-1. Konten-Free-Limit **2 oder 3**? → Default **2**.
-2. Daueraufträge **8 oder 10**? → Default **8**.
-3. Sync ohne Pro (empfohlen) vs. Sync nur mit Pro?
-4. Mac Catalyst: gleiches IAP-Produkt (Universal Purchase) — ja, anstreben.
+1. Daueraufträge **8 oder 10**? → Default **8**.
+2. Mac Catalyst: gleiches IAP-Produkt (Universal Purchase) — ja, anstreben.
+
+Festgelegt: Konten-Free-Limit **3**; Sync **ohne** Pro-Pflicht.
 
 Wenn dieses Schema passt, als Nächstes: StoreKit-Produkte benennen + Feature-Flags/`ILicenseService` skizzieren (Implementierung separat).
