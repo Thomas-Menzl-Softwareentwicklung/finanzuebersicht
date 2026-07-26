@@ -8,7 +8,7 @@
 [![Pre-Release](https://github.com/tom4711/finanzuebersicht/actions/workflows/prerelease.yml/badge.svg)](https://github.com/tom4711/finanzuebersicht/actions/workflows/prerelease.yml)
 [![Release](https://github.com/tom4711/finanzuebersicht/actions/workflows/release.yml/badge.svg)](https://github.com/tom4711/finanzuebersicht/actions/workflows/release.yml)
 [![Downloads](https://img.shields.io/github/downloads/tom4711/finanzuebersicht/total)](https://github.com/tom4711/finanzuebersicht/releases)
-[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
+[![License: GPL-3.0 / Commercial](https://img.shields.io/badge/License-GPL--3.0%20%2F%20Commercial-blue.svg)](LICENSE-COMMERCIAL)
 [![.NET 10](https://img.shields.io/badge/.NET-10-blueviolet)](https://dotnet.microsoft.com/download)
 
 </div>
@@ -231,4 +231,11 @@ Wenn ein Milestone fertig ist, wird `develop` per PR in `main` gemerged. `main` 
 
 ## Lizenz
 
-GPL v3 — siehe LICENSE
+Finanzübersicht nutzt **Dual Licensing** (Copyright © 2026 Thomas Menzl Softwareentwicklung):
+
+| Nutzung | Lizenz |
+|---------|--------|
+| Quellcode ansehen, selbst bauen, verändern und unter denselben Bedingungen weitergeben | [GPL-3.0](LICENSE) |
+| Proprietäre / Store-Distribution (z. B. App Store), verkaufte Binaries ohne GPL-Auflagen für diese Distribution | Nur mit gesonderter [kommerzieller Lizenz](LICENSE-COMMERCIAL) durch den Rechteinhaber |
+
+Kurz: Der Code ist einsehbar und baubar (Transparenz und Vertrauen). Geschlossene Weitergabe oder Store-Verkauf durch Dritte ohne Genehmigung ist nicht erlaubt. Name und Marke „Finanzübersicht“ bleiben geschützt.
