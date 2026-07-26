@@ -724,6 +724,15 @@ public partial class DashboardViewModel : MonthNavigationViewModel, ILocalizable
             CashflowNotableDays = data.Days.Count(d => d.IsNotable);
             UpdateCashflowSummaryText();
         }
+        catch (Finanzuebersicht.Core.Licensing.FeatureGateException)
+        {
+            // Free Store tier: Cashflow is Pro — hide preview without error noise
+            CashflowNetAmount = 0;
+            CashflowProjectedIncome = 0;
+            CashflowProjectedExpenses = 0;
+            CashflowNotableDays = 0;
+            CashflowSummaryText = string.Empty;
+        }
         catch (Exception ex)
         {
             _logger?.LogError(ex, "DashboardViewModel: LoadCashflowPreviewAsync failed");

@@ -214,6 +214,57 @@
                 </VerticalStackLayout>
             </Border>
 
+            <!-- Lizenz / Free · Pro · Sync -->
+            <Border StrokeShape="RoundRectangle 12"
+                    Stroke="{AppThemeBinding Light={StaticResource Separator}, Dark={StaticResource SeparatorDark}}"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource CardBackground}, Dark={StaticResource CardBackgroundDark}}"
+                    Padding="16">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="{loc:Translate Lic_SectionTitle}"
+                           FontSize="18"
+                           FontAttributes="Bold"
+                           TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
+                    <Label Text="{Binding License.ChannelLabel}"
+                           FontSize="14"
+                           TextColor="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}" />
+                    <Label Text="{Binding License.TierLabel}"
+                           FontSize="16"
+                           FontAttributes="Bold"
+                           TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
+                    <Label Text="{Binding License.SyncLabel}"
+                           FontSize="14"
+                           TextColor="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}" />
+                    <Label Text="{Binding License.LimitsHint}"
+                           FontSize="12"
+                           TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray400}}" />
+
+                    <VerticalStackLayout Spacing="8"
+                                         IsVisible="{Binding License.ShowStoreStubControls}">
+                        <Label Text="{loc:Translate Lic_StubHint}"
+                               FontSize="12"
+                               TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray400}}" />
+                        <Grid ColumnDefinitions="*, Auto">
+                            <Label Text="{loc:Translate Lic_StubPro}"
+                                   VerticalOptions="Center"
+                                   TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
+                            <Switch Grid.Column="1"
+                                    IsToggled="{Binding License.StubProEnabled}" />
+                        </Grid>
+                        <Grid ColumnDefinitions="*, Auto">
+                            <Label Text="{loc:Translate Lic_StubSync}"
+                                   VerticalOptions="Center"
+                                   TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
+                            <Switch Grid.Column="1"
+                                    IsToggled="{Binding License.StubSyncEnabled}" />
+                        </Grid>
+                        <Button Text="{loc:Translate Lic_StubApply}"
+                                Command="{Binding License.ApplyStubEntitlementsCommand}"
+                                FontSize="14"
+                                Padding="12,8" />
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+            </Border>
+
             <!-- Hilfe / Einrichtung -->
             <Border StrokeShape="RoundRectangle 12"
                     Stroke="{AppThemeBinding Light={StaticResource Separator}, Dark={StaticResource SeparatorDark}}"

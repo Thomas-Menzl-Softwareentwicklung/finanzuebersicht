@@ -29,7 +29,8 @@ public partial class CategoriesViewModel(
     IDialogService dialogService,
     IFeedbackService feedbackService,
     IAppEvents appEvents,
-    ILogger<CategoriesViewModel>? logger = null) : ObservableObject, IAutoLoadViewModel, ILocalizableViewModel, ICurrencyRefreshViewModel
+    ILogger<CategoriesViewModel>? logger = null,
+    Finanzuebersicht.Core.Licensing.ILicenseService? licenseService = null) : ObservableObject, IAutoLoadViewModel, ILocalizableViewModel, ICurrencyRefreshViewModel
 {
     private readonly DeleteCategoryUseCase _deleteCategoryUseCase = deleteCategoryUseCase;
     private readonly LoadCategoriesUseCase _loadCategoriesUseCase = loadCategoriesUseCase;
@@ -46,6 +47,8 @@ public partial class CategoriesViewModel(
     private readonly IFeedbackService _feedbackService = feedbackService;
     private readonly IAppEvents _appEvents = appEvents;
     private readonly ILogger<CategoriesViewModel>? _logger = logger;
+    private readonly Finanzuebersicht.Core.Licensing.ILicenseService _licenseService =
+        licenseService ?? Finanzuebersicht.Core.Licensing.UnrestrictedLicenseService.Instance;
 
     public System.Windows.Input.ICommand AutoLoadCommand => LoadKategorienCommand;
 
@@ -280,8 +283,23 @@ public partial class CategoriesViewModel(
     }
 
     [RelayCommand]
-    private void ToggleAddKontoForm()
+    private async Task ToggleAddKontoForm()
     {
+        if (!ShowAddKontoForm)
+        {
+            var check = _licenseService.CheckCreateLimit(
+                Finanzuebersicht.Core.Licensing.LimitedResource.Accounts,
+                Konten.Count);
+            if (!check.Allowed)
+            {
+                await _dialogService.ShowAlertAsync(
+                    _loc.GetString(ResourceKeys.Err_Titel),
+                    _loc.GetString(ResourceKeys.Err_LimitErreicht, check.CurrentCount, check.Limit!.Value),
+                    _loc.GetString(ResourceKeys.Btn_OK));
+                return;
+            }
+        }
+
         ShowAddKontoForm = !ShowAddKontoForm;
         if (!ShowAddKontoForm)
             return;
@@ -348,7 +366,7 @@ public partial class CategoriesViewModel(
 
         if (item == null && IsKontenVisible)
         {
-            ToggleAddKontoForm();
+            await ToggleAddKontoForm();
             return;
         }
 

@@ -1,3 +1,4 @@
+using Finanzuebersicht.Core.Licensing;
 using Finanzuebersicht.Models;
 
 namespace Finanzuebersicht.Application.UseCases.RecurringTransactions;
@@ -5,11 +6,13 @@ namespace Finanzuebersicht.Application.UseCases.RecurringTransactions;
 public class SaveRecurringTransactionDetailUseCase(
     IRecurringTransactionRepository recurringTransactionRepository,
     IRecurringGenerationService recurringGenerationService,
-    IAccountRepository accountRepository)
+    IAccountRepository accountRepository,
+    ILicenseService? licenseService = null)
 {
     private readonly IRecurringTransactionRepository _recurringTransactionRepository = recurringTransactionRepository;
     private readonly IRecurringGenerationService _recurringGenerationService = recurringGenerationService;
     private readonly IAccountRepository _accountRepository = accountRepository;
+    private readonly ILicenseService _licenseService = licenseService ?? UnrestrictedLicenseService.Instance;
 
     public async Task ExecuteAsync(
         RecurringTransaction? existing,
@@ -26,7 +29,11 @@ public class SaveRecurringTransactionDetailUseCase(
         int reminderDaysBefore = 0,
         List<RecurringException>? exceptions = null, CancellationToken cancellationToken = default)
     {
-        // logging removed: prefer centralized ILogger or conditional debug logging
+        if (existing == null)
+        {
+            var recurringItems = await _recurringTransactionRepository.GetRecurringTransactionsAsync() ?? [];
+            _licenseService.EnsureCanCreate(LimitedResource.RecurringTransactions, recurringItems.Count);
+        }
 
         if (!string.IsNullOrWhiteSpace(accountId))
         {

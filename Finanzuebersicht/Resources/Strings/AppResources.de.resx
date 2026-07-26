@@ -127,6 +127,24 @@
   <data name="Err_UmbuchungNichtBearbeitbar" xml:space="preserve"><value>Umbuchungen können nicht als Einzelbuchung bearbeitet werden.</value></data>
   <data name="Err_OrdnerNichtWaehlbar" xml:space="preserve"><value>Ordner konnte nicht gewählt werden: {0}</value></data>
   <data name="Err_SucheFehlgeschlagen" xml:space="preserve"><value>Die Suche konnte nicht abgeschlossen werden.</value></data>
+  <data name="Err_ProErforderlich" xml:space="preserve"><value>Dieses Feature erfordert Finanzübersicht Pro.</value></data>
+  <data name="Err_LimitErreicht" xml:space="preserve"><value>Free-Limit erreicht ({0}/{1}). Mit Pro unbegrenzt nutzen.</value></data>
+
+  <data name="Lic_SectionTitle" xml:space="preserve"><value>Lizenz</value></data>
+  <data name="Lic_ChannelDirect" xml:space="preserve"><value>Distribution: Direct-Build (GitHub / selbst gebaut)</value></data>
+  <data name="Lic_ChannelStore" xml:space="preserve"><value>Distribution: App Store</value></data>
+  <data name="Lic_TierFree" xml:space="preserve"><value>Tarif: Free</value></data>
+  <data name="Lic_TierPro" xml:space="preserve"><value>Tarif: Pro</value></data>
+  <data name="Lic_SyncUnavailableDirect" xml:space="preserve"><value>Cloud-Sync: nicht verfügbar für Direct-Builds</value></data>
+  <data name="Lic_SyncInactive" xml:space="preserve"><value>Cloud-Sync: inaktiv</value></data>
+  <data name="Lic_SyncActive" xml:space="preserve"><value>Cloud-Sync: aktiv</value></data>
+  <data name="Lic_SyncEntitledComingSoon" xml:space="preserve"><value>Cloud-Sync: berechtigt (Engine folgt)</value></data>
+  <data name="Lic_DirectFullLocal" xml:space="preserve"><value>Alle lokalen Features freigeschaltet. Sync gibt es nur über den App Store.</value></data>
+  <data name="Lic_FreeLimitsHint" xml:space="preserve"><value>Free-Limits: 3 Konten, 8 Daueraufträge, 1 Sparziel, 3 Vorlagen. CSV-Import &amp; Cashflow brauchen Pro.</value></data>
+  <data name="Lic_StubHint" xml:space="preserve"><value>StoreKit-Stub (Dev): Entitlements schalten, bis echte Käufe angebunden sind.</value></data>
+  <data name="Lic_StubPro" xml:space="preserve"><value>Stub: Pro freigeschaltet</value></data>
+  <data name="Lic_StubSync" xml:space="preserve"><value>Stub: Sync-Abo</value></data>
+  <data name="Lic_StubApply" xml:space="preserve"><value>Stub-Entitlements übernehmen</value></data>
 
   <!-- Confirmation Dialogs -->
   <data name="Dlg_KategorieLoeschen" xml:space="preserve"><value>Kategorie löschen</value></data>
