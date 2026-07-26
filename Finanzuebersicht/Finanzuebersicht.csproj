@@ -43,9 +43,14 @@
 		<CodesignKey Condition="'$(Configuration)' == 'Debug' AND $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">-</CodesignKey>
 
 		<!-- iOS: Entitlements und Signing -->
-		<CodesignEntitlements Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">Platforms/iOS/Entitlements.plist</CodesignEntitlements>
+		<!-- Debug: get-task-allow; Release: distribution-safe (kein get-task-allow) -->
+		<CodesignEntitlements Condition="'$(Configuration)' == 'Debug' AND $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">Platforms/iOS/Entitlements.Debug.plist</CodesignEntitlements>
+		<CodesignEntitlements Condition="'$(Configuration)' != 'Debug' AND $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">Platforms/iOS/Entitlements.plist</CodesignEntitlements>
 		<CodesignKey Condition="'$(Configuration)' == 'Debug' AND $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">Apple Development</CodesignKey>
 		<CodesignProvision Condition="'$(Configuration)' == 'Debug' AND $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">Automatic</CodesignProvision>
+		<!-- Release: TeamID + Distribution Profile lokal oder per CI setzen (siehe docs/APP_STORE.md) -->
+		<!-- <CodesignKey Condition="'$(Configuration)' == 'Release' AND $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">Apple Distribution</CodesignKey> -->
+		<!-- <CodesignProvision Condition="'$(Configuration)' == 'Release' AND $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">Finanzuebersicht App Store</CodesignProvision> -->
 
 		<!-- Suppress MT4162 warning from mtouch (but not via ILLink) -->
 		<!-- Note: passing -nowarn:MT4162 directly to MtouchExtraArgs might be picked up by ILLink and fail -->

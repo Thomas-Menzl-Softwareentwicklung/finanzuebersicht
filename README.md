@@ -105,7 +105,7 @@ Darstellung, Sprache, Anzeige-Währung, Speicherort, Backup & Restore und App-In
 | Plattform | Status |
 |-----------|--------|
 | macOS (Mac Catalyst) | ✅ Unterstützt |
-| iOS | ✅ Unterstützt / kein Build wegen fehlendem Dev Account |
+| iOS (iPhone / iPad) | ✅ Target vorhanden · Store-Basics in Vorbereitung ([docs/APP_STORE.md](docs/APP_STORE.md)) |
 | Windows | ✅ Unterstützt / eingeschränkt getestet |
 
 ## Voraussetzungen
@@ -201,6 +201,8 @@ Finanzuebersicht.Tests/            ← xUnit Tests (net10.0)
 | [docs/GUIDE.md](docs/GUIDE.md) | Entwickler-Leitfaden (Deutsch): Setup, Architektur, Konventionen |
 | [docs/QUICK_START.md](docs/QUICK_START.md) | Quick Start (Englisch) |
 | [docs/ROADMAP.md](docs/ROADMAP.md) | Geplante Features und Milestones |
+| [docs/APP_STORE.md](docs/APP_STORE.md) | App Store / TestFlight Vorbereitung (iPhone / iPad) |
+| [site/](site/) | Support, Datenschutz, Impressum (GitHub Pages) |
 | [docs/CATEGORIZATION_RULES.md](docs/CATEGORIZATION_RULES.md) | Auto-Kategorisierung beim CSV-Import |
 | [docs/RECURRING_UI.md](docs/RECURRING_UI.md) | Dauerauftrag: Instanz verschieben |
 | [docs/ARCHITECTURE_CLEAN_CODE_REVIEW.md](docs/ARCHITECTURE_CLEAN_CODE_REVIEW.md) | Historisches Architektur-Review (Mai 2026) |

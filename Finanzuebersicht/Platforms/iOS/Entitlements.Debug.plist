@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
-    <!-- Release / App Store: no get-task-allow. Add App Groups / iCloud only when needed. -->
+    <!-- Debug-only: allows the debugger to attach. Not for App Store / TestFlight. -->
     <dict>
+        <key>get-task-allow</key>
+        <true/>
     </dict>
 </plist>
