@@ -56,6 +56,14 @@ Dann Archive in Xcode Organizer / Transporter nach TestFlight laden.
 - Review-Notes: lokale JSON-Daten, kein Login, kein Account
 - Splash/Icon final prüfen
 
+## 5. Preisstruktur (Entwurf)
+
+Siehe [`docs/MONETIZATION.md`](MONETIZATION.md):
+
+- **Free** — Alltag lokal, Soft-Limits
+- **Pro** — Einmalkauf (Power-Features)
+- **Sync** — günstiges Jahresabo (CloudKit), sobald #243 bereit ist
+
 ## Lizenz
 
 Als Rechteinhaber darfst du Store-Binaries unter der kommerziellen Spur ([`LICENSE-COMMERCIAL`](../LICENSE-COMMERCIAL)) veröffentlichen. GPL bleibt für den offenen Quellcode.
