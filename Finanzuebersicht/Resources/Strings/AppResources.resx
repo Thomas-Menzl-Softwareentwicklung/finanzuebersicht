@@ -145,6 +145,15 @@
   <data name="Lic_StubPro" xml:space="preserve"><value>Stub: Pro unlocked</value></data>
   <data name="Lic_StubSync" xml:space="preserve"><value>Stub: Sync subscription</value></data>
   <data name="Lic_StubApply" xml:space="preserve"><value>Apply stub entitlements</value></data>
+  <data name="Lic_BuyPro" xml:space="preserve"><value>Unlock Pro</value></data>
+  <data name="Lic_RestorePurchases" xml:space="preserve"><value>Restore purchases</value></data>
+  <data name="Lic_PurchaseSuccess" xml:space="preserve"><value>Pro unlocked</value></data>
+  <data name="Lic_PurchaseFailed" xml:space="preserve"><value>Purchase could not be completed.</value></data>
+  <data name="Lic_RestoreSuccess" xml:space="preserve"><value>Purchases restored</value></data>
+  <data name="Lic_RestoreEmpty" xml:space="preserve"><value>No purchases found for this Apple ID</value></data>
+  <data name="Lic_SyncComingSoon" xml:space="preserve"><value>Cloud Sync: coming later (not for sale yet)</value></data>
+  <data name="Lic_SyncPurchaseLater" xml:space="preserve"><value>Cloud Sync yearly subscription will be offered once CloudKit is ready.</value></data>
+  <data name="Lic_UseStoreKit" xml:space="preserve"><value>Use App Store purchases (clear stub)</value></data>
 
   <!-- Confirmation Dialogs -->
   <data name="Dlg_KategorieLoeschen" xml:space="preserve"><value>Delete Category</value></data>

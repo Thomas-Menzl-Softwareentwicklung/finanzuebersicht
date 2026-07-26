@@ -145,6 +145,15 @@
   <data name="Lic_StubPro" xml:space="preserve"><value>Stub: Pro freigeschaltet</value></data>
   <data name="Lic_StubSync" xml:space="preserve"><value>Stub: Sync-Abo</value></data>
   <data name="Lic_StubApply" xml:space="preserve"><value>Stub-Entitlements übernehmen</value></data>
+  <data name="Lic_BuyPro" xml:space="preserve"><value>Pro freischalten</value></data>
+  <data name="Lic_RestorePurchases" xml:space="preserve"><value>Käufe wiederherstellen</value></data>
+  <data name="Lic_PurchaseSuccess" xml:space="preserve"><value>Pro freigeschaltet</value></data>
+  <data name="Lic_PurchaseFailed" xml:space="preserve"><value>Kauf konnte nicht abgeschlossen werden.</value></data>
+  <data name="Lic_RestoreSuccess" xml:space="preserve"><value>Käufe wiederhergestellt</value></data>
+  <data name="Lic_RestoreEmpty" xml:space="preserve"><value>Keine Käufe für diese Apple-ID gefunden</value></data>
+  <data name="Lic_SyncComingSoon" xml:space="preserve"><value>Cloud-Sync: kommt später (noch nicht käuflich)</value></data>
+  <data name="Lic_SyncPurchaseLater" xml:space="preserve"><value>Das Sync-Jahresabo erscheint, sobald CloudKit bereit ist.</value></data>
+  <data name="Lic_UseStoreKit" xml:space="preserve"><value>App-Store-Käufe nutzen (Stub aus)</value></data>
 
   <!-- Confirmation Dialogs -->
   <data name="Dlg_KategorieLoeschen" xml:space="preserve"><value>Kategorie löschen</value></data>

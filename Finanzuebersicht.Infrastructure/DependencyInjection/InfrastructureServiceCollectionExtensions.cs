@@ -13,8 +13,8 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddSingleton<ISettingsService, SettingsService>();
         services.AddSingleton<IDisplayCurrencyService, DisplayCurrencyService>();
 
-        // Licensing (IDistributionChannelProvider must be registered by the host before this call)
-        services.AddSingleton<ILicenseEntitlementStore, SettingsLicenseEntitlementStore>();
+        // Licensing (IDistributionChannelProvider + IStoreBillingService registered by the host)
+        services.AddSingleton<ILicenseEntitlementStore, LicenseEntitlementStore>();
         services.AddSingleton<ILicenseService, LicenseService>();
 
         // Backup

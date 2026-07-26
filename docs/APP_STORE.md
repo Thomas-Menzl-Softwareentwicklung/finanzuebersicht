@@ -1,77 +1,89 @@
-# App Store Vorbereitung (iPhone / iPad)
+# App Store Vorbereitung (iPhone / iPad) + TestFlight
 
-Kurz-Checkliste für den ersten Store-/TestFlight-Weg. Legal-Seiten liegen im Repo unter [`site/`](../site/).
+Legal-Seiten: [`site/`](../site/). Monetarisierung: [`MONETIZATION.md`](MONETIZATION.md).
 
-## Status (Basics)
+## Status
 
 | Thema | Status |
 |-------|--------|
-| Bundle ID `com.thomasmenzl.finanzuebersicht` | vorhanden (csproj) |
-| iPhone + iPad (`UIDeviceFamily` 1+2) | vorhanden |
-| Privacy Manifest (`PrivacyInfo.xcprivacy`) | vorhanden |
-| Export Compliance (`ITSAppUsesNonExemptEncryption=false`) | gesetzt |
+| Bundle ID `com.thomasmenzl.finanzuebersicht` | vorhanden |
+| iPhone + iPad | vorhanden |
+| Privacy Manifest + Export Compliance | gesetzt |
 | iOS Release-Entitlements (ohne `get-task-allow`) | gesetzt |
-| Support / Privacy / Impressum (`site/`) | vorbereitet (Platzhalter ersetzen) |
-| App Store Connect App + Zertifikate | **manuell in Apple Portal** |
-| Release-Signing / IPA / TestFlight CI | **noch offen** |
-| Store-Screenshots iPhone/iPad | **noch offen** |
+| Support / Privacy (`site/`) | vorbereitet |
+| License-Gates Free/Pro/Sync | vorhanden |
+| StoreKit (Pro kaufen / Restore) | vorhanden (Store-Build, iOS/Mac Catalyst) |
+| Sync-IAP Verkauf | **später** (CloudKit #243) |
+| App Store Connect App + Zertifikate | **manuell** |
+| TestFlight IPA Upload | **manuell auf dem Mac** |
+| Store-Screenshots | **noch offen** |
 
-## 1. Apple Developer Portal
+## Product IDs (App Store Connect)
 
-1. App ID `com.thomasmenzl.finanzuebersicht` anlegen (Capabilities erst bei Bedarf: iCloud, App Groups).
+| Produkt | Typ | Product ID |
+|---------|-----|------------|
+| Finanzübersicht Pro | Non-Consumable | `com.thomasmenzl.finanzuebersicht.pro` |
+| Finanzübersicht Sync | Auto-Renewable (1 Jahr) | `com.thomasmenzl.finanzuebersicht.sync.yearly` |
+
+Sync in der UI noch nicht verkaufen (`IsCloudSyncImplemented = false`). Product trotzdem in ASC anlegen, sobald Sync kommt — oder erst bei #243.
+
+## 1. Apple Developer + App Store Connect
+
+1. App ID `com.thomasmenzl.finanzuebersicht` (Capabilities: In-App Purchase; iCloud erst für Sync).
 2. Zertifikate: **Apple Development** + **Apple Distribution**.
 3. Profiles: Development + **App Store**.
-4. In App Store Connect neue iOS-App mit derselben Bundle-ID anlegen.
+4. ASC: iOS-App anlegen (gleiche Bundle-ID).
+5. ASC → Monetization → In-App Purchases:
+   - Pro (Non-Consumable), Preis z. B. 5,99 €
+   - optional Sync (Auto-Renewable Yearly) für später
+6. Sandbox-Tester unter Users and Access → Sandbox.
 
 ## 2. Legal-URLs (GitHub Pages)
 
-Seiten im öffentlichen Repo: `site/`.
+1. Platzhalter in `site/*.html` ersetzen.
+2. Pages: Branch + Folder **`/site`**.
+3. ASC:
+   - Support → `https://thomas-menzl-softwareentwicklung.github.io/finanzuebersicht/`
+   - Privacy → `…/privacy.html`
 
-1. Platzhalter ersetzen (`REPLACE_WITH_*`) — siehe [`site/README.md`](../site/README.md).
-2. Pages aktivieren: Branch `main` (oder `develop`), Folder **`/site`**.
-3. In App Store Connect:
-   - **Support URL** → `https://thomas-menzl-softwareentwicklung.github.io/finanzuebersicht/`
-   - **Privacy Policy URL** → `https://thomas-menzl-softwareentwicklung.github.io/finanzuebersicht/privacy.html`
+## 3. Store-Build lokal (Mac)
 
-## 3. Lokaler Release-Build (Mac + Xcode)
-
-Nach Anlegen von Team / Distribution Profile in `Finanzuebersicht.csproj` die auskommentierten Release-`Codesign*`-Properties setzen oder per CLI übergeben:
+Store-Distribution einschalten (`APP_DISTRIBUTION_STORE`):
 
 ```bash
 dotnet publish Finanzuebersicht/Finanzuebersicht.csproj \
   -f net10.0-ios \
   -c Release \
+  -p:AppDistribution=Store \
   -p:ArchiveOnBuild=true \
   -p:RuntimeIdentifier=ios-arm64 \
   -p:CodesignKey="Apple Distribution" \
   -p:CodesignProvision="NAME_DES_APP_STORE_PROFILES"
 ```
 
-Dann Archive in Xcode Organizer / Transporter nach TestFlight laden.
+Oder in Xcode: Archive öffnen → Distribute App → **App Store Connect** → Upload (TestFlight).
 
-## 4. Listing (später)
+### TestFlight-Checkliste
 
-- Beschreibung DE/EN, Keywords, Kategorie (z. B. Finance / Lifestyle)
-- Screenshots iPhone + iPad (nicht nur Mac Catalyst)
-- Review-Notes: lokale JSON-Daten, kein Login, kein Account
-- Splash/Icon final prüfen
+1. IPA/Archive hochladen (Transporter oder Xcode Organizer).
+2. In ASC → TestFlight: Export Compliance beantworten (`ITSAppUsesNonExemptEncryption=false` → in der Regel „Nein“).
+3. Interne Tester hinzufügen (oder externe Gruppe + Beta-Review).
+4. Auf Gerät mit **Sandbox Apple ID** Pro-Kauf testen (Einstellungen → Lizenz → Pro freischalten / Käufe wiederherstellen).
+5. Direct/GitHub-Builds bleiben ohne StoreKit-Limits (weiterhin voll lokal).
 
-## 5. Preisstruktur (Entwurf)
+## 4. Listing (vor öffentlichem Release)
 
-Siehe [`docs/MONETIZATION.md`](MONETIZATION.md):
+- Beschreibung DE/EN, Keywords, Kategorie Finance
+- Screenshots iPhone + iPad
+- Review-Notes: lokal, kein Login; IAP Pro optional; Sync noch nicht aktiv
 
-- **Free** — Alltag lokal, Soft-Limits
-- **Pro** — Einmalkauf (Power-Features)
-- **Sync** — günstiges Jahresabo (CloudKit), sobald #243 bereit ist
+## 5. Technik-Hinweise StoreKit
 
-## Lizenz
+- Implementierung: StoreKit **1** (wie Microsoft MAUI BillingService-Sample; StoreKit 2 wartet auf bessere .NET-Swift-Interop).
+- Code: `Finanzuebersicht/Services/Billing/StoreKitBillingService.cs` (nur `IOS`/`MACCATALYST` + `AppDistribution=Store`).
+- Direct-Builds registrieren `UnavailableStoreBillingService`.
+- Stub-Toggles in Einstellungen bleiben für Dev, bis ASC-Produkte live sind.
 
-Als Rechteinhaber darfst du Store-Binaries unter der kommerziellen Spur ([`LICENSE-COMMERCIAL`](../LICENSE-COMMERCIAL)) veröffentlichen. GPL bleibt für den offenen Quellcode.
+## Feature-Gates
 
-## 6. Feature-Gates (Implementierungsstand)
-
-- `ILicenseService` + Soft-Limits in Create-Use-Cases
-- Default-Build **Direct** (volle lokale Features, kein Sync)
-- Store-Build: Free-Limits + Stub-Entitlements in Einstellungen (bis StoreKit)
-- CloudKit-Engine: noch nicht (`IsCloudSyncImplemented = false`)
-
+Siehe `MONETIZATION.md`. Kurz: Direct = immer Pro, kein Sync. Store = Free-Limits + Pro-IAP; Sync-Abo später ohne Pro-Pflicht.

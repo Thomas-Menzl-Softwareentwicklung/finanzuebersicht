@@ -6,7 +6,7 @@ namespace Finanzuebersicht.Tests.Core.Licensing;
 
 public class LicenseServiceTests
 {
-    private static (LicenseService Sut, SettingsLicenseEntitlementStore Store) CreateStoreSut()
+    private static (LicenseService Sut, LicenseEntitlementStore Store) CreateStoreSut()
     {
         var bag = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         var settings = Substitute.For<ISettingsService>();
@@ -15,7 +15,7 @@ public class LicenseServiceTests
         settings.When(s => s.Set(Arg.Any<string>(), Arg.Any<string>()))
             .Do(ci => bag[ci.ArgAt<string>(0)] = ci.ArgAt<string>(1));
 
-        var store = new SettingsLicenseEntitlementStore(settings);
+        var store = new LicenseEntitlementStore(settings, new UnavailableStoreBillingService());
         var sut = new LicenseService(
             new FixedDistributionChannelProvider(DistributionChannel.Store),
             store);
@@ -28,7 +28,7 @@ public class LicenseServiceTests
         var settings = Substitute.For<ISettingsService>();
         var sut = new LicenseService(
             new FixedDistributionChannelProvider(DistributionChannel.Direct),
-            new SettingsLicenseEntitlementStore(settings));
+            new LicenseEntitlementStore(settings, new UnavailableStoreBillingService()));
 
         await sut.RefreshAsync();
 
@@ -86,5 +86,16 @@ public class LicenseServiceTests
         Assert.True(sut.CheckCreateLimit(LimitedResource.Accounts, 50).Allowed);
         Assert.True(sut.HasFeature(AppFeature.Cashflow));
         Assert.False(sut.CanUseCloudSync);
+    }
+
+    [Fact]
+    public async Task ApplyOwnedProductIds_MapsProProduct()
+    {
+        var (sut, store) = CreateStoreSut();
+        await store.ApplyOwnedProductIdsAsync([LicenseProductIds.Pro]);
+        await sut.RefreshAsync();
+
+        Assert.True(sut.HasPro);
+        Assert.False(sut.HasSyncSubscription);
     }
 }

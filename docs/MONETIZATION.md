@@ -25,6 +25,15 @@ Compile-Flag: `APP_DISTRIBUTION_STORE` wenn `AppDistribution=Store`. CI/Release-
 | **Pro** | Non-Consumable IAP | **5,99 €** (Band 4,99–7,99) | Einmal-Kauf, lokale Power-Features |
 | **Sync** (CloudKit) | Auto-Renewable Jahresabo | **5,99 € / Jahr** (Band 4,99–9,99) | Geräte-Sync, laufende Einnahmen |
 
+### Product IDs (App Store Connect)
+
+| Produkt | Product ID |
+|---------|------------|
+| Pro | `com.thomasmenzl.finanzuebersicht.pro` |
+| Sync (jährlich) | `com.thomasmenzl.finanzuebersicht.sync.yearly` |
+
+Konstante: `Finanzuebersicht.Core.Licensing.LicenseProductIds`.
+
 Regeln:
 
 - **Kein Abo für Kernfunktionen** — Free/Pro bleiben lokal nutzbar ohne Abonnement.
@@ -111,9 +120,11 @@ Das Abo gegenfinanziert laufende Kosten (Developer Program, Support, Weiterentwi
 
 | Phase | Was im Store |
 |-------|----------------|
-| **1 — Launch** | Free + Pro (IAP). Sync noch nicht verkaufen (Feature fehlt). Soft-Limits + Pro-Gates aktiv. |
+| **1 — Launch** | Free + Pro (IAP, StoreKit). Sync noch nicht verkaufen (Feature fehlt). Soft-Limits + Pro-Gates aktiv. |
 | **2 — Sync** | Jahresabo freischalten, sobald CloudKit (#243) + Persistenz-Prep (#300) stehen. Privacy/Support-Seiten um Sync ergänzen. |
 | **3 — Feinschliff** | Intro-Offer (z. B. 1. Jahr Sync 2,99 €), optional Tip-Jar nur wenn gewünscht. |
+
+StoreKit-Client (Pro kaufen / Restore) ist im Store-Build verdrahtet; siehe `docs/APP_STORE.md`.
 
 Open Banking (#245) **nicht** in dieses Modell mischen — später eigenes Premium/Partner-Thema.
 

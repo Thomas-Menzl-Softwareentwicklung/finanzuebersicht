@@ -136,6 +136,15 @@ public static class ResourceKeys
     public const string Lic_StubPro = nameof(Lic_StubPro);
     public const string Lic_StubSync = nameof(Lic_StubSync);
     public const string Lic_StubApply = nameof(Lic_StubApply);
+    public const string Lic_BuyPro = nameof(Lic_BuyPro);
+    public const string Lic_RestorePurchases = nameof(Lic_RestorePurchases);
+    public const string Lic_PurchaseSuccess = nameof(Lic_PurchaseSuccess);
+    public const string Lic_PurchaseFailed = nameof(Lic_PurchaseFailed);
+    public const string Lic_RestoreSuccess = nameof(Lic_RestoreSuccess);
+    public const string Lic_RestoreEmpty = nameof(Lic_RestoreEmpty);
+    public const string Lic_SyncComingSoon = nameof(Lic_SyncComingSoon);
+    public const string Lic_SyncPurchaseLater = nameof(Lic_SyncPurchaseLater);
+    public const string Lic_UseStoreKit = nameof(Lic_UseStoreKit);
 
     // Confirmation Dialogs
     public const string Dlg_KategorieLoeschen = nameof(Dlg_KategorieLoeschen);
