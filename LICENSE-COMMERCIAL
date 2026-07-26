@@ -1,0 +1,32 @@
+COMMERCIAL LICENSE
+==================
+
+Copyright (c) 2026 Thomas Menzl Softwareentwicklung. All rights reserved.
+
+Finanzübersicht is dual-licensed.
+
+1. Open-source license
+   The source code is available under the GNU General Public License
+   version 3 (see the file LICENSE). That license applies when you use,
+   modify, or redistribute the software under GPL-3.0 terms.
+
+2. Commercial license
+   In addition, Thomas Menzl Softwareentwicklung offers a separate
+   commercial license for proprietary distribution. Under that license you
+   may distribute closed-source / store binaries (including, without
+   limitation, Apple App Store and other paid storefronts) without the
+   source-disclosure and copyleft obligations of the GPL for that binary
+   distribution.
+
+Unauthorized proprietary redistribution, or offering this software (or a
+modified version) as a closed-source product in an app store or similar
+channel without a commercial license from the copyright holder, is
+prohibited.
+
+For commercial licensing terms, contact Thomas Menzl Softwareentwicklung
+via the GitHub organization:
+https://github.com/Thomas-Menzl-Softwareentwicklung
+
+Trademark notice: The name "Finanzübersicht" and related branding remain
+the property of Thomas Menzl Softwareentwicklung and are not licensed for
+use in competing products without permission.
