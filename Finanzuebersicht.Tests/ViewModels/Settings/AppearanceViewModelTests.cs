@@ -8,7 +8,7 @@ public class AppearanceViewModelTests
     [Fact]
     public void Constructor_LoadsThemeFromSettings()
     {
-        using var settingsScope = new SettingsScope(nameof(AppearanceViewModelTests), ("Theme", "Dark"));
+        using var settingsScope = new SettingsScope(nameof(AppearanceViewModelTests), (SettingsKeys.Theme, ThemeValues.Dark));
         var themeService = Substitute.For<IThemeService>();
         var localizationService = CreateLocalizationService();
 
@@ -40,8 +40,8 @@ public class AppearanceViewModelTests
         sut.SetThemeCommand.Execute("1");
 
         Assert.Equal(1, sut.SelectedThemeIndex);
-        Assert.Equal("Light", settingsScope.Settings.Get("Theme"));
-        themeService.Received(1).Apply("Light");
+        Assert.Equal(ThemeValues.Light, settingsScope.Settings.Get(SettingsKeys.Theme));
+        themeService.Received(1).Apply(ThemeValues.Light);
     }
 
     [Fact]
@@ -54,8 +54,8 @@ public class AppearanceViewModelTests
 
         sut.SelectedThemeIndex = 2;
 
-        Assert.Equal("Dark", settingsScope.Settings.Get("Theme"));
-        themeService.Received(1).Apply("Dark");
+        Assert.Equal(ThemeValues.Dark, settingsScope.Settings.Get(SettingsKeys.Theme));
+        themeService.Received(1).Apply(ThemeValues.Dark);
     }
 
     [Fact]

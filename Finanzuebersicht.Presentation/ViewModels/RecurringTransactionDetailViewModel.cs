@@ -155,7 +155,7 @@ public partial class RecurringTransactionDetailViewModel(
 
     public void ApplyQueryAttributes(IDictionary<string, object> query)
     {
-        if (query.TryGetValue("RecurringTransaction", out var val) && val is RecurringTransaction rt)
+        if (query.TryGetValue(NavigationQueryKeys.RecurringTransaction, out var val) && val is RecurringTransaction rt)
             RecurringTransaction = rt;
     }
 
@@ -317,8 +317,8 @@ public partial class RecurringTransactionDetailViewModel(
 
         var parameters = new Dictionary<string, object>
         {
-            ["RecurringId"] = _existing.Id,
-            ["InstanceDate"] = next.Date
+            [NavigationQueryKeys.RecurringId] = _existing.Id,
+            [NavigationQueryKeys.InstanceDate] = next.Date
         };
 
         await _navigationService.GoToAsync(Routes.RecurringInstanceShift, parameters);

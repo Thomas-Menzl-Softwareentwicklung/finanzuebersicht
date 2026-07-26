@@ -5,7 +5,7 @@ namespace Finanzuebersicht.Infrastructure.Services;
 
 public class AccountStore : JsonDataStoreBase, IAccountRepository
 {
-    private string AccountsFile => Path.Combine(DataDir, "accounts.json");
+    private string AccountsFile => Path.Combine(DataDir, DataFileNames.Accounts);
 
     public AccountStore(string dataDir, ILogger<AccountStore>? logger = null)
         : base(dataDir, logger)

@@ -18,13 +18,10 @@ public static class InfrastructureServiceCollectionExtensions
             new DataMigrationService(sp.GetServices<IDataMigrator>()));
         services.AddSingleton<IBackupService, BackupService>();
 
-        // Helper to resolve data directory
-        string GetDataDir(IServiceProvider sp)
-        {
-            var settings = sp.GetRequiredService<ISettingsService>();
-            var customPath = settings.Get("DataPath", "");
-            return string.IsNullOrWhiteSpace(customPath) ? AppPaths.GetDefaultDataDir() : customPath;
-        }
+        // Resolve once per provider call: applies pending DataPath, then returns active dir.
+        // Store factories invoke this at singleton creation (typically app start).
+        string GetDataDir(IServiceProvider sp) =>
+            DataPathResolver.ResolveDataDir(sp.GetRequiredService<ISettingsService>());
 
         // Register specialized data stores as singletons with factory pattern
         // Each store receives the resolved dataDir and optional logger
@@ -74,8 +71,7 @@ public static class InfrastructureServiceCollectionExtensions
                 sp.GetRequiredService<RecurringStore>(),
                 sp.GetRequiredService<BudgetStore>(),
                 sp.GetRequiredService<SparZielStore>(),
-                sp.GetRequiredService<TransactionTemplateStore>(),
-                sp.GetRequiredService<Finanzuebersicht.Core.Services.IClock>()));
+                sp.GetRequiredService<TransactionTemplateStore>()));
 
         // Expose the LocalDataService instance via the repository interfaces it implements
         services.AddSingleton<ICategoryRepository>(sp => sp.GetRequiredService<LocalDataService>());

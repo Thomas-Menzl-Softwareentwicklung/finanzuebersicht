@@ -1,4 +1,5 @@
 using Xunit;
+using Finanzuebersicht.Core.Constants;
 using Finanzuebersicht.Models;
 using System.IO.Compression;
 using System.Text.Json;
@@ -9,7 +10,7 @@ namespace Finanzuebersicht.Tests.Services
     {
         private readonly string _testBackupDir;
         private readonly string _testDataDir;
-        private readonly MockDataService _mockDataService;
+        private readonly InMemoryFinanceStore _mockDataService;
         private readonly MockSettingsService _mockSettingsService;
 
         public BackupServiceTests()
@@ -19,7 +20,7 @@ namespace Finanzuebersicht.Tests.Services
             Directory.CreateDirectory(_testBackupDir);
             Directory.CreateDirectory(_testDataDir);
 
-            _mockDataService = new MockDataService();
+            _mockDataService = new InMemoryFinanceStore();
             _mockSettingsService = new MockSettingsService(_testDataDir);
         }
 
@@ -74,14 +75,14 @@ namespace Finanzuebersicht.Tests.Services
             // Assert
             using (var zipArchive = ZipFile.OpenRead(zipPath))
             {
-                Assert.NotNull(zipArchive.GetEntry("categories.json"));
-                Assert.NotNull(zipArchive.GetEntry("accounts.json"));
-                Assert.NotNull(zipArchive.GetEntry("transactions.json"));
-                Assert.NotNull(zipArchive.GetEntry("recurring.json"));
-                Assert.NotNull(zipArchive.GetEntry("budgets.json"));
-                Assert.NotNull(zipArchive.GetEntry("sparziele.json"));
-                Assert.NotNull(zipArchive.GetEntry("transaction-templates.json"));
-                Assert.NotNull(zipArchive.GetEntry("backup.metadata.json"));
+                Assert.NotNull(zipArchive.GetEntry(DataFileNames.Categories));
+                Assert.NotNull(zipArchive.GetEntry(DataFileNames.Accounts));
+                Assert.NotNull(zipArchive.GetEntry(DataFileNames.Transactions));
+                Assert.NotNull(zipArchive.GetEntry(DataFileNames.Recurring));
+                Assert.NotNull(zipArchive.GetEntry(DataFileNames.Budgets));
+                Assert.NotNull(zipArchive.GetEntry(DataFileNames.Sparziele));
+                Assert.NotNull(zipArchive.GetEntry(DataFileNames.TransactionTemplates));
+                Assert.NotNull(zipArchive.GetEntry(DataFileNames.BackupMetadata));
             }
         }
 
@@ -116,10 +117,10 @@ namespace Finanzuebersicht.Tests.Services
             var metadata = await service.CreateBackupAsync(_testBackupDir);
 
             // Assert
-            Assert.Equal(2, metadata.EntityCounts["categories"]);
-            Assert.Equal(1, metadata.EntityCounts["accounts"]);
-            Assert.Equal(3, metadata.EntityCounts["transactions"]);
-            Assert.Equal(1, metadata.EntityCounts["recurring"]);
+            Assert.Equal(2, metadata.EntityCounts[BackupEntityKeys.Categories]);
+            Assert.Equal(1, metadata.EntityCounts[BackupEntityKeys.Accounts]);
+            Assert.Equal(3, metadata.EntityCounts[BackupEntityKeys.Transactions]);
+            Assert.Equal(1, metadata.EntityCounts[BackupEntityKeys.Recurring]);
         }
 
         [Fact]
@@ -144,13 +145,13 @@ namespace Finanzuebersicht.Tests.Services
             // Assert: ZIP enthält budgets.json und sparziele.json
             using (var zipArchive = ZipFile.OpenRead(zipPath))
             {
-                Assert.NotNull(zipArchive.GetEntry("budgets.json"));
-                Assert.NotNull(zipArchive.GetEntry("sparziele.json"));
+                Assert.NotNull(zipArchive.GetEntry(DataFileNames.Budgets));
+                Assert.NotNull(zipArchive.GetEntry(DataFileNames.Sparziele));
             }
 
             // Assert: EntityCounts enthält budgets und sparziele
-            Assert.Equal(2, metadata.EntityCounts["budgets"]);
-            Assert.Equal(1, metadata.EntityCounts["sparziele"]);
+            Assert.Equal(2, metadata.EntityCounts[BackupEntityKeys.Budgets]);
+            Assert.Equal(1, metadata.EntityCounts[BackupEntityKeys.Sparziele]);
         }
 
         [Fact]
@@ -227,13 +228,13 @@ namespace Finanzuebersicht.Tests.Services
             // Create incomplete ZIP (missing files)
             using (var zipArchive = ZipFile.Open(incompleteZipPath, ZipArchiveMode.Create))
             {
-                var entry = zipArchive.CreateEntry("categories.json");
+                var entry = zipArchive.CreateEntry(DataFileNames.Categories);
                 using (var stream = entry.Open())
                 using (var writer = new StreamWriter(stream))
                 {
                     writer.Write("[]");
                 }
-                WriteJsonToZip(zipArchive, "backup.metadata.json", new BackupMetadata
+                WriteJsonToZip(zipArchive, DataFileNames.BackupMetadata, new BackupMetadata
                 {
                     Id = "incomplete",
                     CreatedAt = DateTime.UtcNow,
@@ -264,16 +265,21 @@ namespace Finanzuebersicht.Tests.Services
                 Id = "test",
                 CreatedAt = DateTime.UtcNow,
                 SchemaVersion = 999, // Wrong version!
-                EntityCounts = new Dictionary<string, int> { { "categories", 0 }, { "transactions", 0 }, { "recurring", 0 } },
+                EntityCounts = new Dictionary<string, int>
+                {
+                    { BackupEntityKeys.Categories, 0 },
+                    { BackupEntityKeys.Transactions, 0 },
+                    { BackupEntityKeys.Recurring, 0 }
+                },
                 FileName = "backup_wrongversion.zip"
             };
 
             using (var zipArchive = ZipFile.Open(wrongVersionZipPath, ZipArchiveMode.Create))
             {
-                WriteJsonToZip(zipArchive, "categories.json", new List<object>());
-                WriteJsonToZip(zipArchive, "transactions.json", new List<object>());
-                WriteJsonToZip(zipArchive, "recurring.json", new List<object>());
-                WriteJsonToZip(zipArchive, "backup.metadata.json", wrongMetadata);
+                WriteJsonToZip(zipArchive, DataFileNames.Categories, new List<object>());
+                WriteJsonToZip(zipArchive, DataFileNames.Transactions, new List<object>());
+                WriteJsonToZip(zipArchive, DataFileNames.Recurring, new List<object>());
+                WriteJsonToZip(zipArchive, DataFileNames.BackupMetadata, wrongMetadata);
             }
 
             // Act
@@ -371,75 +377,6 @@ namespace Finanzuebersicht.Tests.Services
     }
 
     // ========== Mock-Implementierungen ==========
-
-#pragma warning disable CS0618
-    internal class MockDataService : IDataService, IAccountRepository
-    {
-        private List<Category> _categories = [];
-        private List<Account> _accounts = [];
-        private List<Transaction> _transactions = [];
-        private List<RecurringTransaction> _recurring = [];
-        private List<CategoryBudget> _budgets = [];
-        private List<SparZiel> _sparziele = [];
-
-        public void SetCategories(IEnumerable<Category> categories) => _categories = categories.ToList();
-        public void SetAccounts(IEnumerable<Account> accounts) => _accounts = accounts.ToList();
-        public void SetTransactions(IEnumerable<Transaction> transactions) => _transactions = transactions.ToList();
-        public void SetRecurring(IEnumerable<RecurringTransaction> recurring) => _recurring = recurring.ToList();
-        public void SetBudgets(IEnumerable<CategoryBudget> budgets) => _budgets = budgets.ToList();
-        public void SetSparZiele(IEnumerable<SparZiel> sparziele) => _sparziele = sparziele.ToList();
-
-        // ICategoryRepository
-        public Task<List<Category>> GetCategoriesAsync() => Task.FromResult(_categories);
-        public Task<List<Account>> GetAccountsAsync() => Task.FromResult(_accounts);
-        public Task SaveCategoryAsync(Category category) => Task.CompletedTask;
-        public Task DeleteCategoryAsync(string id) => Task.CompletedTask;
-        public Task ReplaceAllCategoriesAsync(IEnumerable<Category> categories) { _categories = categories.ToList(); return Task.CompletedTask; }
-        public Task SaveAccountAsync(Account account) => Task.CompletedTask;
-        public Task DeleteAccountAsync(string id) => Task.CompletedTask;
-        public Task ReplaceAllAccountsAsync(IEnumerable<Account> accounts) { _accounts = accounts.ToList(); return Task.CompletedTask; }
-
-        // ITransactionRepository
-        public Task<List<Transaction>> GetTransactionsAsync(DateTime vonDatum, DateTime bisDatum) 
-            => Task.FromResult(_transactions.Where(t => t.Datum >= vonDatum && t.Datum <= bisDatum).ToList());
-        public Task SaveTransactionAsync(Transaction transaction) => Task.CompletedTask;
-        public Task SaveTransactionsAsync(IEnumerable<Transaction> transactions) => Task.CompletedTask;
-        public Task DeleteTransactionAsync(string id) => Task.CompletedTask;
-        public Task DeleteTransferGroupAsync(string transferGroupId) => Task.CompletedTask;
-        public Task ReplaceAllTransactionsAsync(IEnumerable<Transaction> transactions) { _transactions = transactions.ToList(); return Task.CompletedTask; }
-        public Task<Category?> GetMostCommonCategoryForPayeeAsync(
-            string payee,
-            double confidenceThreshold = 0.5,
-            CancellationToken cancellationToken = default) 
-            => Task.FromResult<Category?>(null);
-
-        // IRecurringTransactionRepository
-        public Task<List<RecurringTransaction>> GetRecurringTransactionsAsync() => Task.FromResult(_recurring);
-        public Task SaveRecurringTransactionAsync(RecurringTransaction recurring) => Task.CompletedTask;
-        public Task DeleteRecurringTransactionAsync(string id) => Task.CompletedTask;
-        public Task ReplaceAllRecurringTransactionsAsync(IEnumerable<RecurringTransaction> recurring) { _recurring = recurring.ToList(); return Task.CompletedTask; }
-
-        // IRecurringGenerationService
-        public Task GeneratePendingRecurringTransactionsAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
-
-        // IReportingService
-        public Task<YearSummary> GetYearSummaryAsync(int year) => Task.FromResult(new YearSummary());
-        public Task<MonthSummary> GetMonthSummaryAsync(int year, int month) => Task.FromResult(new MonthSummary());
-
-        // IBudgetRepository
-        public Task<List<CategoryBudget>> GetBudgetsAsync() => Task.FromResult(_budgets);
-        public Task SaveBudgetAsync(CategoryBudget budget) => Task.CompletedTask;
-        public Task DeleteBudgetAsync(string id) => Task.CompletedTask;
-        public Task<CategoryBudget?> GetBudgetForCategoryAsync(string kategorieId, int year, int month) => Task.FromResult<CategoryBudget?>(null);
-        public Task ReplaceAllBudgetsAsync(IEnumerable<CategoryBudget> budgets) { _budgets = budgets.ToList(); return Task.CompletedTask; }
-
-        // ISparZielRepository
-        public Task<List<SparZiel>> GetSparZieleAsync() => Task.FromResult(_sparziele);
-        public Task SaveSparZielAsync(SparZiel sparZiel) => Task.CompletedTask;
-        public Task DeleteSparZielAsync(string id) => Task.CompletedTask;
-        public Task ReplaceAllSparZieleAsync(IEnumerable<SparZiel> sparziele) { _sparziele = sparziele.ToList(); return Task.CompletedTask; }
-    }
-#pragma warning restore CS0618
 
     internal class MockSettingsService : SettingsService
     {

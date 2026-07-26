@@ -5,7 +5,7 @@ Dieser Leitfaden hilft beim lokalen Aufbau, Testen und Entwickeln der App.
 ## 1. Repository klonen
 
 ```bash
-git clone https://github.com/tom4711/finanzuebersicht.git
+git clone https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht.git
 cd finanzuebersicht
 dotnet restore
 ```
@@ -171,10 +171,10 @@ main      → v1.x-Tag (löst release.yml aus)
 
 - **Lokal:** JSON-Dateien via `LocalDataService` (Standard, keine externe Abhängigkeit)
 - **Stores:** `CategoryStore`, `AccountStore`, `TransactionStore`, `RecurringStore`, `BudgetStore`, `SparZielStore`, `TransactionTemplateStore`
-- **Repos:** Neue Features arbeiten gegen spezifische `I*Repository`-Interfaces; `IDataService` bleibt nur Legacy
+- **Repos:** Features arbeiten gegen spezifische `I*Repository`-Interfaces (`LocalDataService` als Composite)
 - **Pfad:** Standardmäßig `~/Library/Application Support/Finanzuebersicht`, konfigurierbar über Einstellungen
 - **Konten & Salden:** `GetAccountBalancesUseCase` — Saldo = Anfangssaldo + Σ Buchungen (Umbuchungen auf beiden Konten)
-- **CloudKit:** Code vorhanden, aber deaktiviert (erfordert kostenpflichtiges Apple Developer Account)
+- **CloudKit:** nur noch als Produktidee im Backlog ([#243](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/243)); kein aktiver CloudKit-Code im Repo. Sync-Vorbereitung: [#300](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/300) (v1.20)
 - **Daueraufträge:** Automatische Generierung auf `App.OnStart()` und `Window.Resumed`
 
 ## 10. Backup & Restore

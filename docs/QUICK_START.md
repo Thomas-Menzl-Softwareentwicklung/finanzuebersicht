@@ -5,7 +5,7 @@ A quick reference guide for getting started with Finanzübersicht development.
 ## Clone & Setup
 
 ```bash
-git clone https://github.com/tom4711/finanzuebersicht.git
+git clone https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht.git
 cd finanzuebersicht
 dotnet restore
 dotnet workload install maui

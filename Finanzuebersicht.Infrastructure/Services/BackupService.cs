@@ -5,6 +5,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Finanzuebersicht.Core.Constants;
 using Microsoft.Extensions.Logging;
 using Finanzuebersicht.Models;
 
@@ -33,7 +34,6 @@ namespace Finanzuebersicht.Infrastructure.Services
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase
         };
 
-        private const string BackupMetadataFileName = "backup.metadata.json";
         private const int CurrentSchemaVersion = 3;
 
         public BackupService(
@@ -97,13 +97,13 @@ namespace Finanzuebersicht.Infrastructure.Services
                     FileName = fileName,
                     EntityCounts = new Dictionary<string, int>
                     {
-                        { "categories", categories.Count() },
-                        { "accounts", accounts.Count() },
-                        { "transactions", transactions.Count() },
-                        { "recurring", recurring.Count() },
-                        { "budgets", budgets.Count },
-                        { "sparziele", sparziele.Count },
-                        { "transactionTemplates", transactionTemplates.Count }
+                        { BackupEntityKeys.Categories, categories.Count() },
+                        { BackupEntityKeys.Accounts, accounts.Count() },
+                        { BackupEntityKeys.Transactions, transactions.Count() },
+                        { BackupEntityKeys.Recurring, recurring.Count() },
+                        { BackupEntityKeys.Budgets, budgets.Count },
+                        { BackupEntityKeys.Sparziele, sparziele.Count },
+                        { BackupEntityKeys.TransactionTemplates, transactionTemplates.Count }
                     }
                 };
 
@@ -111,18 +111,24 @@ namespace Finanzuebersicht.Infrastructure.Services
                 using (var zipArchive = ZipFile.Open(filePath, ZipArchiveMode.Create))
                 {
                     // Schreibe Daten-Dateien
-                    WriteJsonToZip(zipArchive, "categories.json", categories);
-                    WriteJsonToZip(zipArchive, "accounts.json", accounts);
-                    WriteJsonToZip(zipArchive, "transactions.json", transactions);
-                    WriteJsonToZip(zipArchive, "recurring.json", recurring);
-                    WriteJsonToZip(zipArchive, "budgets.json", budgets);
-                    WriteJsonToZip(zipArchive, "sparziele.json", sparziele);
-                    WriteJsonToZip(zipArchive, "transaction-templates.json", transactionTemplates);
-                    WriteJsonToZip(zipArchive, BackupMetadataFileName, metadata);
+                    WriteJsonToZip(zipArchive, DataFileNames.Categories, categories);
+                    WriteJsonToZip(zipArchive, DataFileNames.Accounts, accounts);
+                    WriteJsonToZip(zipArchive, DataFileNames.Transactions, transactions);
+                    WriteJsonToZip(zipArchive, DataFileNames.Recurring, recurring);
+                    WriteJsonToZip(zipArchive, DataFileNames.Budgets, budgets);
+                    WriteJsonToZip(zipArchive, DataFileNames.Sparziele, sparziele);
+                    WriteJsonToZip(zipArchive, DataFileNames.TransactionTemplates, transactionTemplates);
+                    WriteJsonToZip(zipArchive, DataFileNames.BackupMetadata, metadata);
                 }
 
                 _logger?.LogInformation("Backup erstellt: {FileName} mit {CatCount} Kategorien, {TxnCount} Transaktionen, {RecCount} Daueraufträgen, {BudCount} Budgets, {SparCount} Sparzielen, {TemplateCount} Vorlagen",
-                    fileName, metadata.EntityCounts["categories"], metadata.EntityCounts["transactions"], metadata.EntityCounts["recurring"], metadata.EntityCounts["budgets"], metadata.EntityCounts["sparziele"], metadata.EntityCounts["transactionTemplates"]);
+                    fileName,
+                    metadata.EntityCounts[BackupEntityKeys.Categories],
+                    metadata.EntityCounts[BackupEntityKeys.Transactions],
+                    metadata.EntityCounts[BackupEntityKeys.Recurring],
+                    metadata.EntityCounts[BackupEntityKeys.Budgets],
+                    metadata.EntityCounts[BackupEntityKeys.Sparziele],
+                    metadata.EntityCounts[BackupEntityKeys.TransactionTemplates]);
 
                 // Speichere Zeitstempel in Settings
                 _settingsService.SetLastBackupTime(_clock.UtcNow);
@@ -200,7 +206,7 @@ namespace Finanzuebersicht.Infrastructure.Services
                 BackupArchiveData archiveData;
                 using (var zipArchive = ZipFile.OpenRead(filePath))
                 {
-                    var metadata = ReadJsonFromZip<BackupMetadata>(zipArchive, BackupMetadataFileName);
+                    var metadata = ReadJsonFromZip<BackupMetadata>(zipArchive, DataFileNames.BackupMetadata);
                     if (metadata == null)
                         return new RestoreResult { Success = false, ErrorMessage = "ZIP-Datei ist beschädigt oder unvollständig" };
 
@@ -222,13 +228,13 @@ namespace Finanzuebersicht.Infrastructure.Services
                 }
 
                 // Deserialisiere die (ggf. migrierten) Daten in konkrete Typen
-                var categories = DeserializeFile<List<Category>>(archiveData, "categories.json");
-                var accounts = DeserializeFile<List<Account>>(archiveData, "accounts.json");
-                var transactions = DeserializeFile<List<Transaction>>(archiveData, "transactions.json");
-                var recurring = DeserializeFile<List<RecurringTransaction>>(archiveData, "recurring.json");
-                var budgets = DeserializeFile<List<CategoryBudget>>(archiveData, "budgets.json");
-                var sparziele = DeserializeFile<List<SparZiel>>(archiveData, "sparziele.json");
-                var transactionTemplates = DeserializeFile<List<TransactionTemplate>>(archiveData, "transaction-templates.json") ?? [];
+                var categories = DeserializeFile<List<Category>>(archiveData, DataFileNames.Categories);
+                var accounts = DeserializeFile<List<Account>>(archiveData, DataFileNames.Accounts);
+                var transactions = DeserializeFile<List<Transaction>>(archiveData, DataFileNames.Transactions);
+                var recurring = DeserializeFile<List<RecurringTransaction>>(archiveData, DataFileNames.Recurring);
+                var budgets = DeserializeFile<List<CategoryBudget>>(archiveData, DataFileNames.Budgets);
+                var sparziele = DeserializeFile<List<SparZiel>>(archiveData, DataFileNames.Sparziele);
+                var transactionTemplates = DeserializeFile<List<TransactionTemplate>>(archiveData, DataFileNames.TransactionTemplates) ?? [];
 
                 if (categories == null || accounts == null || transactions == null || recurring == null || budgets == null || sparziele == null)
                     return new RestoreResult { Success = false, ErrorMessage = "ZIP-Datei ist beschädigt oder unvollständig" };
@@ -245,10 +251,10 @@ namespace Finanzuebersicht.Infrastructure.Services
                 return new RestoreResult
                 {
                     Success = true,
-                    Details = $"Wiederhergestellt: {counts.GetValueOrDefault("categories")} Kategorien, " +
-                              $"{counts.GetValueOrDefault("transactions")} Transaktionen, " +
-                              $"{counts.GetValueOrDefault("recurring")} Daueraufträge, " +
-                              $"{counts.GetValueOrDefault("transactionTemplates")} Vorlagen",
+                    Details = $"Wiederhergestellt: {counts.GetValueOrDefault(BackupEntityKeys.Categories)} Kategorien, " +
+                              $"{counts.GetValueOrDefault(BackupEntityKeys.Transactions)} Transaktionen, " +
+                              $"{counts.GetValueOrDefault(BackupEntityKeys.Recurring)} Daueraufträge, " +
+                              $"{counts.GetValueOrDefault(BackupEntityKeys.TransactionTemplates)} Vorlagen",
                     RestoredMetadata = archiveData.Metadata
                 };
             }
@@ -448,7 +454,7 @@ namespace Finanzuebersicht.Infrastructure.Services
         private BackupMetadata? ExtractMetadataFromZip(string zipPath)
         {
             using var zipArchive = ZipFile.OpenRead(zipPath);
-            return ReadJsonFromZip<BackupMetadata>(zipArchive, BackupMetadataFileName);
+            return ReadJsonFromZip<BackupMetadata>(zipArchive, DataFileNames.BackupMetadata);
         }
 
         private static RestoreResult ValidateBackup(string zipPath)
@@ -458,7 +464,7 @@ namespace Finanzuebersicht.Infrastructure.Services
                 using (var zipArchive = ZipFile.OpenRead(zipPath))
                 {
                     // Validiere Metadaten-Schema: ältere Versionen werden migriert, neuere abgelehnt
-                    var metadata = ReadJsonFromZip<BackupMetadata>(zipArchive, BackupMetadataFileName);
+                    var metadata = ReadJsonFromZip<BackupMetadata>(zipArchive, DataFileNames.BackupMetadata);
                     if (metadata == null || metadata.SchemaVersion > CurrentSchemaVersion)
                     {
                         return new RestoreResult
@@ -468,9 +474,15 @@ namespace Finanzuebersicht.Infrastructure.Services
                         };
                     }
 
-                    var requiredFiles = new List<string> { "categories.json", "transactions.json", "recurring.json", BackupMetadataFileName };
+                    var requiredFiles = new List<string>
+                    {
+                        DataFileNames.Categories,
+                        DataFileNames.Transactions,
+                        DataFileNames.Recurring,
+                        DataFileNames.BackupMetadata
+                    };
                     if (metadata.SchemaVersion >= 3)
-                        requiredFiles.Add("accounts.json");
+                        requiredFiles.Add(DataFileNames.Accounts);
 
                     var missingFiles = requiredFiles.Where(f => zipArchive.GetEntry(f) == null).ToList();
                     if (missingFiles.Count != 0)

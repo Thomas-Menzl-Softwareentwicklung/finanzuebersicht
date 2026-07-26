@@ -9,7 +9,7 @@ namespace Finanzuebersicht.Infrastructure.Services;
 /// </summary>
 public class CategoryStore : JsonDataStoreBase, ICategoryRepository
 {
-    private string CategoriesFile => Path.Combine(DataDir, "categories.json");
+    private string CategoriesFile => Path.Combine(DataDir, DataFileNames.Categories);
 
     public CategoryStore(string dataDir, ILogger<CategoryStore>? logger = null)
         : base(dataDir, logger)

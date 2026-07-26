@@ -1,20 +1,21 @@
 using Finanzuebersicht.Models;
 
-#pragma warning disable CS0618 // IDataService is intentionally implemented here as the local storage adapter
 namespace Finanzuebersicht.Infrastructure.Services;
 
 /// <summary>
-/// Composite data service that coordinates multiple specialized stores.
-/// Uses Dependency Injection to receive pre-configured stores from the DI container,
-/// allowing proper logger propagation and testability.
-///
-/// - CategoryStore: Category persistence
-/// - TransactionStore: Transaction persistence with smart categorization
-/// - RecurringStore: Recurring transaction persistence
-/// - ReportingService: Transaction aggregations
-/// - RecurringGenerationService: Auto-generation of recurring transactions
+/// Composite data service that coordinates specialized JSON stores and exposes them
+/// via repository interfaces. Reporting and recurring generation are registered
+/// separately in DI (<see cref="IReportingService"/>, <see cref="IRecurringGenerationService"/>).
 /// </summary>
-public class LocalDataService : IDataService, IAccountRepository, ITransactionTemplateRepository, IDisposable
+public class LocalDataService :
+    ICategoryRepository,
+    IAccountRepository,
+    ITransactionRepository,
+    IRecurringTransactionRepository,
+    IBudgetRepository,
+    ISparZielRepository,
+    ITransactionTemplateRepository,
+    IDisposable
 {
     private readonly CategoryStore _categoryStore;
     private readonly AccountStore _accountStore;
@@ -23,8 +24,6 @@ public class LocalDataService : IDataService, IAccountRepository, ITransactionTe
     private readonly BudgetStore _budgetStore;
     private readonly SparZielStore _sparZielStore;
     private readonly TransactionTemplateStore _transactionTemplateStore;
-    private readonly ReportingService _reportingService;
-    private readonly RecurringGenerationService _recurringGenerationService;
 
     /// <summary>
     /// Constructor for DI: receives pre-configured stores from the container.
@@ -36,8 +35,7 @@ public class LocalDataService : IDataService, IAccountRepository, ITransactionTe
         RecurringStore recurringStore,
         BudgetStore budgetStore,
         SparZielStore sparZielStore,
-        TransactionTemplateStore transactionTemplateStore,
-        IClock clock)
+        TransactionTemplateStore transactionTemplateStore)
     {
         _categoryStore = categoryStore;
         _accountStore = accountStore;
@@ -46,18 +44,16 @@ public class LocalDataService : IDataService, IAccountRepository, ITransactionTe
         _budgetStore = budgetStore;
         _sparZielStore = sparZielStore;
         _transactionTemplateStore = transactionTemplateStore;
-        _reportingService = new ReportingService(_transactionStore, _categoryStore);
-        _recurringGenerationService = new RecurringGenerationService(_recurringStore, _transactionStore, clock);
     }
 
     /// <summary>
     /// Alternative constructor for manual instantiation (e.g., in tests).
     /// </summary>
-    public LocalDataService(ISettingsService? settings, IClock clock)
+    public LocalDataService(ISettingsService? settings)
     {
-        var defaultDataDir = AppPaths.GetDefaultDataDir();
-        var customPath = settings?.Get("DataPath", "");
-        var dataDir = string.IsNullOrWhiteSpace(customPath) ? defaultDataDir : customPath;
+        var dataDir = settings is null
+            ? AppPaths.GetDefaultDataDir()
+            : DataPathResolver.ResolveDataDir(settings);
 
         _categoryStore = new CategoryStore(dataDir);
         _accountStore = new AccountStore(dataDir);
@@ -66,8 +62,6 @@ public class LocalDataService : IDataService, IAccountRepository, ITransactionTe
         _budgetStore = new BudgetStore(dataDir);
         _sparZielStore = new SparZielStore(dataDir);
         _transactionTemplateStore = new TransactionTemplateStore(dataDir);
-        _reportingService = new ReportingService(_transactionStore, _categoryStore);
-        _recurringGenerationService = new RecurringGenerationService(_recurringStore, _transactionStore, clock);
     }
 
     #region ICategoryRepository delegation
@@ -143,23 +137,6 @@ public class LocalDataService : IDataService, IAccountRepository, ITransactionTe
 
     public Task ReplaceAllRecurringTransactionsAsync(IEnumerable<RecurringTransaction> recurring)
         => _recurringStore.ReplaceAllRecurringTransactionsAsync(recurring);
-
-    #endregion
-
-    #region IReportingService delegation
-
-    public async Task<MonthSummary> GetMonthSummaryAsync(int year, int month)
-        => await _reportingService.GetMonthSummaryAsync(year, month);
-
-    public async Task<YearSummary> GetYearSummaryAsync(int year)
-        => await _reportingService.GetYearSummaryAsync(year);
-
-    #endregion
-
-    #region IRecurringGenerationService delegation
-
-    public async Task GeneratePendingRecurringTransactionsAsync(CancellationToken cancellationToken = default)
-        => await _recurringGenerationService.GeneratePendingRecurringTransactionsAsync(cancellationToken);
 
     #endregion
 

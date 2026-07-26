@@ -500,7 +500,7 @@ public partial class TransactionsViewModel(
             var parameter = new Dictionary<string, object>();
             if (transaktion != null)
             {
-                parameter["Transaction"] = transaktion;
+                parameter[NavigationQueryKeys.Transaction] = transaktion;
             }
 
             if (_navigationService == null)
@@ -524,7 +524,7 @@ public partial class TransactionsViewModel(
 
         await _navigationService.GoToAsync(Routes.TransactionDetail, new Dictionary<string, object>
         {
-            ["DuplicateTransaction"] = transaktion
+            [NavigationQueryKeys.DuplicateTransaction] = transaktion
         });
     }
 
@@ -541,7 +541,7 @@ public partial class TransactionsViewModel(
 
         await _navigationService.GoToAsync(Routes.TransactionDetail, new Dictionary<string, object>
         {
-            ["TransactionTemplate"] = template
+            [NavigationQueryKeys.TransactionTemplate] = template
         });
     }
 

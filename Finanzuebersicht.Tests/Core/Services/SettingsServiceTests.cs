@@ -50,8 +50,8 @@ public class SettingsServiceTests : IDisposable
 
         var settings = new SettingsService(path);
 
-        Assert.Equal("Dark", settings.Get("Theme"));
-        Assert.Equal("EUR", settings.Get("Currency"));
+        Assert.Equal(ThemeValues.Dark, settings.Get(SettingsKeys.Theme));
+        Assert.Equal("EUR", settings.Get(SettingsKeys.Currency));
     }
 
     [Fact]
@@ -65,7 +65,7 @@ public class SettingsServiceTests : IDisposable
         Assert.Null(exception);
 
         var settings = new SettingsService(path);
-        Assert.Equal("fallback", settings.Get("Theme", "fallback"));
+        Assert.Equal("fallback", settings.Get(SettingsKeys.Theme, "fallback"));
     }
 
     [Fact]
@@ -92,5 +92,44 @@ public class SettingsServiceTests : IDisposable
 
         Assert.Null(exception);
         Assert.Equal("Value", settings.Get("Key"));
+    }
+
+    [Fact]
+    public void Contains_ReturnsFalse_WhenKeyMissing()
+    {
+        Assert.False(_settings.Contains("MissingKey_" + Guid.NewGuid()));
+    }
+
+    [Fact]
+    public void Contains_ReturnsTrue_AfterSet()
+    {
+        var key = "PresentKey_" + Guid.NewGuid();
+        _settings.Set(key, "value");
+        Assert.True(_settings.Contains(key));
+    }
+
+    [Fact]
+    public void Remove_DeletesKey_AndPersists()
+    {
+        var path = Path.Combine(_tempDir, "remove-settings.json");
+        var settings = new SettingsService(path);
+        settings.Set("ToRemove", "value");
+        settings.Set("Keep", "ok");
+
+        settings.Remove("ToRemove");
+
+        Assert.False(settings.Contains("ToRemove"));
+        Assert.Equal("ok", settings.Get("Keep"));
+
+        var reloaded = new SettingsService(path);
+        Assert.False(reloaded.Contains("ToRemove"));
+        Assert.Equal("ok", reloaded.Get("Keep"));
+    }
+
+    [Fact]
+    public void Remove_MissingKey_DoesNotThrow()
+    {
+        var exception = Record.Exception(() => _settings.Remove("Missing_" + Guid.NewGuid()));
+        Assert.Null(exception);
     }
 }

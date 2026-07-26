@@ -70,7 +70,7 @@ Layered clean architecture with MVVM (`CommunityToolkit.Mvvm` source generators)
 
 **Data flow:** View → ViewModel → Use Case → Repository (`I*Repository`) → JSON Store
 
-**Legacy:** `IDataService` / `DataServiceFacade` still registered for compatibility — **new code uses repository interfaces and use cases**.
+**Repositories:** Prefer `ICategoryRepository`, `IAccountRepository`, `ITransactionRepository`, `IRecurringTransactionRepository`, `IBudgetRepository`, `ISparZielRepository`, `ITransactionTemplateRepository`. Reporting/generation: `IReportingService`, `IRecurringGenerationService`.
 
 **DI entry points:**
 - `MauiProgram.cs` — app services, pages
@@ -101,7 +101,7 @@ Layered clean architecture with MVVM (`CommunityToolkit.Mvvm` source generators)
 - Account list with balance breakdown: **Verwaltung → Konten** (`CategoriesViewModel`, `AccountListItem`)
 - Dashboard **Kontenübersicht** card with total balance and per-account bars (#213)
 - Opening balance per account in **Konto bearbeiten** (#212) — no fake transactions
-- **Open:** Manual reconciliation (#214) — compare calculated vs. actual balance without bank API
+- Manual reconciliation (#214) — ✅ done (Ist vs. berechnet ohne Bank-API)
 
 ### Dashboard
 - `LoadDashboardMonthUseCase`, `LoadDashboardYearUseCase`, `LoadForecastUseCase`
@@ -118,7 +118,8 @@ Layered clean architecture with MVVM (`CommunityToolkit.Mvvm` source generators)
 ### Other
 - Sparziele with transaction linking and completion forecast
 - Backup/restore (ZIP/JSON), configurable data path
-- CloudKit code exists but disabled (requires paid Apple Developer account)
+- CloudKit sync is a backlog idea (#243); no active CloudKit implementation in tree
+- Active architecture milestone: **v1.20** (`docs/ROADMAP.md`) — before Milestone 22 features and v2.0 (encryption / multi-currency). Wave 0 done (#289–#291); wave 1: #268/#270
 
 ## Data Persistence
 
@@ -269,6 +270,6 @@ Finanzuebersicht.Tests/              ← net10.0
 
 | Issue | Topic | Status |
 |-------|-------|--------|
-| [#212](https://github.com/tom4711/finanzuebersicht/issues/212) | Opening balance per account | ✅ Done |
-| [#213](https://github.com/tom4711/finanzuebersicht/issues/213) | Dashboard account overview with total balance | ✅ Done |
-| [#214](https://github.com/tom4711/finanzuebersicht/issues/214) | Manual balance reconciliation (no bank API) | Open |
+| [#212](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/212) | Opening balance per account | ✅ Done |
+| [#213](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/213) | Dashboard account overview with total balance | ✅ Done |
+| [#214](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/214) | Manual balance reconciliation (no bank API) | ✅ Done |

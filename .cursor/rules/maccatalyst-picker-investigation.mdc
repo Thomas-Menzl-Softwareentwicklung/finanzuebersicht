@@ -24,7 +24,7 @@ Betroffene Seiten u. a.: Transaktion, Dauerauftrag, Konto, Kategorie, Umbuchung,
 
 ## Ursache & Rollback
 
-Kombination **MAUI Mac Catalyst** ([#10208](https://github.com/dotnet/maui/issues/10208), [#33229](https://github.com/dotnet/maui/issues/33229)) + **macOS 27 Beta**. Fix [dotnet/maui#33146](https://github.com/dotnet/maui/pull/33146) in **.NET 10 SR6** — Projekt nutzt **MAUI 10.0.70**.
+Kombination **MAUI Mac Catalyst** ([#10208](https://github.com/dotnet/maui/issues/10208), [#33229](https://github.com/dotnet/maui/issues/33229)) + **macOS 27 Beta**. Fix [dotnet/maui#33146](https://github.com/dotnet/maui/pull/33146) in **.NET 10 SR6** — Projekt nutzt **MAUI 10.0.80**.
 
 **Rollback:** Wenn MAUI/macOS-Bug gefixt ist, native `Picker` wieder einsetzen und `SelectionField` entfernen.
 

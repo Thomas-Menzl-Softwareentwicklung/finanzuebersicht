@@ -44,6 +44,24 @@ public class SettingsService : ISettingsService
         }
     }
 
+    public bool Contains(string key)
+    {
+        lock (_lock)
+        {
+            return _settings.ContainsKey(key);
+        }
+    }
+
+    public void Remove(string key)
+    {
+        lock (_lock)
+        {
+            if (!_settings.Remove(key))
+                return;
+            Save();
+        }
+    }
+
     private void Load()
     {
         try
@@ -148,7 +166,7 @@ public class SettingsService : ISettingsService
     /// </summary>
     public string GetBackupFrequency()
     {
-        return Get(SettingsKeys.BackupFrequency, "weekly");
+        return Get(SettingsKeys.BackupFrequency, BackupFrequencyValues.Weekly);
     }
 
     /// <summary>
@@ -156,7 +174,7 @@ public class SettingsService : ISettingsService
     /// </summary>
     public void SetBackupFrequency(string frequency)
     {
-        if (!new[] { "daily", "weekly", "monthly" }.Contains(frequency))
+        if (!BackupFrequencyValues.All.Contains(frequency))
             throw new ArgumentException($"Ungültige Backup-Häufigkeit: {frequency}");
 
         Set(SettingsKeys.BackupFrequency, frequency);

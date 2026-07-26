@@ -193,7 +193,7 @@ public partial class SparZieleViewModel : ObservableObject, IAutoLoadViewModel, 
     {
         await _navigationService.GoToAsync(Routes.SparZielDetail, new Dictionary<string, object>
         {
-            ["SparZiel"] = summary.SparZiel
+            [NavigationQueryKeys.SparZiel] = summary.SparZiel
         });
     }
 

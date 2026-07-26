@@ -14,6 +14,9 @@ public partial class StorageViewModel : ObservableObject
     [ObservableProperty]
     private string dataPath = string.Empty;
 
+    [ObservableProperty]
+    private bool requiresRestart;
+
     public StorageViewModel(
         ISettingsService settings,
         IDialogService dialogService,
@@ -25,11 +28,7 @@ public partial class StorageViewModel : ObservableObject
         _loc = localizationService;
         _folderPicker = folderPicker;
 
-        DataPath = _settings.Get("DataPath", "");
-        if (string.IsNullOrWhiteSpace(DataPath))
-        {
-            DataPath = GetDefaultDataDir();
-        }
+        RefreshDisplayedPath();
     }
 
     [RelayCommand]
@@ -63,8 +62,9 @@ public partial class StorageViewModel : ObservableObject
                 return;
             }
 
-            _settings.Set("DataPath", newPath);
-            DataPath = newPath;
+            // Defer activation until next start so store singletons keep writing to the active path.
+            _settings.Set(SettingsKeys.DataPathPending, newPath);
+            RefreshDisplayedPath();
 
             await _dialogService.ShowAlertAsync(
                 _loc.GetString(ResourceKeys.Stn_SpeicherortGeaendert),
@@ -83,13 +83,33 @@ public partial class StorageViewModel : ObservableObject
     [RelayCommand]
     private async Task ResetDataPath()
     {
-        _settings.Set("DataPath", string.Empty);
-        DataPath = GetDefaultDataDir();
+        // Empty pending = reset to default on next start; keep active DataPath unchanged this session.
+        _settings.Set(SettingsKeys.DataPathPending, string.Empty);
+        RefreshDisplayedPath();
 
         await _dialogService.ShowAlertAsync(
             _loc.GetString(ResourceKeys.Stn_SpeicherortZurueckgesetzt),
             _loc.GetString(ResourceKeys.Stn_SpeicherortZurueckgesetztDesc),
             _loc.GetString(ResourceKeys.Btn_OK));
+    }
+
+    private void RefreshDisplayedPath()
+    {
+        RequiresRestart = _settings.Contains(SettingsKeys.DataPathPending);
+
+        if (RequiresRestart)
+        {
+            var pending = _settings.Get(SettingsKeys.DataPathPending, "");
+            DataPath = string.IsNullOrWhiteSpace(pending)
+                ? GetDefaultDataDir()
+                : pending;
+            return;
+        }
+
+        var active = _settings.Get(SettingsKeys.DataPath, "");
+        DataPath = string.IsNullOrWhiteSpace(active)
+            ? GetDefaultDataDir()
+            : active;
     }
 
     private static string GetDefaultDataDir() => AppPaths.GetDefaultDataDir();

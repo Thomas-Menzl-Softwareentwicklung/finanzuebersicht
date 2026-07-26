@@ -35,16 +35,17 @@ namespace Finanzuebersicht.Tests.Services
             };
 
             var jsonOptions = new JsonSerializerOptions { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
-            await File.WriteAllTextAsync(Path.Combine(_tempDir, "categories.json"), JsonSerializer.Serialize(categories, jsonOptions));
-            await File.WriteAllTextAsync(Path.Combine(_tempDir, "transactions.json"), JsonSerializer.Serialize(transactions, jsonOptions));
+            await File.WriteAllTextAsync(Path.Combine(_tempDir, DataFileNames.Categories), JsonSerializer.Serialize(categories, jsonOptions));
+            await File.WriteAllTextAsync(Path.Combine(_tempDir, DataFileNames.Transactions), JsonSerializer.Serialize(transactions, jsonOptions));
 
             // Use SettingsService to point LocalDataService to temp dir
             var settings = new SettingsService(Path.Combine(_tempDir, "settings.json"));
-            settings.Set("DataPath", _tempDir);
-            var ds = new LocalDataService(settings, new Finanzuebersicht.Core.Services.SystemClock());
+            settings.Set(SettingsKeys.DataPath, _tempDir);
+            var ds = new LocalDataService(settings);
+            var reporting = new ReportingService(ds, ds);
 
             // Act
-            var summary = await ds.GetYearSummaryAsync(2025);
+            var summary = await reporting.GetYearSummaryAsync(2025);
 
             // Assert
             Assert.Equal(175m, summary.Total);

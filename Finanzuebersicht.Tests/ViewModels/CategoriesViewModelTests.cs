@@ -263,8 +263,8 @@ public class CategoriesViewModelTests
             Routes.CategoryDetail,
             Arg.Is<IDictionary<string, object>?>(parameters =>
                 parameters != null &&
-                parameters.ContainsKey("Category") &&
-                object.ReferenceEquals(parameters["Category"], category)));
+                parameters.ContainsKey(NavigationQueryKeys.Category) &&
+                object.ReferenceEquals(parameters[NavigationQueryKeys.Category], category)));
     }
 
     [Fact]
@@ -392,6 +392,8 @@ public class CategoriesViewModelTests
 
         var createCategoryViewModel = new CategoryDetailViewModel(
             new SaveCategoryDetailUseCase(categoryRepository),
+            new SaveCategoryBudgetUseCase(Substitute.For<IBudgetRepository>()),
+            new LoadCategoryBudgetUseCase(Substitute.For<IBudgetRepository>()),
             navigationService,
             localizationService,
             Substitute.For<IFeedbackService>(),
