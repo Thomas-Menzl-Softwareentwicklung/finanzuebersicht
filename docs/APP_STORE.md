@@ -47,6 +47,13 @@ Sync in der UI noch nicht verkaufen (`IsCloudSyncImplemented = false`). Product 
    - Privacy → `…/privacy.html`
 
 ## 3. Store-Build lokal (Mac)
+1. Platzhalter ersetzen (`REPLACE_WITH_*`) — siehe [`site/README.md`](../site/README.md).
+2. Pages aktivieren: Branch `main` (oder `develop`), Folder **`/site`**.
+3. In App Store Connect:
+   - **Support URL** → `https://finanzuebersicht.thomasmenzl.de/`
+   - **Privacy Policy URL** → `https://finanzuebersicht.thomasmenzl.de/privacy.html`
+
+   Fallback: `https://thomas-menzl-softwareentwicklung.github.io/finanzuebersicht/`
 
 Store-Distribution einschalten (`APP_DISTRIBUTION_STORE`):
 
