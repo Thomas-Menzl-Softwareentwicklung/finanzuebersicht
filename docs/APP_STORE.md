@@ -17,6 +17,7 @@ Monetarisierung: [`MONETIZATION.md`](MONETIZATION.md).
 | Support / Privacy Site | eigenes Repo `finanzuebersicht-site` |
 | License-Gates Free/Pro/Sync | vorhanden |
 | StoreKit (Pro kaufen / Restore) | vorhanden (Store-Build, iOS/Mac Catalyst) |
+| License-Stub-UI (Dev-Toggles) | nur Debug; Release ignoriert Stub-Entitlements |
 | Sync-IAP Verkauf | **später** (CloudKit #243) |
 | App Store Connect App + Zertifikate | **manuell** |
 | TestFlight IPA Upload | **manuell auf dem Mac** |
@@ -89,7 +90,7 @@ Oder in Xcode: Archive öffnen → Distribute App → **App Store Connect** → 
 - Implementierung: StoreKit **1** (wie Microsoft MAUI BillingService-Sample; StoreKit 2 wartet auf bessere .NET-Swift-Interop).
 - Code: `Finanzuebersicht/Services/Billing/StoreKitBillingService.cs` (nur `IOS`/`MACCATALYST` + `AppDistribution=Store`).
 - Direct-Builds registrieren `UnavailableStoreBillingService`.
-- Stub-Toggles in Einstellungen bleiben für Dev, bis ASC-Produkte live sind.
+- Stub-Toggles nur in **Debug**-Store-Builds (Simulator / lokale Dev). Release, TestFlight und App Store: UI ausgeblendet, Stub-Flags werden ignoriert.
 
 ## Feature-Gates
 

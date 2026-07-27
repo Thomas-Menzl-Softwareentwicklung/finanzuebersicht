@@ -5,11 +5,12 @@ namespace Finanzuebersicht.Infrastructure.Licensing;
 
 /// <summary>
 /// Resolves Pro/Sync from StoreKit when available; caches in settings for offline.
-/// Stub setters remain for Store sandbox debugging when products are not yet configured.
+/// Stub overrides are only honored when <paramref name="allowEntitlementStubs"/> is true (Debug / tests).
 /// </summary>
 public sealed class LicenseEntitlementStore(
     ISettingsService settings,
-    IStoreBillingService billingService) : ILicenseEntitlementStore
+    IStoreBillingService billingService,
+    bool allowEntitlementStubs = false) : ILicenseEntitlementStore
 {
     public const string ProKey = SettingsKeys.LicenseStubHasPro;
     public const string SyncKey = SettingsKeys.LicenseStubHasSync;
@@ -21,12 +22,18 @@ public sealed class LicenseEntitlementStore(
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        if (IsTrue(settings.Get(PreferStubKey, "false")) || !billingService.IsAvailable)
+        if (!allowEntitlementStubs)
+            DiscardStubOverrides();
+
+        if (allowEntitlementStubs && IsTrue(settings.Get(PreferStubKey, "false")))
         {
             return (
-                IsTrue(settings.Get(ProKey, settings.Get(CacheProKey, "false"))),
-                IsTrue(settings.Get(SyncKey, settings.Get(CacheSyncKey, "false"))));
+                IsTrue(settings.Get(ProKey, "false")),
+                IsTrue(settings.Get(SyncKey, "false")));
         }
+
+        if (!billingService.IsAvailable)
+            return ReadCache();
 
         try
         {
@@ -65,10 +72,13 @@ public sealed class LicenseEntitlementStore(
     public Task SetStubEntitlementsAsync(bool hasPro, bool hasSyncSubscription, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
+        if (!allowEntitlementStubs)
+            return Task.CompletedTask;
+
         settings.Set(PreferStubKey, "true");
         settings.Set(ProKey, hasPro ? "true" : "false");
         settings.Set(SyncKey, hasSyncSubscription ? "true" : "false");
-        WriteCache(hasPro, hasSyncSubscription);
+        // Do not WriteCache — purchase cache must stay StoreKit-only so Release cannot inherit stub Pro.
         return Task.CompletedTask;
     }
 
@@ -77,6 +87,20 @@ public sealed class LicenseEntitlementStore(
         cancellationToken.ThrowIfCancellationRequested();
         settings.Set(PreferStubKey, "false");
         return Task.CompletedTask;
+    }
+
+    private void DiscardStubOverrides()
+    {
+        if (IsTrue(settings.Get(PreferStubKey, "false")))
+        {
+            settings.Set(PreferStubKey, "false");
+            // Older builds mirrored stubs into the purchase cache — drop that once.
+            settings.Set(CacheProKey, "false");
+            settings.Set(CacheSyncKey, "false");
+        }
+
+        settings.Set(ProKey, "false");
+        settings.Set(SyncKey, "false");
     }
 
     private (bool HasPro, bool HasSyncSubscription) ReadCache() => (

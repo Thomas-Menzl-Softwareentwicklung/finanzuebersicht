@@ -128,7 +128,7 @@ public partial class LicenseViewModel : ObservableObject
     [RelayCommand]
     private async Task ApplyStubEntitlements()
     {
-        if (_licenseService.Channel != DistributionChannel.Store)
+        if (!AreLicenseStubsVisible || _licenseService.Channel != DistributionChannel.Store)
             return;
 
         await _entitlementStore.SetStubEntitlementsAsync(StubProEnabled, StubSyncEnabled);
@@ -139,6 +139,9 @@ public partial class LicenseViewModel : ObservableObject
     [RelayCommand]
     private async Task UseStoreKitInsteadOfStub()
     {
+        if (!AreLicenseStubsVisible)
+            return;
+
         await _entitlementStore.ClearStubPreferenceAsync();
         await _licenseService.RefreshAsync();
         await LoadProductPriceAsync();
@@ -189,8 +192,8 @@ public partial class LicenseViewModel : ObservableObject
 
         ShowStorePurchaseControls = isStore && _billingService.IsAvailable;
         CanBuyPro = ShowStorePurchaseControls && !_licenseService.HasPro;
-        // Stub toggles only on Store builds (useful before ASC products exist / on simulator)
-        ShowStoreStubControls = isStore;
+        // Stub toggles: Debug Store builds only (hidden in Release / TestFlight / App Store)
+        ShowStoreStubControls = AreLicenseStubsVisible && isStore;
 
         if (!isStore)
         {
@@ -217,4 +220,12 @@ public partial class LicenseViewModel : ObservableObject
         StubProEnabled = _licenseService.HasPro && isStore;
         StubSyncEnabled = _licenseService.HasSyncSubscription;
     }
+
+    /// <summary>Dev-only entitlement stubs must never appear in Release Store builds.</summary>
+    private static bool AreLicenseStubsVisible =>
+#if DEBUG
+        true;
+#else
+        false;
+#endif
 }

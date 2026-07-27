@@ -14,7 +14,16 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddSingleton<IDisplayCurrencyService, DisplayCurrencyService>();
 
         // Licensing (IDistributionChannelProvider + IStoreBillingService registered by the host)
-        services.AddSingleton<ILicenseEntitlementStore, LicenseEntitlementStore>();
+        // Entitlement stubs only in Debug — Release/Store builds must not honor free Pro toggles.
+        services.AddSingleton<ILicenseEntitlementStore>(sp =>
+            new LicenseEntitlementStore(
+                sp.GetRequiredService<ISettingsService>(),
+                sp.GetRequiredService<IStoreBillingService>(),
+#if DEBUG
+                allowEntitlementStubs: true));
+#else
+                allowEntitlementStubs: false));
+#endif
         services.AddSingleton<ILicenseService, LicenseService>();
 
         // Backup

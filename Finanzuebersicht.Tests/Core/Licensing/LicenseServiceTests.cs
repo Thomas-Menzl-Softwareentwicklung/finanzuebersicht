@@ -15,7 +15,10 @@ public class LicenseServiceTests
         settings.When(s => s.Set(Arg.Any<string>(), Arg.Any<string>()))
             .Do(ci => bag[ci.ArgAt<string>(0)] = ci.ArgAt<string>(1));
 
-        var store = new LicenseEntitlementStore(settings, new UnavailableStoreBillingService());
+        var store = new LicenseEntitlementStore(
+            settings,
+            new UnavailableStoreBillingService(),
+            allowEntitlementStubs: true);
         var sut = new LicenseService(
             new FixedDistributionChannelProvider(DistributionChannel.Store),
             store);
@@ -28,7 +31,10 @@ public class LicenseServiceTests
         var settings = Substitute.For<ISettingsService>();
         var sut = new LicenseService(
             new FixedDistributionChannelProvider(DistributionChannel.Direct),
-            new LicenseEntitlementStore(settings, new UnavailableStoreBillingService()));
+            new LicenseEntitlementStore(
+                settings,
+                new UnavailableStoreBillingService(),
+                allowEntitlementStubs: false));
 
         await sut.RefreshAsync();
 
@@ -97,5 +103,36 @@ public class LicenseServiceTests
 
         Assert.True(sut.HasPro);
         Assert.False(sut.HasSyncSubscription);
+    }
+
+    [Fact]
+    public async Task ReleaseStore_IgnoresStubEntitlements()
+    {
+        var bag = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        var settings = Substitute.For<ISettingsService>();
+        settings.Get(Arg.Any<string>(), Arg.Any<string>()).Returns(ci =>
+            bag.TryGetValue(ci.ArgAt<string>(0), out var value) ? value : ci.ArgAt<string>(1));
+        settings.When(s => s.Set(Arg.Any<string>(), Arg.Any<string>()))
+            .Do(ci => bag[ci.ArgAt<string>(0)] = ci.ArgAt<string>(1));
+
+        // Leftover Debug stub state must not unlock Pro in Release.
+        bag[LicenseEntitlementStore.PreferStubKey] = "true";
+        bag[LicenseEntitlementStore.ProKey] = "true";
+        bag[LicenseEntitlementStore.SyncKey] = "true";
+
+        var store = new LicenseEntitlementStore(
+            settings,
+            new UnavailableStoreBillingService(),
+            allowEntitlementStubs: false);
+        var sut = new LicenseService(
+            new FixedDistributionChannelProvider(DistributionChannel.Store),
+            store);
+
+        await store.SetStubEntitlementsAsync(hasPro: true, hasSyncSubscription: true);
+        await sut.RefreshAsync();
+
+        Assert.False(sut.HasPro);
+        Assert.False(sut.HasSyncSubscription);
+        Assert.Equal("false", bag[LicenseEntitlementStore.PreferStubKey]);
     }
 }
