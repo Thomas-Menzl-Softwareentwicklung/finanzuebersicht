@@ -63,11 +63,17 @@ public static class MauiProgram
 		builder.Services.AddSingleton<Finanzuebersicht.Core.Licensing.IDistributionChannelProvider>(
 			_ => new Finanzuebersicht.Core.Licensing.FixedDistributionChannelProvider(
 				Finanzuebersicht.Core.Licensing.DistributionChannel.Store));
+#if IOS || MACCATALYST
+		builder.Services.AddSingleton<Finanzuebersicht.Core.Licensing.IStoreBillingService, Finanzuebersicht.Services.Billing.StoreKitBillingService>();
 #else
-		// Default: Direct (GitHub / self-built Windows & Mac) — full local Pro, no Cloud Sync
+		builder.Services.AddSingleton<Finanzuebersicht.Core.Licensing.IStoreBillingService, Finanzuebersicht.Core.Licensing.UnavailableStoreBillingService>();
+#endif
+#else
+		// Default: Direct (GitHub / self-built Windows & Mac) — full local Pro, no Cloud Sync / StoreKit
 		builder.Services.AddSingleton<Finanzuebersicht.Core.Licensing.IDistributionChannelProvider>(
 			_ => new Finanzuebersicht.Core.Licensing.FixedDistributionChannelProvider(
 				Finanzuebersicht.Core.Licensing.DistributionChannel.Direct));
+		builder.Services.AddSingleton<Finanzuebersicht.Core.Licensing.IStoreBillingService, Finanzuebersicht.Core.Licensing.UnavailableStoreBillingService>();
 #endif
 		builder.Services.AddInfrastructureServices();
 		builder.Services.AddSingleton<IRecurringGenerationService, RecurringGenerationService>();
