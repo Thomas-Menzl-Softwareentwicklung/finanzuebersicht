@@ -1,31 +1,28 @@
-# Finanzübersicht — öffentliche Legal-/Support-Seiten
+# Finanzübersicht — Support / Legal Site
 
-Statische Seiten für **App Store Connect** (Support URL + Privacy Policy URL).
+Öffentliche Seiten im Stil von [simpletd.thomasmenzl.de](https://simpletd.thomasmenzl.de) für **App Store Connect**.
 
-Liegen bewusst im App-Repo unter `site/`, weil das Repository öffentlich ist — kein Extra-Repo nötig (anders als bei SimpleTD).
+| Seite | URL | ASC-Feld |
+|-------|-----|----------|
+| Support | `https://finanzuebersicht.thomasmenzl.de/` | Support URL |
+| Privacy | `https://finanzuebersicht.thomasmenzl.de/privacy.html` | Privacy Policy URL |
+| Impressum | `https://finanzuebersicht.thomasmenzl.de/impressum.html` | DE-Pflicht |
 
-| Seite | URL (nach Pages) | ASC-Feld |
-|-------|------------------|----------|
-| Support | Site-Root / `index.html` | Support URL |
-| Privacy | `privacy.html` | Privacy Policy URL |
-| Impressum | `impressum.html` | DE-Pflicht auf der Website |
-
-Erwartete Base-URL:
+Fallback ohne Custom Domain:
 
 `https://thomas-menzl-softwareentwicklung.github.io/finanzuebersicht/`
 
 ## Setup
 
-1. Platzhalter ersetzen in den HTML-Dateien:
-   - `REPLACE_WITH_EMAIL`
-   - `REPLACE_WITH_STREET`
-   - `REPLACE_WITH_ZIP_CITY`
-   - `REPLACE_WITH_VAT_OR_EXEMPTION`
-2. GitHub Pages aktivieren (Repo → Settings → Pages):
-   - Source: **Deploy from a branch**
-   - Branch: `main` (oder `develop`, solange der Store-Release von dort kommt)
-   - Folder: `/site`
-3. Optional per API:
+### 1. GitHub Pages
+
+Repo → Settings → Pages:
+
+- Source: **Deploy from a branch**
+- Branch: `main` (oder `develop`)
+- Folder: **`/site`**
+
+Optional:
 
 ```bash
 gh api repos/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/pages \
@@ -35,6 +32,25 @@ gh api repos/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/pages \
   -f source[path]=/site
 ```
 
-4. In App Store Connect eintragen:
-   - Support URL → `…/finanzuebersicht/`
-   - Privacy Policy URL → `…/finanzuebersicht/privacy.html`
+### 2. Custom Domain (wie SimpleTD)
+
+1. DNS bei deinem Domain-Anbieter: CNAME
+
+   `finanzuebersicht.thomasmenzl.de` → `thomas-menzl-softwareentwicklung.github.io`
+
+2. In GitHub Pages die Custom Domain `finanzuebersicht.thomasmenzl.de` eintragen (HTTPS erzwingen).
+
+Die Datei `site/CNAME` enthält bereits:
+
+```
+finanzuebersicht.thomasmenzl.de
+```
+
+### 3. Noch offen
+
+- USt-Hinweis in `impressum.html` (`REPLACE_WITH_VAT_OR_EXEMPTION`) — analog SimpleTD
+
+### 4. App Store Connect
+
+- Support URL → `https://finanzuebersicht.thomasmenzl.de/`
+- Privacy Policy URL → `https://finanzuebersicht.thomasmenzl.de/privacy.html`
