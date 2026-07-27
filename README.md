@@ -203,7 +203,7 @@ Finanzuebersicht.Tests/            ← xUnit Tests (net10.0)
 | [docs/ROADMAP.md](docs/ROADMAP.md) | Geplante Features und Milestones |
 | [docs/APP_STORE.md](docs/APP_STORE.md) | App Store / TestFlight Vorbereitung (iPhone / iPad) |
 | [docs/MONETIZATION.md](docs/MONETIZATION.md) | Free / Pro / Sync — Preis- und Feature-Schnitt (Entwurf) |
-| [site/](site/) | Support, Datenschutz, Impressum (GitHub Pages) |
+| [finanzuebersicht-site](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht-site) | Support, Datenschutz, Impressum (`finanzuebersicht.thomasmenzl.de`) |
 | [docs/CATEGORIZATION_RULES.md](docs/CATEGORIZATION_RULES.md) | Auto-Kategorisierung beim CSV-Import |
 | [docs/RECURRING_UI.md](docs/RECURRING_UI.md) | Dauerauftrag: Instanz verschieben |
 | [docs/ARCHITECTURE_CLEAN_CODE_REVIEW.md](docs/ARCHITECTURE_CLEAN_CODE_REVIEW.md) | Historisches Architektur-Review (Mai 2026) |

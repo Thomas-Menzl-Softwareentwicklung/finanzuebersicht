@@ -1,6 +1,10 @@
 # App Store Vorbereitung (iPhone / iPad) + TestFlight
 
-Legal-Seiten: [`site/`](../site/). Monetarisierung: [`MONETIZATION.md`](MONETIZATION.md).
+Legal-/Support-Seiten: separates Repo
+[`finanzuebersicht-site`](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht-site)
+→ `https://finanzuebersicht.thomasmenzl.de/`.
+
+Monetarisierung: [`MONETIZATION.md`](MONETIZATION.md).
 
 ## Status
 
@@ -10,7 +14,7 @@ Legal-Seiten: [`site/`](../site/). Monetarisierung: [`MONETIZATION.md`](MONETIZA
 | iPhone + iPad | vorhanden |
 | Privacy Manifest + Export Compliance | gesetzt |
 | iOS Release-Entitlements (ohne `get-task-allow`) | gesetzt |
-| Support / Privacy (`site/`) | vorbereitet |
+| Support / Privacy Site | eigenes Repo `finanzuebersicht-site` |
 | License-Gates Free/Pro/Sync | vorhanden |
 | StoreKit (Pro kaufen / Restore) | vorhanden (Store-Build, iOS/Mac Catalyst) |
 | Sync-IAP Verkauf | **später** (CloudKit #243) |
@@ -38,22 +42,18 @@ Sync in der UI noch nicht verkaufen (`IsCloudSyncImplemented = false`). Product 
    - optional Sync (Auto-Renewable Yearly) für später
 6. Sandbox-Tester unter Users and Access → Sandbox.
 
-## 2. Legal-URLs (GitHub Pages)
+## 2. Legal-URLs
 
-1. Platzhalter in `site/*.html` ersetzen.
-2. Pages: Branch + Folder **`/site`**.
-3. ASC:
-   - Support → `https://thomas-menzl-softwareentwicklung.github.io/finanzuebersicht/`
-   - Privacy → `…/privacy.html`
+Site-Repo: [finanzuebersicht-site](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht-site)
+
+In App Store Connect:
+
+- **Support URL** → `https://finanzuebersicht.thomasmenzl.de/`
+- **Privacy Policy URL** → `https://finanzuebersicht.thomasmenzl.de/privacy.html`
+
+Fallback: `https://thomas-menzl-softwareentwicklung.github.io/finanzuebersicht-site/`
 
 ## 3. Store-Build lokal (Mac)
-1. Platzhalter ersetzen (`REPLACE_WITH_*`) — siehe [`site/README.md`](../site/README.md).
-2. Pages aktivieren: Branch `main` (oder `develop`), Folder **`/site`**.
-3. In App Store Connect:
-   - **Support URL** → `https://finanzuebersicht.thomasmenzl.de/`
-   - **Privacy Policy URL** → `https://finanzuebersicht.thomasmenzl.de/privacy.html`
-
-   Fallback: `https://thomas-menzl-softwareentwicklung.github.io/finanzuebersicht/`
 
 Store-Distribution einschalten (`APP_DISTRIBUTION_STORE`):
 
