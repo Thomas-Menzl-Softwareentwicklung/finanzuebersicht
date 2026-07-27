@@ -10,7 +10,7 @@ public interface ILicenseEntitlementStore
     /// <summary>Persist ownership resolved from StoreKit (after purchase/restore).</summary>
     Task ApplyOwnedProductIdsAsync(IEnumerable<string> ownedProductIds, CancellationToken cancellationToken = default);
 
-    /// <summary>Debug/stub override until App Store products exist.</summary>
+    /// <summary>Debug/stub override for local Store builds and unit tests. No-op when stubs are disabled (Release).</summary>
     Task SetStubEntitlementsAsync(bool hasPro, bool hasSyncSubscription, CancellationToken cancellationToken = default);
 
     /// <summary>Stop preferring stub flags; next refresh uses StoreKit/cache.</summary>
