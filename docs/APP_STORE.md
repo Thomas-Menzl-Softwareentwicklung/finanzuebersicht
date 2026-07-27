@@ -30,8 +30,10 @@ Seiten im öffentlichen Repo: `site/`.
 1. Platzhalter ersetzen (`REPLACE_WITH_*`) — siehe [`site/README.md`](../site/README.md).
 2. Pages aktivieren: Branch `main` (oder `develop`), Folder **`/site`**.
 3. In App Store Connect:
-   - **Support URL** → `https://thomas-menzl-softwareentwicklung.github.io/finanzuebersicht/`
-   - **Privacy Policy URL** → `https://thomas-menzl-softwareentwicklung.github.io/finanzuebersicht/privacy.html`
+   - **Support URL** → `https://finanzuebersicht.thomasmenzl.de/`
+   - **Privacy Policy URL** → `https://finanzuebersicht.thomasmenzl.de/privacy.html`
+
+   Fallback: `https://thomas-menzl-softwareentwicklung.github.io/finanzuebersicht/`
 
 ## 3. Lokaler Release-Build (Mac + Xcode)
 
