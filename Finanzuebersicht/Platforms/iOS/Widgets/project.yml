@@ -1,0 +1,59 @@
+name: QuickExpenseWidget
+options:
+  bundleIdPrefix: de.thomasmenzl.finanzuebersicht
+  deploymentTarget:
+    iOS: "17.0"
+  xcodeVersion: "16.0"
+  createIntermediateGroups: true
+
+settings:
+  base:
+    DEVELOPMENT_TEAM: "XY663DU933"
+
+targets:
+  WidgetHost:
+    type: application
+    platform: iOS
+    sources:
+      - path: WidgetHost
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: de.thomasmenzl.finanzuebersicht.widgethost
+        GENERATE_INFOPLIST_FILE: true
+        INFOPLIST_GENERATION_MODE: GeneratedFile
+        CODE_SIGN_IDENTITY: "Apple Development"
+        CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: "XY663DU933"
+        SWIFT_VERSION: "5.9"
+    dependencies:
+      - target: QuickExpenseWidget
+
+  QuickExpenseWidget:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: QuickExpenseWidget
+        excludes:
+          - "*.entitlements"
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: de.thomasmenzl.finanzuebersicht.QuickExpenseWidget
+        INFOPLIST_FILE: QuickExpenseWidget/Info.plist
+        CODE_SIGN_IDENTITY: "Apple Development"
+        CODE_SIGN_STYLE: Automatic
+        CODE_SIGN_ENTITLEMENTS: QuickExpenseWidget/QuickExpenseWidget.entitlements
+        SWIFT_VERSION: "5.9"
+        GENERATE_INFOPLIST_FILE: false
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME: WidgetBackground
+        LD_RUNPATH_SEARCH_PATHS: "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks"
+        TARGETED_DEVICE_FAMILY: "1,2"
+        MARKETING_VERSION: "1.19"
+        CURRENT_PROJECT_VERSION: "1"
+    entitlements:
+      path: QuickExpenseWidget/QuickExpenseWidget.entitlements
+      properties:
+        application-identifier: XY663DU933.de.thomasmenzl.finanzuebersicht.QuickExpenseWidget
+        com.apple.developer.team-identifier: XY663DU933
+        com.apple.security.application-groups:
+          - group.de.thomasmenzl.finanzuebersicht

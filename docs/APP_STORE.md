@@ -10,7 +10,7 @@ Monetarisierung: [`MONETIZATION.md`](MONETIZATION.md).
 
 | Thema | Status |
 |-------|--------|
-| Bundle ID `com.thomasmenzl.finanzuebersicht` | vorhanden |
+| Bundle ID `de.thomasmenzl.finanzuebersicht` | vorhanden |
 | iPhone + iPad | vorhanden |
 | Privacy Manifest + Export Compliance | gesetzt |
 | iOS Release-Entitlements (ohne `get-task-allow`) | gesetzt (inkl. App Group für Quick-Expense-Widget) |
@@ -28,14 +28,14 @@ Monetarisierung: [`MONETIZATION.md`](MONETIZATION.md).
 
 | Produkt | Typ | Product ID |
 |---------|-----|------------|
-| Finanzübersicht Pro | Non-Consumable | `com.thomasmenzl.finanzuebersicht.pro` |
-| Finanzübersicht Sync | Auto-Renewable (1 Jahr) | `com.thomasmenzl.finanzuebersicht.sync.yearly` |
+| Finanzübersicht Pro | Non-Consumable | `de.thomasmenzl.finanzuebersicht.pro` |
+| Finanzübersicht Sync | Auto-Renewable (1 Jahr) | `de.thomasmenzl.finanzuebersicht.sync.yearly` |
 
 Sync in der UI noch nicht verkaufen (`IsCloudSyncImplemented = false`). Product trotzdem in ASC anlegen, sobald Sync kommt — oder erst bei #243.
 
 ## 1. Apple Developer + App Store Connect
 
-1. App ID `com.thomasmenzl.finanzuebersicht` (Capabilities: In-App Purchase; **App Groups** `group.com.thomasmenzl.finanzuebersicht` für Quick-Expense-Widget; iCloud erst für Sync).
+1. App ID `de.thomasmenzl.finanzuebersicht` (Capabilities: In-App Purchase; **App Groups** `group.de.thomasmenzl.finanzuebersicht` für Quick-Expense-Widget; iCloud erst für Sync).
 2. Zertifikate: **Apple Development** + **Apple Distribution**.
 3. Profiles: Development + **App Store**.
 4. ASC: iOS-App anlegen (gleiche Bundle-ID).

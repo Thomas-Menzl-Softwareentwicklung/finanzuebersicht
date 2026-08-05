@@ -4,7 +4,7 @@ import AppIntents
 
 /// Shared with the MAUI host — must match Finanzuebersicht.Core.Constants.AppGroupIds.
 enum AppGroup {
-    static let id = "group.com.thomasmenzl.finanzuebersicht"
+    static let id = "group.de.thomasmenzl.finanzuebersicht"
     static let pendingFileName = "quick-expense-pending.json"
     static let hasProKey = "hasPro"
 }
@@ -17,6 +17,18 @@ struct PendingExpense: Codable, Identifiable {
 }
 
 enum QuickExpenseSharedStore {
+    private static let iso8601: ISO8601DateFormatter = {
+        let f = ISO8601DateFormatter()
+        f.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return f
+    }()
+
+    private static let iso8601NoFraction: ISO8601DateFormatter = {
+        let f = ISO8601DateFormatter()
+        f.formatOptions = [.withInternetDateTime]
+        return f
+    }()
+
     static var containerURL: URL? {
         FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: AppGroup.id)
     }
@@ -39,7 +51,7 @@ enum QuickExpenseSharedStore {
         var items: [PendingExpense] = []
         if FileManager.default.fileExists(atPath: url.path),
            let data = try? Data(contentsOf: url),
-           let decoded = try? JSONDecoder().decode([PendingExpense].self, from: data) {
+           let decoded = try? decodePending(data) {
             items = decoded
         }
 
@@ -50,8 +62,27 @@ enum QuickExpenseSharedStore {
             createdAt: Date()
         ))
 
-        let encoded = try JSONEncoder().encode(items)
-        try encoded.write(to: url, options: [.atomic])
+        try encodePending(items).write(to: url, options: [.atomic])
+    }
+
+    private static func decodePending(_ data: Data) throws -> [PendingExpense] {
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .custom { decoder in
+            let container = try decoder.singleValueContainer()
+            let raw = try container.decode(String.self)
+            if let d = iso8601.date(from: raw) ?? iso8601NoFraction.date(from: raw) {
+                return d
+            }
+            throw DecodingError.dataCorruptedError(in: container, debugDescription: "Invalid date: \(raw)")
+        }
+        return try decoder.decode([PendingExpense].self, from: data)
+    }
+
+    private static func encodePending(_ items: [PendingExpense]) throws -> Data {
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        encoder.outputFormatting = [.sortedKeys]
+        return try encoder.encode(items)
     }
 }
 
@@ -64,6 +95,16 @@ struct SaveQuickExpenseIntent: AppIntent {
 
     @Parameter(title: "Note")
     var title: String
+
+    init() {
+        self.amountText = ""
+        self.title = ""
+    }
+
+    init(amountText: String, title: String) {
+        self.amountText = amountText
+        self.title = title
+    }
 
     func perform() async throws -> some IntentResult & ProvidesDialog {
         guard QuickExpenseSharedStore.hasPro else {
@@ -109,13 +150,21 @@ struct QuickExpenseWidgetEntryView: View {
             Text("Quick expense")
                 .font(.headline)
             if entry.hasPro {
-                Text("Amount + note → save")
+                Text("Tap a preset — open the app to sync")
                     .font(.caption)
                     .foregroundStyle(.secondary)
-                Button(intent: SaveQuickExpenseIntent(amountText: "", title: "")) {
-                    Label("Capture", systemImage: "plus.circle.fill")
+                HStack(spacing: 6) {
+                    Button(intent: SaveQuickExpenseIntent(amountText: "3.50", title: "Coffee")) {
+                        Text("Coffee 3.50")
+                            .font(.caption2)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    Button(intent: SaveQuickExpenseIntent(amountText: "5.00", title: "Snack")) {
+                        Text("Snack 5")
+                            .font(.caption2)
+                    }
+                    .buttonStyle(.bordered)
                 }
-                .buttonStyle(.borderedProminent)
             } else {
                 Text("Pro unlocks Home Screen capture")
                     .font(.caption)

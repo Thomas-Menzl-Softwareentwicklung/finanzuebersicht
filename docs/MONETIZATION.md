@@ -29,8 +29,8 @@ Compile-Flag: `APP_DISTRIBUTION_STORE` wenn `AppDistribution=Store`. CI/Release-
 
 | Produkt | Product ID |
 |---------|------------|
-| Pro | `com.thomasmenzl.finanzuebersicht.pro` |
-| Sync (jährlich) | `com.thomasmenzl.finanzuebersicht.sync.yearly` |
+| Pro | `de.thomasmenzl.finanzuebersicht.pro` |
+| Sync (jährlich) | `de.thomasmenzl.finanzuebersicht.sync.yearly` |
 
 Konstante: `Finanzuebersicht.Core.Licensing.LicenseProductIds`.
 
