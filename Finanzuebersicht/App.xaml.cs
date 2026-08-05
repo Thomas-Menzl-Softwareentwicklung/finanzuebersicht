@@ -125,6 +125,7 @@ public partial class App : global::Microsoft.Maui.Controls.Application
 				_licenseService.HasFeature(AppFeature.QuickExpenseCapture));
 			AppGroupQuickExpenseInboxStore.PublishPreferredLanguage(
 				CultureInfo.CurrentUICulture.TwoLetterISOLanguageName);
+			Platforms.iOS.WidgetTimelineReloader.ReloadAll();
 		}
 		catch (Exception ex)
 		{

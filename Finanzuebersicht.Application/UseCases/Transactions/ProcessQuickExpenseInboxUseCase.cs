@@ -27,8 +27,11 @@ public class ProcessQuickExpenseInboxUseCase(
             cancellationToken.ThrowIfCancellationRequested();
             try
             {
+                var amountText = FlexibleAmountParser.ToInvariantAmountText(item.AmountText)
+                    ?? item.AmountText;
+
                 var result = await _captureQuickExpenseUseCase.ExecuteAsync(
-                    item.AmountText,
+                    amountText,
                     item.Title,
                     CultureInfo.InvariantCulture,
                     cancellationToken).ConfigureAwait(false);

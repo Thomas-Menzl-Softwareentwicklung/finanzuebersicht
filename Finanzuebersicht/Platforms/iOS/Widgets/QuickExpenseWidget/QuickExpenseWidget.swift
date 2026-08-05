@@ -140,38 +140,62 @@ struct SaveQuickExpenseIntent: AppIntent {
 }
 
 struct QuickExpenseProvider: TimelineProvider {
+    private var languageCode: String {
+        if let code = UserDefaults(suiteName: AppGroup.id)?.string(forKey: AppGroup.preferredLanguageKey),
+           !code.isEmpty {
+            return code
+        }
+        return Locale.current.language.languageCode?.identifier ?? "en"
+    }
+
     func placeholder(in context: Context) -> QuickExpenseEntry {
-        QuickExpenseEntry(date: Date(), hasPro: true)
+        QuickExpenseEntry(date: Date(), hasPro: true, languageCode: languageCode)
     }
 
     func getSnapshot(in context: Context, completion: @escaping (QuickExpenseEntry) -> Void) {
-        completion(QuickExpenseEntry(date: Date(), hasPro: QuickExpenseSharedStore.hasPro))
+        completion(QuickExpenseEntry(
+            date: Date(),
+            hasPro: QuickExpenseSharedStore.hasPro,
+            languageCode: languageCode))
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<QuickExpenseEntry>) -> Void) {
-        let entry = QuickExpenseEntry(date: Date(), hasPro: QuickExpenseSharedStore.hasPro)
-        completion(Timeline(entries: [entry], policy: .after(Date().addingTimeInterval(3600))))
+        let entry = QuickExpenseEntry(
+            date: Date(),
+            hasPro: QuickExpenseSharedStore.hasPro,
+            languageCode: languageCode)
+        // Short policy so language/Pro flips from the app show up quickly even without ReloadAll.
+        completion(Timeline(entries: [entry], policy: .after(Date().addingTimeInterval(15 * 60))))
     }
 }
 
 struct QuickExpenseEntry: TimelineEntry {
     let date: Date
     let hasPro: Bool
+    let languageCode: String
 }
 
 struct QuickExpenseWidgetEntryView: View {
     var entry: QuickExpenseEntry
 
-    private var locale: Locale { QuickExpenseSharedStore.preferredLocale }
+    private var locale: Locale {
+        entry.languageCode.isEmpty
+            ? QuickExpenseSharedStore.preferredLocale
+            : Locale(identifier: entry.languageCode)
+    }
 
     private var coffeeTitle: String { L10n.string("Coffee", locale: locale) }
     private var snackTitle: String { L10n.string("Snack", locale: locale) }
 
-    private var coffeeAmount: String {
+    /// Always invariant for the inbox JSON — display strings stay localized.
+    private let coffeeAmountValue = "3.50"
+    private let snackAmountValue = "5.00"
+
+    private var coffeeAmountDisplay: String {
         locale.language.languageCode?.identifier == "de" ? "3,50" : "3.50"
     }
 
-    private var snackAmount: String {
+    private var snackAmountDisplay: String {
         locale.language.languageCode?.identifier == "de" ? "5,00" : "5.00"
     }
 
@@ -184,13 +208,13 @@ struct QuickExpenseWidgetEntryView: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
                 HStack(spacing: 6) {
-                    Button(intent: SaveQuickExpenseIntent(amountText: coffeeAmount, title: coffeeTitle)) {
-                        Text(String(format: L10n.string("Coffee %@", locale: locale), coffeeAmount))
+                    Button(intent: SaveQuickExpenseIntent(amountText: coffeeAmountValue, title: coffeeTitle)) {
+                        Text(String(format: L10n.string("Coffee %@", locale: locale), coffeeAmountDisplay))
                             .font(.caption2)
                     }
                     .buttonStyle(.borderedProminent)
-                    Button(intent: SaveQuickExpenseIntent(amountText: snackAmount, title: snackTitle)) {
-                        Text(String(format: L10n.string("Snack %@", locale: locale), snackAmount))
+                    Button(intent: SaveQuickExpenseIntent(amountText: snackAmountValue, title: snackTitle)) {
+                        Text(String(format: L10n.string("Snack %@", locale: locale), snackAmountDisplay))
                             .font(.caption2)
                     }
                     .buttonStyle(.bordered)

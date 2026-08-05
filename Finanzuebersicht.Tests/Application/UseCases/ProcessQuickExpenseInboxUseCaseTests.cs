@@ -51,6 +51,25 @@ public class ProcessQuickExpenseInboxUseCaseTests
     }
 
     [Fact]
+    public async Task ExecuteAsync_ParsesGermanDecimalComma_AsEurosNotHundreds()
+    {
+        var inbox = Substitute.For<IQuickExpenseInboxStore>();
+        inbox.DrainPendingAsync(Arg.Any<CancellationToken>()).Returns(
+        [
+            new QuickExpenseInboxItem("1", "3,50", "Kaffee", DateTimeOffset.UtcNow)
+        ]);
+
+        Transaction? saved = null;
+        var transactions = Substitute.For<ITransactionRepository>();
+        transactions.SaveTransactionAsync(Arg.Do<Transaction>(t => saved = t)).Returns(Task.CompletedTask);
+
+        var sut = new ProcessQuickExpenseInboxUseCase(inbox, CreateCapture(transactions));
+        Assert.Equal(1, await sut.ExecuteAsync());
+        Assert.NotNull(saved);
+        Assert.Equal(3.50m, saved!.Betrag);
+    }
+
+    [Fact]
     public async Task ExecuteAsync_ReturnsZero_WhenEmpty()
     {
         var inbox = Substitute.For<IQuickExpenseInboxStore>();
