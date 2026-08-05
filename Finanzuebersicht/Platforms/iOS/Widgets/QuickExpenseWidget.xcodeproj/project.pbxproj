@@ -11,7 +11,9 @@
 		0559A58CD215EAAB5816BBAE /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5399279586D1FC99DCB568C8 /* ContentView.swift */; };
 		0824AE87B2B9946649EBD1F8 /* QuickExpenseWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6340955998BB227C9409604A /* QuickExpenseWidget.swift */; };
 		2745BBF44A79CF70D35CE673 /* WidgetHostApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3276586BD003741044901FE5 /* WidgetHostApp.swift */; };
+		38AA0E2029CFFEEE3D7336DF /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 89C07390DE04D26F5F7B1959 /* Localizable.xcstrings */; };
 		60C1E322BB443A4108747882 /* QuickExpenseWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = AED6AA31B22AD6A00E6A0E00 /* QuickExpenseWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		EA27217F0711511DCB96B15A /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = C8369D2A818A48700A52DF8A /* InfoPlist.strings */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -39,13 +41,15 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		12EE9747AC84438E9C7028A1 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		1937560B137C3D8509EF6785 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		3276586BD003741044901FE5 /* WidgetHostApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetHostApp.swift; sourceTree = "<group>"; };
 		5399279586D1FC99DCB568C8 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		6340955998BB227C9409604A /* QuickExpenseWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickExpenseWidget.swift; sourceTree = "<group>"; };
 		6B28749AD849E58B456C08DB /* WidgetHost.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = WidgetHost.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		89C07390DE04D26F5F7B1959 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		A78EC288B0E4AFBC6B4864DB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		AED6AA31B22AD6A00E6A0E00 /* QuickExpenseWidget.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = QuickExpenseWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
-		B0ED45004CB5AF45E79B9B14 /* WidgetHost.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = WidgetHost.entitlements; sourceTree = "<group>"; };
 		FA2793D43FA27C8E753A53E6 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -73,7 +77,9 @@
 			children = (
 				FA2793D43FA27C8E753A53E6 /* Assets.xcassets */,
 				A78EC288B0E4AFBC6B4864DB /* Info.plist */,
+				89C07390DE04D26F5F7B1959 /* Localizable.xcstrings */,
 				6340955998BB227C9409604A /* QuickExpenseWidget.swift */,
+				C8369D2A818A48700A52DF8A /* InfoPlist.strings */,
 			);
 			path = QuickExpenseWidget;
 			sourceTree = "<group>";
@@ -82,7 +88,6 @@
 			isa = PBXGroup;
 			children = (
 				5399279586D1FC99DCB568C8 /* ContentView.swift */,
-				B0ED45004CB5AF45E79B9B14 /* WidgetHost.entitlements */,
 				3276586BD003741044901FE5 /* WidgetHostApp.swift */,
 			);
 			path = WidgetHost;
@@ -152,6 +157,7 @@
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				Base,
+				de,
 				en,
 			);
 			mainGroup = 31A5D24EB7E86CC2AEF5F598;
@@ -173,6 +179,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				01E01E481859A76668D633B3 /* Assets.xcassets in Resources */,
+				EA27217F0711511DCB96B15A /* InfoPlist.strings in Resources */,
+				38AA0E2029CFFEEE3D7336DF /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -206,6 +214,18 @@
 		};
 /* End PBXTargetDependency section */
 
+/* Begin PBXVariantGroup section */
+		C8369D2A818A48700A52DF8A /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				1937560B137C3D8509EF6785 /* de */,
+				12EE9747AC84438E9C7028A1 /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
 /* Begin XCBuildConfiguration section */
 		1D09352627A1CFC8EE6EC291 /* Release */ = {
 			isa = XCBuildConfiguration;
@@ -215,9 +235,11 @@
 				CODE_SIGN_ENTITLEMENTS = QuickExpenseWidget/QuickExpenseWidget.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = QuickExpenseWidget/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				MARKETING_VERSION = 1.19;
 				PRODUCT_BUNDLE_IDENTIFIER = de.thomasmenzl.finanzuebersicht.QuickExpenseWidget;
 				SDKROOT = iphoneos;
 				SWIFT_VERSION = 5.9;
@@ -394,9 +416,11 @@
 				CODE_SIGN_ENTITLEMENTS = QuickExpenseWidget/QuickExpenseWidget.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = QuickExpenseWidget/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				MARKETING_VERSION = 1.19;
 				PRODUCT_BUNDLE_IDENTIFIER = de.thomasmenzl.finanzuebersicht.QuickExpenseWidget;
 				SDKROOT = iphoneos;
 				SWIFT_VERSION = 5.9;

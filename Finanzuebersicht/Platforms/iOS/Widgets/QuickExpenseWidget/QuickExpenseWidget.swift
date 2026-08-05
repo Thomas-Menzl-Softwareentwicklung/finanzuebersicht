@@ -7,6 +7,7 @@ enum AppGroup {
     static let id = "group.de.thomasmenzl.finanzuebersicht"
     static let pendingFileName = "quick-expense-pending.json"
     static let hasProKey = "hasPro"
+    static let preferredLanguageKey = "preferredLanguage"
 }
 
 struct PendingExpense: Codable, Identifiable {
@@ -39,6 +40,15 @@ enum QuickExpenseSharedStore {
 
     static var hasPro: Bool {
         UserDefaults(suiteName: AppGroup.id)?.bool(forKey: AppGroup.hasProKey) ?? false
+    }
+
+    /// In-app language from MAUI (`de` / `en`); nil → system locale.
+    static var preferredLocale: Locale {
+        if let code = UserDefaults(suiteName: AppGroup.id)?.string(forKey: AppGroup.preferredLanguageKey),
+           !code.isEmpty {
+            return Locale(identifier: code)
+        }
+        return .current
     }
 
     static func enqueue(amountText: String, title: String) throws {
@@ -86,6 +96,12 @@ enum QuickExpenseSharedStore {
     }
 }
 
+private enum L10n {
+    static func string(_ key: String.LocalizationValue, locale: Locale = QuickExpenseSharedStore.preferredLocale) -> String {
+        String(localized: key, locale: locale)
+    }
+}
+
 struct SaveQuickExpenseIntent: AppIntent {
     static var title: LocalizedStringResource = "Save quick expense"
     static var description = IntentDescription("Captures amount and note for Finanzübersicht.")
@@ -107,18 +123,19 @@ struct SaveQuickExpenseIntent: AppIntent {
     }
 
     func perform() async throws -> some IntentResult & ProvidesDialog {
+        let locale = QuickExpenseSharedStore.preferredLocale
         guard QuickExpenseSharedStore.hasPro else {
-            return .result(dialog: "Finanzübersicht Pro is required for quick capture.")
+            return .result(dialog: "\(L10n.string("Finanzübersicht Pro is required for quick capture.", locale: locale))")
         }
 
         let trimmedAmount = amountText.trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedTitle = title.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedAmount.isEmpty, !trimmedTitle.isEmpty else {
-            return .result(dialog: "Amount and note are required.")
+            return .result(dialog: "\(L10n.string("Amount and note are required.", locale: locale))")
         }
 
         try QuickExpenseSharedStore.enqueue(amountText: trimmedAmount, title: trimmedTitle)
-        return .result(dialog: "Saved — open the app to sync.")
+        return .result(dialog: "\(L10n.string("Saved — open the app to sync.", locale: locale))")
     }
 }
 
@@ -145,32 +162,46 @@ struct QuickExpenseEntry: TimelineEntry {
 struct QuickExpenseWidgetEntryView: View {
     var entry: QuickExpenseEntry
 
+    private var locale: Locale { QuickExpenseSharedStore.preferredLocale }
+
+    private var coffeeTitle: String { L10n.string("Coffee", locale: locale) }
+    private var snackTitle: String { L10n.string("Snack", locale: locale) }
+
+    private var coffeeAmount: String {
+        locale.language.languageCode?.identifier == "de" ? "3,50" : "3.50"
+    }
+
+    private var snackAmount: String {
+        locale.language.languageCode?.identifier == "de" ? "5,00" : "5.00"
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Quick expense")
+            Text(L10n.string("Quick expense", locale: locale))
                 .font(.headline)
             if entry.hasPro {
-                Text("Tap a preset — open the app to sync")
+                Text(L10n.string("Tap a preset — open the app to sync", locale: locale))
                     .font(.caption)
                     .foregroundStyle(.secondary)
                 HStack(spacing: 6) {
-                    Button(intent: SaveQuickExpenseIntent(amountText: "3.50", title: "Coffee")) {
-                        Text("Coffee 3.50")
+                    Button(intent: SaveQuickExpenseIntent(amountText: coffeeAmount, title: coffeeTitle)) {
+                        Text(String(format: L10n.string("Coffee %@", locale: locale), coffeeAmount))
                             .font(.caption2)
                     }
                     .buttonStyle(.borderedProminent)
-                    Button(intent: SaveQuickExpenseIntent(amountText: "5.00", title: "Snack")) {
-                        Text("Snack 5")
+                    Button(intent: SaveQuickExpenseIntent(amountText: snackAmount, title: snackTitle)) {
+                        Text(String(format: L10n.string("Snack %@", locale: locale), snackAmount))
                             .font(.caption2)
                     }
                     .buttonStyle(.bordered)
                 }
             } else {
-                Text("Pro unlocks Home Screen capture")
+                Text(L10n.string("Pro unlocks Home Screen capture", locale: locale))
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
         }
+        .environment(\.locale, locale)
         .containerBackground(.fill.tertiary, for: .widget)
     }
 }
@@ -183,8 +214,8 @@ struct QuickExpenseWidget: Widget {
         StaticConfiguration(kind: kind, provider: QuickExpenseProvider()) { entry in
             QuickExpenseWidgetEntryView(entry: entry)
         }
-        .configurationDisplayName("Quick expense")
-        .description("Capture a small expense without opening the full app.")
+        .configurationDisplayName(LocalizedStringResource("Quick expense"))
+        .description(LocalizedStringResource("Capture a small expense without opening the full app."))
         .supportedFamilies([.systemSmall, .systemMedium])
     }
 }

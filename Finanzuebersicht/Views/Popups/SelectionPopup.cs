@@ -1,4 +1,5 @@
 using System.Collections;
+using CommunityToolkit.Maui;
 using CommunityToolkit.Maui.Views;
 using Finanzuebersicht.Converters;
 using Finanzuebersicht.Selection;
@@ -12,12 +13,19 @@ public class SelectionPopup : Popup<object>
     private const double ListVerticalPadding = 6;
     private bool _isClosing;
 
+    /// <summary>See <see cref="FormSheetPopup.SheetPopupOptions"/> — avoid nested CT Border/Shadow.</summary>
+    internal static readonly PopupOptions SelectionPopupOptions = new()
+    {
+        CanBeDismissedByTappingOutsideOfPopup = true,
+        Shape = null,
+        Shadow = null
+    };
+
     public SelectionPopup(IEnumerable items, object? selectedItem, string displayMemberPath)
     {
         BackgroundColor = Colors.Transparent;
         Padding = 0;
         Margin = new Thickness(20);
-        CanBeDismissedByTappingOutsideOfPopup = true;
         Content = CreateContent(items, selectedItem, displayMemberPath);
     }
 

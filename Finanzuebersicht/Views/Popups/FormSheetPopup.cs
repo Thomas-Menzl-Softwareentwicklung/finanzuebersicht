@@ -1,4 +1,5 @@
 using System.Windows.Input;
+using CommunityToolkit.Maui;
 using CommunityToolkit.Maui.Extensions;
 using CommunityToolkit.Maui.Views;
 using Finanzuebersicht.Controls;
@@ -23,6 +24,17 @@ public class FormSheetPopup : Popup<FormSheetResult>
     private const double ChromeHeight = 120;
     private const double MaxHeightFraction = 0.7;
 
+    /// <summary>
+    /// Popup v2 wraps content in its own Border/Shadow — disable those so our card chrome wins
+    /// (nested Border+Shadow has crashed on iOS when opening FormSheet).
+    /// </summary>
+    internal static readonly PopupOptions SheetPopupOptions = new()
+    {
+        CanBeDismissedByTappingOutsideOfPopup = true,
+        Shape = null,
+        Shadow = null
+    };
+
     private bool _isClosing;
     private bool _isSaving;
 
@@ -37,7 +49,6 @@ public class FormSheetPopup : Popup<FormSheetResult>
         BackgroundColor = Colors.Transparent;
         Padding = 0;
         Margin = new Thickness(20);
-        CanBeDismissedByTappingOutsideOfPopup = true;
 
         var (sheetWidth, maxFormHeight) = ComputeSheetSize(hostPage);
         var sheetDescription = string.Format(
@@ -150,11 +161,13 @@ public static class FormSheetPopupExtensions
         saveText ??= LocalizationResourceManager.Current[ResourceKeys.Btn_Speichern];
 
         var popup = new FormSheetPopup(page, title, formContent, cancelText, saveText, trySaveAsync);
-        var popupResult = await page.ShowPopupAsync<FormSheetResult>(popup);
+        var popupResult = await page.ShowPopupAsync<FormSheetResult>(
+            popup,
+            FormSheetPopup.SheetPopupOptions);
 
         if (popupResult.WasDismissedByTappingOutsideOfPopup)
             return false;
 
-        return popupResult.Result == FormSheetResult.Saved;
+        return popupResult.Result is FormSheetResult.Saved;
     }
 }

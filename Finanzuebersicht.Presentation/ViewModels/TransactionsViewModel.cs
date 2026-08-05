@@ -600,22 +600,33 @@ public partial class TransactionsViewModel(
         if (_quickExpenseCaptureViewModel == null || _quickExpenseCaptureSheetService == null)
             return;
 
-        if (!_quickExpenseCaptureViewModel.EnsureProAccess())
+        try
         {
-            await _quickExpenseCaptureViewModel.ShowProRequiredAsync();
-            return;
-        }
+            if (!_quickExpenseCaptureViewModel.EnsureProAccess())
+            {
+                await _quickExpenseCaptureViewModel.ShowProRequiredAsync();
+                return;
+            }
 
-        _quickExpenseCaptureViewModel.Reset();
-        if (await _quickExpenseCaptureSheetService.ShowAsync(_quickExpenseCaptureViewModel))
+            _quickExpenseCaptureViewModel.Reset();
+            if (await _quickExpenseCaptureSheetService.ShowAsync(_quickExpenseCaptureViewModel))
+            {
+                _appEvents.NotifyDataChanged();
+                await _feedbackService.ShowSnackbarAsync(_loc.GetString(ResourceKeys.Msg_SchnellAusgabeGespeichert));
+                await LoadKategorienAsync();
+                if (IsSearchActive)
+                    await ExecuteSearchAsync();
+                else
+                    await LoadTransaktionen();
+            }
+        }
+        catch (Exception ex)
         {
-            _appEvents.NotifyDataChanged();
-            await _feedbackService.ShowSnackbarAsync(_loc.GetString(ResourceKeys.Msg_SchnellAusgabeGespeichert));
-            await LoadKategorienAsync();
-            if (IsSearchActive)
-                await ExecuteSearchAsync();
-            else
-                await LoadTransaktionen();
+            LogError(nameof(QuickCapture), ex);
+            await _dialogService.ShowAlertAsync(
+                _loc.GetString(ResourceKeys.Err_Titel),
+                _loc.GetString(ResourceKeys.Err_SpeichernFehlgeschlagen, ex.Message),
+                _loc.GetString(ResourceKeys.Btn_OK));
         }
     }
 

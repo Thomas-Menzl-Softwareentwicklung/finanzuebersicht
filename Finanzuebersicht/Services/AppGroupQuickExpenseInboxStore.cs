@@ -91,6 +91,21 @@ public sealed class AppGroupQuickExpenseInboxStore : IQuickExpenseInboxStore
         defaults.Synchronize();
     }
 
+    /// <summary>Publishes in-app language so the widget can match (empty = system).</summary>
+    public static void PublishPreferredLanguage(string? languageCode)
+    {
+        using var defaults = new NSUserDefaults(AppGroupIds.Finanzuebersicht, NSUserDefaultsType.SuiteName);
+        if (defaults is null)
+            return;
+
+        if (string.IsNullOrWhiteSpace(languageCode))
+            defaults.RemoveObject(AppGroupIds.PreferredLanguageKey);
+        else
+            defaults.SetString(languageCode.Trim(), AppGroupIds.PreferredLanguageKey);
+
+        defaults.Synchronize();
+    }
+
     private static string? ResolvePendingPath()
     {
         var url = NSFileManager.DefaultManager.GetContainerUrl(AppGroupIds.Finanzuebersicht);

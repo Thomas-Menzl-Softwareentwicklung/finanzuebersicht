@@ -1,4 +1,5 @@
-﻿using Finanzuebersicht.Application.UseCases.Transactions;
+﻿using System.Globalization;
+using Finanzuebersicht.Application.UseCases.Transactions;
 using Finanzuebersicht.Core.Constants;
 using Finanzuebersicht.Core.Licensing;
 using Finanzuebersicht.Core.Services;
@@ -43,7 +44,11 @@ public partial class App : global::Microsoft.Maui.Controls.Application
 	{
 		// Sprache vor InitializeComponent setzen, damit XAML-Bindings korrekt aufgelöst werden
 		localizationService.Initialize();
-		localizationService.LanguageChanged += () => LanguageChanged?.Invoke();
+		localizationService.LanguageChanged += () =>
+		{
+			LanguageChanged?.Invoke();
+			PublishWidgetSharedState();
+		};
 		displayCurrency.Changed += () =>
 		{
 			CurrencyChanged?.Invoke();
@@ -93,7 +98,7 @@ public partial class App : global::Microsoft.Maui.Controls.Application
 		{
 			await _initService.InitializeAsync();
 			await _licenseService.RefreshAsync();
-			PublishProFlagToWidget();
+			PublishWidgetSharedState();
 			await _recurringGenerationService.GeneratePendingRecurringTransactionsAsync();
 			await ProcessQuickExpenseInboxAsync();
 		}
@@ -105,23 +110,25 @@ public partial class App : global::Microsoft.Maui.Controls.Application
 
 	private async Task ProcessQuickExpenseInboxAsync()
 	{
-		PublishProFlagToWidget();
+		PublishWidgetSharedState();
 		var saved = await _processQuickExpenseInboxUseCase.ExecuteAsync();
 		if (saved > 0)
 			NotifyDataChanged();
 	}
 
-	private void PublishProFlagToWidget()
+	private void PublishWidgetSharedState()
 	{
 #if IOS
 		try
 		{
 			AppGroupQuickExpenseInboxStore.PublishHasPro(
 				_licenseService.HasFeature(AppFeature.QuickExpenseCapture));
+			AppGroupQuickExpenseInboxStore.PublishPreferredLanguage(
+				CultureInfo.CurrentUICulture.TwoLetterISOLanguageName);
 		}
 		catch (Exception ex)
 		{
-			_logger?.LogDebug(ex, "Could not publish Pro flag to App Group");
+			_logger?.LogDebug(ex, "Could not publish widget App Group state");
 		}
 #endif
 	}
