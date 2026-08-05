@@ -20,6 +20,12 @@ alwaysApply: true
 - Native `Picker` durch `SelectionField` + `SelectionPopup` ersetzt (macOS 27 Beta Workaround, PR #218)
 - `DatePicker` bleibt nativ; Details: `.cursor/rules/maccatalyst-picker-investigation.mdc`
 
+## iOS Quick-Expense-Widget (Pro)
+
+- **In-App fertig:** Transaktionen → Schnell (Unkategorisiert + Default-Konto)
+- **Mac-Handoff (Xcode `.appex`):** `.cursor/rules/ios-quick-expense-widget.mdc` + `Finanzuebersicht/Platforms/iOS/Widgets/README.md`
+- Nicht mit Anzeige-Widget #242 vermischen
+
 ## Einheitliches Anlegen (#265 ✅ v1.19)
 
 - **Inline:** `CreateFormCard` — Konten, Sparziele (Panel oben, Scroll-to-top)

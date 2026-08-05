@@ -1,0 +1,55 @@
+---
+description: iOS Quick-Expense-Widget — Mac/Xcode Handoff für lokale Cursor-Agents
+alwaysApply: false
+globs:
+  - Finanzuebersicht/Platforms/iOS/Widgets/**
+  - Finanzuebersicht/Services/AppGroupQuickExpenseInboxStore.cs
+  - Finanzuebersicht/Platforms/iOS/Entitlements*.plist
+  - docs/APP_STORE.md
+---
+
+# iOS Quick-Expense-Widget — Mac-Agent-Handoff
+
+**Wann lesen:** Aufgabe erwähnt Widget, WidgetKit, Home Screen Capture, `.appex`, App Groups, oder „Schnell Ausgabe“ auf dem iPhone von außen.
+
+**Status (Cloud/Linux erledigt):** In-App Schnellerfassung + Domain + Pro-Gate + App-Group-Inbox-Processor + Swift-Quellen.  
+**Offen (nur auf Mac mit Xcode):** Widget-Extension bauen und in die MAUI-iOS-App einbetten.
+
+Vollständige Schrittfolge: `Finanzuebersicht/Platforms/iOS/Widgets/README.md` (Abschnitt „Mac-Agent: Xcode-Extension bündeln“).
+
+## Schon fertig — nicht neu erfinden
+
+| Stück | Ort |
+|-------|-----|
+| Capture-Use-Case | `CaptureQuickExpenseUseCase` → echte Ausgabe, `Unkategorisiert` + Default-Konto |
+| Pro | `AppFeature.QuickExpenseCapture` |
+| In-App UI | Transaktionen → „Schnell“ (`QuickExpenseCaptureSheetService`) |
+| Inbox drain | `ProcessQuickExpenseInboxUseCase` in `App` OnStart/Resume |
+| App Group ID | `group.com.thomasmenzl.finanzuebersicht` (`AppGroupIds.Finanzuebersicht`) |
+| Pending-Datei | `quick-expense-pending.json` (camelCase JSON) |
+| Swift-Quellen | `Finanzuebersicht/Platforms/iOS/Widgets/QuickExpenseWidget/` |
+| Haupt-App Entitlements | `Platforms/iOS/Entitlements.plist` + `.Debug.plist` (App Group schon drin) |
+
+## Dein Job auf dem Mac
+
+1. **Kein** zweites Voll-Xcode-Projekt für die MAUI-App anlegen.
+2. Nur eine **Widget Extension** (Target oder Mini-Xcodeproj / XcodeGen) aus den bestehenden Swift-Quellen.
+3. Bundle-ID Extension z. B. `com.thomasmenzl.finanzuebersicht.QuickExpenseWidget`.
+4. Gleiche App Group an Haupt-App-ID **und** Extension-ID im Developer Portal.
+5. `.appex` per MSBuild/`NativeReference` (Kind=AppExtension) in den MAUI-iOS-Build einbinden — Muster: [Redth Maui Widgets](https://github.com/Redth/Maui.Apple.PlatformFeature.Samples/tree/main/Widgets).
+6. Auf Gerät/Simulator: Widget speichern → App öffnen → Transaktion Unkategorisiert erscheint; ohne Pro Intent ablehnen.
+
+## Nicht tun
+
+- Capture-Domain oder In-App-Sheet neu bauen
+- Separate Draft-Entity statt `Transaction` + Unkategorisiert
+- Anzeige-Widget #242 hier mitmischen (Saldo/KPIs = anderes Feature)
+- Linux/Cloud-CI für WidgetKit erwarten (geht nicht ohne Xcode)
+
+## Verifikation
+
+```bash
+dotnet test Finanzuebersicht.Tests/Finanzuebersicht.Tests.csproj -c Release
+dotnet build Finanzuebersicht/Finanzuebersicht.csproj -f net10.0-ios
+# danach: .app enthält PlugIns/*.appex; Home-Screen-Widget manuell testen
+```
