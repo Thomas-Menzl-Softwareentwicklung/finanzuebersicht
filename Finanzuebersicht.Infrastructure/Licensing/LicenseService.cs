@@ -49,6 +49,7 @@ public sealed class LicenseService : ILicenseService
         AppFeature.CsvImport => HasPro,
         AppFeature.Cashflow => HasPro,
         AppFeature.CloudSync => CanUseCloudSync,
+        AppFeature.QuickExpenseCapture => HasPro,
         _ => false
     };
 

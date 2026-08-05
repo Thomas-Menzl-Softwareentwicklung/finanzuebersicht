@@ -282,8 +282,18 @@ Please restart the app.</value></data>
   <data name="Btn_Import" xml:space="preserve"><value>Import</value></data>
   <data name="Btn_Filter" xml:space="preserve"><value>Filter</value></data>
   <data name="Btn_Umbuchen" xml:space="preserve"><value>Transfer</value></data>
+  <data name="Btn_SchnellAusgabe" xml:space="preserve"><value>Quick</value></data>
+  <data name="Btn_UnkategorisiertFilter" xml:space="preserve"><value>Uncategorized ({0})</value></data>
+  <data name="Btn_UnkategorisiertFilterZero" xml:space="preserve"><value>Uncategorized</value></data>
   <data name="Btn_FilterZuruecksetzen" xml:space="preserve"><value>Clear filter</value></data>
   <data name="Title_ShiftInstance" xml:space="preserve"><value>Shift instance</value></data>
+  <data name="Title_SchnellAusgabe" xml:space="preserve"><value>Quick expense</value></data>
+  <data name="Lbl_SchnellAusgabeHinweis" xml:space="preserve"><value>Amount and note only — assign category and account later.</value></data>
+  <data name="Lbl_Info" xml:space="preserve"><value>Note</value></data>
+  <data name="Hint_SchnellAusgabeInfo" xml:space="preserve"><value>e.g. Coffee</value></data>
+  <data name="Msg_SchnellAusgabeGespeichert" xml:space="preserve"><value>Expense saved (uncategorized)</value></data>
+  <data name="Msg_KeineUnkategorisierten" xml:space="preserve"><value>No uncategorized transactions.</value></data>
+  <data name="A11y_SchnellAusgabe" xml:space="preserve"><value>Quick expense capture</value></data>
   <data name="Btn_Hinzufuegen" xml:space="preserve"><value>+</value></data>
   <data name="Btn_Prev" xml:space="preserve"><value>‹</value></data>
   <data name="Btn_Next" xml:space="preserve"><value>›</value></data>

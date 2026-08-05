@@ -1,4 +1,6 @@
-﻿using Finanzuebersicht.Core.Constants;
+﻿using Finanzuebersicht.Application.UseCases.Transactions;
+using Finanzuebersicht.Core.Constants;
+using Finanzuebersicht.Core.Licensing;
 using Finanzuebersicht.Core.Services;
 using Finanzuebersicht.Presentation;
 using Finanzuebersicht.Services;
@@ -23,11 +25,20 @@ public partial class App : global::Microsoft.Maui.Controls.Application
 	private readonly IRecurringGenerationService _recurringGenerationService;
 	private readonly InitializationService _initService;
 	private readonly ThemeService _themeService;
+	private readonly ProcessQuickExpenseInboxUseCase _processQuickExpenseInboxUseCase;
+	private readonly ILicenseService _licenseService;
 	private readonly ILogger<App>? _logger;
 	private readonly string _savedTheme;
 
-	public App(InitializationService initService, IRecurringGenerationService recurringGenerationService, ISettingsService settings,
-		ThemeService themeService, ILocalizationService localizationService, IDisplayCurrencyService displayCurrency,
+	public App(
+		InitializationService initService,
+		IRecurringGenerationService recurringGenerationService,
+		ISettingsService settings,
+		ThemeService themeService,
+		ILocalizationService localizationService,
+		IDisplayCurrencyService displayCurrency,
+		ProcessQuickExpenseInboxUseCase processQuickExpenseInboxUseCase,
+		ILicenseService licenseService,
 		ILogger<App>? logger = null)
 	{
 		// Sprache vor InitializeComponent setzen, damit XAML-Bindings korrekt aufgelöst werden
@@ -43,6 +54,8 @@ public partial class App : global::Microsoft.Maui.Controls.Application
 		_recurringGenerationService = recurringGenerationService;
 		_initService = initService;
 		_themeService = themeService;
+		_processQuickExpenseInboxUseCase = processQuickExpenseInboxUseCase;
+		_licenseService = licenseService;
 		_logger = logger;
 
 		// Gespeichertes Theme anwenden (MAUI-Ebene)
@@ -62,10 +75,11 @@ public partial class App : global::Microsoft.Maui.Controls.Application
 			try
 			{
 				await _recurringGenerationService.GeneratePendingRecurringTransactionsAsync();
+				await ProcessQuickExpenseInboxAsync();
 			}
 			catch (Exception ex)
 			{
-				_logger?.LogError(ex, "Dauerauftrag-Generierung bei Resume fehlgeschlagen");
+				_logger?.LogError(ex, "Dauerauftrag-Generierung / Quick-Expense-Inbox bei Resume fehlgeschlagen");
 			}
 		};
 
@@ -78,11 +92,37 @@ public partial class App : global::Microsoft.Maui.Controls.Application
 		try
 		{
 			await _initService.InitializeAsync();
+			await _licenseService.RefreshAsync();
+			PublishProFlagToWidget();
 			await _recurringGenerationService.GeneratePendingRecurringTransactionsAsync();
+			await ProcessQuickExpenseInboxAsync();
 		}
 		catch (Exception ex)
 		{
 			_logger?.LogError(ex, "App-Initialisierung fehlgeschlagen");
 		}
+	}
+
+	private async Task ProcessQuickExpenseInboxAsync()
+	{
+		PublishProFlagToWidget();
+		var saved = await _processQuickExpenseInboxUseCase.ExecuteAsync();
+		if (saved > 0)
+			NotifyDataChanged();
+	}
+
+	private void PublishProFlagToWidget()
+	{
+#if IOS
+		try
+		{
+			AppGroupQuickExpenseInboxStore.PublishHasPro(
+				_licenseService.HasFeature(AppFeature.QuickExpenseCapture));
+		}
+		catch (Exception ex)
+		{
+			_logger?.LogDebug(ex, "Could not publish Pro flag to App Group");
+		}
+#endif
 	}
 }

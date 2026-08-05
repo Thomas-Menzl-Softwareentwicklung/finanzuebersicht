@@ -26,6 +26,7 @@ public static class PresentationServiceCollectionExtensions
         services.AddTransient<TransferDetailViewModel>();
         services.AddTransient<TransactionsViewModel>();
         services.AddTransient<TransactionDetailViewModel>();
+        services.AddTransient<QuickExpenseCaptureViewModel>();
         services.AddTransient<RecurringTransactionsViewModel>();
         services.AddTransient<RecurringTransactionDetailViewModel>();
         services.AddTransient<RecurringInstanceShiftViewModel>();

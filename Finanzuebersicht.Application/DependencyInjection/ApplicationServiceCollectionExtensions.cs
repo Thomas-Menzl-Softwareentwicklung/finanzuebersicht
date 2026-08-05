@@ -53,6 +53,9 @@ public static class ApplicationServiceCollectionExtensions
         services.AddTransient<SaveTransferUseCase>();
         services.AddTransient<SaveRecurringTransactionDetailUseCase>();
         services.AddTransient<SaveTransactionDetailUseCase>();
+        services.AddTransient<CaptureQuickExpenseUseCase>();
+        services.AddTransient<CountUncategorizedTransactionsUseCase>();
+        services.AddTransient<ProcessQuickExpenseInboxUseCase>();
         services.AddTransient<SaveTransactionTemplateUseCase>();
         services.AddTransient<DeleteTransactionTemplateUseCase>();
         services.AddTransient<UseTransactionTemplateUseCase>();

@@ -82,7 +82,7 @@ Anzeigen: Limit klar in UI („3 von 3 Konten · Pro für unbegrenzt“), nicht 
 | Unbegrenzte Konten / Daueraufträge / Sparziele / Vorlagen | Skalierung |
 | Steuer-Export CSV/PDF (#64, wenn gebaut) | Klarer Pro-Nutzen |
 | Home-Screen-Widget Anzeige (#242, wenn gebaut) | Convenience |
-| Interaktives iOS-Widget Schnellerfassung (wenn gebaut; Entwurf [`ISSUE_DRAFT_quick_expense_widget.md`](ISSUE_DRAFT_quick_expense_widget.md)) | Starker iPhone-Kaufanreiz |
+| Interaktives iOS-Widget / In-App Schnellerfassung Ausgaben (`AppFeature.QuickExpenseCapture`) | Starker iPhone-Kaufanreiz |
 | Lokale Verschlüsselung (#53, wenn gebaut) | Security-Upsell |
 | Kategorien-Hierarchie (#241, wenn gebaut) | Power-Organisation |
 

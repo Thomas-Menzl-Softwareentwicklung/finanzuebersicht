@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using Finanzuebersicht.Application.UseCases.Accounts;
 using Finanzuebersicht.Application.UseCases.Categories;
 using Finanzuebersicht.Application.UseCases.Transactions;
+using Finanzuebersicht.Core.Services;
 using Finanzuebersicht.Models;
 using Finanzuebersicht.Navigation;
 using Finanzuebersicht.Presentation;
@@ -34,7 +35,11 @@ public partial class TransactionsViewModel(
     LoadTransactionTemplatesUseCase? loadTransactionTemplatesUseCase = null,
     DeleteTransactionTemplateUseCase? deleteTransactionTemplateUseCase = null,
     UseTransactionTemplateUseCase? useTransactionTemplateUseCase = null,
-    Finanzuebersicht.Core.Licensing.ILicenseService? licenseService = null) : MonthNavigationViewModel, IAutoLoadViewModel, ICurrencyRefreshViewModel
+    Finanzuebersicht.Core.Licensing.ILicenseService? licenseService = null,
+    QuickExpenseCaptureViewModel? quickExpenseCaptureViewModel = null,
+    IQuickExpenseCaptureSheetService? quickExpenseCaptureSheetService = null,
+    CountUncategorizedTransactionsUseCase? countUncategorizedTransactionsUseCase = null,
+    IUncategorizedCategoryService? uncategorizedCategoryService = null) : MonthNavigationViewModel, IAutoLoadViewModel, ICurrencyRefreshViewModel
 {
     private readonly DeleteTransactionUseCase _deleteTransactionUseCase = deleteTransactionUseCase;
     private readonly RestoreTransactionUseCase _restoreTransactionUseCase = restoreTransactionUseCase;
@@ -59,6 +64,10 @@ public partial class TransactionsViewModel(
     private readonly UseTransactionTemplateUseCase? _useTransactionTemplateUseCase = useTransactionTemplateUseCase;
     private readonly Finanzuebersicht.Core.Licensing.ILicenseService _licenseService =
         licenseService ?? Finanzuebersicht.Core.Licensing.UnrestrictedLicenseService.Instance;
+    private readonly QuickExpenseCaptureViewModel? _quickExpenseCaptureViewModel = quickExpenseCaptureViewModel;
+    private readonly IQuickExpenseCaptureSheetService? _quickExpenseCaptureSheetService = quickExpenseCaptureSheetService;
+    private readonly CountUncategorizedTransactionsUseCase? _countUncategorizedTransactionsUseCase = countUncategorizedTransactionsUseCase;
+    private readonly IUncategorizedCategoryService? _uncategorizedCategoryService = uncategorizedCategoryService;
 
     private CancellationTokenSource? _searchDebounce;
     private int _searchVersion;
@@ -194,6 +203,17 @@ public partial class TransactionsViewModel(
 
     [ObservableProperty]
     private DateTime bisDatumPicker = DateTime.Today;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasUncategorizedTransactions))]
+    [NotifyPropertyChangedFor(nameof(UncategorizedBadgeText))]
+    private int uncategorizedCount;
+
+    public bool HasUncategorizedTransactions => UncategorizedCount > 0;
+
+    public string UncategorizedBadgeText => UncategorizedCount > 0
+        ? _loc.GetString(ResourceKeys.Btn_UnkategorisiertFilter, UncategorizedCount)
+        : _loc.GetString(ResourceKeys.Btn_UnkategorisiertFilterZero);
 
     // Typ-Filter als Index (0=Alle, 1=Einnahmen, 2=Ausgaben) für Picker
     private int _selectedTypIndex;
@@ -405,6 +425,7 @@ public partial class TransactionsViewModel(
                 await LoadKontenAsync();
 
             await LoadTemplatesAsync();
+            await RefreshUncategorizedCountAsync();
         }
         catch (Exception ex)
         {
@@ -417,6 +438,25 @@ public partial class TransactionsViewModel(
         finally
         {
             IsLoading = false;
+        }
+    }
+
+    private async Task RefreshUncategorizedCountAsync()
+    {
+        if (_countUncategorizedTransactionsUseCase == null)
+        {
+            UncategorizedCount = 0;
+            return;
+        }
+
+        try
+        {
+            UncategorizedCount = await _countUncategorizedTransactionsUseCase.ExecuteAsync();
+        }
+        catch (Exception ex)
+        {
+            LogError(nameof(RefreshUncategorizedCountAsync), ex);
+            UncategorizedCount = 0;
         }
     }
 
@@ -552,6 +592,53 @@ public partial class TransactionsViewModel(
     private async Task GoToTransfer()
     {
         await _navigationService.GoToAsync(Routes.TransferDetail);
+    }
+
+    [RelayCommand]
+    private async Task QuickCapture()
+    {
+        if (_quickExpenseCaptureViewModel == null || _quickExpenseCaptureSheetService == null)
+            return;
+
+        if (!_quickExpenseCaptureViewModel.EnsureProAccess())
+        {
+            await _quickExpenseCaptureViewModel.ShowProRequiredAsync();
+            return;
+        }
+
+        _quickExpenseCaptureViewModel.Reset();
+        if (await _quickExpenseCaptureSheetService.ShowAsync(_quickExpenseCaptureViewModel))
+        {
+            _appEvents.NotifyDataChanged();
+            await _feedbackService.ShowSnackbarAsync(_loc.GetString(ResourceKeys.Msg_SchnellAusgabeGespeichert));
+            await LoadKategorienAsync();
+            if (IsSearchActive)
+                await ExecuteSearchAsync();
+            else
+                await LoadTransaktionen();
+        }
+    }
+
+    [RelayCommand]
+    private async Task FilterUncategorized()
+    {
+        if (_uncategorizedCategoryService == null)
+            return;
+
+        var id = await _uncategorizedCategoryService.FindIdAsync();
+        if (string.IsNullOrWhiteSpace(id))
+        {
+            await _dialogService.ShowAlertAsync(
+                _loc.GetString(ResourceKeys.Err_Titel),
+                _loc.GetString(ResourceKeys.Msg_KeineUnkategorisierten),
+                _loc.GetString(ResourceKeys.Btn_OK));
+            return;
+        }
+
+        IsFilterPanelOpen = true;
+        SelectedKategorieFilterItem = AvailableKategorien.FirstOrDefault(k => k.Id == id)
+            ?? new KategorieFilterItem(id, _loc.GetString(ResourceKeys.Lbl_ImportStatusUnkategorisiert));
+        SelectedKategorieId = id;
     }
 
     [RelayCommand]

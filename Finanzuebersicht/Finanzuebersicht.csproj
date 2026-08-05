@@ -107,6 +107,14 @@
 		<ProjectReference Include="..\Finanzuebersicht.Presentation\Finanzuebersicht.Presentation.csproj" />
 	</ItemGroup>
 
+	<!-- WidgetKit sources are built with Xcode on Mac — not by the .NET compiler. -->
+	<ItemGroup>
+		<None Include="Platforms\iOS\Widgets\**\*" />
+		<Content Remove="Platforms\iOS\Widgets\**\*" Condition="Exists('Platforms\iOS\Widgets')" />
+		<Compile Remove="Platforms\iOS\Widgets\**\*" />
+		<_MauiCompileToXaml Remove="Platforms\iOS\Widgets\**\*" />
+	</ItemGroup>
+
 	<!-- Debug/maccatalyst: nach ~/Applications kopieren (Dev-Signatur startet unter macOS 26+ nicht aus /Applications) -->
 	<Target Name="InstallToApplications"
 			AfterTargets="_CodesignAppBundle"

@@ -261,8 +261,18 @@ public static class ResourceKeys
     public const string Btn_Import = nameof(Btn_Import);
     public const string Btn_Filter = nameof(Btn_Filter);
     public const string Btn_Umbuchen = nameof(Btn_Umbuchen);
+    public const string Btn_SchnellAusgabe = nameof(Btn_SchnellAusgabe);
+    public const string Btn_UnkategorisiertFilter = nameof(Btn_UnkategorisiertFilter);
+    public const string Btn_UnkategorisiertFilterZero = nameof(Btn_UnkategorisiertFilterZero);
     public const string Btn_FilterZuruecksetzen = nameof(Btn_FilterZuruecksetzen);
     public const string Title_ShiftInstance = nameof(Title_ShiftInstance);
+    public const string Title_SchnellAusgabe = nameof(Title_SchnellAusgabe);
+    public const string Lbl_SchnellAusgabeHinweis = nameof(Lbl_SchnellAusgabeHinweis);
+    public const string Lbl_Info = nameof(Lbl_Info);
+    public const string Hint_SchnellAusgabeInfo = nameof(Hint_SchnellAusgabeInfo);
+    public const string Msg_SchnellAusgabeGespeichert = nameof(Msg_SchnellAusgabeGespeichert);
+    public const string Msg_KeineUnkategorisierten = nameof(Msg_KeineUnkategorisierten);
+    public const string A11y_SchnellAusgabe = nameof(A11y_SchnellAusgabe);
 
     // Additional common buttons / app info
     public const string Btn_Hinzufuegen = nameof(Btn_Hinzufuegen);

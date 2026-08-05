@@ -13,7 +13,8 @@ Monetarisierung: [`MONETIZATION.md`](MONETIZATION.md).
 | Bundle ID `com.thomasmenzl.finanzuebersicht` | vorhanden |
 | iPhone + iPad | vorhanden |
 | Privacy Manifest + Export Compliance | gesetzt |
-| iOS Release-Entitlements (ohne `get-task-allow`) | gesetzt |
+| iOS Release-Entitlements (ohne `get-task-allow`) | gesetzt (inkl. App Group für Quick-Expense-Widget) |
+| Quick Expense Capture (Pro, In-App + Widget-Inbox) | In-App fertig; Widget-`.appex` auf Mac bundlen — `Platforms/iOS/Widgets/README.md` |
 | Support / Privacy Site | eigenes Repo `finanzuebersicht-site` |
 | License-Gates Free/Pro/Sync | vorhanden |
 | StoreKit (Pro kaufen / Restore) | vorhanden (Store-Build, iOS/Mac Catalyst) |
@@ -34,7 +35,7 @@ Sync in der UI noch nicht verkaufen (`IsCloudSyncImplemented = false`). Product 
 
 ## 1. Apple Developer + App Store Connect
 
-1. App ID `com.thomasmenzl.finanzuebersicht` (Capabilities: In-App Purchase; iCloud erst für Sync).
+1. App ID `com.thomasmenzl.finanzuebersicht` (Capabilities: In-App Purchase; **App Groups** `group.com.thomasmenzl.finanzuebersicht` für Quick-Expense-Widget; iCloud erst für Sync).
 2. Zertifikate: **Apple Development** + **Apple Distribution**.
 3. Profiles: Development + **App Store**.
 4. ASC: iOS-App anlegen (gleiche Bundle-ID).

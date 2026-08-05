@@ -383,18 +383,35 @@
 
         <!-- FABs (immer sichtbar, über Row 4) -->
         <Grid Grid.Row="4" HorizontalOptions="Fill" VerticalOptions="End" Padding="20,0,20,20">
-            <HorizontalStackLayout Spacing="12" HorizontalOptions="Start" VerticalOptions="End">
-                <Button Text="{loc:Translate Btn_Import}" FontSize="14" TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                        BackgroundColor="Transparent"
-                        Command="{Binding ImportCsvCommand}" />
-                <Button Text="{loc:Translate Btn_Umbuchen}"
-                        FontSize="14"
+            <VerticalStackLayout Spacing="8" HorizontalOptions="Start" VerticalOptions="End">
+                <Button Text="{Binding UncategorizedBadgeText}"
+                        FontSize="13"
                         TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
                         BackgroundColor="Transparent"
-                        Padding="12,8"
-                        SemanticProperties.Description="{loc:Translate A11y_UmbuchungHinzufuegen}"
-                        Command="{Binding GoToTransferCommand}" />
-            </HorizontalStackLayout>
+                        Padding="8,4"
+                        HorizontalOptions="Start"
+                        IsVisible="{Binding HasUncategorizedTransactions}"
+                        Command="{Binding FilterUncategorizedCommand}" />
+                <HorizontalStackLayout Spacing="12" HorizontalOptions="Start">
+                    <Button Text="{loc:Translate Btn_Import}" FontSize="14" TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                            BackgroundColor="Transparent"
+                            Command="{Binding ImportCsvCommand}" />
+                    <Button Text="{loc:Translate Btn_Umbuchen}"
+                            FontSize="14"
+                            TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                            BackgroundColor="Transparent"
+                            Padding="12,8"
+                            SemanticProperties.Description="{loc:Translate A11y_UmbuchungHinzufuegen}"
+                            Command="{Binding GoToTransferCommand}" />
+                    <Button Text="{loc:Translate Btn_SchnellAusgabe}"
+                            FontSize="14"
+                            TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                            BackgroundColor="Transparent"
+                            Padding="12,8"
+                            SemanticProperties.Description="{loc:Translate A11y_SchnellAusgabe}"
+                            Command="{Binding QuickCaptureCommand}" />
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
             <Button Text="{loc:Translate Btn_Hinzufuegen}"
                     FontSize="28" TextColor="White"
                     BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"

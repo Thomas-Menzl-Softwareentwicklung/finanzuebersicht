@@ -76,6 +76,9 @@ public static class MauiProgram
 		builder.Services.AddSingleton<Finanzuebersicht.Core.Licensing.IStoreBillingService, Finanzuebersicht.Core.Licensing.UnavailableStoreBillingService>();
 #endif
 		builder.Services.AddInfrastructureServices();
+#if IOS
+		builder.Services.AddSingleton<Finanzuebersicht.Core.Services.IQuickExpenseInboxStore, AppGroupQuickExpenseInboxStore>();
+#endif
 		builder.Services.AddSingleton<IRecurringGenerationService, RecurringGenerationService>();
 		builder.Services.AddSingleton<IReportingService, ReportingService>();
 		builder.Services.AddSingleton<IForecastService, ForecastService>();
@@ -102,6 +105,7 @@ public static class MauiProgram
 		builder.Services.AddSingleton<IAppEvents, MauiAppEvents>();
 		builder.Services.AddSingleton<ICategoryCreateSheetService, CategoryCreateSheetService>();
 		builder.Services.AddSingleton<IRecurringTransactionCreateSheetService, RecurringTransactionCreateSheetService>();
+		builder.Services.AddSingleton<IQuickExpenseCaptureSheetService, QuickExpenseCaptureSheetService>();
 		builder.Services.AddSingleton<IImportSessionStore, ImportSessionStore>();
 		builder.Services.AddSingleton<IFolderPicker, MauiFolderPicker>();
 		builder.Services.AddSingleton<IFileSaver, MauiFileSaver>();

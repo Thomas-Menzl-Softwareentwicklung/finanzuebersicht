@@ -42,6 +42,7 @@ public class LicenseServiceTests
         Assert.False(sut.CanUseCloudSync);
         Assert.True(sut.HasFeature(AppFeature.CsvImport));
         Assert.True(sut.HasFeature(AppFeature.Cashflow));
+        Assert.True(sut.HasFeature(AppFeature.QuickExpenseCapture));
         Assert.False(sut.HasFeature(AppFeature.CloudSync));
         Assert.True(sut.CheckCreateLimit(LimitedResource.Accounts, 99).Allowed);
     }
@@ -55,6 +56,7 @@ public class LicenseServiceTests
         Assert.False(sut.HasPro);
         Assert.False(sut.HasFeature(AppFeature.CsvImport));
         Assert.False(sut.HasFeature(AppFeature.Cashflow));
+        Assert.False(sut.HasFeature(AppFeature.QuickExpenseCapture));
 
         var ok = sut.CheckCreateLimit(LimitedResource.Accounts, FreeTierLimits.MaxAccounts - 1);
         Assert.True(ok.Allowed);
@@ -91,6 +93,7 @@ public class LicenseServiceTests
         Assert.True(sut.HasPro);
         Assert.True(sut.CheckCreateLimit(LimitedResource.Accounts, 50).Allowed);
         Assert.True(sut.HasFeature(AppFeature.Cashflow));
+        Assert.True(sut.HasFeature(AppFeature.QuickExpenseCapture));
         Assert.False(sut.CanUseCloudSync);
     }
 
