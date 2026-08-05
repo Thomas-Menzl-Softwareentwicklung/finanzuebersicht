@@ -71,6 +71,7 @@ public partial class TransactionsViewModel(
 
     private CancellationTokenSource? _searchDebounce;
     private int _searchVersion;
+    private bool _reloadQueued;
 
     private void LogError(string context, Exception? ex = null)
     {
@@ -408,24 +409,33 @@ public partial class TransactionsViewModel(
     private async Task LoadTransaktionen()
     {
         CurrencyRefreshRegistry.Register(this);
-        if (IsLoading) return;
-        IsLoading = true;
+        if (IsLoading)
+        {
+            // Overlapping OnAppearing + DataChanged (widget inbox) must not drop the second load.
+            _reloadQueued = true;
+            return;
+        }
 
+        IsLoading = true;
         try
         {
-            var data = await _loadTransactionsMonthUseCase.ExecuteAsync(AktuellerMonat, SelectedAccountId);
-            TransaktionsGruppen = new ObservableCollection<TransactionGroup>(data.Gruppen);
-            IconMap = data.IconMap;
-            CategoryNameMap = data.CategoryNameMap;
-            AccountMap = data.AccountMap;
+            do
+            {
+                _reloadQueued = false;
+                var data = await _loadTransactionsMonthUseCase.ExecuteAsync(AktuellerMonat, SelectedAccountId);
+                TransaktionsGruppen = new ObservableCollection<TransactionGroup>(data.Gruppen);
+                IconMap = data.IconMap;
+                CategoryNameMap = data.CategoryNameMap;
+                AccountMap = data.AccountMap;
 
-            if (AvailableKategorien.Count == 0)
-                await LoadKategorienAsync();
-            if (AvailableKonten.Count == 0)
-                await LoadKontenAsync();
+                if (AvailableKategorien.Count == 0)
+                    await LoadKategorienAsync();
+                if (AvailableKonten.Count == 0)
+                    await LoadKontenAsync();
 
-            await LoadTemplatesAsync();
-            await RefreshUncategorizedCountAsync();
+                await LoadTemplatesAsync();
+                await RefreshUncategorizedCountAsync();
+            } while (_reloadQueued);
         }
         catch (Exception ex)
         {
@@ -488,31 +498,31 @@ public partial class TransactionsViewModel(
             if (transaktion.IsTransfer && !string.IsNullOrWhiteSpace(transaktion.TransferGroupId))
             {
                 await _deleteTransactionUseCase.ExecuteTransferGroupAsync(transaktion.TransferGroupId);
+            }
+            else
+            {
+                var snapshot = CloneTransaction(transaktion);
+                await _deleteTransactionUseCase.ExecuteAsync(transaktion.Id);
+
+                // TransactionGroup is a plain List — mutating it does not refresh CollectionView.
+                // Reload the month list so the row disappears immediately.
                 await LoadTransaktionen();
                 _appEvents.NotifyDataChanged();
-                await _feedbackService.ShowSnackbarAsync(_loc.GetString(ResourceKeys.Msg_Geloescht));
+                await _feedbackService.ShowSnackbarAsync(
+                    _loc.GetString(ResourceKeys.Msg_Geloescht),
+                    _loc.GetString(ResourceKeys.Btn_Rueckgaengig),
+                    async () =>
+                    {
+                        await _restoreTransactionUseCase.ExecuteAsync(snapshot);
+                        await LoadTransaktionen();
+                        _appEvents.NotifyDataChanged();
+                    });
                 return;
             }
 
-            var snapshot = CloneTransaction(transaktion);
-            await _deleteTransactionUseCase.ExecuteAsync(transaktion.Id);
-            var gruppe = TransaktionsGruppen.FirstOrDefault(g => g.Contains(transaktion));
-            if (gruppe == null) return;
-
-            gruppe.Remove(transaktion);
-            if (gruppe.Count == 0)
-                TransaktionsGruppen.Remove(gruppe);
-
+            await LoadTransaktionen();
             _appEvents.NotifyDataChanged();
-            await _feedbackService.ShowSnackbarAsync(
-                _loc.GetString(ResourceKeys.Msg_Geloescht),
-                _loc.GetString(ResourceKeys.Btn_Rueckgaengig),
-                async () =>
-                {
-                    await _restoreTransactionUseCase.ExecuteAsync(snapshot);
-                    await LoadTransaktionen();
-                    _appEvents.NotifyDataChanged();
-                });
+            await _feedbackService.ShowSnackbarAsync(_loc.GetString(ResourceKeys.Msg_Geloescht));
         }
         catch (Exception ex)
         {
