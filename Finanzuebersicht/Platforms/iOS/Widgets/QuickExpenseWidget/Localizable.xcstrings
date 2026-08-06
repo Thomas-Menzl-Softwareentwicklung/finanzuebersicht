@@ -150,6 +150,36 @@
           }
         }
       }
+    },
+    "Configure shortcuts in Settings" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shortcuts in den Einstellungen festlegen"
+          }
+        }
+      }
+    },
+    "Tap to book — pencil to edit" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tippen bucht — Stift zum Anpassen"
+          }
+        }
+      }
+    },
+    "Edit amount" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Betrag anpassen"
+          }
+        }
+      }
     }
   },
   "version" : "1.0"

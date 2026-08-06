@@ -204,7 +204,6 @@ public class CategoriesViewModelTests
             Substitute.For<IRecurringTransactionRepository>(),
             Substitute.For<IAccountRepository>(),
             Substitute.For<ITransactionTemplateRepository>(),
-            Substitute.For<ICategoryCreateSheetService>(),
             out _,
             out _,
             localizationService);
@@ -222,26 +221,20 @@ public class CategoriesViewModelTests
     }
 
     [Fact]
-    public async Task GoToDetail_WhenKategorienTabAndNoItem_ShowsCreateSheet()
+    public async Task GoToDetail_WhenKategorienTabAndNoItem_NavigatesToCategoryDetail()
     {
-        var categoryCreateSheet = Substitute.For<ICategoryCreateSheetService>();
-        categoryCreateSheet.ShowAsync(Arg.Any<CategoryDetailViewModel>()).Returns(Task.FromResult(false));
-
         var sut = CreateSut(
             Substitute.For<ICategoryRepository>(),
             Substitute.For<ITransactionRepository>(),
             Substitute.For<IRecurringTransactionRepository>(),
             Substitute.For<IAccountRepository>(),
             Substitute.For<ITransactionTemplateRepository>(),
-            categoryCreateSheet,
             out _,
             out var navigationService);
 
         await sut.GoToDetailCommand.ExecuteAsync(null);
 
-        await categoryCreateSheet.Received(1).ShowAsync(Arg.Any<CategoryDetailViewModel>());
-        await navigationService.DidNotReceive().GoToAsync(Arg.Any<string>());
-        await navigationService.DidNotReceive().GoToAsync(Arg.Any<string>(), Arg.Any<IDictionary<string, object>>());
+        await navigationService.Received(1).GoToAsync(Routes.CategoryDetail);
     }
 
     [Fact]
@@ -351,27 +344,6 @@ public class CategoriesViewModelTests
         IAccountRepository accountRepository,
         ITransactionTemplateRepository templateRepository,
         out IDialogService dialogService,
-        out INavigationService navigationService)
-    {
-        return CreateSut(
-            categoryRepository,
-            transactionRepository,
-            recurringTransactionRepository,
-            accountRepository,
-            templateRepository,
-            Substitute.For<ICategoryCreateSheetService>(),
-            out dialogService,
-            out navigationService);
-    }
-
-    private static CategoriesViewModel CreateSut(
-        ICategoryRepository categoryRepository,
-        ITransactionRepository transactionRepository,
-        IRecurringTransactionRepository recurringTransactionRepository,
-        IAccountRepository accountRepository,
-        ITransactionTemplateRepository templateRepository,
-        ICategoryCreateSheetService categoryCreateSheetService,
-        out IDialogService dialogService,
         out INavigationService navigationService,
         ILocalizationService? localizationService = null)
     {
@@ -390,16 +362,6 @@ public class CategoriesViewModelTests
 
         navigationService = Substitute.For<INavigationService>();
 
-        var createCategoryViewModel = new CategoryDetailViewModel(
-            new SaveCategoryDetailUseCase(categoryRepository),
-            new SaveCategoryBudgetUseCase(Substitute.For<IBudgetRepository>()),
-            new LoadCategoryBudgetUseCase(Substitute.For<IBudgetRepository>()),
-            navigationService,
-            localizationService,
-            Substitute.For<IFeedbackService>(),
-            Substitute.For<IAppEvents>(),
-            dialogService);
-
         return new CategoriesViewModel(
             new DeleteCategoryUseCase(categoryRepository, transactionRepository, recurringTransactionRepository),
             new LoadCategoriesUseCase(categoryRepository),
@@ -408,8 +370,6 @@ public class CategoriesViewModelTests
             new SaveAccountDetailUseCase(accountRepository),
             new ToggleAccountArchiveUseCase(accountRepository),
             new DeleteAccountUseCase(accountRepository, transactionRepository, templateRepository),
-            createCategoryViewModel,
-            categoryCreateSheetService,
             localizationService,
             navigationService,
             dialogService,

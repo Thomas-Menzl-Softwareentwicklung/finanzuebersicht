@@ -18,4 +18,5 @@ public static class Routes
     public static readonly string Cashflow = "CashflowPage";
     public static readonly string SparZielDetail = "SparZielDetailPage";
     public static readonly string Onboarding = "OnboardingPage";
+    public static readonly string QuickExpenseCapture = "QuickExpenseCapturePage";
 }

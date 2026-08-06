@@ -5,6 +5,7 @@ using Finanzuebersicht.Infrastructure;
 using Finanzuebersicht.Presentation.DependencyInjection;
 using Finanzuebersicht.Presentation.Services;
 using Finanzuebersicht.Services;
+using Finanzuebersicht.ViewModels;
 using Finanzuebersicht.Views;
 
 using Microsoft.Extensions.Logging;
@@ -31,11 +32,10 @@ public static class MauiProgram
 			});
 
 #if MACCATALYST || IOS
-		// Faster tab switch animation via custom Shell renderer
+		// FastShellRenderer removed: with UIScene (iOS 27 / Mac Catalyst SDK) custom Shell
+		// renderers aborted when switching to Verwaltung. Use stock Shell handlers only.
 		builder.ConfigureMauiHandlers(handlers =>
 		{
-			handlers.AddHandler<Shell, Finanzuebersicht.Handlers.FastShellRenderer>();
-
 			// Mac Catalyst uses the iOS picker: scrolling fires SelectedItem/Date immediately and
 			// can freeze the UI when pickers live inside a ScrollView. Only commit on Done.
 			Microsoft.Maui.Handlers.PickerHandler.Mapper.AppendToMapping("WhenFinishedSelection", (handler, view) =>
@@ -76,8 +76,18 @@ public static class MauiProgram
 		builder.Services.AddSingleton<Finanzuebersicht.Core.Licensing.IStoreBillingService, Finanzuebersicht.Core.Licensing.UnavailableStoreBillingService>();
 #endif
 		builder.Services.AddInfrastructureServices();
-#if IOS
+		// App Group inbox/presets are iPhone-only (widget). Mac Catalyst has no App Group entitlement —
+		// keep File* stores from Infrastructure.
+#if IOS && !MACCATALYST
 		builder.Services.AddSingleton<Finanzuebersicht.Core.Services.IQuickExpenseInboxStore, AppGroupQuickExpenseInboxStore>();
+		var appGroupDir = AppGroupQuickExpenseInboxStore.TryGetContainerPath();
+		if (!string.IsNullOrEmpty(appGroupDir))
+		{
+			builder.Services.AddSingleton<Finanzuebersicht.Core.Services.IQuickExpenseWidgetPresetStore>(sp =>
+				new Finanzuebersicht.Infrastructure.Services.FileQuickExpenseWidgetPresetStore(
+					appGroupDir,
+					sp.GetService<Microsoft.Extensions.Logging.ILogger<Finanzuebersicht.Infrastructure.Services.FileQuickExpenseWidgetPresetStore>>()));
+		}
 #endif
 		builder.Services.AddSingleton<IRecurringGenerationService, RecurringGenerationService>();
 		builder.Services.AddSingleton<IReportingService, ReportingService>();
@@ -103,6 +113,7 @@ public static class MauiProgram
 		builder.Services.AddSingleton<IMainThreadDispatcher, MauiMainThreadDispatcher>();
 		builder.Services.AddSingleton<Finanzuebersicht.Presentation.Services.IFilePicker, MauiFilePicker>();
 		builder.Services.AddSingleton<IAppEvents, MauiAppEvents>();
+		builder.Services.AddSingleton<IWidgetTimelineReloader, MauiWidgetTimelineReloader>();
 		builder.Services.AddSingleton<ICategoryCreateSheetService, CategoryCreateSheetService>();
 		builder.Services.AddSingleton<IRecurringTransactionCreateSheetService, RecurringTransactionCreateSheetService>();
 		builder.Services.AddSingleton<IQuickExpenseCaptureSheetService, QuickExpenseCaptureSheetService>();
@@ -121,7 +132,20 @@ public static class MauiProgram
 		builder.Services.AddTransient<RecurringTransactionsPage>();
 		builder.Services.AddTransient<RecurringTransactionDetailPage>();
         builder.Services.AddTransient<RecurringInstanceShiftPage>();
-		builder.Services.AddTransient<CategoriesPage>();
+		builder.Services.AddTransient<CategoriesPage>(sp =>
+		{
+			try
+			{
+				var vm = sp.GetRequiredService<CategoriesViewModel>();
+				var logger = sp.GetService<Microsoft.Extensions.Logging.ILogger<CategoriesPage>>();
+				return new CategoriesPage(vm, logger);
+			}
+			catch (Exception ex)
+			{
+				CrashLog.Write("CategoriesPage DI/create failed", ex);
+				throw;
+			}
+		});
 		builder.Services.AddTransient<CategoryDetailPage>();
 		builder.Services.AddTransient<AccountDetailPage>();
 		builder.Services.AddTransient<SettingsPage>();
@@ -131,6 +155,7 @@ public static class MauiProgram
 		builder.Services.AddTransient<ImportPreviewPage>();
 		builder.Services.AddTransient<CashflowPage>();
 		builder.Services.AddTransient<OnboardingPage>();
+		builder.Services.AddTransient<QuickExpenseCapturePage>();
 
 #if DEBUG
 		builder.Logging.AddDebug();

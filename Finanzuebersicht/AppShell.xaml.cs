@@ -21,6 +21,7 @@ public partial class AppShell : Shell
 		Routing.RegisterRoute(Routes.Cashflow, typeof(CashflowPage));
 		Routing.RegisterRoute(Routes.SparZielDetail, typeof(SparZielDetailPage));
 		Routing.RegisterRoute(Routes.Onboarding, typeof(OnboardingPage));
+		Routing.RegisterRoute(Routes.QuickExpenseCapture, typeof(QuickExpenseCapturePage));
 	}
 
 	private async void OnSettingsClicked(object? sender, EventArgs e)

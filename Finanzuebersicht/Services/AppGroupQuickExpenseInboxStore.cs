@@ -108,10 +108,17 @@ public sealed class AppGroupQuickExpenseInboxStore : IQuickExpenseInboxStore
 
     private static string? ResolvePendingPath()
     {
-        var url = NSFileManager.DefaultManager.GetContainerUrl(AppGroupIds.Finanzuebersicht);
-        if (url?.Path is null)
+        var path = TryGetContainerPath();
+        if (path is null)
             return null;
-        return Path.Combine(url.Path, AppGroupIds.QuickExpensePendingFileName);
+        return Path.Combine(path, AppGroupIds.QuickExpensePendingFileName);
+    }
+
+    /// <summary>App Group container path, or null if unavailable.</summary>
+    public static string? TryGetContainerPath()
+    {
+        var url = NSFileManager.DefaultManager.GetContainerUrl(AppGroupIds.Finanzuebersicht);
+        return url?.Path;
     }
 
     private sealed class InboxDto

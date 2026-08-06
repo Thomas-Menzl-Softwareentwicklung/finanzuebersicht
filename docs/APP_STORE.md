@@ -57,6 +57,8 @@ Fallback: `https://thomas-menzl-softwareentwicklung.github.io/finanzuebersicht-s
 
 ## 3. Store-Build lokal (Mac)
 
+**Vor jedem Upload:** Änderungen committen. Nerdbank.GitVersioning setzt `CFBundleVersion` aus der Git-Höhe — ohne neuen Commit bleibt die Build-Nummer gleich und App Store Connect lehnt den Upload ab. Danach publishen (nie uncommittete Store-IPA bauen).
+
 Store-Distribution einschalten (`APP_DISTRIBUTION_STORE`):
 
 ```bash

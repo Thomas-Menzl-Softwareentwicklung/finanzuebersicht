@@ -56,6 +56,8 @@ public static class ApplicationServiceCollectionExtensions
         services.AddTransient<CaptureQuickExpenseUseCase>();
         services.AddTransient<CountUncategorizedTransactionsUseCase>();
         services.AddTransient<ProcessQuickExpenseInboxUseCase>();
+        services.AddTransient<LoadQuickExpenseWidgetPresetsUseCase>();
+        services.AddTransient<SaveQuickExpenseWidgetPresetsUseCase>();
         services.AddTransient<SaveTransactionTemplateUseCase>();
         services.AddTransient<DeleteTransactionTemplateUseCase>();
         services.AddTransient<UseTransactionTemplateUseCase>();

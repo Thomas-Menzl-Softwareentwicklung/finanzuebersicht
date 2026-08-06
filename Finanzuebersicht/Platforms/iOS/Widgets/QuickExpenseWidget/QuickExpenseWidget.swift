@@ -6,8 +6,10 @@ import AppIntents
 enum AppGroup {
     static let id = "group.de.thomasmenzl.finanzuebersicht"
     static let pendingFileName = "quick-expense-pending.json"
+    static let presetsFileName = "quick-expense-presets.json"
     static let hasProKey = "hasPro"
     static let preferredLanguageKey = "preferredLanguage"
+    static let urlScheme = "finanzuebersicht"
 }
 
 struct PendingExpense: Codable, Identifiable {
@@ -15,6 +17,19 @@ struct PendingExpense: Codable, Identifiable {
     var amountText: String
     var title: String
     var createdAt: Date
+}
+
+struct WidgetPreset: Codable, Identifiable {
+    var slot: Int
+    var title: String
+    var amountText: String
+
+    var id: Int { slot }
+
+    var isFilled: Bool {
+        !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            && !amountText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
 }
 
 enum QuickExpenseSharedStore {
@@ -38,6 +53,10 @@ enum QuickExpenseSharedStore {
         containerURL?.appendingPathComponent(AppGroup.pendingFileName)
     }
 
+    static var presetsURL: URL? {
+        containerURL?.appendingPathComponent(AppGroup.presetsFileName)
+    }
+
     static var hasPro: Bool {
         UserDefaults(suiteName: AppGroup.id)?.bool(forKey: AppGroup.hasProKey) ?? false
     }
@@ -49,6 +68,27 @@ enum QuickExpenseSharedStore {
             return Locale(identifier: code)
         }
         return .current
+    }
+
+    static func loadPresets() -> [WidgetPreset] {
+        let seeded: [WidgetPreset] = [
+            WidgetPreset(slot: 0, title: "Coffee", amountText: "3.50"),
+            WidgetPreset(slot: 1, title: "Snack", amountText: "5.00"),
+            WidgetPreset(slot: 2, title: "", amountText: ""),
+            WidgetPreset(slot: 3, title: "", amountText: "")
+        ]
+
+        guard let url = presetsURL,
+              FileManager.default.fileExists(atPath: url.path),
+              let data = try? Data(contentsOf: url),
+              let decoded = try? JSONDecoder().decode([WidgetPreset].self, from: data),
+              !decoded.isEmpty else {
+            return seeded.filter(\.isFilled)
+        }
+
+        return decoded
+            .sorted { $0.slot < $1.slot }
+            .filter(\.isFilled)
     }
 
     static func enqueue(amountText: String, title: String) throws {
@@ -73,6 +113,17 @@ enum QuickExpenseSharedStore {
         ))
 
         try encodePending(items).write(to: url, options: [.atomic])
+    }
+
+    static func adjustURL(amountText: String, title: String) -> URL? {
+        var components = URLComponents()
+        components.scheme = AppGroup.urlScheme
+        components.host = "quick-expense"
+        components.queryItems = [
+            URLQueryItem(name: "amount", value: amountText),
+            URLQueryItem(name: "title", value: title)
+        ]
+        return components.url
     }
 
     private static func decodePending(_ data: Data) throws -> [PendingExpense] {
@@ -149,23 +200,31 @@ struct QuickExpenseProvider: TimelineProvider {
     }
 
     func placeholder(in context: Context) -> QuickExpenseEntry {
-        QuickExpenseEntry(date: Date(), hasPro: true, languageCode: languageCode)
+        QuickExpenseEntry(
+            date: Date(),
+            hasPro: true,
+            languageCode: languageCode,
+            presets: [
+                WidgetPreset(slot: 0, title: "Coffee", amountText: "3.50"),
+                WidgetPreset(slot: 1, title: "Snack", amountText: "5.00")
+            ])
     }
 
     func getSnapshot(in context: Context, completion: @escaping (QuickExpenseEntry) -> Void) {
-        completion(QuickExpenseEntry(
-            date: Date(),
-            hasPro: QuickExpenseSharedStore.hasPro,
-            languageCode: languageCode))
+        completion(makeEntry())
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<QuickExpenseEntry>) -> Void) {
-        let entry = QuickExpenseEntry(
+        let entry = makeEntry()
+        completion(Timeline(entries: [entry], policy: .after(Date().addingTimeInterval(15 * 60))))
+    }
+
+    private func makeEntry() -> QuickExpenseEntry {
+        QuickExpenseEntry(
             date: Date(),
             hasPro: QuickExpenseSharedStore.hasPro,
-            languageCode: languageCode)
-        // Short policy so language/Pro flips from the app show up quickly even without ReloadAll.
-        completion(Timeline(entries: [entry], policy: .after(Date().addingTimeInterval(15 * 60))))
+            languageCode: languageCode,
+            presets: QuickExpenseSharedStore.loadPresets())
     }
 }
 
@@ -173,9 +232,11 @@ struct QuickExpenseEntry: TimelineEntry {
     let date: Date
     let hasPro: Bool
     let languageCode: String
+    let presets: [WidgetPreset]
 }
 
 struct QuickExpenseWidgetEntryView: View {
+    @Environment(\.widgetFamily) private var family
     var entry: QuickExpenseEntry
 
     private var locale: Locale {
@@ -184,40 +245,30 @@ struct QuickExpenseWidgetEntryView: View {
             : Locale(identifier: entry.languageCode)
     }
 
-    private var coffeeTitle: String { L10n.string("Coffee", locale: locale) }
-    private var snackTitle: String { L10n.string("Snack", locale: locale) }
-
-    /// Always invariant for the inbox JSON — display strings stay localized.
-    private let coffeeAmountValue = "3.50"
-    private let snackAmountValue = "5.00"
-
-    private var coffeeAmountDisplay: String {
-        locale.language.languageCode?.identifier == "de" ? "3,50" : "3.50"
+    private var maxSlots: Int {
+        family == .systemSmall ? 2 : 4
     }
 
-    private var snackAmountDisplay: String {
-        locale.language.languageCode?.identifier == "de" ? "5,00" : "5.00"
+    private var visiblePresets: [WidgetPreset] {
+        Array(entry.presets.prefix(maxSlots))
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 6) {
             Text(L10n.string("Quick expense", locale: locale))
                 .font(.headline)
             if entry.hasPro {
-                Text(L10n.string("Tap a preset — open the app to sync", locale: locale))
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                HStack(spacing: 6) {
-                    Button(intent: SaveQuickExpenseIntent(amountText: coffeeAmountValue, title: coffeeTitle)) {
-                        Text(String(format: L10n.string("Coffee %@", locale: locale), coffeeAmountDisplay))
-                            .font(.caption2)
+                if visiblePresets.isEmpty {
+                    Text(L10n.string("Configure shortcuts in Settings", locale: locale))
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                } else {
+                    Text(L10n.string("Tap to book — pencil to edit", locale: locale))
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                    ForEach(visiblePresets) { preset in
+                        presetRow(preset)
                     }
-                    .buttonStyle(.borderedProminent)
-                    Button(intent: SaveQuickExpenseIntent(amountText: snackAmountValue, title: snackTitle)) {
-                        Text(String(format: L10n.string("Snack %@", locale: locale), snackAmountDisplay))
-                            .font(.caption2)
-                    }
-                    .buttonStyle(.bordered)
                 }
             } else {
                 Text(L10n.string("Pro unlocks Home Screen capture", locale: locale))
@@ -227,6 +278,41 @@ struct QuickExpenseWidgetEntryView: View {
         }
         .environment(\.locale, locale)
         .containerBackground(.fill.tertiary, for: .widget)
+    }
+
+    @ViewBuilder
+    private func presetRow(_ preset: WidgetPreset) -> some View {
+        let amountDisplay = displayAmount(preset.amountText)
+        HStack(spacing: 4) {
+            Button(intent: SaveQuickExpenseIntent(amountText: preset.amountText, title: preset.title)) {
+                Text("\(preset.title) \(amountDisplay)")
+                    .font(.caption2)
+                    .lineLimit(1)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .buttonStyle(.borderedProminent)
+
+            if let url = QuickExpenseSharedStore.adjustURL(amountText: preset.amountText, title: preset.title) {
+                Link(destination: url) {
+                    Image(systemName: "square.and.pencil")
+                        .font(.caption)
+                        .padding(6)
+                }
+                .accessibilityLabel(L10n.string("Edit amount", locale: locale))
+            }
+        }
+    }
+
+    private func displayAmount(_ invariant: String) -> String {
+        guard let value = Decimal(string: invariant, locale: Locale(identifier: "en_US_POSIX")) else {
+            return invariant
+        }
+        let formatter = NumberFormatter()
+        formatter.locale = locale
+        formatter.numberStyle = .decimal
+        formatter.minimumFractionDigits = 2
+        formatter.maximumFractionDigits = 2
+        return formatter.string(from: value as NSDecimalNumber) ?? invariant
     }
 }
 

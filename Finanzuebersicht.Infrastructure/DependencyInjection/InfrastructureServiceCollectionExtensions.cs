@@ -105,6 +105,11 @@ public static class InfrastructureServiceCollectionExtensions
                 GetDataDir(sp),
                 sp.GetService<ILogger<FileQuickExpenseInboxStore>>()));
 
+        services.AddSingleton<IQuickExpenseWidgetPresetStore>(sp =>
+            new FileQuickExpenseWidgetPresetStore(
+                GetDataDir(sp),
+                sp.GetService<ILogger<FileQuickExpenseWidgetPresetStore>>()));
+
         return services;
     }
 }

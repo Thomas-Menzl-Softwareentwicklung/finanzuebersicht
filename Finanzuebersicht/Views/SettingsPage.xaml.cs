@@ -14,6 +14,9 @@ public partial class SettingsPage : ContentPage
     {
         base.OnAppearing();
         if (BindingContext is SettingsViewModel vm)
+        {
             await vm.License.InitializeAsync();
+            await vm.WidgetPresets.LoadAsync();
+        }
     }
 }

@@ -214,6 +214,56 @@
                 </VerticalStackLayout>
             </Border>
 
+            <!-- Widget-Shortcuts (Pro / Quick Expense) -->
+            <Border StrokeShape="RoundRectangle 12"
+                    Stroke="{AppThemeBinding Light={StaticResource Separator}, Dark={StaticResource SeparatorDark}}"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource CardBackground}, Dark={StaticResource CardBackgroundDark}}"
+                    Padding="16">
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="{Binding WidgetPresets.SectionTitle}"
+                           FontSize="18"
+                           FontAttributes="Bold"
+                           TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
+                    <Label Text="{Binding WidgetPresets.SectionHint}"
+                           FontSize="12"
+                           TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray400}}" />
+                    <Label Text="{Binding WidgetPresets.ProHint}"
+                           IsVisible="{Binding WidgetPresets.ShowProHint}"
+                           FontSize="13"
+                           TextColor="{AppThemeBinding Light={StaticResource Warning}, Dark={StaticResource WarningDark}}" />
+
+                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding WidgetPresets.Slots}"
+                                         Spacing="12"
+                                         IsEnabled="{Binding WidgetPresets.CanEdit}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="vm:QuickExpenseWidgetPresetSlotItem">
+                                <VerticalStackLayout Spacing="6">
+                                    <Label Text="{Binding SlotLabel, StringFormat='#{0}'}"
+                                           FontSize="13"
+                                           FontAttributes="Bold"
+                                           TextColor="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}" />
+                                    <Entry Text="{Binding Title}"
+                                           Placeholder="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.WidgetPresets.TitlePlaceholder}"
+                                           FontSize="16" />
+                                    <Entry Text="{Binding AmountText}"
+                                           Placeholder="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.WidgetPresets.AmountPlaceholder}"
+                                           Keyboard="Numeric"
+                                           FontSize="16" />
+                                </VerticalStackLayout>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+
+                    <Button Text="{loc:Translate Btn_Speichern}"
+                            Command="{Binding WidgetPresets.SaveCommand}"
+                            IsEnabled="{Binding WidgetPresets.CanEdit}"
+                            FontSize="14"
+                            Padding="12,8"
+                            BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                            TextColor="White" />
+                </VerticalStackLayout>
+            </Border>
+
             <!-- Lizenz / Free · Pro · Sync -->
             <Border StrokeShape="RoundRectangle 12"
                     Stroke="{AppThemeBinding Light={StaticResource Separator}, Dark={StaticResource SeparatorDark}}"

@@ -22,7 +22,6 @@ public abstract class BaseContentPage : ContentPage
     protected override void OnAppearing()
     {
         base.OnAppearing();
-        App.DataChanged += OnDataChanged;
         App.LanguageChanged += OnLanguageChanged;
         App.CurrencyChanged += OnCurrencyChanged;
         if (BindingContext is IAutoLoadViewModel vm && vm.ShouldAutoLoad)
@@ -31,20 +30,9 @@ public abstract class BaseContentPage : ContentPage
 
     protected override void OnDisappearing()
     {
-        App.DataChanged -= OnDataChanged;
         App.LanguageChanged -= OnLanguageChanged;
         App.CurrencyChanged -= OnCurrencyChanged;
         base.OnDisappearing();
-    }
-
-    private void OnDataChanged()
-    {
-        // Inbox/resume and other saves may raise off the UI thread.
-        MainThread.BeginInvokeOnMainThread(() =>
-        {
-            if (BindingContext is IAutoLoadViewModel vm && vm.ShouldAutoLoad)
-                vm.AutoLoadCommand.Execute(null);
-        });
     }
 
     private void OnLanguageChanged()

@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using Finanzuebersicht.Application.UseCases.Transactions;
 using Finanzuebersicht.Core.Licensing;
 using Finanzuebersicht.Core.Services;
+using Finanzuebersicht.Navigation;
 using Finanzuebersicht.Presentation.Services;
 using Finanzuebersicht.Resources.Strings;
 
@@ -13,11 +14,17 @@ public partial class QuickExpenseCaptureViewModel(
     CaptureQuickExpenseUseCase captureQuickExpenseUseCase,
     ILocalizationService localizationService,
     IDialogService dialogService,
-    ILicenseService? licenseService = null) : ObservableObject
+    INavigationService navigationService,
+    IFeedbackService feedbackService,
+    IAppEvents appEvents,
+    ILicenseService? licenseService = null) : ObservableObject, IApplyQueryAttributes
 {
     private readonly CaptureQuickExpenseUseCase _captureQuickExpenseUseCase = captureQuickExpenseUseCase;
     private readonly ILocalizationService _loc = localizationService;
     private readonly IDialogService _dialogService = dialogService;
+    private readonly INavigationService _navigationService = navigationService;
+    private readonly IFeedbackService _feedbackService = feedbackService;
+    private readonly IAppEvents _appEvents = appEvents;
     private readonly ILicenseService _licenseService =
         licenseService ?? UnrestrictedLicenseService.Instance;
 
@@ -29,10 +36,21 @@ public partial class QuickExpenseCaptureViewModel(
 
     public string PageTitle => _loc.GetString(ResourceKeys.Title_SchnellAusgabe);
 
+    public string Hinweis => _loc.GetString(ResourceKeys.Lbl_SchnellAusgabeHinweis);
+
     public void Reset()
     {
         BetragText = string.Empty;
         Titel = string.Empty;
+    }
+
+    public void ApplyQueryAttributes(IDictionary<string, object> query)
+    {
+        if (query.TryGetValue(NavigationQueryKeys.Amount, out var amountObj))
+            BetragText = amountObj?.ToString() ?? string.Empty;
+
+        if (query.TryGetValue(NavigationQueryKeys.Title, out var titleObj))
+            Titel = titleObj?.ToString() ?? string.Empty;
     }
 
     public bool EnsureProAccess()
@@ -87,5 +105,22 @@ public partial class QuickExpenseCaptureViewModel(
             await ShowProRequiredAsync();
             return false;
         }
+    }
+
+    [RelayCommand]
+    private async Task Save()
+    {
+        if (!await TrySaveAsync())
+            return;
+
+        _appEvents.NotifyDataChanged();
+        await _feedbackService.ShowSnackbarAsync(_loc.GetString(ResourceKeys.Msg_SchnellAusgabeGespeichert));
+        await _navigationService.GoToAsync("..");
+    }
+
+    [RelayCommand]
+    private async Task Cancel()
+    {
+        await _navigationService.GoToAsync("..");
     }
 }

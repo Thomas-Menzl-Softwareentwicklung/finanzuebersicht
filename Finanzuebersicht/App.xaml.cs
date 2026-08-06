@@ -3,7 +3,9 @@ using Finanzuebersicht.Application.UseCases.Transactions;
 using Finanzuebersicht.Core.Constants;
 using Finanzuebersicht.Core.Licensing;
 using Finanzuebersicht.Core.Services;
+using Finanzuebersicht.Navigation;
 using Finanzuebersicht.Presentation;
+using Finanzuebersicht.Presentation.Services;
 using Finanzuebersicht.Services;
 using Microsoft.Extensions.Logging;
 
@@ -18,16 +20,17 @@ public partial class App : global::Microsoft.Maui.Controls.Application
 
 	public static event Action? CurrencyChanged;
 
-		public static void NotifyDataChanged()
-		{
-			DataChanged?.Invoke();
-		}
+	public static void NotifyDataChanged()
+	{
+		DataChanged?.Invoke();
+	}
 
 	private readonly IRecurringGenerationService _recurringGenerationService;
 	private readonly InitializationService _initService;
 	private readonly ThemeService _themeService;
 	private readonly ProcessQuickExpenseInboxUseCase _processQuickExpenseInboxUseCase;
 	private readonly ILicenseService _licenseService;
+	private readonly INavigationService _navigationService;
 	private readonly ILogger<App>? _logger;
 	private readonly string _savedTheme;
 
@@ -40,6 +43,7 @@ public partial class App : global::Microsoft.Maui.Controls.Application
 		IDisplayCurrencyService displayCurrency,
 		ProcessQuickExpenseInboxUseCase processQuickExpenseInboxUseCase,
 		ILicenseService licenseService,
+		INavigationService navigationService,
 		ILogger<App>? logger = null)
 	{
 		// Sprache vor InitializeComponent setzen, damit XAML-Bindings korrekt aufgelöst werden
@@ -61,6 +65,7 @@ public partial class App : global::Microsoft.Maui.Controls.Application
 		_themeService = themeService;
 		_processQuickExpenseInboxUseCase = processQuickExpenseInboxUseCase;
 		_licenseService = licenseService;
+		_navigationService = navigationService;
 		_logger = logger;
 
 		// Gespeichertes Theme anwenden (MAUI-Ebene)
@@ -106,6 +111,58 @@ public partial class App : global::Microsoft.Maui.Controls.Application
 		{
 			_logger?.LogError(ex, "App-Initialisierung fehlgeschlagen");
 		}
+	}
+
+	protected override async void OnAppLinkRequestReceived(Uri uri)
+	{
+		base.OnAppLinkRequestReceived(uri);
+		try
+		{
+			await HandleAppLinkAsync(uri);
+		}
+		catch (Exception ex)
+		{
+			_logger?.LogError(ex, "App-Link fehlgeschlagen: {Uri}", uri);
+		}
+	}
+
+	internal async Task HandleAppLinkAsync(Uri uri)
+	{
+		if (!string.Equals(uri.Scheme, "finanzuebersicht", StringComparison.OrdinalIgnoreCase))
+			return;
+
+		var host = uri.Host;
+		if (string.IsNullOrEmpty(host) && uri.AbsolutePath.StartsWith("/", StringComparison.Ordinal))
+			host = uri.AbsolutePath.Trim('/');
+
+		if (!string.Equals(host, "quick-expense", StringComparison.OrdinalIgnoreCase))
+			return;
+
+		var amount = string.Empty;
+		var title = string.Empty;
+		foreach (var part in uri.Query.TrimStart('?').Split('&', StringSplitOptions.RemoveEmptyEntries))
+		{
+			var eq = part.IndexOf('=');
+			if (eq <= 0)
+				continue;
+			var key = Uri.UnescapeDataString(part[..eq]);
+			var value = Uri.UnescapeDataString(part[(eq + 1)..]);
+			if (string.Equals(key, "amount", StringComparison.OrdinalIgnoreCase))
+				amount = value;
+			else if (string.Equals(key, "title", StringComparison.OrdinalIgnoreCase))
+				title = value;
+		}
+
+		await MainThread.InvokeOnMainThreadAsync(async () =>
+		{
+			await _navigationService.GoToAsync(
+				Routes.QuickExpenseCapture,
+				new Dictionary<string, object>
+				{
+					[NavigationQueryKeys.Amount] = amount,
+					[NavigationQueryKeys.Title] = title
+				});
+		});
 	}
 
 	private async Task ProcessQuickExpenseInboxAsync()

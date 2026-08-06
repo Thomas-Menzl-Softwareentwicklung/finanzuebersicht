@@ -158,7 +158,7 @@ public partial class SelectionField : ContentView
         if (page is null)
             return;
 
-        var popupResult = await page.ShowPopupAsync<object>(popup, SelectionPopup.SelectionPopupOptions);
+        var popupResult = await page.ShowPopupAsync<object>(popup);
         if (popupResult.WasDismissedByTappingOutsideOfPopup || popupResult.Result is null)
             return;
 

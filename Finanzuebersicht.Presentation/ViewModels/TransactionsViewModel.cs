@@ -36,8 +36,6 @@ public partial class TransactionsViewModel(
     DeleteTransactionTemplateUseCase? deleteTransactionTemplateUseCase = null,
     UseTransactionTemplateUseCase? useTransactionTemplateUseCase = null,
     Finanzuebersicht.Core.Licensing.ILicenseService? licenseService = null,
-    QuickExpenseCaptureViewModel? quickExpenseCaptureViewModel = null,
-    IQuickExpenseCaptureSheetService? quickExpenseCaptureSheetService = null,
     CountUncategorizedTransactionsUseCase? countUncategorizedTransactionsUseCase = null,
     IUncategorizedCategoryService? uncategorizedCategoryService = null) : MonthNavigationViewModel, IAutoLoadViewModel, ICurrencyRefreshViewModel
 {
@@ -64,8 +62,6 @@ public partial class TransactionsViewModel(
     private readonly UseTransactionTemplateUseCase? _useTransactionTemplateUseCase = useTransactionTemplateUseCase;
     private readonly Finanzuebersicht.Core.Licensing.ILicenseService _licenseService =
         licenseService ?? Finanzuebersicht.Core.Licensing.UnrestrictedLicenseService.Instance;
-    private readonly QuickExpenseCaptureViewModel? _quickExpenseCaptureViewModel = quickExpenseCaptureViewModel;
-    private readonly IQuickExpenseCaptureSheetService? _quickExpenseCaptureSheetService = quickExpenseCaptureSheetService;
     private readonly CountUncategorizedTransactionsUseCase? _countUncategorizedTransactionsUseCase = countUncategorizedTransactionsUseCase;
     private readonly IUncategorizedCategoryService? _uncategorizedCategoryService = uncategorizedCategoryService;
 
@@ -607,28 +603,19 @@ public partial class TransactionsViewModel(
     [RelayCommand]
     private async Task QuickCapture()
     {
-        if (_quickExpenseCaptureViewModel == null || _quickExpenseCaptureSheetService == null)
-            return;
-
         try
         {
-            if (!_quickExpenseCaptureViewModel.EnsureProAccess())
+            if (!_licenseService.HasFeature(Finanzuebersicht.Core.Licensing.AppFeature.QuickExpenseCapture))
             {
-                await _quickExpenseCaptureViewModel.ShowProRequiredAsync();
+                await _dialogService.ShowAlertAsync(
+                    _loc.GetString(ResourceKeys.Err_Titel),
+                    _loc.GetString(ResourceKeys.Err_ProErforderlich),
+                    _loc.GetString(ResourceKeys.Btn_OK));
                 return;
             }
 
-            _quickExpenseCaptureViewModel.Reset();
-            if (await _quickExpenseCaptureSheetService.ShowAsync(_quickExpenseCaptureViewModel))
-            {
-                _appEvents.NotifyDataChanged();
-                await _feedbackService.ShowSnackbarAsync(_loc.GetString(ResourceKeys.Msg_SchnellAusgabeGespeichert));
-                await LoadKategorienAsync();
-                if (IsSearchActive)
-                    await ExecuteSearchAsync();
-                else
-                    await LoadTransaktionen();
-            }
+            // Same Shell navigation path as Umbuchen / Detail pages — no modal/popup.
+            await _navigationService.GoToAsync(Routes.QuickExpenseCapture);
         }
         catch (Exception ex)
         {

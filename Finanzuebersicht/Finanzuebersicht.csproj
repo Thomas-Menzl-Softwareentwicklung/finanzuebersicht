@@ -114,6 +114,9 @@
 		<Content Remove="Platforms\iOS\Widgets\**\*" Condition="Exists('Platforms\iOS\Widgets')" />
 		<Compile Remove="Platforms\iOS\Widgets\**\*" />
 		<_MauiCompileToXaml Remove="Platforms\iOS\Widgets\**\*" />
+		<!-- Custom Shell renderer incompatible with UIScene (iOS 27 / Mac Catalyst). -->
+		<Compile Remove="Handlers\FastShellRenderer.cs" />
+		<None Include="Handlers\FastShellRenderer.cs" />
 	</ItemGroup>
 
 	<!-- Embed QuickExpenseWidget.appex (built by BuildWidgetExtension / build-release.sh).

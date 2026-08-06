@@ -15,4 +15,6 @@ public static class NavigationQueryKeys
     public const string InstanceDate = "InstanceDate";
     public const string Account = "Account";
     public const string Category = "Category";
+    public const string Amount = "Amount";
+    public const string Title = "Title";
 }
