@@ -148,6 +148,22 @@
 		</AdditionalAppExtensions>
 	</ItemGroup>
 
+	<!-- Swift @_cdecl bridge: WidgetCenter.reload* (Swift-only API). Built by BuildWidgetKitBridge. -->
+	<ItemGroup Condition="$(TargetFramework.Contains('-ios')) AND '$(EmbedQuickExpenseWidget)' == 'true'">
+		<NativeReference Include="Platforms/iOS/Native/lib/Release-iphoneos/libWidgetKitBridge.a"
+		                 Condition="!$(RuntimeIdentifier.Contains('simulator'))">
+			<Kind>Static</Kind>
+			<ForceLoad>true</ForceLoad>
+			<Frameworks>WidgetKit</Frameworks>
+		</NativeReference>
+		<NativeReference Include="Platforms/iOS/Native/lib/Release-iphonesimulator/libWidgetKitBridge.a"
+		                 Condition="$(RuntimeIdentifier.Contains('simulator'))">
+			<Kind>Static</Kind>
+			<ForceLoad>true</ForceLoad>
+			<Frameworks>WidgetKit</Frameworks>
+		</NativeReference>
+	</ItemGroup>
+
 	<!-- Store: re-sign PlugIns/*.appex with Distribution + Store profile, then re-seal outer .app
 	     with the FULL Release entitlements (incl. application-identifier — do not strip). -->
 	<Target Name="ResignWidgetExtensionForStore"
@@ -171,6 +187,23 @@
 		      WorkingDirectory="$(MSBuildProjectDirectory)" />
 		<Exec Command="codesign --force --sign &quot;$(CodesignKey)&quot; --entitlements &quot;$(_StoreAppEntitlements)&quot; --timestamp=none &quot;$(AppBundleDir)&quot;"
 		      Condition="'$(AppBundleDir)' != '' AND '$(CodesignKey)' != ''" />
+	</Target>
+
+	<!-- Builds Swift WidgetKitBridge.a for P/Invoke reloadAllTimelines (Swift-only WidgetCenter). -->
+	<Target Name="BuildWidgetKitBridge"
+	        BeforeTargets="ResolveNativeReferences;_AOTCompile;CoreCompile"
+	        Condition="$(TargetFramework.Contains('-ios')) AND '$(EmbedQuickExpenseWidget)' == 'true' AND '$(SkipWidgetKitBridgeBuild)' != 'true'">
+		<PropertyGroup>
+			<_BridgeIsSimulator>$(RuntimeIdentifier.Contains('simulator'))</_BridgeIsSimulator>
+			<_BridgeSubdir Condition="'$(_BridgeIsSimulator)' == 'true'">Release-iphonesimulator</_BridgeSubdir>
+			<_BridgeSubdir Condition="'$(_BridgeIsSimulator)' != 'true'">Release-iphoneos</_BridgeSubdir>
+			<_BridgeLib>$(MSBuildProjectDirectory)/Platforms/iOS/Native/lib/$(_BridgeSubdir)/libWidgetKitBridge.a</_BridgeLib>
+		</PropertyGroup>
+		<Message Text="Building WidgetKitBridge.a via Platforms/iOS/Native/build-widgetkit-bridge.sh..." Importance="high" />
+		<Exec Command="bash build-widgetkit-bridge.sh"
+		      WorkingDirectory="$(MSBuildProjectDirectory)/Platforms/iOS/Native" />
+		<Error Text="Expected WidgetKit bridge at $(_BridgeLib)."
+		       Condition="!Exists('$(_BridgeLib)')" />
 	</Target>
 
 	<!-- Builds Platforms/iOS/Widgets via build-release.sh (xcodegen + xcodebuild), stages .appex. -->

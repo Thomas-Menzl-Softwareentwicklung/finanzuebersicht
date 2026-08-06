@@ -216,7 +216,8 @@ struct QuickExpenseProvider: TimelineProvider {
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<QuickExpenseEntry>) -> Void) {
         let entry = makeEntry()
-        completion(Timeline(entries: [entry], policy: .after(Date().addingTimeInterval(15 * 60))))
+        // Prefer explicit reload from the app; keep a short fallback if reload is missed.
+        completion(Timeline(entries: [entry], policy: .after(Date().addingTimeInterval(5 * 60))))
     }
 
     private func makeEntry() -> QuickExpenseEntry {
@@ -246,7 +247,23 @@ struct QuickExpenseWidgetEntryView: View {
     }
 
     private var maxSlots: Int {
-        family == .systemSmall ? 2 : 4
+        switch family {
+        case .systemSmall:
+            return 2
+        case .systemMedium, .systemLarge, .systemExtraLarge:
+            return 4
+        default:
+            return 4
+        }
+    }
+
+    private var rowFont: Font {
+        switch family {
+        case .systemLarge, .systemExtraLarge:
+            return .subheadline
+        default:
+            return .caption2
+        }
     }
 
     private var visiblePresets: [WidgetPreset] {
@@ -254,9 +271,9 @@ struct QuickExpenseWidgetEntryView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: family == .systemSmall ? 6 : 8) {
             Text(L10n.string("Quick expense", locale: locale))
-                .font(.headline)
+                .font(family == .systemSmall ? .headline : .title3)
             if entry.hasPro {
                 if visiblePresets.isEmpty {
                     Text(L10n.string("Configure shortcuts in Settings", locale: locale))
@@ -269,6 +286,7 @@ struct QuickExpenseWidgetEntryView: View {
                     ForEach(visiblePresets) { preset in
                         presetRow(preset)
                     }
+                    Spacer(minLength: 0)
                 }
             } else {
                 Text(L10n.string("Pro unlocks Home Screen capture", locale: locale))
@@ -286,7 +304,7 @@ struct QuickExpenseWidgetEntryView: View {
         HStack(spacing: 4) {
             Button(intent: SaveQuickExpenseIntent(amountText: preset.amountText, title: preset.title)) {
                 Text("\(preset.title) \(amountDisplay)")
-                    .font(.caption2)
+                    .font(rowFont)
                     .lineLimit(1)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
@@ -295,7 +313,7 @@ struct QuickExpenseWidgetEntryView: View {
             if let url = QuickExpenseSharedStore.adjustURL(amountText: preset.amountText, title: preset.title) {
                 Link(destination: url) {
                     Image(systemName: "square.and.pencil")
-                        .font(.caption)
+                        .font(rowFont)
                         .padding(6)
                 }
                 .accessibilityLabel(L10n.string("Edit amount", locale: locale))
@@ -326,6 +344,6 @@ struct QuickExpenseWidget: Widget {
         }
         .configurationDisplayName(LocalizedStringResource("Quick expense"))
         .description(LocalizedStringResource("Capture a small expense without opening the full app."))
-        .supportedFamilies([.systemSmall, .systemMedium])
+        .supportedFamilies([.systemSmall, .systemMedium, .systemLarge, .systemExtraLarge])
     }
 }
