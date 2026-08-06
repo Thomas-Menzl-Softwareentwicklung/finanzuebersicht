@@ -23,6 +23,7 @@ Kurz: .NET 10 + MAUI, Multi-Language UI (Deutsch & Englisch), MVVM-Architektur.
 - **30-Tage-Cashflow-Vorschau** inkl. geplanter Daueraufträge
 - **Mehrere Konten** mit Anfangssaldo, Saldo pro Konto und **Umbuchungen** zwischen Konten
 - Transaktionen anlegen, editieren, suchen, filtern, duplizieren und als Vorlage speichern
+- **Schnellerfassung** (Pro): In-App „Schnell“ auf allen Plattformen; auf iOS zusätzlich Home-Screen-Widget mit konfigurierbaren Shortcuts
 - CSV-Import (DKB-Format) mit Vorschau, Auto-Kategorisierung und Duplikat-Erkennung
 - Wiederkehrende Buchungen (Daueraufträge) mit Instanz-Verschieben und Ausnahmen
 - Kategorien mit Icon, Farbe und monatlichem Budget
@@ -105,7 +106,7 @@ Darstellung, Sprache, Anzeige-Währung, Speicherort, Backup & Restore und App-In
 | Plattform | Status |
 |-----------|--------|
 | macOS (Mac Catalyst) | ✅ Unterstützt |
-| iOS (iPhone / iPad) | ✅ Target vorhanden · Store-Basics in Vorbereitung ([docs/APP_STORE.md](docs/APP_STORE.md)) |
+| iOS (iPhone / iPad) | ✅ Unterstützt · Widget + Store/TestFlight-Vorbereitung ([docs/APP_STORE.md](docs/APP_STORE.md)) |
 | Windows | ✅ Unterstützt / eingeschränkt getestet |
 
 ## Voraussetzungen

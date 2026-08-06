@@ -12,8 +12,8 @@ globs:
 
 **Wann lesen:** Aufgabe erwähnt Widget, WidgetKit, Home Screen Capture, `.appex`, App Groups, oder „Schnell Ausgabe“ auf dem iPhone von außen.
 
-**Status:** In-App + Domain + Pro-Gate + Inbox + Swift + XcodeGen + MSBuild-Embed + gebautes `.appex` in `PlugIns/`.  
-**Noch manuell:** App Group im Developer Portal für Extension-ID; Gerätetest (Widget → Drain → Unkategorisiert).
+**Status:** In-App + Domain + Pro-Gate + Inbox + Swift + XcodeGen + MSBuild-Embed + `.appex` in `PlugIns/` + Presets/Deep Link.  
+**Noch manuell:** App Group im Developer Portal für Extension-ID (falls neu); Gerätetest (Widget → Drain → Unkategorisiert); Store-Upload.
 
 Vollständige Schrittfolge: `Finanzuebersicht/Platforms/iOS/Widgets/README.md` (Abschnitt „Mac-Agent: Xcode-Extension bündeln“).
 

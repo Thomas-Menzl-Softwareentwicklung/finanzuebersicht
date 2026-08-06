@@ -156,7 +156,7 @@ Setup-Hilfe (Milestone/Labels): `scripts/setup-v120-architecture-milestone.sh` (
 
 | Welle | Issues | Fokus | Stand |
 |-------|--------|--------|-------|
-| 0 | [#289](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/289) ✅, [#290](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/290) ✅, [#291](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/291) | DataPath-Restart, DataFileNames, Doc-Drift | Welle 0 fast fertig |
+| 0 | [#289](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/289) ✅, [#290](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/290) ✅, [#291](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/291) ✅ | DataPath-Restart, DataFileNames, Doc-Drift | ✅ Welle 0 fertig |
 | 1 | [#268](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/268), [#270](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/270) | Legacy `IDataService` raus, Budget Use Case | offen |
 | 2 | [#269](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/269), [#292](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/292), [#273](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/273) | Import-/Backup-Use-Cases, Vollscan-Queries | offen |
 | 3 | [#267](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/267), [#293](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/293), [#294](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/294) | Dashboard-/Transactions-/Categories-VM-Splits | offen |
@@ -175,7 +175,7 @@ Größere Produkt-Features. Sync/Open Banking setzen idealerweise #300 (und stab
 |-------|-------|---------|
 | [#241](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/241) | Kategorien-Hierarchie (Ober-/Unterkategorien) | L |
 | [#242](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/242) | Home-Screen-Widget Anzeige (iOS / macOS) | L |
-| — | Interaktives iOS-Widget + In-App Schnellerfassung Ausgaben (Pro) — In-App ✅; Mac-Handoff: `Platforms/iOS/Widgets/README.md` + `.cursor/rules/ios-quick-expense-widget.mdc` | L–XL |
+| — | Interaktives iOS-Widget + In-App Schnellerfassung Ausgaben (Pro) | ✅ (iOS-Widget + Inbox; Mac/Windows nur In-App „Schnell“) |
 | [#244](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/244) | Daueraufträge mit variablem Betrag | M |
 | [#243](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/243) | CloudKit-Sync zwischen Geräten | XL |
 | [#245](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/245) | Open Banking / automatischer Bank-Import | XL |

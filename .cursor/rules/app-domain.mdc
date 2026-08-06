@@ -22,8 +22,8 @@ alwaysApply: true
 
 ## iOS Quick-Expense-Widget (Pro)
 
-- **In-App fertig:** Transaktionen → Schnell (Unkategorisiert + Default-Konto)
-- **Mac-Handoff (Xcode `.appex`):** `.cursor/rules/ios-quick-expense-widget.mdc` + `Finanzuebersicht/Platforms/iOS/Widgets/README.md`
+- **Fertig:** In-App „Schnell“ (alle Targets) + iOS WidgetKit-`.appex` (Presets, Inbox, Deep Link)
+- Build/Resign: `.cursor/rules/ios-quick-expense-widget.mdc` + `Finanzuebersicht/Platforms/iOS/Widgets/README.md`
 - Nicht mit Anzeige-Widget #242 vermischen
 
 ## Einheitliches Anlegen (#265 ✅ v1.19)

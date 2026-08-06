@@ -14,7 +14,7 @@ Monetarisierung: [`MONETIZATION.md`](MONETIZATION.md).
 | iPhone + iPad | vorhanden |
 | Privacy Manifest + Export Compliance | gesetzt |
 | iOS Release-Entitlements (ohne `get-task-allow`) | gesetzt (inkl. App Group für Quick-Expense-Widget) |
-| Quick Expense Capture (Pro, In-App + Widget-Inbox) | In-App fertig; Widget-`.appex` auf Mac bundlen — `Platforms/iOS/Widgets/README.md` |
+| Quick Expense Capture (Pro, In-App + iOS-Widget) | ✅ In-App alle Targets; WidgetKit-`.appex` eingebettet — `Platforms/iOS/Widgets/README.md` |
 | Support / Privacy Site | eigenes Repo `finanzuebersicht-site` |
 | License-Gates Free/Pro/Sync | vorhanden |
 | StoreKit (Pro kaufen / Restore) | vorhanden (Store-Build, iOS/Mac Catalyst) |
@@ -94,6 +94,8 @@ Oder in Xcode: Archive öffnen → Distribute App → **App Store Connect** → 
 - Code: `Finanzuebersicht/Services/Billing/StoreKitBillingService.cs` (nur `IOS`/`MACCATALYST` + `AppDistribution=Store`).
 - Direct-Builds registrieren `UnavailableStoreBillingService`.
 - Stub-Toggles nur in **Debug**-Store-Builds (Simulator / lokale Dev). Release, TestFlight und App Store: UI ausgeblendet, Stub-Flags werden ignoriert.
+- **Restore:** leeres StoreKit-Owned-Set darf den gecachten Pro-Status nicht löschen.
+- **Resume:** License-Refresh vor Widget-Inbox-Drain; ohne Pro bleiben Pending-Items erhalten.
 
 ## Feature-Gates
 

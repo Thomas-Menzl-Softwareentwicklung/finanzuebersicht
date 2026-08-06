@@ -1,15 +1,16 @@
 # Quick Expense Widget (iOS)
 
-Interactive Home Screen capture for small expenses (**Pro**).
+Interactive Home Screen capture for small expenses (**Pro**). In-App „Schnell“ + WidgetKit-`.appex` are implemented.
 
-> **Lokaler Cursor-Agent (Mac):** Lies zuerst `.cursor/rules/ios-quick-expense-widget.mdc`, dann den Abschnitt **Mac-Agent: Xcode-Extension bündeln** unten. Die In-App-Schnellerfassung ist fertig — dein Fokus ist nur die WidgetKit-`.appex`.
+> **Lokaler Cursor-Agent (Mac):** Bei Swift-/Embed-/Resign-Änderungen zuerst `.cursor/rules/ios-quick-expense-widget.mdc`, dann den Abschnitt **Mac-Agent: Xcode-Extension bündeln** unten. Domain/UI nicht neu bauen.
 
 ## Runtime flow
 
 1. Widget App Intent writes `{ amountText, title }` into the App Group file `quick-expense-pending.json`.
-2. MAUI app on start/resume drains the file via `ProcessQuickExpenseInboxUseCase` → `CaptureQuickExpenseUseCase`.
+2. MAUI app on start/resume drains the file via `ProcessQuickExpenseInboxUseCase` → `CaptureQuickExpenseUseCase` (after license refresh; without Pro, pending items stay).
 3. Result: real `Transaction` (Ausgabe) with system category **Unkategorisiert** + default account.
 4. In-app: Transaktionen → **Schnell** sheet (same use case) + filter **Unkategorisiert (n)**.
+5. Pencil / Anpassen: deep link `finanzuebersicht://quick-expense` opens Schnell with preset prefill.
 
 App Group id: `group.de.thomasmenzl.finanzuebersicht` (`AppGroupIds.Finanzuebersicht`).
 
@@ -28,9 +29,9 @@ JSON shape (camelCase, array):
 
 Pro flag for the Intent: App Group `UserDefaults` key `hasPro` (written by `AppGroupQuickExpenseInboxStore.PublishHasPro`).
 
-## In-app (ships without the .appex)
+## In-app (all targets)
 
-Works on all targets: Transaktionen → Schnell. Inbox processor is ready for widget writes once the extension is bundled.
+Transaktionen → Schnell works on iOS, Mac Catalyst, and Windows. The Home Screen widget is **iOS-only**; Mac/Windows use In-App only.
 
 ---
 
