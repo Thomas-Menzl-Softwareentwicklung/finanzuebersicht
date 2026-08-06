@@ -77,7 +77,7 @@ public class TransactionsViewModelTests
     }
 
     [Fact]
-    public async Task LoadTransaktionen_WhenAlreadyLoading_DoesNotExecuteAgain()
+    public async Task LoadTransaktionen_WhenAlreadyLoading_QueuesSecondLoad()
     {
         var started = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
         var finish = new TaskCompletionSource<List<Transaction>>(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -131,7 +131,8 @@ public class TransactionsViewModelTests
 
         await Task.WhenAll(firstLoad, secondLoad);
 
-        await transactionRepository.Received(1).GetTransactionsAsync(Arg.Any<DateTime>(), Arg.Any<DateTime>());
+        // Second call while loading is queued and runs after the first completes.
+        await transactionRepository.Received(2).GetTransactionsAsync(Arg.Any<DateTime>(), Arg.Any<DateTime>());
     }
 
     [Fact]

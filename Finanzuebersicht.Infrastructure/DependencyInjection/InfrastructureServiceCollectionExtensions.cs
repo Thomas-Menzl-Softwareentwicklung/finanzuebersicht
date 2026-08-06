@@ -26,6 +26,8 @@ public static class InfrastructureServiceCollectionExtensions
 #endif
         services.AddSingleton<ILicenseService, LicenseService>();
 
+        services.AddSingleton<IUncategorizedCategoryService, UncategorizedCategoryService>();
+
         // Backup
         services.AddSingleton<IDataMigrator, Finanzuebersicht.Core.Services.Migrations.V1ToV2Migrator>();
         services.AddSingleton<IDataMigrator, Finanzuebersicht.Core.Services.Migrations.V2ToV3Migrator>();
@@ -96,6 +98,17 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddSingleton<IBudgetRepository>(sp => sp.GetRequiredService<LocalDataService>());
         services.AddSingleton<ISparZielRepository>(sp => sp.GetRequiredService<LocalDataService>());
         services.AddSingleton<ITransactionTemplateRepository>(sp => sp.GetRequiredService<LocalDataService>());
+
+        // Default inbox (tests / non-iOS). MAUI host may replace with App Group store.
+        services.AddSingleton<IQuickExpenseInboxStore>(sp =>
+            new FileQuickExpenseInboxStore(
+                GetDataDir(sp),
+                sp.GetService<ILogger<FileQuickExpenseInboxStore>>()));
+
+        services.AddSingleton<IQuickExpenseWidgetPresetStore>(sp =>
+            new FileQuickExpenseWidgetPresetStore(
+                GetDataDir(sp),
+                sp.GetService<ILogger<FileQuickExpenseWidgetPresetStore>>()));
 
         return services;
     }

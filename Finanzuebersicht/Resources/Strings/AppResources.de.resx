@@ -282,8 +282,24 @@ Bitte starte die App neu.</value></data>
   <data name="Btn_Import" xml:space="preserve"><value>Import</value></data>
   <data name="Btn_Filter" xml:space="preserve"><value>Filter</value></data>
   <data name="Btn_Umbuchen" xml:space="preserve"><value>Umbuchen</value></data>
+  <data name="Btn_SchnellAusgabe" xml:space="preserve"><value>Schnell</value></data>
+  <data name="Btn_UnkategorisiertFilter" xml:space="preserve"><value>Unkategorisiert ({0})</value></data>
+  <data name="Btn_UnkategorisiertFilterZero" xml:space="preserve"><value>Unkategorisiert</value></data>
   <data name="Btn_FilterZuruecksetzen" xml:space="preserve"><value>Filter zurücksetzen</value></data>
   <data name="Title_ShiftInstance" xml:space="preserve"><value>Instanz verschieben</value></data>
+  <data name="Title_SchnellAusgabe" xml:space="preserve"><value>Schnelle Ausgabe</value></data>
+  <data name="Lbl_SchnellAusgabeHinweis" xml:space="preserve"><value>Nur Betrag und Info — Kategorie und Konto später zuweisen.</value></data>
+  <data name="Lbl_Info" xml:space="preserve"><value>Info</value></data>
+  <data name="Hint_SchnellAusgabeInfo" xml:space="preserve"><value>z. B. Kaffee</value></data>
+  <data name="Msg_SchnellAusgabeGespeichert" xml:space="preserve"><value>Ausgabe gespeichert (unkategorisiert)</value></data>
+  <data name="Msg_KeineUnkategorisierten" xml:space="preserve"><value>Keine unkategorisierten Transaktionen.</value></data>
+  <data name="A11y_SchnellAusgabe" xml:space="preserve"><value>Ausgabe schnell erfassen</value></data>
+  <data name="Stn_WidgetShortcutsTitle" xml:space="preserve"><value>Widget-Shortcuts</value></data>
+  <data name="Stn_WidgetShortcutsHint" xml:space="preserve"><value>Bis zu vier Vorlagen auf dem Home-Screen-Widget. Leere Slots werden ausgeblendet. Tippen bucht sofort; der Anpassen-Button öffnet die Schnellerfassung.</value></data>
+  <data name="Stn_WidgetShortcutSlot" xml:space="preserve"><value>Slot {0}</value></data>
+  <data name="Stn_WidgetShortcutTitle" xml:space="preserve"><value>Titel</value></data>
+  <data name="Stn_WidgetShortcutAmount" xml:space="preserve"><value>Betrag</value></data>
+  <data name="Msg_WidgetShortcutsGespeichert" xml:space="preserve"><value>Widget-Shortcuts gespeichert</value></data>
   <data name="Btn_Hinzufuegen" xml:space="preserve"><value>+</value></data>
   <data name="Btn_Prev" xml:space="preserve"><value>‹</value></data>
   <data name="Btn_Next" xml:space="preserve"><value>›</value></data>

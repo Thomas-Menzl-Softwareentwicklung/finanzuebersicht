@@ -49,6 +49,7 @@ public sealed class LicenseService : ILicenseService
         AppFeature.CsvImport => HasPro,
         AppFeature.Cashflow => HasPro,
         AppFeature.CloudSync => CanUseCloudSync,
+        AppFeature.QuickExpenseCapture => HasPro,
         _ => false
     };
 
@@ -110,10 +111,8 @@ public sealed class LicenseService : ILicenseService
             return;
         }
 
-        var entitlements = _entitlementStore.GetEntitlementsAsync().GetAwaiter().GetResult();
-        _hasPro = entitlements.HasPro;
-        _hasSyncSubscription = entitlements.HasSyncSubscription;
-        _loaded = true;
+        // Store: never block the UI thread on StoreKit (sync-over-async deadlocks → watchdog kill).
+        // Constructor defaults stay in effect until RefreshAsync completes.
     }
 
     private void ApplyChannelDefaults()

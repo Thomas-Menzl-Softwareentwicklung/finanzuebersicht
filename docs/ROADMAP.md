@@ -174,7 +174,8 @@ Größere Produkt-Features. Sync/Open Banking setzen idealerweise #300 (und stab
 | Issue | Thema | Aufwand |
 |-------|-------|---------|
 | [#241](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/241) | Kategorien-Hierarchie (Ober-/Unterkategorien) | L |
-| [#242](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/242) | Home-Screen-Widget (iOS / macOS) | L |
+| [#242](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/242) | Home-Screen-Widget Anzeige (iOS / macOS) | L |
+| — | Interaktives iOS-Widget + In-App Schnellerfassung Ausgaben (Pro) — In-App ✅; Mac-Handoff: `Platforms/iOS/Widgets/README.md` + `.cursor/rules/ios-quick-expense-widget.mdc` | L–XL |
 | [#244](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/244) | Daueraufträge mit variablem Betrag | M |
 | [#243](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/243) | CloudKit-Sync zwischen Geräten | XL |
 | [#245](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/245) | Open Banking / automatischer Bank-Import | XL |

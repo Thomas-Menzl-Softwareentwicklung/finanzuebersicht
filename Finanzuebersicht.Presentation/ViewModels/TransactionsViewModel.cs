@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using Finanzuebersicht.Application.UseCases.Accounts;
 using Finanzuebersicht.Application.UseCases.Categories;
 using Finanzuebersicht.Application.UseCases.Transactions;
+using Finanzuebersicht.Core.Services;
 using Finanzuebersicht.Models;
 using Finanzuebersicht.Navigation;
 using Finanzuebersicht.Presentation;
@@ -34,7 +35,9 @@ public partial class TransactionsViewModel(
     LoadTransactionTemplatesUseCase? loadTransactionTemplatesUseCase = null,
     DeleteTransactionTemplateUseCase? deleteTransactionTemplateUseCase = null,
     UseTransactionTemplateUseCase? useTransactionTemplateUseCase = null,
-    Finanzuebersicht.Core.Licensing.ILicenseService? licenseService = null) : MonthNavigationViewModel, IAutoLoadViewModel, ICurrencyRefreshViewModel
+    Finanzuebersicht.Core.Licensing.ILicenseService? licenseService = null,
+    CountUncategorizedTransactionsUseCase? countUncategorizedTransactionsUseCase = null,
+    IUncategorizedCategoryService? uncategorizedCategoryService = null) : MonthNavigationViewModel, IAutoLoadViewModel, ICurrencyRefreshViewModel
 {
     private readonly DeleteTransactionUseCase _deleteTransactionUseCase = deleteTransactionUseCase;
     private readonly RestoreTransactionUseCase _restoreTransactionUseCase = restoreTransactionUseCase;
@@ -59,9 +62,12 @@ public partial class TransactionsViewModel(
     private readonly UseTransactionTemplateUseCase? _useTransactionTemplateUseCase = useTransactionTemplateUseCase;
     private readonly Finanzuebersicht.Core.Licensing.ILicenseService _licenseService =
         licenseService ?? Finanzuebersicht.Core.Licensing.UnrestrictedLicenseService.Instance;
+    private readonly CountUncategorizedTransactionsUseCase? _countUncategorizedTransactionsUseCase = countUncategorizedTransactionsUseCase;
+    private readonly IUncategorizedCategoryService? _uncategorizedCategoryService = uncategorizedCategoryService;
 
     private CancellationTokenSource? _searchDebounce;
     private int _searchVersion;
+    private bool _reloadQueued;
 
     private void LogError(string context, Exception? ex = null)
     {
@@ -194,6 +200,17 @@ public partial class TransactionsViewModel(
 
     [ObservableProperty]
     private DateTime bisDatumPicker = DateTime.Today;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasUncategorizedTransactions))]
+    [NotifyPropertyChangedFor(nameof(UncategorizedBadgeText))]
+    private int uncategorizedCount;
+
+    public bool HasUncategorizedTransactions => UncategorizedCount > 0;
+
+    public string UncategorizedBadgeText => UncategorizedCount > 0
+        ? _loc.GetString(ResourceKeys.Btn_UnkategorisiertFilter, UncategorizedCount)
+        : _loc.GetString(ResourceKeys.Btn_UnkategorisiertFilterZero);
 
     // Typ-Filter als Index (0=Alle, 1=Einnahmen, 2=Ausgaben) für Picker
     private int _selectedTypIndex;
@@ -388,23 +405,33 @@ public partial class TransactionsViewModel(
     private async Task LoadTransaktionen()
     {
         CurrencyRefreshRegistry.Register(this);
-        if (IsLoading) return;
-        IsLoading = true;
+        if (IsLoading)
+        {
+            // Overlapping OnAppearing + DataChanged (widget inbox) must not drop the second load.
+            _reloadQueued = true;
+            return;
+        }
 
+        IsLoading = true;
         try
         {
-            var data = await _loadTransactionsMonthUseCase.ExecuteAsync(AktuellerMonat, SelectedAccountId);
-            TransaktionsGruppen = new ObservableCollection<TransactionGroup>(data.Gruppen);
-            IconMap = data.IconMap;
-            CategoryNameMap = data.CategoryNameMap;
-            AccountMap = data.AccountMap;
+            do
+            {
+                _reloadQueued = false;
+                var data = await _loadTransactionsMonthUseCase.ExecuteAsync(AktuellerMonat, SelectedAccountId);
+                TransaktionsGruppen = new ObservableCollection<TransactionGroup>(data.Gruppen);
+                IconMap = data.IconMap;
+                CategoryNameMap = data.CategoryNameMap;
+                AccountMap = data.AccountMap;
 
-            if (AvailableKategorien.Count == 0)
-                await LoadKategorienAsync();
-            if (AvailableKonten.Count == 0)
-                await LoadKontenAsync();
+                if (AvailableKategorien.Count == 0)
+                    await LoadKategorienAsync();
+                if (AvailableKonten.Count == 0)
+                    await LoadKontenAsync();
 
-            await LoadTemplatesAsync();
+                await LoadTemplatesAsync();
+                await RefreshUncategorizedCountAsync();
+            } while (_reloadQueued);
         }
         catch (Exception ex)
         {
@@ -417,6 +444,25 @@ public partial class TransactionsViewModel(
         finally
         {
             IsLoading = false;
+        }
+    }
+
+    private async Task RefreshUncategorizedCountAsync()
+    {
+        if (_countUncategorizedTransactionsUseCase == null)
+        {
+            UncategorizedCount = 0;
+            return;
+        }
+
+        try
+        {
+            UncategorizedCount = await _countUncategorizedTransactionsUseCase.ExecuteAsync();
+        }
+        catch (Exception ex)
+        {
+            LogError(nameof(RefreshUncategorizedCountAsync), ex);
+            UncategorizedCount = 0;
         }
     }
 
@@ -448,31 +494,31 @@ public partial class TransactionsViewModel(
             if (transaktion.IsTransfer && !string.IsNullOrWhiteSpace(transaktion.TransferGroupId))
             {
                 await _deleteTransactionUseCase.ExecuteTransferGroupAsync(transaktion.TransferGroupId);
+            }
+            else
+            {
+                var snapshot = CloneTransaction(transaktion);
+                await _deleteTransactionUseCase.ExecuteAsync(transaktion.Id);
+
+                // TransactionGroup is a plain List — mutating it does not refresh CollectionView.
+                // Reload the month list so the row disappears immediately.
                 await LoadTransaktionen();
                 _appEvents.NotifyDataChanged();
-                await _feedbackService.ShowSnackbarAsync(_loc.GetString(ResourceKeys.Msg_Geloescht));
+                await _feedbackService.ShowSnackbarAsync(
+                    _loc.GetString(ResourceKeys.Msg_Geloescht),
+                    _loc.GetString(ResourceKeys.Btn_Rueckgaengig),
+                    async () =>
+                    {
+                        await _restoreTransactionUseCase.ExecuteAsync(snapshot);
+                        await LoadTransaktionen();
+                        _appEvents.NotifyDataChanged();
+                    });
                 return;
             }
 
-            var snapshot = CloneTransaction(transaktion);
-            await _deleteTransactionUseCase.ExecuteAsync(transaktion.Id);
-            var gruppe = TransaktionsGruppen.FirstOrDefault(g => g.Contains(transaktion));
-            if (gruppe == null) return;
-
-            gruppe.Remove(transaktion);
-            if (gruppe.Count == 0)
-                TransaktionsGruppen.Remove(gruppe);
-
+            await LoadTransaktionen();
             _appEvents.NotifyDataChanged();
-            await _feedbackService.ShowSnackbarAsync(
-                _loc.GetString(ResourceKeys.Msg_Geloescht),
-                _loc.GetString(ResourceKeys.Btn_Rueckgaengig),
-                async () =>
-                {
-                    await _restoreTransactionUseCase.ExecuteAsync(snapshot);
-                    await LoadTransaktionen();
-                    _appEvents.NotifyDataChanged();
-                });
+            await _feedbackService.ShowSnackbarAsync(_loc.GetString(ResourceKeys.Msg_Geloescht));
         }
         catch (Exception ex)
         {
@@ -552,6 +598,55 @@ public partial class TransactionsViewModel(
     private async Task GoToTransfer()
     {
         await _navigationService.GoToAsync(Routes.TransferDetail);
+    }
+
+    [RelayCommand]
+    private async Task QuickCapture()
+    {
+        try
+        {
+            if (!_licenseService.HasFeature(Finanzuebersicht.Core.Licensing.AppFeature.QuickExpenseCapture))
+            {
+                await _dialogService.ShowAlertAsync(
+                    _loc.GetString(ResourceKeys.Err_Titel),
+                    _loc.GetString(ResourceKeys.Err_ProErforderlich),
+                    _loc.GetString(ResourceKeys.Btn_OK));
+                return;
+            }
+
+            // Same Shell navigation path as Umbuchen / Detail pages — no modal/popup.
+            await _navigationService.GoToAsync(Routes.QuickExpenseCapture);
+        }
+        catch (Exception ex)
+        {
+            LogError(nameof(QuickCapture), ex);
+            await _dialogService.ShowAlertAsync(
+                _loc.GetString(ResourceKeys.Err_Titel),
+                _loc.GetString(ResourceKeys.Err_SpeichernFehlgeschlagen, ex.Message),
+                _loc.GetString(ResourceKeys.Btn_OK));
+        }
+    }
+
+    [RelayCommand]
+    private async Task FilterUncategorized()
+    {
+        if (_uncategorizedCategoryService == null)
+            return;
+
+        var id = await _uncategorizedCategoryService.FindIdAsync();
+        if (string.IsNullOrWhiteSpace(id))
+        {
+            await _dialogService.ShowAlertAsync(
+                _loc.GetString(ResourceKeys.Err_Titel),
+                _loc.GetString(ResourceKeys.Msg_KeineUnkategorisierten),
+                _loc.GetString(ResourceKeys.Btn_OK));
+            return;
+        }
+
+        IsFilterPanelOpen = true;
+        SelectedKategorieFilterItem = AvailableKategorien.FirstOrDefault(k => k.Id == id)
+            ?? new KategorieFilterItem(id, _loc.GetString(ResourceKeys.Lbl_ImportStatusUnkategorisiert));
+        SelectedKategorieId = id;
     }
 
     [RelayCommand]

@@ -17,7 +17,7 @@
 		<ApplicationTitle>Finanzübersicht</ApplicationTitle>
 
 		<!-- App Identifier -->
-		<ApplicationId>com.thomasmenzl.finanzuebersicht</ApplicationId>
+		<ApplicationId>de.thomasmenzl.finanzuebersicht</ApplicationId>
 
 		<!-- Direct = GitHub/self-built (default). Store = App Store / Mac App Store (-p:AppDistribution=Store). -->
 		<AppDistribution Condition="'$(AppDistribution)' == ''">Direct</AppDistribution>
@@ -50,6 +50,7 @@
 		<!-- Debug: get-task-allow; Release: distribution-safe (kein get-task-allow) -->
 		<CodesignEntitlements Condition="'$(Configuration)' == 'Debug' AND $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">Platforms/iOS/Entitlements.Debug.plist</CodesignEntitlements>
 		<CodesignEntitlements Condition="'$(Configuration)' != 'Debug' AND $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">Platforms/iOS/Entitlements.plist</CodesignEntitlements>
+		<DevelopmentTeam Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">XY663DU933</DevelopmentTeam>
 		<CodesignKey Condition="'$(Configuration)' == 'Debug' AND $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">Apple Development</CodesignKey>
 		<CodesignProvision Condition="'$(Configuration)' == 'Debug' AND $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">Automatic</CodesignProvision>
 		<!-- Release: TeamID + Distribution Profile lokal oder per CI setzen (siehe docs/APP_STORE.md) -->
@@ -106,6 +107,134 @@
 		<ProjectReference Include="..\Finanzuebersicht.Infrastructure\Finanzuebersicht.Infrastructure.csproj" />
 		<ProjectReference Include="..\Finanzuebersicht.Presentation\Finanzuebersicht.Presentation.csproj" />
 	</ItemGroup>
+
+	<!-- WidgetKit sources are built with Xcode on Mac — not by the .NET compiler. -->
+	<ItemGroup>
+		<None Include="Platforms\iOS\Widgets\**\*" />
+		<Content Remove="Platforms\iOS\Widgets\**\*" Condition="Exists('Platforms\iOS\Widgets')" />
+		<Compile Remove="Platforms\iOS\Widgets\**\*" />
+		<_MauiCompileToXaml Remove="Platforms\iOS\Widgets\**\*" />
+		<!-- Custom Shell renderer incompatible with UIScene (iOS 27 / Mac Catalyst). -->
+		<Compile Remove="Handlers\FastShellRenderer.cs" />
+		<None Include="Handlers\FastShellRenderer.cs" />
+	</ItemGroup>
+
+	<!-- Embed QuickExpenseWidget.appex (built by BuildWidgetExtension / build-release.sh).
+	     Pattern: Redth Maui.Apple.PlatformFeature.Samples — Widgets.
+	     Skip rebuild: -p:SkipWidgetBuild=true (keeps previously staged .appex).
+	     Skip embed entirely: -p:EmbedQuickExpenseWidget=false -->
+	<PropertyGroup Condition="$(TargetFramework.Contains('-ios'))">
+		<EmbedQuickExpenseWidget Condition="'$(EmbedQuickExpenseWidget)' == ''">true</EmbedQuickExpenseWidget>
+	</PropertyGroup>
+
+	<ItemGroup Condition="$(TargetFramework.Contains('-ios')) AND '$(EmbedQuickExpenseWidget)' == 'true'">
+		<!-- Staging lives at $(MSBuildProjectDirectory)/WidgetExtensions (NOT under Platforms/,
+		     or SingleProject packs an unsigned .appex into the .app and ASC rejects it). -->
+		<Content Remove="WidgetExtensions\**" />
+		<None Remove="WidgetExtensions\**" />
+		<MauiAsset Remove="WidgetExtensions\**" />
+		<_MauiCompileToXaml Remove="WidgetExtensions\**" />
+		<!-- Legacy path — exclude if a leftover folder exists -->
+		<Content Remove="Platforms\iOS\WidgetExtensions\**" />
+		<None Remove="Platforms\iOS\WidgetExtensions\**" />
+		<MauiAsset Remove="Platforms\iOS\WidgetExtensions\**" />
+
+		<AdditionalAppExtensions Include="$(MSBuildProjectDirectory)/WidgetExtensions">
+			<Name>QuickExpenseWidget</Name>
+			<BuildOutput Condition="'$(ComputedPlatform)' == 'iPhone'">Release-iphoneos</BuildOutput>
+			<BuildOutput Condition="'$(ComputedPlatform)' == 'iPhoneSimulator'">Release-iphonesimulator</BuildOutput>
+			<!-- Must live next to staging folder / match Name (dotnet/macios #8933). -->
+			<CodesignEntitlements>$(MSBuildProjectDirectory)/WidgetExtensions/QuickExpenseWidget.entitlements</CodesignEntitlements>
+		</AdditionalAppExtensions>
+	</ItemGroup>
+
+	<!-- Swift @_cdecl bridge: WidgetCenter.reload* (Swift-only API). Built by BuildWidgetKitBridge. -->
+	<ItemGroup Condition="$(TargetFramework.Contains('-ios')) AND '$(EmbedQuickExpenseWidget)' == 'true'">
+		<NativeReference Include="Platforms/iOS/Native/lib/Release-iphoneos/libWidgetKitBridge.a"
+		                 Condition="!$(RuntimeIdentifier.Contains('simulator'))">
+			<Kind>Static</Kind>
+			<ForceLoad>true</ForceLoad>
+			<Frameworks>WidgetKit</Frameworks>
+		</NativeReference>
+		<NativeReference Include="Platforms/iOS/Native/lib/Release-iphonesimulator/libWidgetKitBridge.a"
+		                 Condition="$(RuntimeIdentifier.Contains('simulator'))">
+			<Kind>Static</Kind>
+			<ForceLoad>true</ForceLoad>
+			<Frameworks>WidgetKit</Frameworks>
+		</NativeReference>
+	</ItemGroup>
+
+	<!-- Store: re-sign PlugIns/*.appex with Distribution + Store profile, then re-seal outer .app
+	     with the FULL Release entitlements (incl. application-identifier — do not strip). -->
+	<Target Name="ResignWidgetExtensionForStore"
+	        AfterTargets="_CodesignAppBundle"
+	        DependsOnTargets="GetBuildVersion"
+	        Condition="$(TargetFramework.Contains('-ios')) AND '$(EmbedQuickExpenseWidget)' == 'true' AND '$(AppDistribution)' == 'Store' AND '$(ComputedPlatform)' == 'iPhone'">
+		<PropertyGroup>
+			<_WidgetAppexInBundle Condition="'$(AppBundleDir)' != ''">$(AppBundleDir)/PlugIns/QuickExpenseWidget.appex</_WidgetAppexInBundle>
+			<_WidgetAppexInBundle Condition="'$(_WidgetAppexInBundle)' == ''">$(OutputPath)$(RuntimeIdentifier)/$(ApplicationTitle).app/PlugIns/QuickExpenseWidget.appex</_WidgetAppexInBundle>
+			<_StoreAppEntitlements>$(MSBuildProjectDirectory)/Platforms/iOS/Entitlements.plist</_StoreAppEntitlements>
+			<_WidgetMarketingVersion Condition="'$(ApplicationDisplayVersion)' != ''">$(ApplicationDisplayVersion)</_WidgetMarketingVersion>
+			<_WidgetMarketingVersion Condition="'$(_WidgetMarketingVersion)' == ''">$(MajorMinorVersion)</_WidgetMarketingVersion>
+			<_WidgetBuildVersion Condition="'$(ApplicationVersion)' != ''">$(ApplicationVersion)</_WidgetBuildVersion>
+			<_WidgetBuildVersion Condition="'$(_WidgetBuildVersion)' == ''">$(BuildVersionSimple)</_WidgetBuildVersion>
+		</PropertyGroup>
+		<Error Text="Widget appex missing in app bundle: $(_WidgetAppexInBundle)"
+		       Condition="!Exists('$(_WidgetAppexInBundle)')" />
+		<Error Text="Store entitlements missing: $(_StoreAppEntitlements)"
+		       Condition="!Exists('$(_StoreAppEntitlements)')" />
+		<Exec Command="MARKETING_VERSION=&quot;$(_WidgetMarketingVersion)&quot; CURRENT_PROJECT_VERSION=&quot;$(_WidgetBuildVersion)&quot; bash Platforms/iOS/sign-widget-store.sh &quot;$(_WidgetAppexInBundle)&quot;"
+		      WorkingDirectory="$(MSBuildProjectDirectory)" />
+		<Exec Command="codesign --force --sign &quot;$(CodesignKey)&quot; --entitlements &quot;$(_StoreAppEntitlements)&quot; --timestamp=none &quot;$(AppBundleDir)&quot;"
+		      Condition="'$(AppBundleDir)' != '' AND '$(CodesignKey)' != ''" />
+	</Target>
+
+	<!-- Builds Swift WidgetKitBridge.a for P/Invoke reloadAllTimelines (Swift-only WidgetCenter). -->
+	<Target Name="BuildWidgetKitBridge"
+	        BeforeTargets="ResolveNativeReferences;_AOTCompile;CoreCompile"
+	        Condition="$(TargetFramework.Contains('-ios')) AND '$(EmbedQuickExpenseWidget)' == 'true' AND '$(SkipWidgetKitBridgeBuild)' != 'true'">
+		<PropertyGroup>
+			<_BridgeIsSimulator>$(RuntimeIdentifier.Contains('simulator'))</_BridgeIsSimulator>
+			<_BridgeSubdir Condition="'$(_BridgeIsSimulator)' == 'true'">Release-iphonesimulator</_BridgeSubdir>
+			<_BridgeSubdir Condition="'$(_BridgeIsSimulator)' != 'true'">Release-iphoneos</_BridgeSubdir>
+			<_BridgeLib>$(MSBuildProjectDirectory)/Platforms/iOS/Native/lib/$(_BridgeSubdir)/libWidgetKitBridge.a</_BridgeLib>
+		</PropertyGroup>
+		<Message Text="Building WidgetKitBridge.a via Platforms/iOS/Native/build-widgetkit-bridge.sh..." Importance="high" />
+		<Exec Command="bash build-widgetkit-bridge.sh"
+		      WorkingDirectory="$(MSBuildProjectDirectory)/Platforms/iOS/Native" />
+		<Error Text="Expected WidgetKit bridge at $(_BridgeLib)."
+		       Condition="!Exists('$(_BridgeLib)')" />
+	</Target>
+
+	<!-- Builds Platforms/iOS/Widgets via build-release.sh (xcodegen + xcodebuild), stages .appex. -->
+	<Target Name="BuildWidgetExtension"
+	        AfterTargets="ResolveReferences"
+	        DependsOnTargets="GetBuildVersion"
+	        Condition="$(TargetFramework.Contains('-ios')) AND '$(EmbedQuickExpenseWidget)' == 'true' AND '$(SkipWidgetBuild)' != 'true'">
+
+		<PropertyGroup>
+			<_XcodeProjectDir>$(MSBuildProjectDirectory)/Platforms/iOS/Widgets</_XcodeProjectDir>
+			<_WidgetIsSimulator>$(RuntimeIdentifier.Contains('simulator'))</_WidgetIsSimulator>
+			<_WidgetOutputSubdir Condition="'$(_WidgetIsSimulator)' == 'true'">Release-iphonesimulator</_WidgetOutputSubdir>
+			<_WidgetOutputSubdir Condition="'$(_WidgetIsSimulator)' != 'true'">Release-iphoneos</_WidgetOutputSubdir>
+			<_WidgetDestAppex>$(MSBuildProjectDirectory)/WidgetExtensions/$(_WidgetOutputSubdir)/QuickExpenseWidget.appex</_WidgetDestAppex>
+			<_WidgetMarketingVersion Condition="'$(MajorMinorVersion)' != ''">$(MajorMinorVersion)</_WidgetMarketingVersion>
+			<_WidgetMarketingVersion Condition="'$(_WidgetMarketingVersion)' == ''">1.19</_WidgetMarketingVersion>
+			<_WidgetBuildVersion Condition="'$(BuildVersionSimple)' != ''">$(BuildVersionSimple)</_WidgetBuildVersion>
+			<_WidgetBuildVersion Condition="'$(_WidgetBuildVersion)' == ''">$(_WidgetMarketingVersion)</_WidgetBuildVersion>
+		</PropertyGroup>
+
+		<Error Text="Widget sources not found at $(_XcodeProjectDir). See Platforms/iOS/Widgets/README.md."
+		       Condition="!Exists('$(_XcodeProjectDir)/project.yml')" />
+
+		<Message Text="Building QuickExpenseWidget.appex via Platforms/iOS/Widgets/build-release.sh (v$(_WidgetMarketingVersion) / $(_WidgetBuildVersion))..." Importance="high" />
+		<Exec Command="MARKETING_VERSION=&quot;$(_WidgetMarketingVersion)&quot; CURRENT_PROJECT_VERSION=&quot;$(_WidgetBuildVersion)&quot; bash build-release.sh"
+		      WorkingDirectory="$(_XcodeProjectDir)" />
+
+		<Error Text="Expected staged widget at $(_WidgetDestAppex). See Platforms/iOS/Widgets/README.md."
+		       Condition="!Exists('$(_WidgetDestAppex)')" />
+		<Message Text="Widget extension staged at $(_WidgetDestAppex)" Importance="high" />
+	</Target>
 
 	<!-- Debug/maccatalyst: nach ~/Applications kopieren (Dev-Signatur startet unter macOS 26+ nicht aus /Applications) -->
 	<Target Name="InstallToApplications"

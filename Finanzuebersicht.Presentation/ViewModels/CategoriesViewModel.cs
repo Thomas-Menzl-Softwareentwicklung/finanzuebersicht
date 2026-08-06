@@ -22,8 +22,6 @@ public partial class CategoriesViewModel(
     SaveAccountDetailUseCase saveAccountDetailUseCase,
     ToggleAccountArchiveUseCase toggleAccountArchiveUseCase,
     DeleteAccountUseCase deleteAccountUseCase,
-    CategoryDetailViewModel createCategoryViewModel,
-    ICategoryCreateSheetService categoryCreateSheetService,
     ILocalizationService localizationService,
     INavigationService navigationService,
     IDialogService dialogService,
@@ -39,8 +37,6 @@ public partial class CategoriesViewModel(
     private readonly SaveAccountDetailUseCase _saveAccountDetailUseCase = saveAccountDetailUseCase;
     private readonly ToggleAccountArchiveUseCase _toggleAccountArchiveUseCase = toggleAccountArchiveUseCase;
     private readonly DeleteAccountUseCase _deleteAccountUseCase = deleteAccountUseCase;
-    private readonly CategoryDetailViewModel _createCategoryViewModel = createCategoryViewModel;
-    private readonly ICategoryCreateSheetService _categoryCreateSheetService = categoryCreateSheetService;
     private readonly ILocalizationService _loc = localizationService;
     private readonly INavigationService _navigationService = navigationService;
     private readonly IDialogService _dialogService = dialogService;
@@ -372,9 +368,8 @@ public partial class CategoriesViewModel(
 
         if (item == null && IsKategorienVisible)
         {
-            _createCategoryViewModel.ResetForCreate();
-            if (await _categoryCreateSheetService.ShowAsync(_createCategoryViewModel))
-                await LoadKategorienCore(force: true);
+            // Shell page (same as before FormSheet) — Toolkit Popup crashed on iOS/Mac.
+            await _navigationService.GoToAsync(Routes.CategoryDetail);
             return;
         }
 

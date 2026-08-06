@@ -5,5 +5,9 @@
     <dict>
         <key>get-task-allow</key>
         <true/>
+        <key>com.apple.security.application-groups</key>
+        <array>
+            <string>group.de.thomasmenzl.finanzuebersicht</string>
+        </array>
     </dict>
 </plist>

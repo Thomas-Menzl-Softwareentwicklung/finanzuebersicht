@@ -26,6 +26,7 @@ public static class PresentationServiceCollectionExtensions
         services.AddTransient<TransferDetailViewModel>();
         services.AddTransient<TransactionsViewModel>();
         services.AddTransient<TransactionDetailViewModel>();
+        services.AddTransient<QuickExpenseCaptureViewModel>();
         services.AddTransient<RecurringTransactionsViewModel>();
         services.AddTransient<RecurringTransactionDetailViewModel>();
         services.AddTransient<RecurringInstanceShiftViewModel>();
@@ -33,6 +34,7 @@ public static class PresentationServiceCollectionExtensions
         services.AddTransient<StorageViewModel>();
         services.AddTransient<BackupViewModel>();
         services.AddTransient<LicenseViewModel>();
+        services.AddTransient<QuickExpenseWidgetPresetsViewModel>();
         services.AddTransient<AboutViewModel>(sp =>
             new AboutViewModel(appAssembly, sp.GetService<Microsoft.Extensions.Logging.ILogger<AboutViewModel>>()));
         services.AddTransient<SettingsViewModel>(sp =>
@@ -42,6 +44,7 @@ public static class PresentationServiceCollectionExtensions
                 sp.GetRequiredService<BackupViewModel>(),
                 sp.GetRequiredService<AboutViewModel>(),
                 sp.GetRequiredService<LicenseViewModel>(),
+                sp.GetRequiredService<QuickExpenseWidgetPresetsViewModel>(),
                 sp.GetRequiredService<INavigationService>()));
         services.AddTransient<SparZieleViewModel>();
         services.AddTransient<SparZielDetailViewModel>();

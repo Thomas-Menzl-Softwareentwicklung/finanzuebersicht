@@ -29,8 +29,8 @@ Compile-Flag: `APP_DISTRIBUTION_STORE` wenn `AppDistribution=Store`. CI/Release-
 
 | Produkt | Product ID |
 |---------|------------|
-| Pro | `com.thomasmenzl.finanzuebersicht.pro` |
-| Sync (jährlich) | `com.thomasmenzl.finanzuebersicht.sync.yearly` |
+| Pro | `de.thomasmenzl.finanzuebersicht.pro` |
+| Sync (jährlich) | `de.thomasmenzl.finanzuebersicht.sync.yearly` |
 
 Konstante: `Finanzuebersicht.Core.Licensing.LicenseProductIds`.
 
@@ -81,7 +81,8 @@ Anzeigen: Limit klar in UI („3 von 3 Konten · Pro für unbegrenzt“), nicht 
 | 30-Tage-Cashflow | Planungs-Feature, starker Kaufanreiz |
 | Unbegrenzte Konten / Daueraufträge / Sparziele / Vorlagen | Skalierung |
 | Steuer-Export CSV/PDF (#64, wenn gebaut) | Klarer Pro-Nutzen |
-| Home-Screen-Widget (#242, wenn gebaut) | Convenience |
+| Home-Screen-Widget Anzeige (#242, wenn gebaut) | Convenience |
+| Interaktives iOS-Widget / In-App Schnellerfassung Ausgaben (`AppFeature.QuickExpenseCapture`) | Starker iPhone-Kaufanreiz |
 | Lokale Verschlüsselung (#53, wenn gebaut) | Security-Upsell |
 | Kategorien-Hierarchie (#241, wenn gebaut) | Power-Organisation |
 

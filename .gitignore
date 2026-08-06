@@ -35,6 +35,13 @@ bld/
 *.dSYM.zip
 *.dSYM
 
+# WidgetKit / Xcode (Platforms/iOS/Widgets)
+Finanzuebersicht/Platforms/iOS/Widgets/build/
+Finanzuebersicht/Platforms/iOS/Widgets/XReleases/
+Finanzuebersicht/Platforms/iOS/Widgets/*.xcodeproj/xcuserdata/
+Finanzuebersicht/Platforms/iOS/Widgets/*.xcodeproj/project.xcworkspace/
+*.appex
+
 # Stryker.NET
 .tools/
 Finanzuebersicht.Tests/TestResults/test-results.trx
