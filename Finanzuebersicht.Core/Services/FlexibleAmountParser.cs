@@ -18,6 +18,21 @@ public static class FlexibleAmountParser
         return amount.ToString(CultureInfo.InvariantCulture);
     }
 
+    /// <summary>
+    /// Formats a stored/invariant amount for UI entry (e.g. <c>3,50</c> in de-DE).
+    /// </summary>
+    public static string ToDisplayAmountText(string? amountText, CultureInfo? culture = null)
+    {
+        culture ??= CultureInfo.CurrentCulture;
+        if (string.IsNullOrWhiteSpace(amountText))
+            return string.Empty;
+
+        if (!TryParse(amountText, out var amount))
+            return amountText.Trim();
+
+        return amount.ToString("F2", culture);
+    }
+
     public static bool TryParse(string? amountText, out decimal amount)
     {
         amount = 0;

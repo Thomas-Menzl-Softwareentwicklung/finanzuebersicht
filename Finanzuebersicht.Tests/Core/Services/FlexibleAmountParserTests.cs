@@ -1,3 +1,4 @@
+using System.Globalization;
 using Finanzuebersicht.Core.Services;
 
 namespace Finanzuebersicht.Tests.Core.Services;
@@ -22,5 +23,20 @@ public class FlexibleAmountParserTests
     public void ToInvariantAmountText_RewritesGermanDecimal()
     {
         Assert.Equal("3.50", FlexibleAmountParser.ToInvariantAmountText("3,50"));
+    }
+
+    [Fact]
+    public void ToDisplayAmountText_UsesCurrentCultureDecimalSeparator()
+    {
+        var previous = CultureInfo.CurrentCulture;
+        try
+        {
+            CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("de-DE");
+            Assert.Equal("3,50", FlexibleAmountParser.ToDisplayAmountText("3.50"));
+        }
+        finally
+        {
+            CultureInfo.CurrentCulture = previous;
+        }
     }
 }

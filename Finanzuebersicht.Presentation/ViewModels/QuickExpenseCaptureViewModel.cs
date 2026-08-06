@@ -47,7 +47,7 @@ public partial class QuickExpenseCaptureViewModel(
     public void ApplyQueryAttributes(IDictionary<string, object> query)
     {
         if (query.TryGetValue(NavigationQueryKeys.Amount, out var amountObj))
-            BetragText = amountObj?.ToString() ?? string.Empty;
+            BetragText = FlexibleAmountParser.ToDisplayAmountText(amountObj?.ToString());
 
         if (query.TryGetValue(NavigationQueryKeys.Title, out var titleObj))
             Titel = titleObj?.ToString() ?? string.Empty;

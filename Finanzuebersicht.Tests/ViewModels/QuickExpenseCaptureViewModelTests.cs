@@ -1,3 +1,4 @@
+using System.Globalization;
 using Finanzuebersicht.Application.UseCases.Transactions;
 using Finanzuebersicht.Constants;
 using Finanzuebersicht.Core.Licensing;
@@ -13,19 +14,28 @@ namespace Finanzuebersicht.Tests.ViewModels;
 public class QuickExpenseCaptureViewModelTests
 {
     [Fact]
-    public void ApplyQueryAttributes_PrefillsAmountAndTitle()
+    public void ApplyQueryAttributes_PrefillsAmountWithCurrentCulture()
     {
-        var sut = CreateSut();
-        sut.Reset();
-
-        sut.ApplyQueryAttributes(new Dictionary<string, object>
+        var previous = CultureInfo.CurrentCulture;
+        try
         {
-            [NavigationQueryKeys.Amount] = "4.20",
-            [NavigationQueryKeys.Title] = "Bahn"
-        });
+            CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("de-DE");
+            var sut = CreateSut();
+            sut.Reset();
 
-        Assert.Equal("4.20", sut.BetragText);
-        Assert.Equal("Bahn", sut.Titel);
+            sut.ApplyQueryAttributes(new Dictionary<string, object>
+            {
+                [NavigationQueryKeys.Amount] = "4.20",
+                [NavigationQueryKeys.Title] = "Bahn"
+            });
+
+            Assert.Equal("4,20", sut.BetragText);
+            Assert.Equal("Bahn", sut.Titel);
+        }
+        finally
+        {
+            CultureInfo.CurrentCulture = previous;
+        }
     }
 
     private static QuickExpenseCaptureViewModel CreateSut()

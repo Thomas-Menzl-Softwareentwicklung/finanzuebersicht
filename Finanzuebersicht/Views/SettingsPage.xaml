@@ -232,9 +232,11 @@
                            FontSize="13"
                            TextColor="{AppThemeBinding Light={StaticResource Warning}, Dark={StaticResource WarningDark}}" />
 
+                    <!-- HasProAccess only (not CanEdit/IsBusy): disabling Entries mid-save drops focus
+                         before TwoWay Text is committed on iOS. -->
                     <VerticalStackLayout BindableLayout.ItemsSource="{Binding WidgetPresets.Slots}"
                                          Spacing="12"
-                                         IsEnabled="{Binding WidgetPresets.CanEdit}">
+                                         IsEnabled="{Binding WidgetPresets.HasProAccess}">
                         <BindableLayout.ItemTemplate>
                             <DataTemplate x:DataType="vm:QuickExpenseWidgetPresetSlotItem">
                                 <VerticalStackLayout Spacing="6">
@@ -242,10 +244,10 @@
                                            FontSize="13"
                                            FontAttributes="Bold"
                                            TextColor="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}" />
-                                    <Entry Text="{Binding Title}"
+                                    <Entry Text="{Binding Title, Mode=TwoWay}"
                                            Placeholder="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.WidgetPresets.TitlePlaceholder}"
                                            FontSize="16" />
-                                    <Entry Text="{Binding AmountText}"
+                                    <Entry Text="{Binding AmountText, Mode=TwoWay}"
                                            Placeholder="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.WidgetPresets.AmountPlaceholder}"
                                            Keyboard="Numeric"
                                            FontSize="16" />
@@ -255,7 +257,7 @@
                     </VerticalStackLayout>
 
                     <Button Text="{loc:Translate Btn_Speichern}"
-                            Command="{Binding WidgetPresets.SaveCommand}"
+                            Clicked="OnWidgetPresetsSaveClicked"
                             IsEnabled="{Binding WidgetPresets.CanEdit}"
                             FontSize="14"
                             Padding="12,8"

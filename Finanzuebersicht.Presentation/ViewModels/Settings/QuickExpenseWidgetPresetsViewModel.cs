@@ -83,6 +83,15 @@ public partial class QuickExpenseWidgetPresetsViewModel : ObservableObject
     public string TitlePlaceholder => _loc.GetString(ResourceKeys.Hint_SchnellAusgabeInfo);
     public string AmountPlaceholder => _loc.GetString(ResourceKeys.Hint_Betrag);
 
+    private void ApplyPresetsToSlots(IReadOnlyList<QuickExpenseWidgetPreset> presets)
+    {
+        for (var i = 0; i < Slots.Count && i < presets.Count; i++)
+        {
+            Slots[i].Title = presets[i].Title;
+            Slots[i].AmountText = FlexibleAmountParser.ToDisplayAmountText(presets[i].AmountText);
+        }
+    }
+
     [RelayCommand]
     public async Task LoadAsync()
     {
@@ -94,11 +103,7 @@ public partial class QuickExpenseWidgetPresetsViewModel : ObservableObject
         {
             IsBusy = true;
             var presets = await _loadUseCase.ExecuteAsync();
-            for (var i = 0; i < Slots.Count && i < presets.Count; i++)
-            {
-                Slots[i].Title = presets[i].Title;
-                Slots[i].AmountText = presets[i].AmountText;
-            }
+            ApplyPresetsToSlots(presets);
         }
         catch (FeatureGateException)
         {
@@ -132,10 +137,13 @@ public partial class QuickExpenseWidgetPresetsViewModel : ObservableObject
 
         try
         {
-            IsBusy = true;
+            // Snapshot before IsBusy flips CanEdit/IsEnabled — otherwise iOS Entry may not
+            // flush TwoWay bindings while still focused, and we would persist stale values.
             var presets = Slots
-                .Select(s => new QuickExpenseWidgetPreset(s.Slot, s.Title, s.AmountText))
+                .Select(s => new QuickExpenseWidgetPreset(s.Slot, s.Title ?? string.Empty, s.AmountText ?? string.Empty))
                 .ToList();
+
+            IsBusy = true;
 
             var result = await _saveUseCase.ExecuteAsync(presets);
             if (!result.Success)
@@ -158,6 +166,8 @@ public partial class QuickExpenseWidgetPresetsViewModel : ObservableObject
                 return;
             }
 
+            var saved = await _loadUseCase.ExecuteAsync();
+            ApplyPresetsToSlots(saved);
             _widgetReloader.ReloadAll();
             await _feedbackService.ShowSnackbarAsync(_loc.GetString(ResourceKeys.Msg_WidgetShortcutsGespeichert));
         }

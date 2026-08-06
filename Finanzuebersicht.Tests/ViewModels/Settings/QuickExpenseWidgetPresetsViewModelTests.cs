@@ -1,3 +1,4 @@
+using System.Globalization;
 using Finanzuebersicht.Application.UseCases.Transactions;
 using Finanzuebersicht.Core.Services;
 using Finanzuebersicht.Presentation.Services;
@@ -9,23 +10,32 @@ namespace Finanzuebersicht.Tests.ViewModels.Settings;
 public class QuickExpenseWidgetPresetsViewModelTests
 {
     [Fact]
-    public async Task LoadAsync_FillsSlotsFromStore()
+    public async Task LoadAsync_FillsSlotsFromStore_WithDisplayAmounts()
     {
-        var store = Substitute.For<IQuickExpenseWidgetPresetStore>();
-        store.LoadAsync(Arg.Any<CancellationToken>()).Returns(
-        [
-            new QuickExpenseWidgetPreset(0, "A", "1.00"),
-            new QuickExpenseWidgetPreset(1, "B", "2.00"),
-            new QuickExpenseWidgetPreset(2, string.Empty, string.Empty),
-            new QuickExpenseWidgetPreset(3, string.Empty, string.Empty)
-        ]);
+        var previous = CultureInfo.CurrentCulture;
+        try
+        {
+            CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("de-DE");
+            var store = Substitute.For<IQuickExpenseWidgetPresetStore>();
+            store.LoadAsync(Arg.Any<CancellationToken>()).Returns(
+            [
+                new QuickExpenseWidgetPreset(0, "A", "1.00"),
+                new QuickExpenseWidgetPreset(1, "B", "2.00"),
+                new QuickExpenseWidgetPreset(2, string.Empty, string.Empty),
+                new QuickExpenseWidgetPreset(3, string.Empty, string.Empty)
+            ]);
 
-        var sut = CreateSut(store);
-        await sut.LoadAsync();
+            var sut = CreateSut(store);
+            await sut.LoadAsync();
 
-        Assert.Equal("A", sut.Slots[0].Title);
-        Assert.Equal("1.00", sut.Slots[0].AmountText);
-        Assert.Equal("B", sut.Slots[1].Title);
+            Assert.Equal("A", sut.Slots[0].Title);
+            Assert.Equal("1,00", sut.Slots[0].AmountText);
+            Assert.Equal("B", sut.Slots[1].Title);
+        }
+        finally
+        {
+            CultureInfo.CurrentCulture = previous;
+        }
     }
 
     [Fact]
