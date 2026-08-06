@@ -250,7 +250,7 @@ struct QuickExpenseWidgetEntryView: View {
         switch family {
         case .systemSmall:
             return 2
-        case .systemMedium, .systemLarge, .systemExtraLarge:
+        case .systemMedium:
             return 4
         default:
             return 4
@@ -258,12 +258,12 @@ struct QuickExpenseWidgetEntryView: View {
     }
 
     private var rowFont: Font {
-        switch family {
-        case .systemLarge, .systemExtraLarge:
-            return .subheadline
-        default:
-            return .caption2
-        }
+        .caption2
+    }
+
+    /// Medium: 2×2 grid; Small stays a single column.
+    private var usesTwoColumns: Bool {
+        family == .systemMedium
     }
 
     private var visiblePresets: [WidgetPreset] {
@@ -271,26 +271,28 @@ struct QuickExpenseWidgetEntryView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: family == .systemSmall ? 6 : 8) {
+        VStack(alignment: .leading, spacing: family == .systemSmall ? 4 : 6) {
             Text(L10n.string("Quick expense", locale: locale))
-                .font(family == .systemSmall ? .headline : .title3)
+                .font(.headline)
+                .lineLimit(1)
             if entry.hasPro {
                 if visiblePresets.isEmpty {
                     Text(L10n.string("Configure shortcuts in Settings", locale: locale))
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                } else {
-                    Text(L10n.string("Tap to book — pencil to edit", locale: locale))
                         .font(.caption2)
                         .foregroundStyle(.secondary)
-                    ForEach(visiblePresets) { preset in
-                        presetRow(preset)
+                } else {
+                    if family != .systemSmall {
+                        Text(L10n.string("Tap to book — pencil to edit", locale: locale))
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
                     }
+                    presetGrid
                     Spacer(minLength: 0)
                 }
             } else {
                 Text(L10n.string("Pro unlocks Home Screen capture", locale: locale))
-                    .font(.caption)
+                    .font(.caption2)
                     .foregroundStyle(.secondary)
             }
         }
@@ -299,22 +301,52 @@ struct QuickExpenseWidgetEntryView: View {
     }
 
     @ViewBuilder
+    private var presetGrid: some View {
+        if usesTwoColumns {
+            let rows = stride(from: 0, to: visiblePresets.count, by: 2).map { start in
+                Array(visiblePresets[start..<min(start + 2, visiblePresets.count)])
+            }
+            VStack(spacing: 6) {
+                ForEach(Array(rows.enumerated()), id: \.offset) { _, row in
+                    HStack(spacing: 6) {
+                        ForEach(row) { preset in
+                            presetRow(preset)
+                                .frame(maxWidth: .infinity)
+                        }
+                        if row.count == 1 {
+                            Color.clear.frame(maxWidth: .infinity)
+                        }
+                    }
+                }
+            }
+        } else {
+            VStack(spacing: 4) {
+                ForEach(visiblePresets) { preset in
+                    presetRow(preset)
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
     private func presetRow(_ preset: WidgetPreset) -> some View {
         let amountDisplay = displayAmount(preset.amountText)
-        HStack(spacing: 4) {
+        HStack(spacing: 2) {
             Button(intent: SaveQuickExpenseIntent(amountText: preset.amountText, title: preset.title)) {
                 Text("\(preset.title) \(amountDisplay)")
                     .font(rowFont)
                     .lineLimit(1)
+                    .minimumScaleFactor(0.8)
                     .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.vertical, 2)
             }
-            .buttonStyle(.borderedProminent)
+            .buttonStyle(.bordered)
 
             if let url = QuickExpenseSharedStore.adjustURL(amountText: preset.amountText, title: preset.title) {
                 Link(destination: url) {
                     Image(systemName: "square.and.pencil")
                         .font(rowFont)
-                        .padding(6)
+                        .padding(4)
                 }
                 .accessibilityLabel(L10n.string("Edit amount", locale: locale))
             }
@@ -344,6 +376,6 @@ struct QuickExpenseWidget: Widget {
         }
         .configurationDisplayName(LocalizedStringResource("Quick expense"))
         .description(LocalizedStringResource("Capture a small expense without opening the full app."))
-        .supportedFamilies([.systemSmall, .systemMedium, .systemLarge, .systemExtraLarge])
+        .supportedFamilies([.systemSmall, .systemMedium])
     }
 }

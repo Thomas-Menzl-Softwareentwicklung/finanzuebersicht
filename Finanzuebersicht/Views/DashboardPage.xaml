@@ -143,52 +143,50 @@
                                          ActionCommand="{Binding NavigateToTransaktionenCommand}"
                                          IsVisible="{Binding HasAnyData, Converter={StaticResource InvertBool}}" />
 
-                <VerticalStackLayout Spacing="16" IsVisible="{Binding HasAnyData}">
-
-                    <!-- Monatsnavigation -->
-                    <Grid ColumnDefinitions="Auto, *, Auto" IsVisible="{Binding IsMonthView}">
-                        <Button Grid.Column="0" Text="‹" FontSize="32"
-                                BackgroundColor="Transparent"
-                                TextColor="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}"
-                                Command="{Binding PreviousMonthCommand}"
-                                SemanticProperties.Description="{loc:Translate A11y_VorherigerMonat}"
-                                WidthRequest="44" Padding="0" />
-                        <VerticalStackLayout Grid.Column="1" HorizontalOptions="Center" VerticalOptions="Center">
-                            <Label Text="{Binding MonatAnzeige}"
-                                   FontSize="18" FontAttributes="Bold"
-                                   HorizontalTextAlignment="Center" />
-                            <Label Text="{loc:Translate Lbl_Prognose}" FontSize="11"
-                                   TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}"
-                                   HorizontalTextAlignment="Center"
-                                   IsVisible="{Binding IstPrognose}" />
-                        </VerticalStackLayout>
-                        <Button Grid.Column="2" Text="›" FontSize="32"
-                                BackgroundColor="Transparent"
-                                TextColor="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}"
-                                Command="{Binding NextMonthCommand}"
-                                SemanticProperties.Description="{loc:Translate A11y_NaechsterMonat}"
-                                WidthRequest="44" Padding="0" />
-                    </Grid>
-
-                    <!-- Jahresnavigation -->
-                    <Grid ColumnDefinitions="Auto, *, Auto" IsVisible="{Binding IsYearView}">
-                        <Button Grid.Column="0" Text="‹" FontSize="32"
-                                BackgroundColor="Transparent"
-                                TextColor="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}"
-                                Command="{Binding PreviousYearCommand}"
-                                SemanticProperties.Description="{loc:Translate A11y_VorherigesJahr}"
-                                WidthRequest="44" Padding="0" />
-                        <Label Grid.Column="1" Text="{Binding JahrAnzeige}"
+                <!-- Monats-/Jahresnavigation immer sichtbar sobald Konten oder Historie existieren -->
+                <Grid ColumnDefinitions="Auto, *, Auto" IsVisible="{Binding ShowMonthView}">
+                    <Button Grid.Column="0" Text="‹" FontSize="32"
+                            BackgroundColor="Transparent"
+                            TextColor="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}"
+                            Command="{Binding PreviousMonthCommand}"
+                            SemanticProperties.Description="{loc:Translate A11y_VorherigerMonat}"
+                            WidthRequest="44" Padding="0" />
+                    <VerticalStackLayout Grid.Column="1" HorizontalOptions="Center" VerticalOptions="Center">
+                        <Label Text="{Binding MonatAnzeige}"
                                FontSize="18" FontAttributes="Bold"
-                               HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
-                        <Button Grid.Column="2" Text="›" FontSize="32"
-                                BackgroundColor="Transparent"
-                                TextColor="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}"
-                                Command="{Binding NextYearCommand}"
-                                SemanticProperties.Description="{loc:Translate A11y_NaechstesJahr}"
-                                WidthRequest="44" Padding="0" />
-                    </Grid>
+                               HorizontalTextAlignment="Center" />
+                        <Label Text="{loc:Translate Lbl_Prognose}" FontSize="11"
+                               TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}"
+                               HorizontalTextAlignment="Center"
+                               IsVisible="{Binding IstPrognose}" />
+                    </VerticalStackLayout>
+                    <Button Grid.Column="2" Text="›" FontSize="32"
+                            BackgroundColor="Transparent"
+                            TextColor="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}"
+                            Command="{Binding NextMonthCommand}"
+                            SemanticProperties.Description="{loc:Translate A11y_NaechsterMonat}"
+                            WidthRequest="44" Padding="0" />
+                </Grid>
 
+                <Grid ColumnDefinitions="Auto, *, Auto" IsVisible="{Binding ShowYearView}">
+                    <Button Grid.Column="0" Text="‹" FontSize="32"
+                            BackgroundColor="Transparent"
+                            TextColor="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}"
+                            Command="{Binding PreviousYearCommand}"
+                            SemanticProperties.Description="{loc:Translate A11y_VorherigesJahr}"
+                            WidthRequest="44" Padding="0" />
+                    <Label Grid.Column="1" Text="{Binding JahrAnzeige}"
+                           FontSize="18" FontAttributes="Bold"
+                           HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
+                    <Button Grid.Column="2" Text="›" FontSize="32"
+                            BackgroundColor="Transparent"
+                            TextColor="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}"
+                            Command="{Binding NextYearCommand}"
+                            SemanticProperties.Description="{loc:Translate A11y_NaechstesJahr}"
+                            WidthRequest="44" Padding="0" />
+                </Grid>
+
+                <VerticalStackLayout Spacing="16" IsVisible="{Binding HasAnyData}">
                     <!-- KPI-Kacheln -->
                     <Grid ColumnDefinitions="*, *, *" ColumnSpacing="8" IsVisible="{Binding ShowMonthKpis}">
                         <Border Grid.Column="0" Style="{StaticResource DashboardKpiCard}"

@@ -249,6 +249,8 @@
 
     <Style TargetType="RefreshView">
         <Setter Property="RefreshColor" Value="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource Gray200}}" />
+        <!-- Pull-to-refresh disabled: reload on tab focus is enough; gesture felt broken on device. -->
+        <Setter Property="IsRefreshEnabled" Value="False" />
     </Style>
 
     <Style TargetType="SearchBar">

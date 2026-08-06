@@ -19,7 +19,7 @@
     <ScrollView Grid.Row="0" Padding="16">
         <VerticalStackLayout Spacing="20">
 
-            <VerticalStackLayout Spacing="8">
+            <VerticalStackLayout Spacing="8" IsVisible="{Binding IsEditing}">
                 <Label Text="{Binding FortschrittText}" FontSize="14" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
                 <ProgressBar Progress="{Binding FortschrittProzent, Converter={StaticResource ProzentToWidth}}"
                              ProgressColor="{AppThemeBinding Light={StaticResource Einnahme}, Dark={StaticResource EinnahmeDark}}"
@@ -68,6 +68,7 @@
 
             <Button Text="{loc:Translate Btn_BeitragBuchen}"
                     Command="{Binding BookContributionCommand}"
+                    IsVisible="{Binding IsEditing}"
                     BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
                     TextColor="{StaticResource White}"
                     CornerRadius="12"
@@ -85,6 +86,7 @@
 
             <Button Text="{loc:Translate Btn_Loeschen}"
                     Command="{Binding DeleteCommand}"
+                    IsVisible="{Binding IsEditing}"
                     BackgroundColor="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray900}}"
                     TextColor="{AppThemeBinding Light={StaticResource Ausgabe}, Dark={StaticResource AusgabeDark}}"
                     CornerRadius="12"

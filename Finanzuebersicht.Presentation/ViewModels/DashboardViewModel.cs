@@ -307,6 +307,7 @@ public partial class DashboardViewModel : MonthNavigationViewModel, ILocalizable
     private int _minJahr;
     private bool _minJahrLoaded;
     private bool _foundTransactions;
+    private bool _reloadQueued;
 
     partial void OnSelectedKontoFilterItemChanged(KategorieFilterItem? value)
     {
@@ -435,26 +436,35 @@ public partial class DashboardViewModel : MonthNavigationViewModel, ILocalizable
     private async Task LoadDashboard()
     {
         CurrencyRefreshRegistry.Register(this);
-        if (IsLoading) return;
+        if (IsLoading)
+        {
+            _reloadQueued = true;
+            return;
+        }
+
         IsLoading = true;
         try
         {
-            await EnsureMinJahrLoadedAsync();
-            await EnsureAccountFilterLoadedAsync();
-            await UpdateKontenUebersichtAsync();
-            await UpdateSelectedAccountSaldoAsync();
-            if (IsMonthView)
+            do
             {
-                await LadeMonatAsync();
-            }
-            else
-            {
-                await LadeJahrAsync();
-            }
-            await LadeFaelligeDauerauftraegeAsync();
-            await LoadCashflowPreviewAsync();
-            HasAnyDataLoaded = HasMonthData || HasYearData;
-            OnPropertyChanged(nameof(ShowSecondarySections));
+                _reloadQueued = false;
+                await EnsureMinJahrLoadedAsync();
+                await EnsureAccountFilterLoadedAsync();
+                await UpdateKontenUebersichtAsync();
+                await UpdateSelectedAccountSaldoAsync();
+                if (IsMonthView)
+                {
+                    await LadeMonatAsync();
+                }
+                else
+                {
+                    await LadeJahrAsync();
+                }
+                await LadeFaelligeDauerauftraegeAsync();
+                await LoadCashflowPreviewAsync();
+                HasAnyDataLoaded = _foundTransactions || HasKontenUebersicht || HasMonthData || HasYearData;
+                OnPropertyChanged(nameof(ShowSecondarySections));
+            } while (_reloadQueued);
         }
         finally
         {

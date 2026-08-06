@@ -32,32 +32,10 @@ public partial class SparZieleViewModel : ObservableObject, IAutoLoadViewModel, 
 
     public bool IsEmpty => SparZiele.Count == 0;
 
-    public bool IsEmptyStateVisible => IsEmpty && !ShowAddForm;
+    public bool IsEmptyStateVisible => IsEmpty;
 
     [ObservableProperty]
     private bool isLoading;
-
-    [ObservableProperty]
-    private string neuerTitel = string.Empty;
-
-    [ObservableProperty]
-    private string neuerIcon = "🎯";
-
-    [ObservableProperty]
-    private decimal neuesZielBetrag;
-
-    [ObservableProperty]
-    private decimal neuerAktuellerBetrag;
-
-    [ObservableProperty]
-    private DateTime? neueFaelligkeit;
-
-    [ObservableProperty]
-    private decimal neueMonatlicheSparrate;
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsEmptyStateVisible))]
-    private bool showAddForm;
 
     public SparZieleViewModel(
         LoadSparZieleUseCase loadUseCase,
@@ -96,76 +74,9 @@ public partial class SparZieleViewModel : ObservableObject, IAutoLoadViewModel, 
     }
 
     [RelayCommand]
-    private void ToggleAddForm()
+    private async Task OpenCreateForm()
     {
-        ShowAddForm = !ShowAddForm;
-        if (ShowAddForm)
-        {
-            NeuerTitel = string.Empty;
-            NeuerIcon = "🎯";
-            NeuesZielBetrag = 0;
-            NeuerAktuellerBetrag = 0;
-            NeueFaelligkeit = null;
-            NeueMonatlicheSparrate = 0;
-        }
-    }
-
-    [RelayCommand]
-    private async Task SaveNewSparZiel()
-    {
-        if (string.IsNullOrWhiteSpace(NeuerTitel))
-        {
-            await _dialogService.ShowAlertAsync(
-                _loc.GetString(ResourceKeys.Err_Titel),
-                _loc.GetString(ResourceKeys.Err_TitelErforderlich),
-                _loc.GetString(ResourceKeys.Btn_OK));
-            return;
-        }
-        if (NeuesZielBetrag <= 0)
-        {
-            await _dialogService.ShowAlertAsync(
-                _loc.GetString(ResourceKeys.Err_Titel),
-                _loc.GetString(ResourceKeys.Err_BetragGroesserNull),
-                _loc.GetString(ResourceKeys.Btn_OK));
-            return;
-        }
-        if (NeuerAktuellerBetrag < 0)
-        {
-            await _dialogService.ShowAlertAsync(
-                _loc.GetString(ResourceKeys.Err_Titel),
-                _loc.GetString(ResourceKeys.Err_UngueltigerBetrag),
-                _loc.GetString(ResourceKeys.Btn_OK));
-            return;
-        }
-
-        try
-        {
-            var ziel = new SparZiel
-            {
-                Titel = NeuerTitel,
-                Icon = string.IsNullOrWhiteSpace(NeuerIcon) ? "🎯" : NeuerIcon,
-                ZielBetrag = NeuesZielBetrag,
-                AktuellerBetrag = NeuerAktuellerBetrag,
-                Faelligkeitsdatum = NeueFaelligkeit,
-                MonatlicheSparrate = NeueMonatlicheSparrate > 0 ? NeueMonatlicheSparrate : null
-            };
-
-            await _saveUseCase.ExecuteAsync(ziel);
-            _appEvents.NotifyDataChanged();
-            await _feedbackService.ShowSnackbarAsync(_loc.GetString(ResourceKeys.Msg_Gespeichert));
-        }
-        catch (Exception ex)
-        {
-            _logger?.LogError(ex, "SparZieleViewModel: {Context}", nameof(SaveNewSparZiel));
-            await _dialogService.ShowAlertAsync(
-                _loc.GetString(ResourceKeys.Err_Titel),
-                _loc.GetString(ResourceKeys.Err_SpeichernFehlgeschlagen, ex.Message),
-                _loc.GetString(ResourceKeys.Btn_OK));
-            return;
-        }
-
-        ShowAddForm = false;
-        await LoadSparZieleCommand.ExecuteAsync(null);
+        await _navigationService.GoToAsync(Routes.SparZielDetail);
     }
 
     [RelayCommand]
@@ -224,12 +135,5 @@ public partial class SparZieleViewModel : ObservableObject, IAutoLoadViewModel, 
         }
     }
 
-    public void RefreshCurrencyDisplay()
-    {
-        OnPropertyChanged(nameof(NeuesZielBetrag));
-        OnPropertyChanged(nameof(NeuerAktuellerBetrag));
-        OnPropertyChanged(nameof(NeueMonatlicheSparrate));
-        if (SparZiele.Count > 0)
-            SparZiele = CurrencyDisplayRefresh.Clone(SparZiele);
-    }
+    public void RefreshCurrencyDisplay() => _ = LoadSparZieleCommand.ExecuteAsync(null);
 }

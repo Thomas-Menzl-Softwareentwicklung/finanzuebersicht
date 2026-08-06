@@ -80,7 +80,7 @@
         </DataTemplate>
     </views:BaseContentPage.Resources>
 
-    <Grid RowDefinitions="Auto, Auto, Auto, Auto, *">
+    <Grid RowDefinitions="Auto, Auto, Auto, Auto, Auto, *">
 
         <!-- Row 0: Suchleiste + Filter-Button -->
         <Grid Grid.Row="0" ColumnDefinitions="*, Auto" Padding="12,8,12,4" ColumnSpacing="8">
@@ -263,8 +263,52 @@
             </VerticalStackLayout>
         </Border>
 
-        <!-- Row 4: Content -->
-        <Grid Grid.Row="4">
+        <!-- Row 4: Schnellaktionen (opake Leiste, nicht über der Liste) -->
+        <Border Grid.Row="4"
+                StrokeShape="RoundRectangle 0"
+                Stroke="Transparent"
+                BackgroundColor="{AppThemeBinding Light={StaticResource CardBackground}, Dark={StaticResource CardBackgroundDark}}"
+                Padding="12,8,72,8">
+            <VerticalStackLayout Spacing="6">
+                <Button Text="{Binding UncategorizedBadgeText}"
+                        FontSize="13"
+                        TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}"
+                        Padding="10,6"
+                        CornerRadius="8"
+                        HorizontalOptions="Start"
+                        IsVisible="{Binding HasUncategorizedTransactions}"
+                        Command="{Binding FilterUncategorizedCommand}" />
+                <HorizontalStackLayout Spacing="8">
+                    <Button Text="{loc:Translate Btn_Import}"
+                            FontSize="14"
+                            TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                            BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}"
+                            Padding="12,8"
+                            CornerRadius="8"
+                            Command="{Binding ImportCsvCommand}" />
+                    <Button Text="{loc:Translate Btn_Umbuchen}"
+                            FontSize="14"
+                            TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                            BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}"
+                            Padding="12,8"
+                            CornerRadius="8"
+                            SemanticProperties.Description="{loc:Translate A11y_UmbuchungHinzufuegen}"
+                            Command="{Binding GoToTransferCommand}" />
+                    <Button Text="{loc:Translate Btn_SchnellAusgabe}"
+                            FontSize="14"
+                            TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                            BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}"
+                            Padding="12,8"
+                            CornerRadius="8"
+                            SemanticProperties.Description="{loc:Translate A11y_SchnellAusgabe}"
+                            Command="{Binding QuickCaptureCommand}" />
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+        </Border>
+
+        <!-- Row 5: Content -->
+        <Grid Grid.Row="5">
 
             <!-- Monatsansicht (normal) -->
             <RefreshView Command="{Binding LoadTransaktionenCommand}"
@@ -381,43 +425,16 @@
 
         </Grid>
 
-        <!-- FABs (immer sichtbar, über Row 4) -->
-        <Grid Grid.Row="4" HorizontalOptions="Fill" VerticalOptions="End" Padding="20,0,20,20">
-            <VerticalStackLayout Spacing="8" HorizontalOptions="Start" VerticalOptions="End">
-                <Button Text="{Binding UncategorizedBadgeText}"
-                        FontSize="13"
-                        TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                        BackgroundColor="Transparent"
-                        Padding="8,4"
-                        HorizontalOptions="Start"
-                        IsVisible="{Binding HasUncategorizedTransactions}"
-                        Command="{Binding FilterUncategorizedCommand}" />
-                <HorizontalStackLayout Spacing="12" HorizontalOptions="Start">
-                    <Button Text="{loc:Translate Btn_Import}" FontSize="14" TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                            BackgroundColor="Transparent"
-                            Command="{Binding ImportCsvCommand}" />
-                    <Button Text="{loc:Translate Btn_Umbuchen}"
-                            FontSize="14"
-                            TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                            BackgroundColor="Transparent"
-                            Padding="12,8"
-                            SemanticProperties.Description="{loc:Translate A11y_UmbuchungHinzufuegen}"
-                            Command="{Binding GoToTransferCommand}" />
-                    <Button Text="{loc:Translate Btn_SchnellAusgabe}"
-                            FontSize="14"
-                            TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                            BackgroundColor="Transparent"
-                            Padding="12,8"
-                            SemanticProperties.Description="{loc:Translate A11y_SchnellAusgabe}"
-                            Command="{Binding QuickCaptureCommand}" />
-                </HorizontalStackLayout>
-            </VerticalStackLayout>
+        <!-- FAB (über der Liste, rechts) -->
+        <Grid Grid.Row="5" HorizontalOptions="Fill" VerticalOptions="End" Padding="20,0,20,20"
+              InputTransparent="True">
             <Button Text="{loc:Translate Btn_Hinzufuegen}"
                     FontSize="28" TextColor="White"
                     BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
                     CornerRadius="28"
                     WidthRequest="56" HeightRequest="56"
                     HorizontalOptions="End" VerticalOptions="End"
+                    InputTransparent="False"
                     SemanticProperties.Description="{loc:Translate A11y_TransaktionHinzufuegen}"
                     Shadow="{Shadow Brush='#40000000', Offset='0,4', Radius=8}"
                     Command="{Binding GoToDetailCommand}" />

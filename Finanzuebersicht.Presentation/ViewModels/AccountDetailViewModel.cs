@@ -128,6 +128,28 @@ public partial class AccountDetailViewModel(
     {
         if (query.TryGetValue(NavigationQueryKeys.Account, out var val) && val is Account a)
             Account = a;
+        else
+            ResetForCreate();
+    }
+
+    public void ResetForCreate()
+    {
+        _existingAccount = null;
+        Name = string.Empty;
+        Type = AccountType.Girokonto;
+        IsArchived = false;
+        OpeningBalanceText = string.Empty;
+        UseOpeningBalanceDate = false;
+        OpeningBalanceDate = DateTime.Today;
+        ActualBalanceText = string.Empty;
+        CalculatedBalanceText = string.Empty;
+        SelectedTypeOption = VerfuegbareTypen.FirstOrDefault(t => t.Value == Type);
+        OnPropertyChanged(nameof(PageTitle));
+        OnPropertyChanged(nameof(IsSystemAccount));
+        OnPropertyChanged(nameof(CanArchive));
+        OnPropertyChanged(nameof(SystemAccountHint));
+        OnPropertyChanged(nameof(ArchiveStatusText));
+        OnPropertyChanged(nameof(CanReconcile));
     }
 
     [RelayCommand]

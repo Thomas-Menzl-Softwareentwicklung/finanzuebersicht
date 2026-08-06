@@ -1,5 +1,4 @@
 using System.Collections.ObjectModel;
-using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Finanzuebersicht.Application.UseCases.Accounts;
@@ -19,7 +18,6 @@ public partial class CategoriesViewModel(
     LoadCategoriesUseCase loadCategoriesUseCase,
     LoadAccountsUseCase loadAccountsUseCase,
     GetAccountBalancesUseCase getAccountBalancesUseCase,
-    SaveAccountDetailUseCase saveAccountDetailUseCase,
     ToggleAccountArchiveUseCase toggleAccountArchiveUseCase,
     DeleteAccountUseCase deleteAccountUseCase,
     ILocalizationService localizationService,
@@ -34,7 +32,6 @@ public partial class CategoriesViewModel(
     private readonly LoadCategoriesUseCase _loadCategoriesUseCase = loadCategoriesUseCase;
     private readonly LoadAccountsUseCase _loadAccountsUseCase = loadAccountsUseCase;
     private readonly GetAccountBalancesUseCase _getAccountBalancesUseCase = getAccountBalancesUseCase;
-    private readonly SaveAccountDetailUseCase _saveAccountDetailUseCase = saveAccountDetailUseCase;
     private readonly ToggleAccountArchiveUseCase _toggleAccountArchiveUseCase = toggleAccountArchiveUseCase;
     private readonly DeleteAccountUseCase _deleteAccountUseCase = deleteAccountUseCase;
     private readonly ILocalizationService _loc = localizationService;
@@ -85,17 +82,11 @@ public partial class CategoriesViewModel(
     partial void OnSelectedSectionIndexChanged(int value)
     {
         OnPropertyChanged(nameof(FabAccessibilityDescription));
-        if (value == 0)
-            ShowAddKontoForm = false;
     }
 
     public void RefreshLocalizedStrings()
     {
         OnPropertyChanged(nameof(FabAccessibilityDescription));
-        OnPropertyChanged(nameof(NeuesKontoFormTitle));
-        OnPropertyChanged(nameof(VerfuegbareKontoTypen));
-        SelectedKontoTypeOption = VerfuegbareKontoTypen
-            .FirstOrDefault(option => option.Value == SelectedKontoTypeOption?.Value);
         _ = LoadKategorienCore();
     }
 
@@ -104,32 +95,7 @@ public partial class CategoriesViewModel(
     [ObservableProperty]
     private bool isLoading;
 
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsKontenEmptyStateVisible))]
-    private bool showAddKontoForm;
-
-    [ObservableProperty]
-    private string neuerKontoName = string.Empty;
-
-    [ObservableProperty]
-    private AccountTypeOption? selectedKontoTypeOption;
-
-    [ObservableProperty]
-    private string neuerAnfangssaldoText = string.Empty;
-
-    public bool IsKontenEmptyStateVisible => IsKontenEmpty && !ShowAddKontoForm;
-
-    public string NeuesKontoFormTitle => _loc.GetString(ResourceKeys.Title_KontoHinzufuegen);
-
-    public List<AccountTypeOption> VerfuegbareKontoTypen =>
-    [
-        new(AccountType.Girokonto, _loc.GetString(EnumResourceKeys.GetAccountType(AccountType.Girokonto))),
-        new(AccountType.Tagesgeld, _loc.GetString(EnumResourceKeys.GetAccountType(AccountType.Tagesgeld))),
-        new(AccountType.Kreditkarte, _loc.GetString(EnumResourceKeys.GetAccountType(AccountType.Kreditkarte))),
-        new(AccountType.Bargeld, _loc.GetString(EnumResourceKeys.GetAccountType(AccountType.Bargeld))),
-        new(AccountType.Depot, _loc.GetString(EnumResourceKeys.GetAccountType(AccountType.Depot))),
-        new(AccountType.Sonstiges, _loc.GetString(EnumResourceKeys.GetAccountType(AccountType.Sonstiges)))
-    ];
+    public bool IsKontenEmptyStateVisible => IsKontenEmpty;
 
     [RelayCommand]
     private void ShowKategorien() => SelectedSectionIndex = 0;
@@ -279,75 +245,6 @@ public partial class CategoriesViewModel(
     }
 
     [RelayCommand]
-    private async Task ToggleAddKontoForm()
-    {
-        if (!ShowAddKontoForm)
-        {
-            var check = _licenseService.CheckCreateLimit(
-                Finanzuebersicht.Core.Licensing.LimitedResource.Accounts,
-                Konten.Count);
-            if (!check.Allowed)
-            {
-                await _dialogService.ShowAlertAsync(
-                    _loc.GetString(ResourceKeys.Err_Titel),
-                    _loc.GetString(ResourceKeys.Err_LimitErreicht, check.CurrentCount, check.Limit!.Value),
-                    _loc.GetString(ResourceKeys.Btn_OK));
-                return;
-            }
-        }
-
-        ShowAddKontoForm = !ShowAddKontoForm;
-        if (!ShowAddKontoForm)
-            return;
-
-        NeuerKontoName = string.Empty;
-        NeuerAnfangssaldoText = string.Empty;
-        SelectedKontoTypeOption = VerfuegbareKontoTypen.FirstOrDefault(t => t.Value == AccountType.Girokonto)
-            ?? VerfuegbareKontoTypen.FirstOrDefault();
-    }
-
-    [RelayCommand]
-    private async Task SaveNewKonto()
-    {
-        if (string.IsNullOrWhiteSpace(NeuerKontoName))
-        {
-            await _dialogService.ShowAlertAsync(
-                _loc.GetString(ResourceKeys.Err_Titel),
-                _loc.GetString(ResourceKeys.Err_TitelErforderlich),
-                _loc.GetString(ResourceKeys.Btn_OK));
-            return;
-        }
-
-        if (!TryParseAnfangssaldo(out var openingBalance))
-        {
-            await _dialogService.ShowAlertAsync(
-                _loc.GetString(ResourceKeys.Err_Titel),
-                _loc.GetString(ResourceKeys.Err_UngueltigerBetrag),
-                _loc.GetString(ResourceKeys.Btn_OK));
-            return;
-        }
-
-        try
-        {
-            var type = SelectedKontoTypeOption?.Value ?? AccountType.Girokonto;
-            await _saveAccountDetailUseCase.ExecuteAsync(
-                null, NeuerKontoName.Trim(), type, openingBalance: openingBalance);
-            ShowAddKontoForm = false;
-            _appEvents.NotifyDataChanged();
-            await LoadKategorienCore(force: true);
-            await _feedbackService.ShowSnackbarAsync(_loc.GetString(ResourceKeys.Msg_Gespeichert));
-        }
-        catch (Exception ex)
-        {
-            _logger?.LogError(ex, "CategoriesViewModel: {Context}", nameof(SaveNewKonto));
-            await _dialogService.ShowAlertAsync(
-                _loc.GetString(ResourceKeys.Err_Titel),
-                _loc.GetString(ResourceKeys.Err_SpeichernFehlgeschlagen, ex.Message),
-                _loc.GetString(ResourceKeys.Btn_OK));
-        }
-    }
-
-    [RelayCommand]
     private async Task GoToDetail(object? item = null)
     {
         if (item is AccountListItem kontoItem)
@@ -362,7 +259,19 @@ public partial class CategoriesViewModel(
 
         if (item == null && IsKontenVisible)
         {
-            await ToggleAddKontoForm();
+            var check = _licenseService.CheckCreateLimit(
+                Finanzuebersicht.Core.Licensing.LimitedResource.Accounts,
+                Konten.Count);
+            if (!check.Allowed)
+            {
+                await _dialogService.ShowAlertAsync(
+                    _loc.GetString(ResourceKeys.Err_Titel),
+                    _loc.GetString(ResourceKeys.Err_LimitErreicht, check.CurrentCount, check.Limit!.Value),
+                    _loc.GetString(ResourceKeys.Btn_OK));
+                return;
+            }
+
+            await _navigationService.GoToAsync(Routes.AccountDetail);
             return;
         }
 
@@ -381,20 +290,5 @@ public partial class CategoriesViewModel(
         }
 
         await _navigationService.GoToAsync(Routes.CategoryDetail);
-    }
-
-    private bool TryParseAnfangssaldo(out decimal openingBalance)
-    {
-        if (string.IsNullOrWhiteSpace(NeuerAnfangssaldoText))
-        {
-            openingBalance = 0m;
-            return true;
-        }
-
-        return decimal.TryParse(
-            NeuerAnfangssaldoText,
-            NumberStyles.Number,
-            CultureInfo.CurrentCulture,
-            out openingBalance);
     }
 }
