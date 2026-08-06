@@ -128,6 +128,8 @@ public partial class App : global::Microsoft.Maui.Controls.Application
 		{
 			try
 			{
+				await _licenseService.RefreshAsync();
+				PublishWidgetSharedState();
 				await _recurringGenerationService.GeneratePendingRecurringTransactionsAsync();
 				await ProcessQuickExpenseInboxAsync();
 			}

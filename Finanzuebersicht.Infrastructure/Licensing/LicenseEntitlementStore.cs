@@ -62,6 +62,10 @@ public sealed class LicenseEntitlementStore(
     {
         cancellationToken.ThrowIfCancellationRequested();
         var owned = ownedProductIds as ICollection<string> ?? ownedProductIds.ToList();
+        // Empty StoreKit result must not clear cached Pro (failed/empty restore).
+        if (owned.Count == 0)
+            return Task.CompletedTask;
+
         var hasPro = Contains(owned, LicenseProductIds.Pro);
         var hasSync = Contains(owned, LicenseProductIds.SyncYearly);
         settings.Set(PreferStubKey, "false");

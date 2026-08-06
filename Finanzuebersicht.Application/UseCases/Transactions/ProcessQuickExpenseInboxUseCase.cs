@@ -8,23 +8,34 @@ namespace Finanzuebersicht.Application.UseCases.Transactions;
 public class ProcessQuickExpenseInboxUseCase(
     IQuickExpenseInboxStore inboxStore,
     CaptureQuickExpenseUseCase captureQuickExpenseUseCase,
+    ILicenseService? licenseService = null,
     ILogger<ProcessQuickExpenseInboxUseCase>? logger = null)
 {
     private readonly IQuickExpenseInboxStore _inboxStore = inboxStore;
     private readonly CaptureQuickExpenseUseCase _captureQuickExpenseUseCase = captureQuickExpenseUseCase;
+    private readonly ILicenseService _licenseService =
+        licenseService ?? UnrestrictedLicenseService.Instance;
     private readonly ILogger<ProcessQuickExpenseInboxUseCase>? _logger = logger;
 
     /// <summary>Drains the widget inbox and saves each item. Returns how many were saved.</summary>
     public async Task<int> ExecuteAsync(CancellationToken cancellationToken = default)
     {
+        // Leave the App Group file untouched until Pro is confirmed.
+        if (!_licenseService.HasFeature(AppFeature.QuickExpenseCapture))
+        {
+            _logger?.LogDebug("Quick expense inbox skipped; Pro not available");
+            return 0;
+        }
+
         var pending = await _inboxStore.DrainPendingAsync(cancellationToken).ConfigureAwait(false);
         if (pending.Count == 0)
             return 0;
 
         var saved = 0;
-        foreach (var item in pending)
+        for (var i = 0; i < pending.Count; i++)
         {
             cancellationToken.ThrowIfCancellationRequested();
+            var item = pending[i];
             try
             {
                 var amountText = FlexibleAmountParser.ToInvariantAmountText(item.AmountText)
@@ -46,7 +57,12 @@ public class ProcessQuickExpenseInboxUseCase(
             }
             catch (FeatureGateException ex)
             {
-                _logger?.LogWarning(ex, "Quick expense inbox requires Pro; dropping {Count} remaining items", pending.Count - saved);
+                var remaining = pending.Skip(i).ToList();
+                _logger?.LogWarning(
+                    ex,
+                    "Quick expense inbox requires Pro; restoring {Count} unprocessed items",
+                    remaining.Count);
+                await _inboxStore.WritePendingAsync(remaining, cancellationToken).ConfigureAwait(false);
                 break;
             }
             catch (Exception ex)

@@ -81,6 +81,43 @@ public sealed class AppGroupQuickExpenseInboxStore : IQuickExpenseInboxStore
         }
     }
 
+    public async Task WritePendingAsync(
+        IReadOnlyList<QuickExpenseInboxItem> items,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(items);
+        await _gate.WaitAsync(cancellationToken).ConfigureAwait(false);
+        try
+        {
+            var path = ResolvePendingPath();
+            if (path is null)
+            {
+                _logger?.LogWarning("App Group unavailable; cannot restore quick-expense inbox");
+                return;
+            }
+
+            var dtos = items
+                .Select(i => new InboxDto
+                {
+                    Id = i.Id,
+                    AmountText = i.AmountText,
+                    Title = i.Title,
+                    CreatedAt = i.CreatedAt
+                })
+                .ToList();
+
+            await Task.Run(() =>
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                File.WriteAllText(path, JsonSerializer.Serialize(dtos, JsonOptions));
+            }, cancellationToken).ConfigureAwait(false);
+        }
+        finally
+        {
+            _gate.Release();
+        }
+    }
+
     /// <summary>Publishes Pro entitlement for the widget Intent to check.</summary>
     public static void PublishHasPro(bool hasPro)
     {

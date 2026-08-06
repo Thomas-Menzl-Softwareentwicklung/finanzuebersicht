@@ -12,4 +12,7 @@ public sealed record QuickExpenseInboxItem(
 public interface IQuickExpenseInboxStore
 {
     Task<IReadOnlyList<QuickExpenseInboxItem>> DrainPendingAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>Replaces the pending file (used to put back items that could not be processed).</summary>
+    Task WritePendingAsync(IReadOnlyList<QuickExpenseInboxItem> items, CancellationToken cancellationToken = default);
 }

@@ -114,8 +114,13 @@ public partial class LicenseViewModel : ObservableObject
         {
             await _entitlementStore.ClearStubPreferenceAsync();
             var ok = await _billingService.RestorePurchasesAsync();
-            await PersistOwnedAndRefreshAsync();
-            await _feedbackService.ShowSnackbarAsync(ok
+            // Only overwrite cache when StoreKit reports owned products (empty restore keeps cache).
+            var owned = await _billingService.GetOwnedProductIdsAsync();
+            if (owned.Count > 0)
+                await _entitlementStore.ApplyOwnedProductIdsAsync(owned);
+            await _licenseService.RefreshAsync();
+            RefreshFromService();
+            await _feedbackService.ShowSnackbarAsync(ok || owned.Count > 0
                 ? _loc.GetString(ResourceKeys.Lic_RestoreSuccess)
                 : _loc.GetString(ResourceKeys.Lic_RestoreEmpty));
         }

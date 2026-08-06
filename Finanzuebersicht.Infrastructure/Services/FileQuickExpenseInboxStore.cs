@@ -73,6 +73,35 @@ public sealed class FileQuickExpenseInboxStore : IQuickExpenseInboxStore
         }
     }
 
+    public async Task WritePendingAsync(
+        IReadOnlyList<QuickExpenseInboxItem> items,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(items);
+        await _gate.WaitAsync(cancellationToken).ConfigureAwait(false);
+        try
+        {
+            var dtos = items
+                .Select(i => new InboxDto
+                {
+                    Id = i.Id,
+                    AmountText = i.AmountText,
+                    Title = i.Title,
+                    CreatedAt = i.CreatedAt
+                })
+                .ToList();
+
+            await File.WriteAllTextAsync(
+                _filePath,
+                JsonSerializer.Serialize(dtos, JsonOptions),
+                cancellationToken).ConfigureAwait(false);
+        }
+        finally
+        {
+            _gate.Release();
+        }
+    }
+
     /// <summary>Test/helper: enqueue an item (widget writes this file on iOS).</summary>
     public async Task EnqueueAsync(QuickExpenseInboxItem item, CancellationToken cancellationToken = default)
     {
