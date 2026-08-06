@@ -33,6 +33,20 @@ public partial class App : global::Microsoft.Maui.Controls.Application
 	private readonly INavigationService _navigationService;
 	private readonly ILogger<App>? _logger;
 	private readonly string _savedTheme;
+	private Uri? _pendingAppLink;
+	private bool _startupComplete;
+	private static Uri? _pendingAppLinkBeforeApp;
+
+	/// <summary>
+	/// Entry from UIScene OpenUrl / WillConnect (custom scheme). Queues until Shell is ready.
+	/// </summary>
+	public static void EnqueueAppLink(Uri uri)
+	{
+		if (Current is App app)
+			app.ReceiveAppLink(uri);
+		else
+			_pendingAppLinkBeforeApp = uri;
+	}
 
 	public App(
 		InitializationService initService,
@@ -71,6 +85,33 @@ public partial class App : global::Microsoft.Maui.Controls.Application
 		// Gespeichertes Theme anwenden (MAUI-Ebene)
 		_savedTheme = settings.Get(SettingsKeys.Theme, ThemeValues.System);
 		_themeService.Apply(_savedTheme);
+
+		if (_pendingAppLinkBeforeApp is not null)
+		{
+			_pendingAppLink = _pendingAppLinkBeforeApp;
+			_pendingAppLinkBeforeApp = null;
+		}
+	}
+
+	internal void ReceiveAppLink(Uri uri)
+	{
+		MainThread.BeginInvokeOnMainThread(async () =>
+		{
+			try
+			{
+				if (!_startupComplete || Shell.Current is null)
+				{
+					_pendingAppLink = uri;
+					return;
+				}
+
+				await HandleAppLinkAsync(uri);
+			}
+			catch (Exception ex)
+			{
+				_logger?.LogError(ex, "App-Link (Scene) fehlgeschlagen: {Uri}", uri);
+			}
+		});
 	}
 
 	protected override Window CreateWindow(IActivationState? activationState)
@@ -111,19 +152,29 @@ public partial class App : global::Microsoft.Maui.Controls.Application
 		{
 			_logger?.LogError(ex, "App-Initialisierung fehlgeschlagen");
 		}
+		finally
+		{
+			_startupComplete = true;
+			var pending = _pendingAppLink;
+			_pendingAppLink = null;
+			if (pending is not null)
+			{
+				try
+				{
+					await HandleAppLinkAsync(pending);
+				}
+				catch (Exception ex)
+				{
+					_logger?.LogError(ex, "Pending App-Link fehlgeschlagen: {Uri}", pending);
+				}
+			}
+		}
 	}
 
-	protected override async void OnAppLinkRequestReceived(Uri uri)
+	protected override void OnAppLinkRequestReceived(Uri uri)
 	{
 		base.OnAppLinkRequestReceived(uri);
-		try
-		{
-			await HandleAppLinkAsync(uri);
-		}
-		catch (Exception ex)
-		{
-			_logger?.LogError(ex, "App-Link fehlgeschlagen: {Uri}", uri);
-		}
+		ReceiveAppLink(uri);
 	}
 
 	internal async Task HandleAppLinkAsync(Uri uri)
@@ -155,13 +206,26 @@ public partial class App : global::Microsoft.Maui.Controls.Application
 
 		await MainThread.InvokeOnMainThreadAsync(async () =>
 		{
-			await _navigationService.GoToAsync(
-				Routes.QuickExpenseCapture,
-				new Dictionary<string, object>
-				{
-					[NavigationQueryKeys.Amount] = amount,
-					[NavigationQueryKeys.Title] = title
-				});
+			// Wait briefly if Shell is still wiring up after cold start.
+			for (var i = 0; i < 20 && Shell.Current is null; i++)
+				await Task.Delay(50);
+
+			if (Shell.Current is null)
+			{
+				_pendingAppLink = uri;
+				_logger?.LogWarning("Shell not ready for App-Link; queued {Uri}", uri);
+				return;
+			}
+
+			var parameters = new Dictionary<string, object>
+			{
+				[NavigationQueryKeys.Amount] = amount,
+				[NavigationQueryKeys.Title] = title
+			};
+
+			// Land on Transaktionen (Schnell lives there), then open capture with prefill.
+			await _navigationService.GoToAsync("//TransactionsPage");
+			await _navigationService.GoToAsync(Routes.QuickExpenseCapture, parameters);
 		});
 	}
 
