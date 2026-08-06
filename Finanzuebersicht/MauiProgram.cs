@@ -80,14 +80,14 @@ public static class MauiProgram
 		// keep File* stores from Infrastructure.
 #if IOS && !MACCATALYST
 		builder.Services.AddSingleton<Finanzuebersicht.Core.Services.IQuickExpenseInboxStore, AppGroupQuickExpenseInboxStore>();
-		var appGroupDir = AppGroupQuickExpenseInboxStore.TryGetContainerPath();
-		if (!string.IsNullOrEmpty(appGroupDir))
-		{
-			builder.Services.AddSingleton<Finanzuebersicht.Core.Services.IQuickExpenseWidgetPresetStore>(sp =>
-				new Finanzuebersicht.Infrastructure.Services.FileQuickExpenseWidgetPresetStore(
-					appGroupDir,
-					sp.GetService<Microsoft.Extensions.Logging.ILogger<Finanzuebersicht.Infrastructure.Services.FileQuickExpenseWidgetPresetStore>>()));
-		}
+		// Resolve App Group path lazily on each Load/Save (not at DI build — often null that early).
+		builder.Services.AddSingleton<Finanzuebersicht.Core.Services.IQuickExpenseWidgetPresetStore>(sp =>
+			new Finanzuebersicht.Infrastructure.Services.MirroredQuickExpenseWidgetPresetStore(
+				Finanzuebersicht.Infrastructure.Services.DataPathResolver.ResolveDataDir(
+					sp.GetRequiredService<Finanzuebersicht.Core.Services.ISettingsService>()),
+				AppGroupQuickExpenseInboxStore.TryGetContainerPath,
+				sp.GetService<Microsoft.Extensions.Logging.ILogger<Finanzuebersicht.Infrastructure.Services.MirroredQuickExpenseWidgetPresetStore>>(),
+				sp.GetService<Microsoft.Extensions.Logging.ILogger<Finanzuebersicht.Infrastructure.Services.FileQuickExpenseWidgetPresetStore>>()));
 #endif
 		builder.Services.AddSingleton<IRecurringGenerationService, RecurringGenerationService>();
 		builder.Services.AddSingleton<IReportingService, ReportingService>();

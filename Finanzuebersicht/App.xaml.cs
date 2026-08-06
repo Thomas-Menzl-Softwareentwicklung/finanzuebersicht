@@ -31,6 +31,7 @@ public partial class App : global::Microsoft.Maui.Controls.Application
 	private readonly ProcessQuickExpenseInboxUseCase _processQuickExpenseInboxUseCase;
 	private readonly ILicenseService _licenseService;
 	private readonly INavigationService _navigationService;
+	private readonly IQuickExpenseWidgetPresetStore? _quickExpenseWidgetPresetStore;
 	private readonly ILogger<App>? _logger;
 	private readonly string _savedTheme;
 	private Uri? _pendingAppLink;
@@ -58,6 +59,7 @@ public partial class App : global::Microsoft.Maui.Controls.Application
 		ProcessQuickExpenseInboxUseCase processQuickExpenseInboxUseCase,
 		ILicenseService licenseService,
 		INavigationService navigationService,
+		IQuickExpenseWidgetPresetStore? quickExpenseWidgetPresetStore = null,
 		ILogger<App>? logger = null)
 	{
 		// Sprache vor InitializeComponent setzen, damit XAML-Bindings korrekt aufgelöst werden
@@ -80,6 +82,7 @@ public partial class App : global::Microsoft.Maui.Controls.Application
 		_processQuickExpenseInboxUseCase = processQuickExpenseInboxUseCase;
 		_licenseService = licenseService;
 		_navigationService = navigationService;
+		_quickExpenseWidgetPresetStore = quickExpenseWidgetPresetStore;
 		_logger = logger;
 
 		// Gespeichertes Theme anwenden (MAUI-Ebene)
@@ -144,6 +147,7 @@ public partial class App : global::Microsoft.Maui.Controls.Application
 		{
 			await _initService.InitializeAsync();
 			await _licenseService.RefreshAsync();
+			await EnsureWidgetPresetsMirroredAsync();
 			PublishWidgetSharedState();
 			await _recurringGenerationService.GeneratePendingRecurringTransactionsAsync();
 			await ProcessQuickExpenseInboxAsync();
@@ -235,6 +239,24 @@ public partial class App : global::Microsoft.Maui.Controls.Application
 		var saved = await _processQuickExpenseInboxUseCase.ExecuteAsync();
 		if (saved > 0)
 			NotifyDataChanged();
+	}
+
+	/// <summary>
+	/// Copies locally saved presets into the App Group if the widget file is still missing.
+	/// </summary>
+	private async Task EnsureWidgetPresetsMirroredAsync()
+	{
+		if (_quickExpenseWidgetPresetStore is null)
+			return;
+
+		try
+		{
+			await _quickExpenseWidgetPresetStore.LoadAsync();
+		}
+		catch (Exception ex)
+		{
+			_logger?.LogDebug(ex, "Widget preset mirror/load skipped");
+		}
 	}
 
 	private void PublishWidgetSharedState()
