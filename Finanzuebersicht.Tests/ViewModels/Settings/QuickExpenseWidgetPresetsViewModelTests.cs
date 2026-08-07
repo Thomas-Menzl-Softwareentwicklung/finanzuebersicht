@@ -39,6 +39,31 @@ public class QuickExpenseWidgetPresetsViewModelTests
     }
 
     [Fact]
+    public void IsBusy_NotifiesCanEdit_SoSaveButtonReEnablesAfterLoadOrSave()
+    {
+        var store = Substitute.For<IQuickExpenseWidgetPresetStore>();
+        var sut = CreateSut(store);
+
+        Assert.True(sut.HasProAccess);
+        Assert.True(sut.CanEdit);
+
+        var canEditNotifications = new List<bool>();
+        sut.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(QuickExpenseWidgetPresetsViewModel.CanEdit))
+                canEditNotifications.Add(sut.CanEdit);
+        };
+
+        sut.IsBusy = true;
+        Assert.False(sut.CanEdit);
+        Assert.Equal([false], canEditNotifications);
+
+        sut.IsBusy = false;
+        Assert.True(sut.CanEdit);
+        Assert.Equal([false, true], canEditNotifications);
+    }
+
+    [Fact]
     public async Task SaveAsync_WhenValid_ReloadsWidgetTimeline()
     {
         var store = Substitute.For<IQuickExpenseWidgetPresetStore>();
