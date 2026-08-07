@@ -137,6 +137,20 @@ public partial class CategoryDetailViewModel(
     }
 
     [RelayCommand]
+    private void SelectIcon(string? icon)
+    {
+        if (!string.IsNullOrEmpty(icon))
+            Icon = icon;
+    }
+
+    [RelayCommand]
+    private void SelectColor(string? color)
+    {
+        if (!string.IsNullOrEmpty(color))
+            Color = color;
+    }
+
+    [RelayCommand]
     private async Task Save()
     {
         if (await TrySaveAsync())
