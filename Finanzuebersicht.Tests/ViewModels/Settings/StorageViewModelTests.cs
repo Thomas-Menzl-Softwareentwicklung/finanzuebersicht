@@ -97,6 +97,21 @@ public class StorageViewModelTests
     }
 
     [Fact]
+    public void Constructor_ExposesFolderPickerCapability_MatchingPlatform()
+    {
+        using var settingsScope = new SettingsScope(nameof(StorageViewModelTests));
+
+        var sut = new StorageViewModel(
+            settingsScope.Settings,
+            CreateDialogService(),
+            CreateLocalizationService());
+
+        var expected = !OperatingSystem.IsIOS() || OperatingSystem.IsMacCatalyst();
+        Assert.Equal(expected, sut.CanChangeDataPath);
+        Assert.Equal(!expected, sut.ShowAppContainerStorageHint);
+    }
+
+    [Fact]
     public async Task ChooseDataPath_WhenFolderPickerIsNull_ShowsErrorAlert()
     {
         using var settingsScope = new SettingsScope(nameof(StorageViewModelTests));

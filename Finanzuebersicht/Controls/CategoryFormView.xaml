@@ -18,9 +18,13 @@
 
         <VerticalStackLayout Spacing="4">
             <Label Text="{loc:Translate Lbl_Icon}" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
+            <!-- Fixed height avoids nested CollectionView-in-ScrollView measure/scroll conflicts (#297). -->
             <CollectionView ItemsSource="{Binding VerfuegbareIcons}"
                             SelectionMode="Single"
-                            SelectedItem="{Binding Icon}">
+                            SelectedItem="{Binding Icon}"
+                            HeightRequest="156"
+                            VerticalOptions="Start"
+                            VerticalScrollBarVisibility="Never">
                 <CollectionView.ItemsLayout>
                     <GridItemsLayout Orientation="Vertical" Span="7"
                                      HorizontalItemSpacing="8" VerticalItemSpacing="8" />
@@ -43,7 +47,10 @@
             <Label Text="{loc:Translate Lbl_Farbe}" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
             <CollectionView ItemsSource="{Binding VerfuegbareFarben}"
                             SelectionMode="Single"
-                            SelectedItem="{Binding Color}">
+                            SelectedItem="{Binding Color}"
+                            HeightRequest="100"
+                            VerticalOptions="Start"
+                            VerticalScrollBarVisibility="Never">
                 <CollectionView.ItemsLayout>
                     <GridItemsLayout Orientation="Vertical" Span="5"
                                      HorizontalItemSpacing="10" VerticalItemSpacing="10" />

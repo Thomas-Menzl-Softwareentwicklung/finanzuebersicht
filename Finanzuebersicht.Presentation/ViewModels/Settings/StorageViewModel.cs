@@ -17,6 +17,14 @@ public partial class StorageViewModel : ObservableObject
     [ObservableProperty]
     private bool requiresRestart;
 
+    /// <summary>
+    /// Custom data folder picking is a desktop capability (macOS / Mac Catalyst).
+    /// On iOS the sandbox path is fixed — hide folder picker UI (#299).
+    /// </summary>
+    public bool CanChangeDataPath { get; } = SupportsFolderPicker();
+
+    public bool ShowAppContainerStorageHint => !CanChangeDataPath;
+
     public StorageViewModel(
         ISettingsService settings,
         IDialogService dialogService,
@@ -34,6 +42,9 @@ public partial class StorageViewModel : ObservableObject
     [RelayCommand]
     private async Task ChooseDataPath()
     {
+        if (!CanChangeDataPath)
+            return;
+
         if (_folderPicker == null)
         {
             await _dialogService.ShowAlertAsync(
@@ -83,6 +94,9 @@ public partial class StorageViewModel : ObservableObject
     [RelayCommand]
     private async Task ResetDataPath()
     {
+        if (!CanChangeDataPath)
+            return;
+
         // Empty pending = reset to default on next start; keep active DataPath unchanged this session.
         _settings.Set(SettingsKeys.DataPathPending, string.Empty);
         RefreshDisplayedPath();
@@ -113,4 +127,10 @@ public partial class StorageViewModel : ObservableObject
     }
 
     private static string GetDefaultDataDir() => AppPaths.GetDefaultDataDir();
+
+    /// <summary>
+    /// iOS (phone/tablet) is sandboxed; Mac Catalyst reports as iOS but keeps folder picking.
+    /// </summary>
+    private static bool SupportsFolderPicker() =>
+        !OperatingSystem.IsIOS() || OperatingSystem.IsMacCatalyst();
 }

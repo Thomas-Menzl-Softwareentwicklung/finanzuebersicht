@@ -15,7 +15,7 @@ public class InitializationServiceTests
     {
         _categoryRepository.GetCategoriesAsync().Returns(new List<Category>());
         _accountRepository.GetAccountsAsync().Returns(new List<Account>());
-        _transactionRepository.GetTransactionsAsync(Arg.Any<DateTime>(), Arg.Any<DateTime>()).Returns(new List<Transaction>());
+        _transactionRepository.AssignMissingAccountIdsAsync(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(0);
 
         var service = new InitializationService(_categoryRepository, _accountRepository, _transactionRepository);
         await service.InitializeAsync();
@@ -39,7 +39,7 @@ public class InitializationServiceTests
         {
             new() { Id = "acc-1", Name = "Girokonto", Type = AccountType.Girokonto, SystemKey = SystemAccountKeys.Default }
         });
-        _transactionRepository.GetTransactionsAsync(Arg.Any<DateTime>(), Arg.Any<DateTime>()).Returns(new List<Transaction>());
+        _transactionRepository.AssignMissingAccountIdsAsync(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(0);
 
         var service = new InitializationService(_categoryRepository, _accountRepository, _transactionRepository);
         await service.InitializeAsync();
@@ -56,10 +56,7 @@ public class InitializationServiceTests
             new() { Id = "1", Name = "Existiert", Icon = "📦", Color = "#007AFF", Typ = TransactionType.Ausgabe }
         });
         _accountRepository.GetAccountsAsync().Returns(new List<Account>());
-        _transactionRepository.GetTransactionsAsync(Arg.Any<DateTime>(), Arg.Any<DateTime>()).Returns(new List<Transaction>
-        {
-            new() { Id = "t1", Titel = "Test", Betrag = 12.34m, KategorieId = "1", AccountId = null }
-        });
+        _transactionRepository.AssignMissingAccountIdsAsync(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(1);
 
         string? defaultAccountId = null;
         _accountRepository.When(x => x.SaveAccountAsync(Arg.Any<Account>()))
@@ -69,7 +66,6 @@ public class InitializationServiceTests
         await service.InitializeAsync();
 
         Assert.NotNull(defaultAccountId);
-        await _transactionRepository.Received(1).ReplaceAllTransactionsAsync(NonNullArg.Is<IEnumerable<Transaction>>(txs =>
-            txs.Single().AccountId == defaultAccountId));
+        await _transactionRepository.Received(1).AssignMissingAccountIdsAsync(defaultAccountId!, Arg.Any<CancellationToken>());
     }
 }
