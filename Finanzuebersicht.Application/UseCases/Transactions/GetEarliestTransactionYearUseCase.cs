@@ -7,8 +7,6 @@ public class GetEarliestTransactionYearUseCase(ITransactionRepository transactio
     public async Task<int?> ExecuteAsync(CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
-
-        var transactions = await _transactionRepository.GetTransactionsAsync(DateTime.MinValue, DateTime.MaxValue);
-        return transactions.Count > 0 ? transactions.Min(t => t.Datum.Year) : null;
+        return await _transactionRepository.GetEarliestTransactionYearAsync(cancellationToken);
     }
 }

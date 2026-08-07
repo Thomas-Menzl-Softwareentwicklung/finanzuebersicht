@@ -17,11 +17,8 @@ public class DeleteCategoryUseCaseTests
             new() { Id = "cat-delete", Name = "Zu löschen" },
             new() { Id = "cat-default", Name = "Sonstiges", SystemKey = Finanzuebersicht.Constants.SystemCategoryKeys.Sonstiges }
         });
-        transactionRepository.GetTransactionsAsync(DateTime.MinValue, DateTime.MaxValue).Returns(new List<Transaction>
-        {
-            new() { Id = "tx-1", KategorieId = "cat-delete" },
-            new() { Id = "tx-2", KategorieId = "cat-other" }
-        });
+        transactionRepository.RemapCategoryIdAsync("cat-delete", "cat-default", Arg.Any<CancellationToken>())
+            .Returns(1);
         recurringRepository.GetRecurringTransactionsAsync().Returns(new List<RecurringTransaction>
         {
             new() { Id = "r-1", KategorieId = "cat-delete" },
@@ -32,8 +29,7 @@ public class DeleteCategoryUseCaseTests
 
         await sut.ExecuteAsync("cat-delete");
 
-        await transactionRepository.Received(1).SaveTransactionAsync(
-            NonNullArg.Is<Transaction>(t => t.Id == "tx-1" && t.KategorieId == "cat-default"));
+        await transactionRepository.Received(1).RemapCategoryIdAsync("cat-delete", "cat-default", Arg.Any<CancellationToken>());
         await recurringRepository.Received(1).SaveRecurringTransactionAsync(
             NonNullArg.Is<RecurringTransaction>(r => r.Id == "r-1" && r.KategorieId == "cat-default"));
         await categoryRepository.Received(1).DeleteCategoryAsync("cat-delete");
@@ -49,10 +45,8 @@ public class DeleteCategoryUseCaseTests
         {
             new() { Id = "cat-delete", Name = "Zu löschen" }
         });
-        transactionRepository.GetTransactionsAsync(DateTime.MinValue, DateTime.MaxValue).Returns(new List<Transaction>
-        {
-            new() { Id = "tx-1", KategorieId = "cat-delete" }
-        });
+        transactionRepository.RemapCategoryIdAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(1);
         recurringRepository.GetRecurringTransactionsAsync().Returns(new List<RecurringTransaction>());
 
         var sut = new DeleteCategoryUseCase(categoryRepository, transactionRepository, recurringRepository);
@@ -61,7 +55,10 @@ public class DeleteCategoryUseCaseTests
 
         await categoryRepository.Received(1).SaveCategoryAsync(
             NonNullArg.Is<Category>(c => c.SystemKey == Finanzuebersicht.Constants.SystemCategoryKeys.Sonstiges));
-        await transactionRepository.Received(1).SaveTransactionAsync(Arg.Any<Transaction>());
+        await transactionRepository.Received(1).RemapCategoryIdAsync(
+            "cat-delete",
+            Arg.Any<string>(),
+            Arg.Any<CancellationToken>());
         await categoryRepository.Received(1).DeleteCategoryAsync("cat-delete");
     }
 }

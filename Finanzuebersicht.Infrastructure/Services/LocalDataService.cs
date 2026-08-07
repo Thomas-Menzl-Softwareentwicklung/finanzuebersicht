@@ -101,6 +101,27 @@ public class LocalDataService :
     public async Task<List<Transaction>> GetTransactionsAsync(DateTime vonDatum, DateTime bisDatum)
         => await _transactionStore.GetTransactionsAsync(vonDatum, bisDatum);
 
+    public Task<List<Transaction>> GetAllTransactionsAsync(CancellationToken cancellationToken = default)
+        => _transactionStore.GetAllTransactionsAsync(cancellationToken);
+
+    public Task<int?> GetEarliestTransactionYearAsync(CancellationToken cancellationToken = default)
+        => _transactionStore.GetEarliestTransactionYearAsync(cancellationToken);
+
+    public Task<bool> HasTransactionsForCategoryAsync(string categoryId, CancellationToken cancellationToken = default)
+        => _transactionStore.HasTransactionsForCategoryAsync(categoryId, cancellationToken);
+
+    public Task<bool> HasTransactionsForAccountAsync(string accountId, CancellationToken cancellationToken = default)
+        => _transactionStore.HasTransactionsForAccountAsync(accountId, cancellationToken);
+
+    public Task<int> RemapCategoryIdAsync(string fromCategoryId, string toCategoryId, CancellationToken cancellationToken = default)
+        => _transactionStore.RemapCategoryIdAsync(fromCategoryId, toCategoryId, cancellationToken);
+
+    public Task<int> RemapAccountIdAsync(string fromAccountId, string toAccountId, CancellationToken cancellationToken = default)
+        => _transactionStore.RemapAccountIdAsync(fromAccountId, toAccountId, cancellationToken);
+
+    public Task<int> AssignMissingAccountIdsAsync(string defaultAccountId, CancellationToken cancellationToken = default)
+        => _transactionStore.AssignMissingAccountIdsAsync(defaultAccountId, cancellationToken);
+
     public async Task SaveTransactionAsync(Transaction transaction)
         => await _transactionStore.SaveTransactionAsync(transaction);
 

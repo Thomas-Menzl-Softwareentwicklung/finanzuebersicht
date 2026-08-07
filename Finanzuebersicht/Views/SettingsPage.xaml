@@ -148,7 +148,7 @@
                            FontSize="12"
                            TextColor="{StaticResource TextTertiary}" />
 
-                    <HorizontalStackLayout Spacing="8">
+                    <HorizontalStackLayout Spacing="8" IsVisible="{Binding Storage.CanChangeDataPath}">
                         <Button Text="{loc:Translate Btn_OrdnerWaehlen}"
                                 Command="{Binding Storage.ChooseDataPathCommand}"
                                 FontSize="14"
@@ -162,6 +162,12 @@
                     </HorizontalStackLayout>
 
                     <Label Text="{loc:Translate Hint_iCloudTipp}"
+                           IsVisible="{Binding Storage.CanChangeDataPath}"
+                           FontSize="12"
+                           TextColor="{StaticResource TextTertiary}" />
+
+                    <Label Text="{loc:Translate Hint_SpeicherortAppContainer}"
+                           IsVisible="{Binding Storage.ShowAppContainerStorageHint}"
                            FontSize="12"
                            TextColor="{StaticResource TextTertiary}" />
                 </VerticalStackLayout>

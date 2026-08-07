@@ -230,8 +230,8 @@ public class CategoriesViewModelTests
         accountRepository.GetAccountsAsync().Returns(new List<Account> { account });
 
         var transactionRepository = Substitute.For<ITransactionRepository>();
-        transactionRepository.GetTransactionsAsync(DateTime.MinValue, DateTime.MaxValue)
-            .Returns(new List<Transaction>());
+        transactionRepository.RemapAccountIdAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(0);
 
         var templateRepository = Substitute.For<ITransactionTemplateRepository>();
         templateRepository.GetTransactionTemplatesAsync().Returns(new List<TransactionTemplate>());

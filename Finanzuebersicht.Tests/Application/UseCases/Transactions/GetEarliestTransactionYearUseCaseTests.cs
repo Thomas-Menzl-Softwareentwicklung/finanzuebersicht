@@ -1,5 +1,4 @@
 using Finanzuebersicht.Application.UseCases.Transactions;
-using Finanzuebersicht.Models;
 
 namespace Finanzuebersicht.Tests.Application.UseCases.Transactions;
 
@@ -9,25 +8,21 @@ public class GetEarliestTransactionYearUseCaseTests
     public async Task ExecuteAsync_ReturnsMinimumYear_WhenTransactionsExist()
     {
         var repository = Substitute.For<ITransactionRepository>();
-        repository.GetTransactionsAsync(DateTime.MinValue, DateTime.MaxValue).Returns(
-        [
-            new Transaction { Datum = new DateTime(2024, 6, 1) },
-            new Transaction { Datum = new DateTime(2022, 1, 15) },
-            new Transaction { Datum = new DateTime(2026, 3, 1) }
-        ]);
+        repository.GetEarliestTransactionYearAsync(Arg.Any<CancellationToken>()).Returns(2022);
 
         var sut = new GetEarliestTransactionYearUseCase(repository);
 
         var result = await sut.ExecuteAsync();
 
         Assert.Equal(2022, result);
+        await repository.Received(1).GetEarliestTransactionYearAsync(Arg.Any<CancellationToken>());
     }
 
     [Fact]
     public async Task ExecuteAsync_ReturnsNull_WhenNoTransactionsExist()
     {
         var repository = Substitute.For<ITransactionRepository>();
-        repository.GetTransactionsAsync(DateTime.MinValue, DateTime.MaxValue).Returns([]);
+        repository.GetEarliestTransactionYearAsync(Arg.Any<CancellationToken>()).Returns((int?)null);
 
         var sut = new GetEarliestTransactionYearUseCase(repository);
 

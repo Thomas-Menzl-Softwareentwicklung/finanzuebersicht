@@ -35,12 +35,7 @@ public class DeleteCategoryUseCase(
             await _categoryRepository.SaveCategoryAsync(fallbackCategory);
         }
 
-        var transactions = await _transactionRepository.GetTransactionsAsync(DateTime.MinValue, DateTime.MaxValue);
-        foreach (var transaction in transactions.Where(t => t.KategorieId == categoryId))
-        {
-            transaction.KategorieId = fallbackCategory.Id;
-            await _transactionRepository.SaveTransactionAsync(transaction);
-        }
+        await _transactionRepository.RemapCategoryIdAsync(categoryId, fallbackCategory.Id, cancellationToken);
 
         var recurringTransactions = await _recurringTransactionRepository.GetRecurringTransactionsAsync();
         foreach (var recurring in recurringTransactions.Where(r => r.KategorieId == categoryId))

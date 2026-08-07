@@ -5,6 +5,39 @@ namespace Finanzuebersicht.Core.Services;
 public interface ITransactionRepository
 {
     Task<List<Transaction>> GetTransactionsAsync(DateTime vonDatum, DateTime bisDatum);
+
+    /// <summary>
+    /// Loads all transactions without a date-range filter. Prefer targeted queries
+    /// (<see cref="GetEarliestTransactionYearAsync"/>, <see cref="HasTransactionsForCategoryAsync"/>, …)
+    /// when a full scan is not required. Intended for backup/export paths.
+    /// </summary>
+    Task<List<Transaction>> GetAllTransactionsAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>Returns the earliest transaction year, or null when there are no transactions.</summary>
+    Task<int?> GetEarliestTransactionYearAsync(CancellationToken cancellationToken = default);
+
+    Task<bool> HasTransactionsForCategoryAsync(string categoryId, CancellationToken cancellationToken = default);
+
+    Task<bool> HasTransactionsForAccountAsync(string accountId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Remaps <paramref name="fromCategoryId"/> → <paramref name="toCategoryId"/> in one load/save pass.
+    /// Returns the number of updated rows.
+    /// </summary>
+    Task<int> RemapCategoryIdAsync(string fromCategoryId, string toCategoryId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Remaps <paramref name="fromAccountId"/> → <paramref name="toAccountId"/> in one load/save pass.
+    /// Returns the number of updated rows.
+    /// </summary>
+    Task<int> RemapAccountIdAsync(string fromAccountId, string toAccountId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Assigns <paramref name="defaultAccountId"/> to transactions with a missing AccountId.
+    /// Returns the number of updated rows.
+    /// </summary>
+    Task<int> AssignMissingAccountIdsAsync(string defaultAccountId, CancellationToken cancellationToken = default);
+
     Task SaveTransactionAsync(Transaction transaction);
     Task SaveTransactionsAsync(IEnumerable<Transaction> transactions);
     Task DeleteTransactionAsync(string id);

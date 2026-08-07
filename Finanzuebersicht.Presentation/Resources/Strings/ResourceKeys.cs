@@ -91,6 +91,7 @@ public static class ResourceKeys
     public const string Hint_Titelbeispiel = nameof(Hint_Titelbeispiel);
     public const string Hint_KategorieWaehlen = nameof(Hint_KategorieWaehlen);
     public const string Hint_iCloudTipp = nameof(Hint_iCloudTipp);
+    public const string Hint_SpeicherortAppContainer = nameof(Hint_SpeicherortAppContainer);
 
     // Empty States
     public const string Empty_KeineKategorien = nameof(Empty_KeineKategorien);

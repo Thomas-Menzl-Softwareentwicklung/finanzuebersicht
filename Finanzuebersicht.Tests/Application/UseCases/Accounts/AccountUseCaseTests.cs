@@ -33,11 +33,8 @@ public class AccountUseCaseTests
         accountRepository.DeleteAccountAsync(Arg.Any<string>()).Returns(Task.CompletedTask);
 
         var transactionRepository = Substitute.For<ITransactionRepository>();
-        transactionRepository.GetTransactionsAsync(Arg.Any<DateTime>(), Arg.Any<DateTime>())
-            .Returns(new List<Transaction>
-            {
-                new() { Id = "t1", AccountId = "acc-old" }
-            });
+        transactionRepository.RemapAccountIdAsync("acc-old", "acc-default", Arg.Any<CancellationToken>())
+            .Returns(1);
         transactionRepository.SaveTransactionAsync(Arg.Any<Transaction>()).Returns(Task.CompletedTask);
 
         var templateRepository = Substitute.For<ITransactionTemplateRepository>();
@@ -51,7 +48,7 @@ public class AccountUseCaseTests
 
         await sut.ExecuteAsync("acc-old");
 
-        await transactionRepository.Received(1).SaveTransactionAsync(NonNullArg.Is<Transaction>(t => t.AccountId == "acc-default"));
+        await transactionRepository.Received(1).RemapAccountIdAsync("acc-old", "acc-default", Arg.Any<CancellationToken>());
         await templateRepository.Received(1).SaveTransactionTemplateAsync(NonNullArg.Is<TransactionTemplate>(t => t.AccountId == "acc-default"));
         await accountRepository.Received(1).DeleteAccountAsync("acc-old");
     }

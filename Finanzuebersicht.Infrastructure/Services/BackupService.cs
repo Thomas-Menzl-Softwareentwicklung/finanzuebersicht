@@ -80,7 +80,7 @@ namespace Finanzuebersicht.Infrastructure.Services
                 // Lade alle Daten
                 var categories = await _categoryRepository.GetCategoriesAsync();
                 var accounts = await _accountRepository.GetAccountsAsync();
-                var transactions = await _transactionRepository.GetTransactionsAsync(DateTime.MinValue, DateTime.MaxValue);
+                var transactions = await _transactionRepository.GetAllTransactionsAsync();
                 var recurring = await _recurringRepository.GetRecurringTransactionsAsync();
                 var budgets = await _budgetRepository.GetBudgetsAsync();
                 var sparziele = await _sparZielRepository.GetSparZieleAsync();
@@ -298,7 +298,7 @@ namespace Finanzuebersicht.Infrastructure.Services
             // ab bevor irgendetwas überschrieben wurde — das ist das gewünschte Verhalten.
             var snapshotCategories = await _categoryRepository.GetCategoriesAsync();
             var snapshotAccounts = await _accountRepository.GetAccountsAsync();
-            var snapshotTransactions = await _transactionRepository.GetTransactionsAsync(DateTime.MinValue, DateTime.MaxValue);
+            var snapshotTransactions = await _transactionRepository.GetAllTransactionsAsync();
             var snapshotRecurring = await _recurringRepository.GetRecurringTransactionsAsync();
             var snapshotBudgets = await _budgetRepository.GetBudgetsAsync();
             var snapshotSparziele = await _sparZielRepository.GetSparZieleAsync();
@@ -389,7 +389,7 @@ namespace Finanzuebersicht.Infrastructure.Services
         {
             try
             {
-                var transactions = await _transactionRepository.GetTransactionsAsync(DateTime.MinValue, DateTime.MaxValue);
+                var transactions = await _transactionRepository.GetAllTransactionsAsync();
                 var categories = await _categoryRepository.GetCategoriesAsync();
                 var categoryMap = categories.ToDictionary(c => c.Id, c => c.Name);
 

@@ -37,6 +37,162 @@ public class TransactionStore : JsonDataStoreBase, ITransactionRepository
         }
     }
 
+    public async Task<List<Transaction>> GetAllTransactionsAsync(CancellationToken cancellationToken = default)
+    {
+        await StoreLock.WaitAsync(cancellationToken);
+        try
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var items = await LoadAsync<Transaction>(TransactionsFile);
+            return [..items.OrderByDescending(t => t.Datum)];
+        }
+        finally
+        {
+            StoreLock.Release();
+        }
+    }
+
+    public async Task<int?> GetEarliestTransactionYearAsync(CancellationToken cancellationToken = default)
+    {
+        await StoreLock.WaitAsync(cancellationToken);
+        try
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var items = await LoadAsync<Transaction>(TransactionsFile);
+            return items.Count > 0 ? items.Min(t => t.Datum.Year) : null;
+        }
+        finally
+        {
+            StoreLock.Release();
+        }
+    }
+
+    public async Task<bool> HasTransactionsForCategoryAsync(string categoryId, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrEmpty(categoryId))
+            return false;
+
+        await StoreLock.WaitAsync(cancellationToken);
+        try
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var items = await LoadAsync<Transaction>(TransactionsFile);
+            return items.Any(t => t.KategorieId == categoryId);
+        }
+        finally
+        {
+            StoreLock.Release();
+        }
+    }
+
+    public async Task<bool> HasTransactionsForAccountAsync(string accountId, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrEmpty(accountId))
+            return false;
+
+        await StoreLock.WaitAsync(cancellationToken);
+        try
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var items = await LoadAsync<Transaction>(TransactionsFile);
+            return items.Any(t => t.AccountId == accountId);
+        }
+        finally
+        {
+            StoreLock.Release();
+        }
+    }
+
+    public async Task<int> RemapCategoryIdAsync(string fromCategoryId, string toCategoryId, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrEmpty(fromCategoryId) || string.IsNullOrEmpty(toCategoryId) || fromCategoryId == toCategoryId)
+            return 0;
+
+        await StoreLock.WaitAsync(cancellationToken);
+        try
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var items = await LoadAsync<Transaction>(TransactionsFile);
+            var changed = 0;
+            foreach (var transaction in items)
+            {
+                if (transaction.KategorieId != fromCategoryId)
+                    continue;
+                transaction.KategorieId = toCategoryId;
+                changed++;
+            }
+
+            if (changed > 0)
+                await SaveAsync(TransactionsFile, items);
+
+            return changed;
+        }
+        finally
+        {
+            StoreLock.Release();
+        }
+    }
+
+    public async Task<int> RemapAccountIdAsync(string fromAccountId, string toAccountId, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrEmpty(fromAccountId) || string.IsNullOrEmpty(toAccountId) || fromAccountId == toAccountId)
+            return 0;
+
+        await StoreLock.WaitAsync(cancellationToken);
+        try
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var items = await LoadAsync<Transaction>(TransactionsFile);
+            var changed = 0;
+            foreach (var transaction in items)
+            {
+                if (transaction.AccountId != fromAccountId)
+                    continue;
+                transaction.AccountId = toAccountId;
+                changed++;
+            }
+
+            if (changed > 0)
+                await SaveAsync(TransactionsFile, items);
+
+            return changed;
+        }
+        finally
+        {
+            StoreLock.Release();
+        }
+    }
+
+    public async Task<int> AssignMissingAccountIdsAsync(string defaultAccountId, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrEmpty(defaultAccountId))
+            return 0;
+
+        await StoreLock.WaitAsync(cancellationToken);
+        try
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var items = await LoadAsync<Transaction>(TransactionsFile);
+            var changed = 0;
+            foreach (var transaction in items)
+            {
+                if (!string.IsNullOrWhiteSpace(transaction.AccountId))
+                    continue;
+                transaction.AccountId = defaultAccountId;
+                changed++;
+            }
+
+            if (changed > 0)
+                await SaveAsync(TransactionsFile, items);
+
+            return changed;
+        }
+        finally
+        {
+            StoreLock.Release();
+        }
+    }
+
     public async Task SaveTransactionAsync(Transaction transaction)
     {
         await StoreLock.WaitAsync();

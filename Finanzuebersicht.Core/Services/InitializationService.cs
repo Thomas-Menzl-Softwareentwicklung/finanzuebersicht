@@ -52,21 +52,6 @@ public class InitializationService(
             await _accountRepository.SaveAccountAsync(defaultAccount);
         }
 
-        var transactions = await _transactionRepository.GetTransactionsAsync(DateTime.MinValue, DateTime.MaxValue);
-        var migrated = false;
-
-        foreach (var transaction in transactions)
-        {
-            if (string.IsNullOrWhiteSpace(transaction.AccountId))
-            {
-                transaction.AccountId = defaultAccount.Id;
-                migrated = true;
-            }
-        }
-
-        if (migrated)
-        {
-            await _transactionRepository.ReplaceAllTransactionsAsync(transactions);
-        }
+        await _transactionRepository.AssignMissingAccountIdsAsync(defaultAccount.Id);
     }
 }

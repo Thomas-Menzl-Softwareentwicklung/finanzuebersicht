@@ -100,6 +100,7 @@
   <data name="Hint_KategorieWaehlen" xml:space="preserve"><value>Select Category</value></data>
   <data name="Hint_KontoWaehlen" xml:space="preserve"><value>Select Account</value></data>
   <data name="Hint_iCloudTipp" xml:space="preserve"><value>💡 Tip: Choose a folder in iCloud Drive to automatically back up your data.</value></data>
+  <data name="Hint_SpeicherortAppContainer" xml:space="preserve"><value>On iPhone and iPad, data stays in the app sandbox. The path above is fixed and cannot be changed.</value></data>
 
   <!-- Empty States -->
   <data name="Empty_KeineKategorien" xml:space="preserve"><value>No categories available</value></data>
