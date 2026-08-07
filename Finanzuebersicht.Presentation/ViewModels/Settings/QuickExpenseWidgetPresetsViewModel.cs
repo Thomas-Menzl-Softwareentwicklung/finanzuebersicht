@@ -42,6 +42,7 @@ public partial class QuickExpenseWidgetPresetsViewModel : ObservableObject
     public ObservableCollection<QuickExpenseWidgetPresetSlotItem> Slots { get; } = [];
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanEdit))]
     private bool isBusy;
 
     [ObservableProperty]
