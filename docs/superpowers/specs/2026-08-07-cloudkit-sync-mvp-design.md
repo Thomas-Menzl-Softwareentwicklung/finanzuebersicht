@@ -14,7 +14,7 @@ Optional iCloud/CloudKit sync between iPhone, iPad, and Mac (same Apple ID), off
 | Topic | Choice |
 |-------|--------|
 | Scope of this design | Architecture + MVP slice (not full product in one go) |
-| Synced data | Accounts, categories, transactions, recurring transactions (+ exceptions), savings goals (`SparZiel`) |
+| Synced data | Accounts, categories, transactions, recurring (+ embedded exceptions), savings goals (`SparZiel`) |
 | Conflict rule | Last-write-wins per entity (`UpdatedAt`) |
 | Deletes | Tombstones with timestamp |
 | Sync cadence | Auto: app start / foreground + debounced after local writes + CloudKit push |
@@ -75,9 +75,9 @@ digraph cloudkit_mvp {
 
 ### Synced entities (MVP)
 
-`Account`, `Category`, `Transaction`, `RecurringTransaction`, `RecurringException`, `SparZiel`.
+`Account`, `Category`, `Transaction`, `RecurringTransaction` (with embedded `RecurringException` list), `SparZiel`.
 
-`RecurringException` is included so skip/shift state for Daueraufträge stays consistent across devices. `TransactionTemplate` (Schnellvorlagen), `CategoryBudget`, and settings remain out of MVP.
+Locally, exceptions live inside `RecurringTransaction.Exceptions` (`recurring.json`). The MVP syncs them as part of the parent `RecurringTransaction` CloudKit record (bump parent `UpdatedAt` on exception changes) — no separate `RecurringException` record type. `TransactionTemplate`, `CategoryBudget`, and settings remain out of MVP.
 
 ### Per-entity fields (local + cloud)
 
@@ -99,7 +99,7 @@ digraph cloudkit_mvp {
 
 - **Database:** private (per Apple ID).
 - **Zone:** custom zone `finanzuebersicht-sync`.
-- **Record types:** `Account`, `Category`, `Transaction`, `RecurringTransaction`, `RecurringException`, `SparZiel`, `Tombstone`.
+- **Record types:** `Account`, `Category`, `Transaction`, `RecurringTransaction`, `SparZiel`, `Tombstone`.
 - **Schema meta:** `SyncMeta` record with `schemaVersion`. If cloud schema is newer than the app understands → pause sync and prompt to update the app.
 
 ### C# building blocks
