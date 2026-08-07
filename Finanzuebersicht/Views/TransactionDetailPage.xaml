@@ -33,7 +33,7 @@
 
             <!-- Betrag -->
             <VerticalStackLayout Spacing="4">
-                <Label Text="{loc:Translate Lbl_Betrag}" FontSize="13" TextColor="Gray" />
+                <Label Text="{loc:Translate Lbl_Betrag}" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
                 <Entry Text="{Binding BetragText}" Placeholder="{loc:Translate Hint_Betrag}"
                        Keyboard="Numeric" FontSize="28" FontAttributes="Bold"
                        HorizontalTextAlignment="Center"
@@ -42,7 +42,7 @@
 
             <!-- Titel -->
             <VerticalStackLayout Spacing="4">
-                <Label Text="{loc:Translate Lbl_Titel}" FontSize="13" TextColor="Gray" />
+                <Label Text="{loc:Translate Lbl_Titel}" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
                 <Entry Text="{Binding Titel}" Placeholder="{loc:Translate Hint_Beschreibung}"
                        FontSize="16"
                        SemanticProperties.Hint="{loc:Translate A11y_HintTitel}" />
@@ -50,20 +50,20 @@
 
             <!-- Verwendungszweck -->
             <VerticalStackLayout Spacing="4">
-                <Label Text="{loc:Translate Lbl_Verwendungszweck}" FontSize="13" TextColor="Gray" />
+                <Label Text="{loc:Translate Lbl_Verwendungszweck}" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
                 <Editor Text="{Binding Verwendungszweck}" HeightRequest="100" AutoSize="TextChanges" />
             </VerticalStackLayout>
 
             <!-- Datum -->
             <VerticalStackLayout Spacing="4">
-                <Label Text="{loc:Translate Lbl_Datum}" FontSize="13" TextColor="Gray" />
+                <Label Text="{loc:Translate Lbl_Datum}" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
                 <DatePicker Date="{Binding Datum}" FontSize="16"
                             Format="dd. MMMM yyyy" />
             </VerticalStackLayout>
 
             <!-- Kategorie -->
             <VerticalStackLayout Spacing="4">
-                <Label Text="{loc:Translate Lbl_Kategorie}" FontSize="13" TextColor="Gray" />
+                <Label Text="{loc:Translate Lbl_Kategorie}" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
                 <controls:SelectionField ItemsSource="{Binding Kategorien}"
                                          SelectedItem="{Binding SelectedKategorie, Mode=TwoWay}"
                                          DisplayMemberPath="Name"
@@ -73,7 +73,7 @@
 
             <!-- Konto -->
             <VerticalStackLayout Spacing="4">
-                <Label Text="{loc:Translate Lbl_Konto}" FontSize="13" TextColor="Gray" />
+                <Label Text="{loc:Translate Lbl_Konto}" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
                 <controls:SelectionField ItemsSource="{Binding Accounts}"
                                          SelectedItem="{Binding SelectedAccount, Mode=TwoWay}"
                                          DisplayMemberPath="Name"
@@ -83,7 +83,7 @@
 
             <!-- Sparziel -->
             <VerticalStackLayout Spacing="4" IsVisible="{Binding HasSparZiele}">
-                <Label Text="{loc:Translate Lbl_SparZiel}" FontSize="13" TextColor="Gray" />
+                <Label Text="{loc:Translate Lbl_SparZiel}" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
                 <controls:SelectionField ItemsSource="{Binding SparZiele}"
                                          SelectedItem="{Binding SelectedSparZiel, Mode=TwoWay}"
                                          DisplayMemberPath="Titel"

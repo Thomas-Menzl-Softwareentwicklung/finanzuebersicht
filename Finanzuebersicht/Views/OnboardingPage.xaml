@@ -26,13 +26,13 @@
 
             <Label Text="{Binding StepDescription}"
                    FontSize="16"
-                   TextColor="Gray"
+                   TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}"
                    HorizontalTextAlignment="Center"
                    LineBreakMode="WordWrap" />
 
             <Label Text="{Binding StepIndicator}"
                    FontSize="13"
-                   TextColor="Gray"
+                   TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}"
                    HorizontalTextAlignment="Center" />
 
             <VerticalStackLayout Spacing="12" IsVisible="{Binding ShowWelcomeSetup}">
@@ -115,7 +115,7 @@
                     Command="{Binding BackCommand}"
                     IsVisible="{Binding IsFirstStep, Converter={StaticResource InvertBool}}"
                     BackgroundColor="Transparent"
-                    TextColor="Gray" />
+                    TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
 
         </VerticalStackLayout>
     </ScrollView>

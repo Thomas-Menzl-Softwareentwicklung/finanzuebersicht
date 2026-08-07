@@ -68,7 +68,7 @@
                                                        TextColor="{AppThemeBinding Light={StaticResource Einnahme}, Dark={StaticResource EinnahmeDark}}" HorizontalTextAlignment="End" />
                                                 <Label Text="{Binding SparZiel.ZielBetrag, Converter={StaticResource Currency}}"
                                                        FontSize="12" HorizontalTextAlignment="End"
-                                                       TextColor="{AppThemeBinding Light=#8E8E93, Dark=#636366}" />
+                                                       TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
                                             </VerticalStackLayout>
                                         </Grid>
 
@@ -78,11 +78,11 @@
                                                 <Label Grid.Column="0"
                                                        Text="{loc:Translate Lbl_Fortschritt}"
                                                        FontSize="12"
-                                                       TextColor="{AppThemeBinding Light=#8E8E93, Dark=#636366}" />
+                                                       TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
                                                 <Label Grid.Column="1"
                                                        Text="{Binding FortschrittProzent, StringFormat='{0:F0}%'}"
                                                        FontSize="12"
-                                                       TextColor="{AppThemeBinding Light=#8E8E93, Dark=#636366}" />
+                                                       TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
                                             </Grid>
                                             <ProgressBar Progress="{Binding FortschrittDecimal}"
                                                          ProgressColor="{AppThemeBinding Light={StaticResource Einnahme}, Dark={StaticResource EinnahmeDark}}"

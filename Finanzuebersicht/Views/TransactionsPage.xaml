@@ -58,7 +58,7 @@
                 <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
                     <Label Text="{Binding Titel}" FontSize="16" FontAttributes="Bold"
                            LineBreakMode="TailTruncation" />
-                    <Label Text="{Binding Verwendungszweck}" FontSize="12" TextColor="Gray"
+                    <Label Text="{Binding Verwendungszweck}" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}"
                            LineBreakMode="TailTruncation" />
                     <Label FontSize="11" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}"
                            LineBreakMode="TailTruncation">
@@ -139,7 +139,7 @@
                 <!-- Kategorie-Filter -->
                 <Grid ColumnDefinitions="80, *" ColumnSpacing="8">
                     <Label Grid.Column="0" Text="{loc:Translate Lbl_AlleKategorien}"
-                           FontSize="13" TextColor="Gray" VerticalTextAlignment="Center" />
+                           FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" VerticalTextAlignment="Center" />
                     <controls:SelectionField Grid.Column="1"
                                              ItemsSource="{Binding AvailableKategorien}"
                                              SelectedItem="{Binding SelectedKategorieFilterItem, Mode=TwoWay}"
@@ -150,7 +150,7 @@
                 <!-- Konto-Filter -->
                 <Grid ColumnDefinitions="80, *" ColumnSpacing="8">
                     <Label Grid.Column="0" Text="{loc:Translate Lbl_Konto}"
-                           FontSize="13" TextColor="Gray" VerticalTextAlignment="Center" />
+                           FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" VerticalTextAlignment="Center" />
                     <controls:SelectionField Grid.Column="1"
                                              ItemsSource="{Binding AvailableKonten}"
                                              SelectedItem="{Binding SelectedKontoFilterItem, Mode=TwoWay}"
@@ -161,7 +161,7 @@
                 <!-- Typ-Filter -->
                 <Grid ColumnDefinitions="80, *" ColumnSpacing="8">
                     <Label Grid.Column="0" Text="{loc:Translate Lbl_AlleTypen}"
-                           FontSize="13" TextColor="Gray" VerticalTextAlignment="Center" />
+                           FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" VerticalTextAlignment="Center" />
                     <controls:SelectionField Grid.Column="1"
                                              ItemsSource="{Binding TypFilterItems}"
                                              SelectedItem="{Binding SelectedTypFilterItem, Mode=TwoWay}"
@@ -172,7 +172,7 @@
                 <!-- Datum-Filter aktivieren -->
                 <Grid ColumnDefinitions="*, Auto" ColumnSpacing="8">
                     <Label Grid.Column="0" Text="{loc:Translate Lbl_VonDatum}"
-                           FontSize="13" TextColor="Gray" VerticalTextAlignment="Center" />
+                           FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" VerticalTextAlignment="Center" />
                     <Switch Grid.Column="1" IsToggled="{Binding IsDateFilterEnabled}" />
                 </Grid>
 
@@ -180,12 +180,12 @@
                 <Grid ColumnDefinitions="80, *, 40, *" ColumnSpacing="8"
                       IsVisible="{Binding IsDateFilterEnabled}">
                     <Label Grid.Column="0" Text="{loc:Translate Lbl_VonDatum}"
-                           FontSize="13" TextColor="Gray" VerticalTextAlignment="Center" />
+                           FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" VerticalTextAlignment="Center" />
                     <DatePicker Grid.Column="1"
                                 Date="{Binding VonDatumPicker}"
                                 Format="dd.MM.yyyy" FontSize="14" />
                     <Label Grid.Column="2" Text="{loc:Translate Lbl_BisDatum}"
-                           FontSize="13" TextColor="Gray" VerticalTextAlignment="Center" />
+                           FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" VerticalTextAlignment="Center" />
                     <DatePicker Grid.Column="3"
                                 Date="{Binding BisDatumPicker}"
                                 Format="dd.MM.yyyy" FontSize="14" />
@@ -328,7 +328,7 @@
                     <CollectionView.GroupHeaderTemplate>
                         <DataTemplate x:DataType="models:TransactionGroup">
                             <Label Text="{Binding DatumFormatiert}"
-                                   FontSize="14" TextColor="Gray"
+                                   FontSize="14" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}"
                                    Padding="16,12,16,4" />
                         </DataTemplate>
                     </CollectionView.GroupHeaderTemplate>
@@ -378,7 +378,7 @@
                                     <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
                                         <Label Text="{Binding Titel}" FontSize="16" FontAttributes="Bold"
                                                LineBreakMode="TailTruncation" />
-                                        <Label Text="{Binding Verwendungszweck}" FontSize="12" TextColor="Gray"
+                                        <Label Text="{Binding Verwendungszweck}" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}"
                                                LineBreakMode="TailTruncation" />
                                     </VerticalStackLayout>
                                     <Label Grid.Column="2"
@@ -398,13 +398,13 @@
 
                 <!-- Ergebnis-Anzahl -->
                 <Label Padding="16,8,16,4"
-                       FontSize="13" TextColor="Gray"
+                       FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}"
                        IsVisible="{Binding HasSearchResults}"
                        Text="{Binding SearchCountText}" />
 
                 <!-- Keine Ergebnisse -->
                 <Label Text="{loc:Translate Empty_KeineSuchergebnisse}"
-                       FontSize="16" HorizontalTextAlignment="Center" TextColor="Gray"
+                       FontSize="16" HorizontalTextAlignment="Center" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}"
                        Margin="0,40,0,0"
                        IsVisible="{Binding HasSearchResults, Converter={StaticResource InvertBool}}" />
 
@@ -416,7 +416,7 @@
                     <CollectionView.GroupHeaderTemplate>
                         <DataTemplate x:DataType="models:TransactionGroup">
                             <Label Text="{Binding DatumFormatiert}"
-                                   FontSize="14" TextColor="Gray" FontAttributes="Bold"
+                                   FontSize="14" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" FontAttributes="Bold"
                                    Padding="16,12,16,4" />
                         </DataTemplate>
                     </CollectionView.GroupHeaderTemplate>

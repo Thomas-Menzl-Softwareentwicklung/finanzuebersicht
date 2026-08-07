@@ -13,13 +13,13 @@
         <VerticalStackLayout Spacing="20">
 
             <VerticalStackLayout Spacing="4">
-                <Label Text="{loc:Translate Lbl_Name}" FontSize="13" TextColor="Gray" />
+                <Label Text="{loc:Translate Lbl_Name}" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
                 <Entry Text="{Binding Name}" Placeholder="{loc:Translate Lbl_Konto}"
                        FontSize="16" />
             </VerticalStackLayout>
 
             <VerticalStackLayout Spacing="4">
-                <Label Text="{loc:Translate Lbl_Typ}" FontSize="13" TextColor="Gray" />
+                <Label Text="{loc:Translate Lbl_Typ}" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
                 <controls:SelectionField ItemsSource="{Binding VerfuegbareTypen}"
                                          SelectedItem="{Binding SelectedTypeOption, Mode=TwoWay}"
                                          DisplayMemberPath="DisplayName"
@@ -27,21 +27,21 @@
             </VerticalStackLayout>
 
             <VerticalStackLayout Spacing="4">
-                <Label Text="{loc:Translate Lbl_Anfangssaldo}" FontSize="13" TextColor="Gray" />
+                <Label Text="{loc:Translate Lbl_Anfangssaldo}" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
                 <Entry Text="{Binding OpeningBalanceText}"
                        Placeholder="{loc:Translate Hint_Betrag}"
                        Keyboard="Numeric"
                        FontSize="16" />
                 <Label Text="{loc:Translate Hint_Anfangssaldo}"
                        FontSize="12"
-                       TextColor="Gray" />
+                       TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
             </VerticalStackLayout>
 
             <VerticalStackLayout Spacing="4">
                 <Grid ColumnDefinitions="*, Auto" ColumnSpacing="8">
                     <Label Text="{loc:Translate Lbl_AnfangssaldoStichtag}"
                            FontSize="13"
-                           TextColor="Gray"
+                           TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}"
                            VerticalTextAlignment="Center" />
                     <Switch Grid.Column="1"
                             IsToggled="{Binding UseOpeningBalanceDate}" />
@@ -62,25 +62,25 @@
 
             <Label Text="{Binding ArchiveStatusText}"
                    FontSize="12"
-                   TextColor="Gray" />
+                   TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
 
             <Label Text="{Binding SystemAccountHint}"
                    FontSize="12"
-                   TextColor="Gray"
+                   TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}"
                    IsVisible="{Binding IsSystemAccount}" />
 
             <VerticalStackLayout Spacing="8"
                                  IsVisible="{Binding CanReconcile}">
-                <Label Text="{loc:Translate Lbl_BerechneterSaldo}" FontSize="13" TextColor="Gray" />
+                <Label Text="{loc:Translate Lbl_BerechneterSaldo}" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
                 <Label Text="{Binding CalculatedBalanceText}" FontSize="16" FontAttributes="Bold" />
-                <Label Text="{loc:Translate Lbl_IstSaldo}" FontSize="13" TextColor="Gray" />
+                <Label Text="{loc:Translate Lbl_IstSaldo}" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
                 <Entry Text="{Binding ActualBalanceText}"
                        Placeholder="{loc:Translate Hint_Betrag}"
                        Keyboard="Numeric"
                        FontSize="16" />
                 <Label Text="{loc:Translate Hint_SaldoAbgleich}"
                        FontSize="12"
-                       TextColor="Gray" />
+                       TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
                 <Button Text="{loc:Translate Btn_Abgleichen}"
                         Command="{Binding ReconcileCommand}"
                         BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
