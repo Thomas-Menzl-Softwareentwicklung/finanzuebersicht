@@ -165,8 +165,8 @@ Offene Issues in Abarbeitungsreihenfolge (#274 vor Import/Backup, damit neue Use
 | 3 | [#292](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/292) | Backup in Application-Layer (Use Cases) | ✅ |
 | 4 | [#293](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/293) | TransactionsViewModel aufteilen (nach #269) | ✅ |
 | 5 | [#267](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/267) | DashboardViewModel aufteilen | ✅ |
-| 6 | [#294](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/294) | CategoriesViewModel aufteilen | in Arbeit (`feature/294-categories-vm-split`) |
-| 7 | [#271](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/271) | App-Static-Events → `IAppEvents` | offen |
+| 6 | [#294](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/294) | CategoriesViewModel aufteilen | ✅ |
+| 7 | [#271](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/271) | App-Static-Events → `IAppEvents` | in Arbeit (`feature/271-app-events`) |
 | 8 | [#295](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/295) | Shell-Tab-Routes / ID-Navigation härten | offen |
 | 9 | [#296](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/296) | Listen auf CollectionView virtualisieren | offen |
 | 10 | [#300](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/300) | Sync-Persistenz-Prep (`ExternalId`/`Source`) | offen |

@@ -13,24 +13,13 @@ namespace Finanzuebersicht;
 
 public partial class App : global::Microsoft.Maui.Controls.Application
 {
-	// App-wide event to notify UI of data changes (e.g., after import)
-	public static event Action? DataChanged;
-
-	public static event Action? LanguageChanged;
-
-	public static event Action? CurrencyChanged;
-
-	public static void NotifyDataChanged()
-	{
-		DataChanged?.Invoke();
-	}
-
 	private readonly IRecurringGenerationService _recurringGenerationService;
 	private readonly InitializationService _initService;
 	private readonly ThemeService _themeService;
 	private readonly ProcessQuickExpenseInboxUseCase _processQuickExpenseInboxUseCase;
 	private readonly ILicenseService _licenseService;
 	private readonly INavigationService _navigationService;
+	private readonly IAppEvents _appEvents;
 	private readonly IQuickExpenseWidgetPresetStore? _quickExpenseWidgetPresetStore;
 	private readonly ILogger<App>? _logger;
 	private readonly string _savedTheme;
@@ -59,19 +48,22 @@ public partial class App : global::Microsoft.Maui.Controls.Application
 		ProcessQuickExpenseInboxUseCase processQuickExpenseInboxUseCase,
 		ILicenseService licenseService,
 		INavigationService navigationService,
+		IAppEvents appEvents,
 		IQuickExpenseWidgetPresetStore? quickExpenseWidgetPresetStore = null,
 		ILogger<App>? logger = null)
 	{
+		_appEvents = appEvents;
+
 		// Sprache vor InitializeComponent setzen, damit XAML-Bindings korrekt aufgelöst werden
 		localizationService.Initialize();
 		localizationService.LanguageChanged += () =>
 		{
-			LanguageChanged?.Invoke();
+			_appEvents.NotifyLanguageChanged();
 			PublishWidgetSharedState();
 		};
 		displayCurrency.Changed += () =>
 		{
-			CurrencyChanged?.Invoke();
+			_appEvents.NotifyCurrencyChanged();
 			CurrencyRefreshRegistry.RefreshAll();
 		};
 
@@ -240,7 +232,7 @@ public partial class App : global::Microsoft.Maui.Controls.Application
 		PublishWidgetSharedState();
 		var saved = await _processQuickExpenseInboxUseCase.ExecuteAsync();
 		if (saved > 0)
-			NotifyDataChanged();
+			_appEvents.NotifyDataChanged();
 	}
 
 	/// <summary>

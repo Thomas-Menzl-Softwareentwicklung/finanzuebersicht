@@ -121,7 +121,7 @@ Layered clean architecture with MVVM (`CommunityToolkit.Mvvm` source generators)
 - Sparziele with transaction linking and completion forecast
 - Backup/restore (ZIP/JSON), configurable data path
 - CloudKit sync is a backlog idea (#243); no active CloudKit implementation in tree
-- Active architecture milestone: **v1.20** (`docs/ROADMAP.md`) — before Milestone 22 features and v2.0 (encryption / multi-currency). Next: CategoriesViewModel split (#294), then App-Events (#271).
+- Active architecture milestone: **v1.20** (`docs/ROADMAP.md`) — before Milestone 22 features and v2.0 (encryption / multi-currency). Next: App-Static-Events → `IAppEvents` (#271), then Shell-Routes (#295).
 
 ## Data Persistence
 
