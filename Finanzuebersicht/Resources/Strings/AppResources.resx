@@ -404,6 +404,10 @@ Please restart the app.</value></data>
   <data name="A11y_NaechstesJahr" xml:space="preserve"><value>Next year</value></data>
   <data name="A11y_TransaktionHinzufuegen" xml:space="preserve"><value>Add new transaction</value></data>
   <data name="A11y_UmbuchungHinzufuegen" xml:space="preserve"><value>Add new transfer</value></data>
+  <data name="A11y_CsvImport" xml:space="preserve"><value>Start CSV import</value></data>
+  <data name="Fab_Umbuchen" xml:space="preserve"><value>⇄</value></data>
+  <data name="Fab_Import" xml:space="preserve"><value>⬇</value></data>
+  <data name="Fab_Schnell" xml:space="preserve"><value>⚡</value></data>
   <data name="A11y_KategorieHinzufuegen" xml:space="preserve"><value>Add new category</value></data>
   <data name="A11y_KontoHinzufuegen" xml:space="preserve"><value>Add new account</value></data>
   <data name="A11y_SparZielHinzufuegen" xml:space="preserve"><value>Add new savings goal</value></data>

@@ -289,6 +289,8 @@ public class DashboardViewModelTests
             localizationService,
             navigationService,
             settingsService,
+            dialogService,
+            Substitute.For<Finanzuebersicht.Core.Licensing.ILicenseService>(),
             clock);
     }
 }

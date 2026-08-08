@@ -452,6 +452,10 @@ public static class ResourceKeys
     public const string A11y_NaechstesJahr = nameof(A11y_NaechstesJahr);
     public const string A11y_TransaktionHinzufuegen = nameof(A11y_TransaktionHinzufuegen);
     public const string A11y_UmbuchungHinzufuegen = nameof(A11y_UmbuchungHinzufuegen);
+    public const string A11y_CsvImport = nameof(A11y_CsvImport);
+    public const string Fab_Umbuchen = nameof(Fab_Umbuchen);
+    public const string Fab_Import = nameof(Fab_Import);
+    public const string Fab_Schnell = nameof(Fab_Schnell);
     public const string A11y_KategorieHinzufuegen = nameof(A11y_KategorieHinzufuegen);
     public const string A11y_KontoHinzufuegen = nameof(A11y_KontoHinzufuegen);
     public const string A11y_SparZielHinzufuegen = nameof(A11y_SparZielHinzufuegen);
