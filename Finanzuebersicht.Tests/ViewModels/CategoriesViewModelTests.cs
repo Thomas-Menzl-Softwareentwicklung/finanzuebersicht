@@ -325,9 +325,16 @@ public class CategoriesViewModelTests
 
         navigationService = Substitute.For<INavigationService>();
 
-        return new CategoriesViewModel(
-            new DeleteCategoryUseCase(categoryRepository, transactionRepository, recurringTransactionRepository),
+        var categoriesCoordinator = new CategoriesListCoordinator(
             new LoadCategoriesUseCase(categoryRepository),
+            new DeleteCategoryUseCase(categoryRepository, transactionRepository, recurringTransactionRepository),
+            localizationService,
+            navigationService,
+            dialogService,
+            Substitute.For<IFeedbackService>(),
+            Substitute.For<IAppEvents>());
+
+        var accountsCoordinator = new AccountsListCoordinator(
             new LoadAccountsUseCase(accountRepository),
             new GetAccountBalancesUseCase(accountRepository, transactionRepository),
             new ToggleAccountArchiveUseCase(accountRepository),
@@ -338,6 +345,12 @@ public class CategoriesViewModelTests
             Substitute.For<IFeedbackService>(),
             Substitute.For<IAppEvents>(),
             licenseService: licenseService);
+
+        return new CategoriesViewModel(
+            categoriesCoordinator,
+            accountsCoordinator,
+            localizationService,
+            dialogService);
     }
 
     private static string FindWorkspaceFile(string relativePath)

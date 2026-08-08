@@ -24,6 +24,8 @@ public static class PresentationServiceCollectionExtensions
         services.AddTransient<DashboardDueRecurringCoordinator>();
         services.AddTransient<DashboardExpandSettingsHelper>();
         services.AddTransient<DashboardViewModel>();
+        services.AddTransient<CategoriesListCoordinator>();
+        services.AddTransient<AccountsListCoordinator>();
         services.AddTransient<CategoriesViewModel>();
         services.AddTransient<CategoryDetailViewModel>();
         services.AddTransient<AccountDetailViewModel>();
