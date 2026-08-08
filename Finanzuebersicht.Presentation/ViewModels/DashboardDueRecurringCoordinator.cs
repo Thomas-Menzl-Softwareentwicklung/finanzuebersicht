@@ -119,7 +119,7 @@ public sealed class DashboardDueRecurringCoordinator(
     }
 
     public Task NavigateToListAsync()
-        => _navigationService.GoToAsync("//RecurringTransactionsPage");
+        => _navigationService.GoToAsync(Routes.RecurringTransactionsTab);
 
     private string? BuildHint(DueRecurringItem item)
     {

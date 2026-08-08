@@ -16,11 +16,13 @@ public static class ApplicationServiceCollectionExtensions
     {
         services.AddTransient<DeleteCategoryUseCase>();
         services.AddTransient<LoadCategoriesUseCase>();
+        services.AddTransient<GetCategoryByIdUseCase>();
         services.AddTransient<SaveCategoryDetailUseCase>();
         services.AddTransient<SaveCategoryBudgetUseCase>();
         services.AddTransient<LoadCategoryBudgetUseCase>();
         services.AddTransient<LoadAccountsUseCase>();
         services.AddTransient<LoadActiveAccountsUseCase>();
+        services.AddTransient<GetAccountByIdUseCase>();
         services.AddTransient<SaveAccountDetailUseCase>();
         services.AddTransient<ToggleAccountArchiveUseCase>();
         services.AddTransient<DeleteAccountUseCase>();
@@ -45,6 +47,7 @@ public static class ApplicationServiceCollectionExtensions
         services.AddTransient<SkipDueRecurringInstanceUseCase>();
 
         services.AddTransient<LoadTransactionDetailDataUseCase>();
+        services.AddTransient<GetTransactionByIdUseCase>();
         services.AddTransient<DeleteTransactionUseCase>();
         services.AddTransient<RestoreTransactionUseCase>();
         services.AddTransient<HasAnyTransactionsUseCase>();

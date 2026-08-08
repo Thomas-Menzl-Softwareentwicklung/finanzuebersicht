@@ -538,7 +538,7 @@ public partial class TransactionsViewModel(
             var parameter = new Dictionary<string, object>();
             if (transaktion != null)
             {
-                parameter[NavigationQueryKeys.Transaction] = transaktion;
+                parameter[NavigationQueryKeys.TransactionId] = transaktion.Id;
             }
 
             if (_navigationService == null)

@@ -118,7 +118,7 @@ public partial class OnboardingViewModel(
 
         await _navigationService.GoToAsync(Routes.AccountDetail, new Dictionary<string, object>
         {
-            [NavigationQueryKeys.Account] = account
+            [NavigationQueryKeys.AccountId] = account.Id
         });
     }
 
@@ -126,7 +126,7 @@ public partial class OnboardingViewModel(
     private async Task OpenNewTransaction()
     {
         CompleteNavigationPending();
-        await _navigationService.GoToAsync("//TransactionsPage");
+        await _navigationService.GoToAsync(Routes.TransactionsTab);
         await _navigationService.GoToAsync(Routes.TransactionDetail);
     }
 

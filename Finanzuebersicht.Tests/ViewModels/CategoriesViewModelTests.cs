@@ -218,8 +218,8 @@ public class CategoriesViewModelTests
             Routes.CategoryDetail,
             Arg.Is<IDictionary<string, object>?>(parameters =>
                 parameters != null &&
-                parameters.ContainsKey(NavigationQueryKeys.Category) &&
-                object.ReferenceEquals(parameters[NavigationQueryKeys.Category], category)));
+                parameters.ContainsKey(NavigationQueryKeys.CategoryId) &&
+                Equals(parameters[NavigationQueryKeys.CategoryId], category.Id)));
     }
 
     [Fact]

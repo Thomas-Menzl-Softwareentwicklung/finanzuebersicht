@@ -138,7 +138,7 @@ public sealed class AccountsListCoordinator(
     public Task NavigateToDetailAsync(AccountListItem konto)
         => _navigationService.GoToAsync(Routes.AccountDetail, new Dictionary<string, object>
         {
-            [NavigationQueryKeys.Account] = konto.Account
+            [NavigationQueryKeys.AccountId] = konto.Account.Id
         });
 
     public async Task NavigateToCreateAsync(int currentAccountCount)
