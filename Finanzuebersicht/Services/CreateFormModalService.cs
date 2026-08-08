@@ -4,7 +4,8 @@ namespace Finanzuebersicht.Services;
 
 /// <summary>
 /// Modal create-form host modeled on <see cref="QuickExpenseCaptureSheetService"/> —
-/// plain ContentPage, no Toolkit Popup, no NavigationPage wrapper.
+/// plain ContentPage as iOS/Mac page sheet (content-height detent when possible),
+/// no Toolkit Popup, no NavigationPage wrapper.
 /// </summary>
 public sealed class CreateFormModalService : ICreateFormModalService
 {
@@ -99,36 +100,54 @@ public sealed class CreateFormModalService : ICreateFormModalService
         };
         Grid.SetColumn(saveButton, 1);
 
+        var grabber = new BoxView
+        {
+            WidthRequest = 36,
+            HeightRequest = 5,
+            CornerRadius = 2.5,
+            HorizontalOptions = LayoutOptions.Center,
+            Color = Colors.Gray.WithAlpha(0.45f),
+            Margin = new Thickness(0, 4, 0, 4)
+        };
+
+        var sheetBody = new VerticalStackLayout
+        {
+            Padding = new Thickness(20, 8, 20, 20),
+            Spacing = 16,
+            Children =
+            {
+                grabber,
+                new Label
+                {
+                    Text = title,
+                    FontSize = 20,
+                    FontAttributes = FontAttributes.Bold
+                },
+                formHost,
+                buttonRow
+            }
+        };
+
         var page = new ContentPage
         {
             Title = title,
             Content = new ScrollView
             {
-                Content = new VerticalStackLayout
-                {
-                    Padding = new Thickness(20),
-                    Spacing = 16,
-                    Children =
-                    {
-                        new Label
-                        {
-                            Text = title,
-                            FontSize = 20,
-                            FontAttributes = FontAttributes.Bold
-                        },
-                        formHost,
-                        buttonRow
-                    }
-                }
+                Content = sheetBody
             }
         };
+
+#if IOS || MACCATALYST
+        CreateFormSheetPresentation.PreferPageSheet(page);
+        CreateFormSheetPresentation.AttachFittingDetents(page, sheetBody);
+#endif
 
         page.Disappearing += (_, _) => Complete(false);
 
         try
         {
             await MainThread.InvokeOnMainThreadAsync(async () =>
-                await navigation.PushModalAsync(page));
+                await navigation.PushModalAsync(page, animated: true));
         }
         catch (Exception ex)
         {
