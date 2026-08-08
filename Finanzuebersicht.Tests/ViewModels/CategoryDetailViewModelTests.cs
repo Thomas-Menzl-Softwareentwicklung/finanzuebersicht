@@ -41,6 +41,9 @@ public class CategoryDetailViewModelTests
         Assert.DoesNotContain(sut.ColorChoices, item => item.Value != "#FF3B30" && item.IsSelected);
     }
 
+    [Fact]
+    public async Task TrySaveAsync_WhenBudgetSaveFails_SecondAttemptReusesSavedCategory()
+    {
         var categoryRepository = Substitute.For<ICategoryRepository>();
         var savedCategories = new List<Category>();
         categoryRepository.SaveCategoryAsync(Arg.Any<Category>())
