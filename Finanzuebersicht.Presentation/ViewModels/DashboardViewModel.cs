@@ -2,10 +2,10 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Finanzuebersicht.Application.UseCases.Accounts;
 using Finanzuebersicht.Application.UseCases.Dashboard;
 using Finanzuebersicht.Application.UseCases.RecurringTransactions;
 using Finanzuebersicht.Application.UseCases.Transactions;
+using Finanzuebersicht.Core.Constants;
 using Finanzuebersicht.Core.Services;
 using Finanzuebersicht.Models;
 using Finanzuebersicht.Navigation;
@@ -20,16 +20,13 @@ public partial class DashboardViewModel : MonthNavigationViewModel, ILocalizable
     private readonly LoadDashboardMonthUseCase _loadDashboardMonthUseCase;
     private readonly LoadDashboardYearUseCase _loadDashboardYearUseCase;
     private readonly LoadForecastUseCase _loadForecastUseCase;
-    private readonly GetDueRecurringWithHintsUseCase _getDueRecurringUseCase;
-    private readonly BookDueRecurringInstanceUseCase _bookDueRecurringUseCase;
-    private readonly SkipDueRecurringInstanceUseCase _skipDueRecurringUseCase;
-    private readonly LoadCashflowOutlookUseCase _loadCashflowOutlookUseCase;
-    private readonly ISettingsService _settingsService;
-    private readonly IDialogService _dialogService;
+    private readonly DashboardDueRecurringCoordinator _dueRecurringCoordinator;
+    private readonly DashboardCashflowPreviewCoordinator _cashflowCoordinator;
+    private readonly DashboardAccountsCoordinator _accountsCoordinator;
+    private readonly DashboardExpandSettingsHelper _expandSettings;
     private readonly GetDefaultBudgetTotalUseCase _getDefaultBudgetTotalUseCase;
-    private readonly LoadActiveAccountsUseCase _loadActiveAccountsUseCase;
     private readonly GetEarliestTransactionYearUseCase _getEarliestTransactionYearUseCase;
-    private readonly GetAccountBalancesUseCase _getAccountBalancesUseCase;
+    private readonly ISettingsService _settingsService;
     private readonly ILocalizationService _loc;
     private readonly INavigationService _navigationService;
     private readonly IClock _clock;
@@ -375,17 +372,14 @@ public partial class DashboardViewModel : MonthNavigationViewModel, ILocalizable
         LoadDashboardMonthUseCase loadDashboardMonthUseCase,
         LoadDashboardYearUseCase loadDashboardYearUseCase,
         LoadForecastUseCase loadForecastUseCase,
-        LoadCashflowOutlookUseCase loadCashflowOutlookUseCase,
-        GetDueRecurringWithHintsUseCase getDueRecurringUseCase,
-        BookDueRecurringInstanceUseCase bookDueRecurringUseCase,
-        SkipDueRecurringInstanceUseCase skipDueRecurringUseCase,
+        DashboardCashflowPreviewCoordinator cashflowCoordinator,
+        DashboardDueRecurringCoordinator dueRecurringCoordinator,
+        DashboardAccountsCoordinator accountsCoordinator,
+        DashboardExpandSettingsHelper expandSettings,
         GetDefaultBudgetTotalUseCase getDefaultBudgetTotalUseCase,
-        LoadActiveAccountsUseCase loadActiveAccountsUseCase,
         GetEarliestTransactionYearUseCase getEarliestTransactionYearUseCase,
         ILocalizationService localizationService,
         INavigationService navigationService,
-        IDialogService dialogService,
-        GetAccountBalancesUseCase getAccountBalancesUseCase,
         ISettingsService settingsService,
         IClock? clock = null,
         ILogger<DashboardViewModel>? logger = null) : base(clock)
@@ -396,38 +390,27 @@ public partial class DashboardViewModel : MonthNavigationViewModel, ILocalizable
         _loadDashboardMonthUseCase = loadDashboardMonthUseCase;
         _loadDashboardYearUseCase = loadDashboardYearUseCase;
         _loadForecastUseCase = loadForecastUseCase;
-        _loadCashflowOutlookUseCase = loadCashflowOutlookUseCase;
-        _getDueRecurringUseCase = getDueRecurringUseCase;
-        _bookDueRecurringUseCase = bookDueRecurringUseCase;
-        _skipDueRecurringUseCase = skipDueRecurringUseCase;
+        _cashflowCoordinator = cashflowCoordinator;
+        _dueRecurringCoordinator = dueRecurringCoordinator;
+        _accountsCoordinator = accountsCoordinator;
+        _expandSettings = expandSettings;
         _getDefaultBudgetTotalUseCase = getDefaultBudgetTotalUseCase;
-        _loadActiveAccountsUseCase = loadActiveAccountsUseCase;
         _getEarliestTransactionYearUseCase = getEarliestTransactionYearUseCase;
         _loc = localizationService;
         _navigationService = navigationService;
-        _dialogService = dialogService;
-        _getAccountBalancesUseCase = getAccountBalancesUseCase;
         _settingsService = settingsService;
         _logger = logger;
-        IsBudgetSectionExpanded = ReadExpandedSetting(settingsService, SettingsKeys.DashboardBudgetExpanded);
-        IsYearMonthTrendExpanded = ReadExpandedSetting(settingsService, SettingsKeys.DashboardYearMonthTrendExpanded);
-        IsYearCategoriesExpanded = ReadExpandedSetting(settingsService, SettingsKeys.DashboardYearCategoriesExpanded, defaultExpanded: true);
-        IsMonthExpensesSectionExpanded = ReadExpandedSetting(settingsService, SettingsKeys.DashboardMonthExpensesExpanded, defaultExpanded: true);
-        IsMonthIncomeSectionExpanded = ReadExpandedSetting(settingsService, SettingsKeys.DashboardMonthIncomeExpanded);
-        IsDueDetailsExpanded = ReadExpandedSetting(settingsService, SettingsKeys.DashboardDueDetailsExpanded);
-        IsAccountsSectionExpanded = ReadExpandedSetting(settingsService, SettingsKeys.DashboardAccountsExpanded);
-        IsCashflowSectionExpanded = ReadExpandedSetting(settingsService, SettingsKeys.DashboardCashflowExpanded);
-        IsFilterSectionExpanded = ReadExpandedSetting(settingsService, SettingsKeys.DashboardFilterExpanded);
-        ShowInsightRows = ReadExpandedSetting(settingsService, SettingsKeys.DashboardInsightRowsEnabled);
+        IsBudgetSectionExpanded = _expandSettings.Read(DashboardExpandSettingsHelper.Keys.Budget);
+        IsYearMonthTrendExpanded = _expandSettings.Read(DashboardExpandSettingsHelper.Keys.YearMonthTrend);
+        IsYearCategoriesExpanded = _expandSettings.Read(DashboardExpandSettingsHelper.Keys.YearCategories, defaultValue: true);
+        IsMonthExpensesSectionExpanded = _expandSettings.Read(DashboardExpandSettingsHelper.Keys.MonthExpenses, defaultValue: true);
+        IsMonthIncomeSectionExpanded = _expandSettings.Read(DashboardExpandSettingsHelper.Keys.MonthIncome);
+        IsDueDetailsExpanded = _expandSettings.Read(DashboardExpandSettingsHelper.Keys.DueDetails);
+        IsAccountsSectionExpanded = _expandSettings.Read(DashboardExpandSettingsHelper.Keys.Accounts);
+        IsCashflowSectionExpanded = _expandSettings.Read(DashboardExpandSettingsHelper.Keys.Cashflow);
+        IsFilterSectionExpanded = _expandSettings.Read(DashboardExpandSettingsHelper.Keys.Filter);
+        ShowInsightRows = _expandSettings.Read(SettingsKeys.DashboardInsightRowsEnabled);
         UpdateJahrAnzeige();
-    }
-
-    private static bool ReadExpandedSetting(ISettingsService settingsService, string key, bool defaultExpanded = false)
-    {
-        var defaultValue = defaultExpanded.ToString().ToLowerInvariant();
-        return bool.TryParse(settingsService.Get(key, defaultValue), out var expanded)
-            ? expanded
-            : defaultExpanded;
     }
 
     protected override async Task OnMonthChangedAsync() => await LoadDashboard();
@@ -502,33 +485,14 @@ public partial class DashboardViewModel : MonthNavigationViewModel, ILocalizable
 
     private async Task UpdateSelectedAccountSaldoAsync()
     {
-        if (string.IsNullOrWhiteSpace(SelectedAccountId))
-        {
-            SelectedAccountSaldo = 0;
-            return;
-        }
-
-        var balances = await _getAccountBalancesUseCase.ExecuteAsync();
-        SelectedAccountSaldo = balances.FirstOrDefault(b => b.AccountId == SelectedAccountId)?.Saldo ?? 0;
+        SelectedAccountSaldo = await _accountsCoordinator.GetSelectedSaldoAsync(SelectedAccountId);
     }
 
     private async Task UpdateKontenUebersichtAsync()
     {
-        var balances = await _getAccountBalancesUseCase.ExecuteAsync();
-        var active = balances.Where(b => !b.IsArchived).ToList();
-        GesamtSaldo = active.Sum(b => b.Saldo);
-
-        var maxAbs = active.Count > 0 ? active.Max(b => Math.Abs(b.Saldo)) : 0m;
-        KontenUebersicht = new ObservableCollection<AccountOverviewItem>(
-            active
-                .OrderByDescending(b => Math.Abs(b.Saldo))
-                .Select(b => new AccountOverviewItem
-                {
-                    AccountId = b.AccountId,
-                    Name = b.AccountName,
-                    Saldo = b.Saldo,
-                    AnteilProzent = maxAbs > 0 ? Math.Abs(b.Saldo) / maxAbs * 100 : 0
-                }));
+        var snapshot = await _accountsCoordinator.LoadOverviewAsync();
+        GesamtSaldo = snapshot.GesamtSaldo;
+        KontenUebersicht = snapshot.Overview;
     }
 
     private IEnumerable<BudgetHintSummary> GetBudgetWarnings() =>
@@ -565,22 +529,11 @@ public partial class DashboardViewModel : MonthNavigationViewModel, ILocalizable
         return Task.CompletedTask;
     }
 
-    private async Task EnsureAccountFilterLoadedAsync()
-    {
-        if (AvailableKonten.Count > 0) return;
-
-        var accounts = await _loadActiveAccountsUseCase.ExecuteAsync();
-        var items = new ObservableCollection<KategorieFilterItem>
-        {
-            new(null, _loc.GetString(ResourceKeys.Lbl_AlleKonten), ResourceKeys.Lbl_AlleKonten)
-        };
-
-        foreach (var account in accounts)
-            items.Add(new KategorieFilterItem(account.Id, account.Name));
-
-        AvailableKonten = items;
-        SelectedKontoFilterItem = items[0];
-    }
+    private Task EnsureAccountFilterLoadedAsync()
+        => _accountsCoordinator.EnsureFilterLoadedAsync(
+            AvailableKonten,
+            items => AvailableKonten = items,
+            item => SelectedKontoFilterItem = item);
 
     private async Task LadeMonatAsync()
     {
@@ -725,33 +678,12 @@ public partial class DashboardViewModel : MonthNavigationViewModel, ILocalizable
 
     private async Task LoadCashflowPreviewAsync()
     {
-        try
-        {
-            var data = await _loadCashflowOutlookUseCase.ExecuteAsync(accountId: SelectedAccountId);
-            CashflowNetAmount = data.ProjectedIncome - data.ProjectedExpenses;
-            CashflowProjectedIncome = data.ProjectedIncome;
-            CashflowProjectedExpenses = data.ProjectedExpenses;
-            CashflowNotableDays = data.Days.Count(d => d.IsNotable);
-            UpdateCashflowSummaryText();
-        }
-        catch (Finanzuebersicht.Core.Licensing.FeatureGateException)
-        {
-            // Free Store tier: Cashflow is Pro — hide preview without error noise
-            CashflowNetAmount = 0;
-            CashflowProjectedIncome = 0;
-            CashflowProjectedExpenses = 0;
-            CashflowNotableDays = 0;
-            CashflowSummaryText = string.Empty;
-        }
-        catch (Exception ex)
-        {
-            _logger?.LogError(ex, "DashboardViewModel: LoadCashflowPreviewAsync failed");
-            CashflowNetAmount = 0;
-            CashflowProjectedIncome = 0;
-            CashflowProjectedExpenses = 0;
-            CashflowNotableDays = 0;
-            CashflowSummaryText = string.Empty;
-        }
+        var snapshot = await _cashflowCoordinator.LoadAsync(SelectedAccountId);
+        CashflowNetAmount = snapshot.NetAmount;
+        CashflowProjectedIncome = snapshot.ProjectedIncome;
+        CashflowProjectedExpenses = snapshot.ProjectedExpenses;
+        CashflowNotableDays = snapshot.NotableDays;
+        CashflowSummaryText = snapshot.SummaryText;
 
         OnPropertyChanged(nameof(ShowCashflowCompact));
         OnPropertyChanged(nameof(ShowCashflowExpanded));
@@ -762,176 +694,73 @@ public partial class DashboardViewModel : MonthNavigationViewModel, ILocalizable
 
     [RelayCommand]
     private void ToggleBudgetSection()
-    {
-        IsBudgetSectionExpanded = !IsBudgetSectionExpanded;
-        _settingsService.Set(SettingsKeys.DashboardBudgetExpanded, IsBudgetSectionExpanded.ToString().ToLowerInvariant());
-    }
+        => IsBudgetSectionExpanded = _expandSettings.Toggle(DashboardExpandSettingsHelper.Keys.Budget, IsBudgetSectionExpanded);
 
     [RelayCommand]
     private void ToggleYearMonthTrend()
-    {
-        IsYearMonthTrendExpanded = !IsYearMonthTrendExpanded;
-        _settingsService.Set(SettingsKeys.DashboardYearMonthTrendExpanded, IsYearMonthTrendExpanded.ToString().ToLowerInvariant());
-    }
+        => IsYearMonthTrendExpanded = _expandSettings.Toggle(DashboardExpandSettingsHelper.Keys.YearMonthTrend, IsYearMonthTrendExpanded);
 
     [RelayCommand]
     private void ToggleYearCategories()
-    {
-        IsYearCategoriesExpanded = !IsYearCategoriesExpanded;
-        _settingsService.Set(SettingsKeys.DashboardYearCategoriesExpanded, IsYearCategoriesExpanded.ToString().ToLowerInvariant());
-    }
+        => IsYearCategoriesExpanded = _expandSettings.Toggle(DashboardExpandSettingsHelper.Keys.YearCategories, IsYearCategoriesExpanded);
 
     [RelayCommand]
     private void ToggleMonthExpensesSection()
-    {
-        IsMonthExpensesSectionExpanded = !IsMonthExpensesSectionExpanded;
-        _settingsService.Set(SettingsKeys.DashboardMonthExpensesExpanded, IsMonthExpensesSectionExpanded.ToString().ToLowerInvariant());
-    }
+        => IsMonthExpensesSectionExpanded = _expandSettings.Toggle(DashboardExpandSettingsHelper.Keys.MonthExpenses, IsMonthExpensesSectionExpanded);
 
     [RelayCommand]
     private void ToggleMonthIncomeSection()
-    {
-        IsMonthIncomeSectionExpanded = !IsMonthIncomeSectionExpanded;
-        _settingsService.Set(SettingsKeys.DashboardMonthIncomeExpanded, IsMonthIncomeSectionExpanded.ToString().ToLowerInvariant());
-    }
+        => IsMonthIncomeSectionExpanded = _expandSettings.Toggle(DashboardExpandSettingsHelper.Keys.MonthIncome, IsMonthIncomeSectionExpanded);
 
     [RelayCommand]
     private void ToggleDueDetails()
-    {
-        IsDueDetailsExpanded = !IsDueDetailsExpanded;
-        _settingsService.Set(SettingsKeys.DashboardDueDetailsExpanded, IsDueDetailsExpanded.ToString().ToLowerInvariant());
-    }
+        => IsDueDetailsExpanded = _expandSettings.Toggle(DashboardExpandSettingsHelper.Keys.DueDetails, IsDueDetailsExpanded);
 
     [RelayCommand]
     private void ToggleAccountsSection()
-    {
-        IsAccountsSectionExpanded = !IsAccountsSectionExpanded;
-        _settingsService.Set(SettingsKeys.DashboardAccountsExpanded, IsAccountsSectionExpanded.ToString().ToLowerInvariant());
-    }
+        => IsAccountsSectionExpanded = _expandSettings.Toggle(DashboardExpandSettingsHelper.Keys.Accounts, IsAccountsSectionExpanded);
 
     [RelayCommand]
     private void ToggleCashflowSection()
-    {
-        IsCashflowSectionExpanded = !IsCashflowSectionExpanded;
-        _settingsService.Set(SettingsKeys.DashboardCashflowExpanded, IsCashflowSectionExpanded.ToString().ToLowerInvariant());
-    }
+        => IsCashflowSectionExpanded = _expandSettings.Toggle(DashboardExpandSettingsHelper.Keys.Cashflow, IsCashflowSectionExpanded);
 
     [RelayCommand]
     private void ToggleFilterSection()
-    {
-        IsFilterSectionExpanded = !IsFilterSectionExpanded;
-        _settingsService.Set(SettingsKeys.DashboardFilterExpanded, IsFilterSectionExpanded.ToString().ToLowerInvariant());
-    }
+        => IsFilterSectionExpanded = _expandSettings.Toggle(DashboardExpandSettingsHelper.Keys.Filter, IsFilterSectionExpanded);
 
     private async Task LadeFaelligeDauerauftraegeAsync()
     {
-        const int dashboardPreviewDays = 7;
-        var items = await _getDueRecurringUseCase.ExecuteAsync(_clock.Today);
-        var actionable = items
-            .Select(item =>
-            {
-                var hint = BuildDueRecurringHint(item, dashboardPreviewDays);
-                if (hint is null)
-                    return null;
-
-                item.Hint = hint;
-                return item;
-            })
-            .Where(item => item is not null)
-            .Cast<DueRecurringItem>()
-            .ToList();
-
-        DueRecurringCount = actionable.Count;
-        DueRecurringItems = new ObservableCollection<DueRecurringItem>(actionable);
+        DueRecurringItems = await _dueRecurringCoordinator.LoadAsync();
+        DueRecurringCount = DueRecurringItems.Count;
         OnPropertyChanged(nameof(DueRecurringText));
         OnPropertyChanged(nameof(ShowDueDetailsList));
-    }
-
-    private string? BuildDueRecurringHint(DueRecurringItem item, int dashboardPreviewDays)
-    {
-        var daysUntil = (item.DueDate.Date - _clock.Today.Date).Days;
-        return daysUntil switch
-        {
-            0 => _loc.GetString(ResourceKeys.Hint_HeuteFaellig),
-            < 0 => _loc.GetString(ResourceKeys.Hint_UeberfaelligSeitTagen, -daysUntil),
-            > 0 when daysUntil <= dashboardPreviewDays => _loc.GetString(ResourceKeys.Hint_FaelligInTagen, daysUntil),
-            > 0 when item.Recurring.ReminderDaysBefore > 0 && daysUntil <= item.Recurring.ReminderDaysBefore
-                => _loc.GetString(ResourceKeys.Hint_FaelligInTagen, daysUntil),
-            _ => null
-        };
     }
 
     [RelayCommand]
     private async Task BookDueRecurring(DueRecurringItem? item)
     {
-        if (item == null) return;
+        if (!await _dueRecurringCoordinator.TryBookAsync(item))
+            return;
 
-        var confirm = await _dialogService.ShowConfirmationAsync(
-            _loc.GetString(ResourceKeys.Dlg_DauerauftragBuchen),
-            _loc.GetString(ResourceKeys.Dlg_DauerauftragBuchenFrage, item.Recurring.Titel, item.DueDate.ToString("d")),
-            _loc.GetString(ResourceKeys.Btn_Ja),
-            _loc.GetString(ResourceKeys.Btn_Nein));
-        if (!confirm) return;
-
-        try
-        {
-            await _bookDueRecurringUseCase.ExecuteAsync(item.Recurring.Id, item.InstanceDate);
-            await LoadDashboard();
-        }
-        catch (Exception ex)
-        {
-            _logger?.LogError(ex, "BookDueRecurring failed");
-            await _dialogService.ShowAlertAsync(
-                _loc.GetString(ResourceKeys.Err_Titel),
-                _loc.GetString(ResourceKeys.Err_SpeichernFehlgeschlagen, ex.Message),
-                _loc.GetString(ResourceKeys.Btn_OK));
-        }
+        await LoadDashboard();
     }
 
     [RelayCommand]
     private async Task SkipDueRecurring(DueRecurringItem? item)
     {
-        if (item == null) return;
+        if (!await _dueRecurringCoordinator.TrySkipAsync(item))
+            return;
 
-        var confirm = await _dialogService.ShowConfirmationAsync(
-            _loc.GetString(ResourceKeys.Dlg_DauerauftragUeberspringen),
-            _loc.GetString(ResourceKeys.Dlg_DauerauftragUeberspringenFrage, item.Recurring.Titel),
-            _loc.GetString(ResourceKeys.Btn_Ja),
-            _loc.GetString(ResourceKeys.Btn_Nein));
-        if (!confirm) return;
-
-        try
-        {
-            await _skipDueRecurringUseCase.ExecuteAsync(item.Recurring.Id, item.InstanceDate);
-            await LoadDashboard();
-        }
-        catch (Exception ex)
-        {
-            _logger?.LogError(ex, "SkipDueRecurring failed");
-            await _dialogService.ShowAlertAsync(
-                _loc.GetString(ResourceKeys.Err_Titel),
-                _loc.GetString(ResourceKeys.Err_SpeichernFehlgeschlagen, ex.Message),
-                _loc.GetString(ResourceKeys.Btn_OK));
-        }
+        await LoadDashboard();
     }
 
     [RelayCommand]
-    private async Task ShiftDueRecurring(DueRecurringItem? item)
-    {
-        if (item == null) return;
-
-        await _navigationService.GoToAsync(Routes.RecurringInstanceShift, new Dictionary<string, object>
-        {
-            [NavigationQueryKeys.RecurringId] = item.Recurring.Id,
-            [NavigationQueryKeys.InstanceDate] = item.InstanceDate
-        });
-    }
+    private Task ShiftDueRecurring(DueRecurringItem? item)
+        => _dueRecurringCoordinator.ShiftAsync(item);
 
     [RelayCommand]
-    private async Task NavigateToDauerauftraege()
-    {
-        await _navigationService.GoToAsync("//RecurringTransactionsPage");
-    }
+    private Task NavigateToDauerauftraege()
+        => _dueRecurringCoordinator.NavigateToListAsync();
 
     [RelayCommand]
     private async Task NavigateToTransaktionen()
