@@ -13,6 +13,7 @@ namespace Finanzuebersicht.ViewModels;
 
 public partial class AccountDetailViewModel(
     SaveAccountDetailUseCase saveAccountDetailUseCase,
+    GetAccountByIdUseCase getAccountByIdUseCase,
     GetAccountBalancesUseCase getAccountBalancesUseCase,
     ReconcileAccountBalanceUseCase reconcileAccountBalanceUseCase,
     INavigationService navigationService,
@@ -23,6 +24,7 @@ public partial class AccountDetailViewModel(
     ILogger<AccountDetailViewModel>? logger = null) : ObservableObject, IApplyQueryAttributes, ILocalizableViewModel
 {
     private readonly SaveAccountDetailUseCase _saveAccountDetailUseCase = saveAccountDetailUseCase;
+    private readonly GetAccountByIdUseCase _getAccountByIdUseCase = getAccountByIdUseCase;
     private readonly GetAccountBalancesUseCase _getAccountBalancesUseCase = getAccountBalancesUseCase;
     private readonly ReconcileAccountBalanceUseCase _reconcileAccountBalanceUseCase = reconcileAccountBalanceUseCase;
     private readonly INavigationService _navigationService = navigationService;
@@ -126,10 +128,33 @@ public partial class AccountDetailViewModel(
 
     public void ApplyQueryAttributes(IDictionary<string, object> query)
     {
+        if (query.TryGetValue(NavigationQueryKeys.AccountId, out var idVal) && idVal is string accountId && !string.IsNullOrWhiteSpace(accountId))
+        {
+            _ = LoadExistingByIdAsync(accountId);
+            return;
+        }
+
         if (query.TryGetValue(NavigationQueryKeys.Account, out var val) && val is Account a)
             Account = a;
         else
             ResetForCreate();
+    }
+
+    private async Task LoadExistingByIdAsync(string accountId)
+    {
+        try
+        {
+            var account = await _getAccountByIdUseCase.ExecuteAsync(accountId);
+            if (account is not null)
+                Account = account;
+            else
+                ResetForCreate();
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogError(ex, "AccountDetailViewModel: LoadExistingByIdAsync failed for {Id}", accountId);
+            ResetForCreate();
+        }
     }
 
     public void ResetForCreate()

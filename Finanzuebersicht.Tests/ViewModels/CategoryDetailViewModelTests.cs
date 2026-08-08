@@ -151,6 +151,7 @@ public class CategoryDetailViewModelTests
             new SaveCategoryDetailUseCase(categoryRepository),
             new SaveCategoryBudgetUseCase(budgetRepository),
             new LoadCategoryBudgetUseCase(budgetRepository),
+            new GetCategoryByIdUseCase(categoryRepository),
             Substitute.For<INavigationService>(),
             localizationService,
             feedbackService ?? Substitute.For<IFeedbackService>(),

@@ -222,7 +222,7 @@ public partial class App : global::Microsoft.Maui.Controls.Application
 			};
 
 			// Land on Transaktionen (Schnell lives there), then open capture with prefill.
-			await _navigationService.GoToAsync("//TransactionsPage");
+			await _navigationService.GoToAsync(Routes.TransactionsTab);
 			await _navigationService.GoToAsync(Routes.QuickExpenseCapture, parameters);
 		});
 	}

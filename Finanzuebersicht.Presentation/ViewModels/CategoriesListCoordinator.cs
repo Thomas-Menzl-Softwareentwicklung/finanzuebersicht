@@ -71,6 +71,6 @@ public sealed class CategoriesListCoordinator(
     public Task NavigateToDetailAsync(Category kategorie)
         => _navigationService.GoToAsync(Routes.CategoryDetail, new Dictionary<string, object>
         {
-            [NavigationQueryKeys.Category] = kategorie
+            [NavigationQueryKeys.CategoryId] = kategorie.Id
         });
 }

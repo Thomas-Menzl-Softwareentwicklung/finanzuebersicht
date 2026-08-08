@@ -10,9 +10,8 @@ namespace Finanzuebersicht.Tests.ViewModels;
 public class AccountDetailViewModelTests
 {
     [Fact]
-    public void ApplyQueryAttributes_LoadsAccountFields()
+    public async Task ApplyQueryAttributes_LoadsAccountFieldsById()
     {
-        var viewModel = CreateSut(out _);
         var account = new Account
         {
             Id = "acc-1",
@@ -21,8 +20,14 @@ public class AccountDetailViewModelTests
             OpeningBalance = 1500m,
             OpeningBalanceDate = new DateTime(2026, 1, 1)
         };
+        var accountRepository = Substitute.For<IAccountRepository>();
+        accountRepository.GetAccountsAsync().Returns([account]);
 
-        viewModel.ApplyQueryAttributes(new Dictionary<string, object> { [NavigationQueryKeys.Account] = account });
+        var viewModel = CreateSut(out _, accountRepository);
+        viewModel.ApplyQueryAttributes(new Dictionary<string, object> { [NavigationQueryKeys.AccountId] = "acc-1" });
+
+        for (var i = 0; i < 50 && viewModel.Name != "Giro"; i++)
+            await Task.Delay(10);
 
         Assert.Equal("Giro", viewModel.Name);
         Assert.Equal(AccountType.Girokonto, viewModel.Type);
@@ -64,8 +69,10 @@ public class AccountDetailViewModelTests
         var viewModel = CreateSut(out _, out var dialogService);
         viewModel.ApplyQueryAttributes(new Dictionary<string, object>
         {
-            [NavigationQueryKeys.Account] = new Account { Id = "acc-1", Name = "Giro", OpeningBalance = 1000m }
+            [NavigationQueryKeys.AccountId] = "acc-1"
         });
+        // Ensure existing account is loaded for reconcile (sync fallback for test stability)
+        viewModel.Account = new Account { Id = "acc-1", Name = "Giro", OpeningBalance = 1000m };
         viewModel.ActualBalanceText = "abc";
 
         await viewModel.ReconcileCommand.ExecuteAsync(null);
@@ -88,8 +95,12 @@ public class AccountDetailViewModelTests
         IAccountRepository? accountRepository = null,
         ITransactionRepository? transactionRepository = null)
     {
-        accountRepository ??= Substitute.For<IAccountRepository>();
-        accountRepository.GetAccountsAsync().Returns([]);
+        if (accountRepository is null)
+        {
+            accountRepository = Substitute.For<IAccountRepository>();
+            accountRepository.GetAccountsAsync().Returns([]);
+        }
+
         accountRepository.SaveAccountAsync(Arg.Any<Account>()).Returns(Task.CompletedTask);
 
         transactionRepository ??= Substitute.For<ITransactionRepository>();
@@ -114,6 +125,7 @@ public class AccountDetailViewModelTests
 
         return new AccountDetailViewModel(
             new SaveAccountDetailUseCase(accountRepository),
+            new GetAccountByIdUseCase(accountRepository),
             new GetAccountBalancesUseCase(accountRepository, transactionRepository),
             new ReconcileAccountBalanceUseCase(
                 accountRepository,

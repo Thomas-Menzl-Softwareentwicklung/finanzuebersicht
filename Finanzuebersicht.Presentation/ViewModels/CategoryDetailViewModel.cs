@@ -14,6 +14,7 @@ public partial class CategoryDetailViewModel(
     SaveCategoryDetailUseCase saveCategoryDetailUseCase,
     SaveCategoryBudgetUseCase saveCategoryBudgetUseCase,
     LoadCategoryBudgetUseCase loadCategoryBudgetUseCase,
+    GetCategoryByIdUseCase getCategoryByIdUseCase,
     INavigationService navigationService,
     ILocalizationService localizationService,
     IFeedbackService feedbackService,
@@ -24,6 +25,7 @@ public partial class CategoryDetailViewModel(
     private readonly SaveCategoryDetailUseCase _saveCategoryDetailUseCase = saveCategoryDetailUseCase;
     private readonly SaveCategoryBudgetUseCase _saveCategoryBudgetUseCase = saveCategoryBudgetUseCase;
     private readonly LoadCategoryBudgetUseCase _loadCategoryBudgetUseCase = loadCategoryBudgetUseCase;
+    private readonly GetCategoryByIdUseCase _getCategoryByIdUseCase = getCategoryByIdUseCase;
     private readonly INavigationService _navigationService = navigationService;
     private readonly ILocalizationService _loc = localizationService;
     private readonly IFeedbackService _feedbackService = feedbackService;
@@ -118,8 +120,28 @@ public partial class CategoryDetailViewModel(
 
     public void ApplyQueryAttributes(IDictionary<string, object> query)
     {
+        if (query.TryGetValue(NavigationQueryKeys.CategoryId, out var idVal) && idVal is string categoryId && !string.IsNullOrWhiteSpace(categoryId))
+        {
+            _ = LoadExistingByIdAsync(categoryId);
+            return;
+        }
+
         if (query.TryGetValue(NavigationQueryKeys.Category, out var val) && val is Category c)
             Category = c;
+    }
+
+    private async Task LoadExistingByIdAsync(string categoryId)
+    {
+        try
+        {
+            var category = await _getCategoryByIdUseCase.ExecuteAsync(categoryId);
+            if (category is not null)
+                Category = category;
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogError(ex, "CategoryDetailViewModel: LoadExistingByIdAsync failed for {Id}", categoryId);
+        }
     }
 
     private async Task LoadBudgetAsync(string kategorieId)

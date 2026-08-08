@@ -765,7 +765,7 @@ public partial class DashboardViewModel : MonthNavigationViewModel, ILocalizable
     [RelayCommand]
     private async Task NavigateToTransaktionen()
     {
-        await _navigationService.GoToAsync("//TransactionsPage");
+        await _navigationService.GoToAsync(Routes.TransactionsTab);
     }
 
     [RelayCommand]
