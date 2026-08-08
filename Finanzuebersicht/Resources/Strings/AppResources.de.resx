@@ -378,6 +378,8 @@ Bitte starte die App neu.</value></data>
   <data name="Msg_ImportStatusMissingDate" xml:space="preserve"><value>Buchungsdatum fehlt</value></data>
   <data name="Msg_ImportStatusPossibleDuplicate" xml:space="preserve"><value>Mögliches Duplikat</value></data>
   <data name="Msg_ImportStatusCategoryUnresolved" xml:space="preserve"><value>Kategorie nicht zugeordnet</value></data>
+  <data name="Msg_ImportFileReadFailed" xml:space="preserve"><value>Die Datei konnte nicht gelesen werden.</value></data>
+  <data name="Msg_ImportNoParserMatched" xml:space="preserve"><value>Kein passender Parser gefunden oder keine Datensätze in der Datei.</value></data>
   <data name="Btn_Duplizieren" xml:space="preserve"><value>Duplizieren</value></data>
   <data name="Btn_Verwenden" xml:space="preserve"><value>Verwenden</value></data>
   <data name="Btn_AlsVorlageSpeichern" xml:space="preserve"><value>Als Vorlage speichern</value></data>

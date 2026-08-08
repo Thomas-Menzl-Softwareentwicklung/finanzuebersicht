@@ -1,3 +1,5 @@
+using Finanzuebersicht.Application.UseCases.Import;
+using Finanzuebersicht.Core.Services;
 using Finanzuebersicht.Models;
 using Finanzuebersicht.Presentation.Services;
 using Finanzuebersicht.ViewModels;
@@ -7,6 +9,14 @@ namespace Finanzuebersicht.Tests.ViewModels;
 
 public class ImportPreviewViewModelTests
 {
+    private static CommitCsvImportUseCase CreateCommitUseCase(ICategoryRepository categoryRepository)
+        => new(new CsvImportOrchestrator(
+            [],
+            Substitute.For<ITransactionRepository>(),
+            Substitute.For<ILogger<CsvImportOrchestrator>>(),
+            categoryRepository,
+            uncategorizedCategoryService: new UncategorizedCategoryService(categoryRepository)));
+
     [Fact]
     public async Task LoadPreview_LoadsRowsAndDefaultFilterIsAll()
     {
@@ -55,7 +65,7 @@ public class ImportPreviewViewModelTests
         dialog.ShowAlertAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>()).Returns(Task.CompletedTask);
 
         var vm = new ImportPreviewViewModel(
-            new ImportService([], Substitute.For<ITransactionRepository>(), Substitute.For<ILogger<ImportService>>(), categoryRepository),
+            CreateCommitUseCase(categoryRepository),
             sessionStore,
             categoryRepository,
             navigation,
@@ -99,7 +109,7 @@ public class ImportPreviewViewModelTests
         var localization = Substitute.For<ILocalizationService>();
         localization.GetString(Arg.Any<string>()).Returns(call => call.ArgNotNull<string>());
         var vm = new ImportPreviewViewModel(
-            new ImportService([], Substitute.For<ITransactionRepository>(), Substitute.For<ILogger<ImportService>>(), categoryRepository),
+            CreateCommitUseCase(categoryRepository),
             sessionStore,
             categoryRepository,
             Substitute.For<INavigationService>(),
