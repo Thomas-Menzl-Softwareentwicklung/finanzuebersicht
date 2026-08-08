@@ -6,25 +6,22 @@ Referenz-Klickdummy (extern): `Finanzübersicht Mobile App Verfeinerung-2` — d
 
 ---
 
-## Ist-Zustand (Stand develop, nach UIScene / Aug 2026)
+## Ist-Zustand (Stand feature/create-ux-modal-sheets)
 
-Nach Stabilisierungs-Reverts (`8494ba6`, `9b2a7ee`) öffnet **Anlegen überall** eine **Detail-Page** (Push):
+**Anlegen** (FAB / Empty State) öffnet ein **Modal** über `CreateFormModalService` (Schnell-Muster, kein Toolkit-Popup):
 
-| Kontext | FAB / Empty State heute |
-|---------|-------------------------|
-| Transaktionen | `TransactionDetail` / Schnell separat (`QuickExpenseCaptureSheetService`) |
-| Umbuchen | `TransferDetail` |
-| Verwaltung › Kategorien | `CategoryDetail` |
-| Verwaltung › Konten | `AccountDetail` |
-| Sparziele | `SparZielDetail` |
-| Daueraufträge | `RecurringTransactionDetail` |
+| Kontext | Create |
+|---------|--------|
+| Verwaltung › Kategorien | `CategoryCreateSheetService` + `CategoryFormView` |
+| Verwaltung › Konten | `AccountCreateSheetService` + `AccountFormView` |
+| Sparziele | `SparZielCreateSheetService` + `SparZielFormView` |
+| Daueraufträge | `RecurringTransactionCreateSheetService` + `RecurringTransactionFormView` |
+| Transaktionen Schnell | `QuickExpenseCaptureSheetService` (eigenes Modal) |
+| Umbuchen / volle Transaktion | weiterhin Detail-Page (`TransferDetail` / `TransactionDetail`) |
 
-Legacy-Bausteine existieren noch, sind aber **nicht** an Create gebunden:
+**Bearbeiten** (Tap auf Zeile) bleibt Detail-Page.
 
-- `CreateFormCard`, `FormSheetPopup` (CommunityToolkit) — Crash-/Deadlock-Historie auf iOS/Mac nach UIScene
-- `CategoryCreateSheetService`, `RecurringTransactionCreateSheetService` — DI registriert, keine VM-Caller
-
-**Bearbeiten** (Tap auf Zeile) bleibt Detail-Page — das gilt auch im Soll.
+Legacy: `CreateFormCard`, `FormSheetPopup` (CommunityToolkit) — nicht für neue Create-Flows.
 
 ---
 

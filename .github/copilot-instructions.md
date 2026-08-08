@@ -152,11 +152,11 @@ Native `Picker` controls freeze on **macOS 27 Beta** when scrolling inside picke
 
 ### Create UX (#265 / Mockup Soll)
 
-**Ist:** FAB/Empty-State Anlegen navigates to `*DetailPage` for all entities (post-UIScene revert). Schnell uses modal `QuickExpenseCaptureSheetService` (no Toolkit Popup).
+**Ist:** Context-sensitive FAB opens modal create sheets via `CreateFormModalService` (QuickExpense-style ContentPage, no Toolkit Popup) for Kategorie, Konto, Sparziel, Dauerauftrag. Schnell remains `QuickExpenseCaptureSheetService`. Full transaction / transfer create still use detail pages. Edit stays on `*DetailPage`.
 
-**Soll:** Context-sensitive FAB + bottom sheet/modal (same chrome, form per tab): Transactions → Schnellerfassung; Verwaltung/Sparziele/Daueraufträge → entity create forms. Edit stays on detail pages. Do **not** revive CommunityToolkit `FormSheetPopup` or inline `CreateFormCard` as the target pattern.
+**Soll (Mockup):** same pattern; polish Schnell sheet UX; #266 for richer transaction create.
 
-Full reference (Ist/Soll, wireframes, tech Leitbild): `docs/CREATE_UX.md`.
+Full reference: `docs/CREATE_UX.md`.
 
 ### Quick Expense Capture (Pro) + iOS Widget
 

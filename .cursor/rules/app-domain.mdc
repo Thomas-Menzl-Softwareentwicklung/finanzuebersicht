@@ -28,8 +28,8 @@ alwaysApply: true
 
 ## Anlegen / Create UX
 
-- **Ist:** FAB → `*DetailPage` (nach Revert Aug 2026); Schnell = Modal ohne Toolkit-Popup
-- **Soll:** kontextsensitiver FAB + Bottom-Sheet (Mockup); kein globales „immer Schnellerfassung“
+- **Ist:** FAB → Modal-Sheet (`CreateFormModalService`) für Kategorie/Konto/Sparziel/Dauerauftrag; Schnell separat; Umbuchen/volle Buchung weiter Detail
+- **Soll:** Mockup-Chrome (Schnell-Keypad etc.); kein Toolkit-Popup
 - **Bearbeiten:** weiter `*DetailPage`
 - Doku: `docs/CREATE_UX.md`
 

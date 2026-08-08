@@ -15,6 +15,8 @@ namespace Finanzuebersicht.ViewModels;
 public sealed class CategoriesListCoordinator(
     LoadCategoriesUseCase loadCategoriesUseCase,
     DeleteCategoryUseCase deleteCategoryUseCase,
+    CategoryDetailViewModel createCategoryViewModel,
+    ICategoryCreateSheetService categoryCreateSheetService,
     ILocalizationService localizationService,
     INavigationService navigationService,
     IDialogService dialogService,
@@ -24,6 +26,8 @@ public sealed class CategoriesListCoordinator(
 {
     private readonly LoadCategoriesUseCase _loadCategoriesUseCase = loadCategoriesUseCase;
     private readonly DeleteCategoryUseCase _deleteCategoryUseCase = deleteCategoryUseCase;
+    private readonly CategoryDetailViewModel _createCategoryViewModel = createCategoryViewModel;
+    private readonly ICategoryCreateSheetService _categoryCreateSheetService = categoryCreateSheetService;
     private readonly ILocalizationService _loc = localizationService;
     private readonly INavigationService _navigationService = navigationService;
     private readonly IDialogService _dialogService = dialogService;
@@ -65,8 +69,11 @@ public sealed class CategoriesListCoordinator(
         }
     }
 
-    public Task NavigateToCreateAsync()
-        => _navigationService.GoToAsync(Routes.CategoryDetail);
+    public async Task<bool> NavigateToCreateAsync()
+    {
+        _createCategoryViewModel.ResetForCreate();
+        return await _categoryCreateSheetService.ShowAsync(_createCategoryViewModel);
+    }
 
     public Task NavigateToDetailAsync(Category kategorie)
         => _navigationService.GoToAsync(Routes.CategoryDetail, new Dictionary<string, object>

@@ -137,7 +137,7 @@ public class CategoriesViewModelTests
     }
 
     [Fact]
-    public async Task GoToDetail_WhenKontenTabAndNoItem_NavigatesToAccountDetail()
+    public async Task GoToDetail_WhenKontenTabAndNoItem_OpensAccountCreateSheet()
     {
         var sut = CreateSut(
             Substitute.For<ICategoryRepository>(),
@@ -146,13 +146,16 @@ public class CategoriesViewModelTests
             Substitute.For<IAccountRepository>(),
             Substitute.For<ITransactionTemplateRepository>(),
             out _,
-            out var navigationService);
+            out var navigationService,
+            out _,
+            out var accountCreateSheet);
 
         sut.SelectedSectionIndex = 1;
 
         await sut.GoToDetailCommand.ExecuteAsync(null);
 
-        await navigationService.Received(1).GoToAsync(Routes.AccountDetail);
+        await accountCreateSheet.Received(1).ShowAsync(Arg.Any<AccountDetailViewModel>());
+        await navigationService.DidNotReceive().GoToAsync(Routes.AccountDetail);
     }
 
     [Fact]
@@ -172,6 +175,8 @@ public class CategoriesViewModelTests
             Substitute.For<ITransactionTemplateRepository>(),
             out var dialogService,
             out var navigationService,
+            out _,
+            out var accountCreateSheet,
             licenseService: licenseService);
 
         sut.SelectedSectionIndex = 1;
@@ -179,11 +184,12 @@ public class CategoriesViewModelTests
         await sut.GoToDetailCommand.ExecuteAsync(null);
 
         await dialogService.Received(1).ShowAlertAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>());
+        await accountCreateSheet.DidNotReceive().ShowAsync(Arg.Any<AccountDetailViewModel>());
         await navigationService.DidNotReceive().GoToAsync(Routes.AccountDetail);
     }
 
     [Fact]
-    public async Task GoToDetail_WhenKategorienTabAndNoItem_NavigatesToCategoryDetail()
+    public async Task GoToDetail_WhenKategorienTabAndNoItem_OpensCategoryCreateSheet()
     {
         var sut = CreateSut(
             Substitute.For<ICategoryRepository>(),
@@ -192,11 +198,14 @@ public class CategoriesViewModelTests
             Substitute.For<IAccountRepository>(),
             Substitute.For<ITransactionTemplateRepository>(),
             out _,
-            out var navigationService);
+            out var navigationService,
+            out var categoryCreateSheet,
+            out _);
 
         await sut.GoToDetailCommand.ExecuteAsync(null);
 
-        await navigationService.Received(1).GoToAsync(Routes.CategoryDetail);
+        await categoryCreateSheet.Received(1).ShowAsync(Arg.Any<CategoryDetailViewModel>());
+        await navigationService.DidNotReceive().GoToAsync(Routes.CategoryDetail);
     }
 
     [Fact]
@@ -307,6 +316,8 @@ public class CategoriesViewModelTests
         ITransactionTemplateRepository templateRepository,
         out IDialogService dialogService,
         out INavigationService navigationService,
+        out ICategoryCreateSheetService categoryCreateSheet,
+        out IAccountCreateSheetService accountCreateSheet,
         ILocalizationService? localizationService = null,
         Finanzuebersicht.Core.Licensing.ILicenseService? licenseService = null)
     {
@@ -325,9 +336,16 @@ public class CategoriesViewModelTests
 
         navigationService = Substitute.For<INavigationService>();
 
+        categoryCreateSheet = Substitute.For<ICategoryCreateSheetService>();
+        categoryCreateSheet.ShowAsync(Arg.Any<CategoryDetailViewModel>()).Returns(false);
+        accountCreateSheet = Substitute.For<IAccountCreateSheetService>();
+        accountCreateSheet.ShowAsync(Arg.Any<AccountDetailViewModel>()).Returns(false);
+
         var categoriesCoordinator = new CategoriesListCoordinator(
             new LoadCategoriesUseCase(categoryRepository),
             new DeleteCategoryUseCase(categoryRepository, transactionRepository, recurringTransactionRepository),
+            CreateCategoryDetailViewModel(localizationService, dialogService, navigationService),
+            categoryCreateSheet,
             localizationService,
             navigationService,
             dialogService,
@@ -339,6 +357,8 @@ public class CategoriesViewModelTests
             new GetAccountBalancesUseCase(accountRepository, transactionRepository),
             new ToggleAccountArchiveUseCase(accountRepository),
             new DeleteAccountUseCase(accountRepository, transactionRepository, templateRepository),
+            CreateAccountDetailViewModel(localizationService, dialogService, navigationService, accountRepository, transactionRepository),
+            accountCreateSheet,
             localizationService,
             navigationService,
             dialogService,
@@ -351,6 +371,42 @@ public class CategoriesViewModelTests
             accountsCoordinator,
             localizationService,
             dialogService);
+    }
+
+    private static CategoryDetailViewModel CreateCategoryDetailViewModel(
+        ILocalizationService localizationService,
+        IDialogService dialogService,
+        INavigationService navigationService) =>
+        new(
+            new SaveCategoryDetailUseCase(Substitute.For<ICategoryRepository>()),
+            new SaveCategoryBudgetUseCase(Substitute.For<IBudgetRepository>()),
+            new LoadCategoryBudgetUseCase(Substitute.For<IBudgetRepository>()),
+            new GetCategoryByIdUseCase(Substitute.For<ICategoryRepository>()),
+            navigationService,
+            localizationService,
+            Substitute.For<IFeedbackService>(),
+            Substitute.For<IAppEvents>(),
+            dialogService);
+
+    private static AccountDetailViewModel CreateAccountDetailViewModel(
+        ILocalizationService localizationService,
+        IDialogService dialogService,
+        INavigationService navigationService,
+        IAccountRepository accountRepository,
+        ITransactionRepository transactionRepository)
+    {
+        var saveAccount = new SaveAccountDetailUseCase(accountRepository);
+        var getBalances = new GetAccountBalancesUseCase(accountRepository, transactionRepository);
+        return new(
+            saveAccount,
+            new GetAccountByIdUseCase(accountRepository),
+            getBalances,
+            new ReconcileAccountBalanceUseCase(accountRepository, getBalances, saveAccount),
+            navigationService,
+            localizationService,
+            dialogService,
+            Substitute.For<IFeedbackService>(),
+            Substitute.For<IAppEvents>());
     }
 
     private static string FindWorkspaceFile(string relativePath)
@@ -383,6 +439,31 @@ public class CategoriesViewModelTests
             accountRepository,
             templateRepository,
             out dialogService,
+            out _,
+            out _,
             out _);
+    }
+
+    private static CategoriesViewModel CreateSut(
+        ICategoryRepository categoryRepository,
+        ITransactionRepository transactionRepository,
+        IRecurringTransactionRepository recurringTransactionRepository,
+        IAccountRepository accountRepository,
+        ITransactionTemplateRepository templateRepository,
+        out IDialogService dialogService,
+        out INavigationService navigationService,
+        Finanzuebersicht.Core.Licensing.ILicenseService? licenseService = null)
+    {
+        return CreateSut(
+            categoryRepository,
+            transactionRepository,
+            recurringTransactionRepository,
+            accountRepository,
+            templateRepository,
+            out dialogService,
+            out navigationService,
+            out _,
+            out _,
+            licenseService: licenseService);
     }
 }

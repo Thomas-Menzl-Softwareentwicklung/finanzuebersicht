@@ -5,15 +5,14 @@ using Finanzuebersicht.ViewModels;
 
 namespace Finanzuebersicht.Services;
 
-public sealed class RecurringTransactionCreateSheetService(ICreateFormModalService createFormModalService)
-    : IRecurringTransactionCreateSheetService
+public sealed class AccountCreateSheetService(ICreateFormModalService createFormModalService) : IAccountCreateSheetService
 {
-    public Task<bool> ShowAsync(RecurringTransactionDetailViewModel viewModel)
+    public Task<bool> ShowAsync(AccountDetailViewModel viewModel)
     {
         var loc = LocalizationResourceManager.Current;
         return createFormModalService.ShowAsync(
             viewModel.PageTitle,
-            () => new RecurringTransactionFormView { BindingContext = viewModel },
+            () => new AccountFormView { BindingContext = viewModel },
             viewModel.TrySaveAsync,
             saveText: loc[ResourceKeys.Btn_Speichern]);
     }
