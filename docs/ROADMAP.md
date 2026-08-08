@@ -168,8 +168,8 @@ Offene Issues in Abarbeitungsreihenfolge (#274 vor Import/Backup, damit neue Use
 | 6 | [#294](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/294) | CategoriesViewModel aufteilen | ✅ |
 | 7 | [#271](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/271) | App-Static-Events → `IAppEvents` | ✅ |
 | 8 | [#295](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/295) | Shell-Tab-Routes / ID-Navigation härten | ✅ |
-| 9 | [#296](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/296) | Listen auf CollectionView virtualisieren | in Arbeit (`feature/296-collectionview-virtualize`) |
-| 10 | [#300](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/300) | Sync-Persistenz-Prep (`ExternalId`/`Source`) | offen |
+| 9 | [#296](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/296) | Listen auf CollectionView virtualisieren | ✅ |
+| 10 | [#300](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/300) | Sync-Persistenz-Prep (`ExternalId`/`Source`) | in Arbeit (`feature/300-sync-persistence-prep`) |
 
 Parallel möglich: #267 neben #269/#292; #294 neben #271 — #293 erst nach #269.
 

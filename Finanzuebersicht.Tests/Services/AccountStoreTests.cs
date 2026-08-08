@@ -1,3 +1,4 @@
+using Finanzuebersicht.Constants;
 using Finanzuebersicht.Models;
 
 namespace Finanzuebersicht.Tests.Services;
@@ -32,6 +33,27 @@ public class AccountStoreTests : IDisposable
         var accounts = await _store.GetAccountsAsync();
 
         Assert.Single(accounts, a => a.Id == account.Id && a.Name == "Girokonto");
+    }
+
+    [Fact]
+    public async Task SaveAndGet_PersistsOptionalSyncFields()
+    {
+        var updatedAt = new DateTime(2026, 8, 8, 12, 0, 0, DateTimeKind.Utc);
+        var account = new Account
+        {
+            Name = "Girokonto",
+            Type = AccountType.Girokonto,
+            ExternalId = "ck-acc-1",
+            Source = EntitySources.CloudKit,
+            UpdatedAt = updatedAt
+        };
+
+        await _store.SaveAccountAsync(account);
+        var loaded = (await _store.GetAccountsAsync()).Single(a => a.Id == account.Id);
+
+        Assert.Equal("ck-acc-1", loaded.ExternalId);
+        Assert.Equal(EntitySources.CloudKit, loaded.Source);
+        Assert.Equal(updatedAt, loaded.UpdatedAt);
     }
 
     [Fact]
