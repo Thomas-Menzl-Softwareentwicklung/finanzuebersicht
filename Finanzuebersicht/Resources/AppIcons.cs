@@ -14,4 +14,5 @@ public static class AppIcons
     public const string Year = "year.png";
     public const string FabImport = "fab_import.png";
     public const string FabTransfer = "fab_transfer.png";
+    public const string FabSchnell = "fab_schnell.png";
 }

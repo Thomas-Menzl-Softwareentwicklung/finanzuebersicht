@@ -622,18 +622,25 @@
         </ScrollView>
     </RefreshView>
 
-        <Button Text="{loc:Translate Fab_Schnell}"
-                FontSize="22"
-                TextColor="White"
+        <Border StrokeShape="RoundRectangle 28"
+                Stroke="Transparent"
                 BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                CornerRadius="28"
                 WidthRequest="56"
                 HeightRequest="56"
+                Padding="14"
                 HorizontalOptions="End"
                 VerticalOptions="End"
                 Margin="20"
                 SemanticProperties.Description="{loc:Translate A11y_SchnellAusgabe}"
-                Shadow="{Shadow Brush='#40000000', Offset='0,4', Radius=8}"
-                Command="{Binding QuickCaptureCommand}" />
+                Shadow="{Shadow Brush='#40000000', Offset='0,4', Radius=8}">
+            <Border.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding QuickCaptureCommand}" />
+            </Border.GestureRecognizers>
+            <Image Source="fab_schnell.png"
+                   Aspect="AspectFit"
+                   HorizontalOptions="Center"
+                   VerticalOptions="Center"
+                   InputTransparent="True" />
+        </Border>
     </Grid>
 </ContentPage>
