@@ -337,22 +337,34 @@ public class TransactionsViewModelTests
         feedbackService.ShowSnackbarAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<Func<Task>>())
             .Returns(Task.CompletedTask);
 
+        var importCoordinator = new TransactionImportCoordinator(
+            analyzeCsvImportUseCase,
+            filePicker,
+            navigationService,
+            dialogService,
+            localizationService,
+            importSessionStore: importSessionStore);
+
+        var templatesCoordinator = new TransactionTemplatesCoordinator(
+            navigationService,
+            dialogService,
+            localizationService);
+
         return new TransactionsViewModel(
             new DeleteTransactionUseCase(deleteTransactionRepository),
             new RestoreTransactionUseCase(deleteTransactionRepository),
             new LoadTransactionsMonthUseCase(loadTransactionRepository, loadCategoryRepository, loadAccountRepository),
             new SearchTransactionsUseCase(searchTransactionRepository, searchCategoryRepository, searchAccountRepository),
             navigationService,
-            analyzeCsvImportUseCase,
+            importCoordinator,
+            templatesCoordinator,
             dialogService,
             feedbackService,
             localizationService,
             new LoadCategoriesUseCase(loadCategoryRepository),
             new LoadAccountsUseCase(loadAccountRepository),
             dispatcher,
-            filePicker,
             appEvents,
-            logger,
-            importSessionStore);
+            logger);
     }
 }
