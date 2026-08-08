@@ -25,6 +25,13 @@ public static class UseCaseErrorPresenter
                 ResourceKeys.Err_LimitErreicht,
                 error.FormatArgs.ElementAtOrDefault(0) ?? 0,
                 error.FormatArgs.ElementAtOrDefault(1) ?? 0),
+            UseCaseErrorCode.BackupNotFound => loc.GetString(ResourceKeys.Err_BackupNichtGefunden),
+            UseCaseErrorCode.BackupCorrupt => loc.GetString(ResourceKeys.Err_BackupBeschaedigt),
+            UseCaseErrorCode.BackupSchemaIncompatible => loc.GetString(ResourceKeys.Err_BackupSchemaInkompatibel),
+            UseCaseErrorCode.BackupDataInconsistent => loc.GetString(ResourceKeys.Msg_RestoreInconsistentDesc),
+            UseCaseErrorCode.BackupRestoreFailed => loc.GetString(ResourceKeys.Msg_RestoreFailedTitle),
+            UseCaseErrorCode.BackupExportFailed => loc.GetString(ResourceKeys.Msg_CSVExportFailedTitle),
+            UseCaseErrorCode.BackupFailed => loc.GetString(ResourceKeys.Msg_BackupFailedTitle),
             _ => loc.GetString(ResourceKeys.Err_SpeichernFehlgeschlagen, error.Code.ToString())
         };
     }

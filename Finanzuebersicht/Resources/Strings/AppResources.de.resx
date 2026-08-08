@@ -133,6 +133,9 @@
   <data name="Err_SucheFehlgeschlagen" xml:space="preserve"><value>Die Suche konnte nicht abgeschlossen werden.</value></data>
   <data name="Err_ProErforderlich" xml:space="preserve"><value>Dieses Feature erfordert Finanzübersicht Pro.</value></data>
   <data name="Err_LimitErreicht" xml:space="preserve"><value>Free-Limit erreicht ({0}/{1}). Mit Pro unbegrenzt nutzen.</value></data>
+  <data name="Err_BackupNichtGefunden" xml:space="preserve"><value>Das ausgewählte Backup wurde nicht gefunden.</value></data>
+  <data name="Err_BackupBeschaedigt" xml:space="preserve"><value>Die Backup-Datei ist beschädigt oder unvollständig.</value></data>
+  <data name="Err_BackupSchemaInkompatibel" xml:space="preserve"><value>Dieses Backup ist mit dieser App-Version nicht kompatibel.</value></data>
 
   <data name="Lic_SectionTitle" xml:space="preserve"><value>Lizenz</value></data>
   <data name="Lic_ChannelDirect" xml:space="preserve"><value>Distribution: Direct-Build (GitHub / selbst gebaut)</value></data>
