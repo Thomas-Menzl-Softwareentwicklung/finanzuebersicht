@@ -154,16 +154,24 @@ Setup-Hilfe (Milestone/Labels): `scripts/setup-v120-architecture-milestone.sh` (
 
 ### Empfohlene Reihenfolge
 
-| Welle | Issues | Fokus | Stand |
-|-------|--------|--------|-------|
-| 0 | [#289](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/289) ✅, [#290](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/290) ✅, [#291](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/291) ✅ | DataPath-Restart, DataFileNames, Doc-Drift | ✅ Welle 0 fertig |
-| 1 | [#268](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/268), [#270](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/270) | Legacy `IDataService` raus, Budget Use Case | offen |
-| 2 | [#269](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/269), [#292](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/292), [#273](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/273) | Import-/Backup-Use-Cases, Vollscan-Queries | offen |
-| 3 | [#267](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/267), [#293](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/293), [#294](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/294) | Dashboard-/Transactions-/Categories-VM-Splits | offen |
-| 4 | [#274](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/274) | Fehler- & i18n-Grenze | offen |
-| 5 | [#271](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/271), [#295](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/295) | IAppEvents, Navigation härten | offen |
-| 6 | [#296](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/296)–[#299](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/299) | MAUI-Readiness (Listen, Nested Scroll, Theme, Storage-UI) | offen |
-| 7 | [#300](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/300) | Sync-Persistenz-Prep (`ExternalId`/`Source`) für später #243/#245 | offen |
+Abgeschlossen: Welle 0 (#289–#291), Welle 1 (#268, #270), Vollscan (#273), MAUI #297–#299.
+
+Offene Issues in Abarbeitungsreihenfolge (#274 vor Import/Backup, damit neue Use Cases die Fehlerkonvention gleich mitnehmen):
+
+| Nr. | Issue | Fokus | Stand |
+|-----|--------|--------|-------|
+| 1 | [#274](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/274) | Einheitliches Fehler- & Result-Modell | in Arbeit (`feature/274-use-case-result-model`) |
+| 2 | [#269](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/269) | Import in Application-Layer (Use Cases) | offen |
+| 3 | [#292](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/292) | Backup in Application-Layer (Use Cases) | offen |
+| 4 | [#293](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/293) | TransactionsViewModel aufteilen (nach #269) | offen |
+| 5 | [#267](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/267) | DashboardViewModel aufteilen | offen |
+| 6 | [#294](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/294) | CategoriesViewModel aufteilen | offen |
+| 7 | [#271](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/271) | App-Static-Events → `IAppEvents` | offen |
+| 8 | [#295](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/295) | Shell-Tab-Routes / ID-Navigation härten | offen |
+| 9 | [#296](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/296) | Listen auf CollectionView virtualisieren | offen |
+| 10 | [#300](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/300) | Sync-Persistenz-Prep (`ExternalId`/`Source`) | offen |
+
+Parallel möglich: #267 neben #269/#292; #294 neben #271 — #293 erst nach #269.
 
 ---
 

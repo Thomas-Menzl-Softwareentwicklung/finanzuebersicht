@@ -1,3 +1,4 @@
+using Finanzuebersicht.Application.Results;
 using Finanzuebersicht.Constants;
 using Finanzuebersicht.Models;
 
@@ -10,7 +11,7 @@ public class SaveTransactionDetailUseCase(
     private readonly ITransactionRepository _transactionRepository = transactionRepository;
     private readonly IAccountRepository _accountRepository = accountRepository;
 
-    public async Task ExecuteAsync(
+    public async Task<UseCaseResult> ExecuteAsync(
         Transaction? existingTransaction,
         decimal betrag,
         string titel,
@@ -23,15 +24,16 @@ public class SaveTransactionDetailUseCase(
         CancellationToken cancellationToken = default)
     {
         if (existingTransaction?.IsTransfer == true)
-            throw new InvalidOperationException("Transfers must be edited through the transfer flow.");
+            return UseCaseResult.Fail(UseCaseErrorCode.TransferMustUseTransferFlow);
 
         if (!string.IsNullOrWhiteSpace(accountId))
         {
             var accounts = await _accountRepository.GetAccountsAsync();
-            var account = accounts.FirstOrDefault(a => a.Id == accountId)
-                ?? throw new InvalidOperationException("Selected account not found.");
+            var account = accounts.FirstOrDefault(a => a.Id == accountId);
+            if (account is null)
+                return UseCaseResult.Fail(UseCaseErrorCode.AccountNotFound);
             if (account.IsArchived && (existingTransaction == null || existingTransaction.AccountId != accountId))
-                throw new InvalidOperationException("Archived account cannot be assigned to new transactions.");
+                return UseCaseResult.Fail(UseCaseErrorCode.AccountArchived);
         }
 
         var transaction = existingTransaction ?? new Transaction();
@@ -46,6 +48,7 @@ public class SaveTransactionDetailUseCase(
         transaction.SparZielId = string.IsNullOrWhiteSpace(sparZielId) ? null : sparZielId;
 
         await _transactionRepository.SaveTransactionAsync(transaction);
+        return UseCaseResult.Ok();
     }
 
     private async Task<string> ResolveAccountIdAsync(

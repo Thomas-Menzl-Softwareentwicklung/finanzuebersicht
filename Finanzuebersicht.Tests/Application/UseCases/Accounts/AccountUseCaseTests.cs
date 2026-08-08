@@ -13,8 +13,10 @@ public class AccountUseCaseTests
 
         var sut = new SaveAccountDetailUseCase(repository);
 
-        var saved = await sut.ExecuteAsync(null, "Tagesgeld", AccountType.Tagesgeld);
+        var result = await sut.ExecuteAsync(null, "Tagesgeld", AccountType.Tagesgeld);
 
+        Assert.True(result.IsSuccess);
+        var saved = result.Value!;
         await repository.Received(1).SaveAccountAsync(NonNullArg.Is<Account>(a =>
             a.Name == "Tagesgeld" &&
             a.Type == AccountType.Tagesgeld));
@@ -178,8 +180,10 @@ public class AccountUseCaseTests
         var sut = new SaveAccountDetailUseCase(repository);
         var stichtag = new DateTime(2026, 1, 1);
 
-        var saved = await sut.ExecuteAsync(null, "Tagesgeld", AccountType.Tagesgeld, false, 2500m, stichtag);
+        var result = await sut.ExecuteAsync(null, "Tagesgeld", AccountType.Tagesgeld, false, 2500m, stichtag);
 
+        Assert.True(result.IsSuccess);
+        var saved = result.Value!;
         await repository.Received(1).SaveAccountAsync(NonNullArg.Is<Account>(a =>
             a.Name == "Tagesgeld" &&
             a.Type == AccountType.Tagesgeld &&

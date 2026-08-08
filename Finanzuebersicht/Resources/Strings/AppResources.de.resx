@@ -125,6 +125,9 @@
   <data name="Err_LoeschenFehlgeschlagen" xml:space="preserve"><value>Fehler beim Löschen: {0}</value></data>
   <data name="Err_LadenFehlgeschlagen" xml:space="preserve"><value>Fehler beim Laden: {0}</value></data>
   <data name="Err_TransferKontenUnterschiedlich" xml:space="preserve"><value>Bitte unterschiedliche Quell- und Zielkonten auswählen.</value></data>
+  <data name="Err_TransferKontenErforderlich" xml:space="preserve"><value>Bitte Quell- und Zielkonto auswählen.</value></data>
+  <data name="Err_KontoNichtGefunden" xml:space="preserve"><value>Das ausgewählte Konto wurde nicht gefunden.</value></data>
+  <data name="Err_KontoArchiviert" xml:space="preserve"><value>Archivierte Konten können für diese Aktion nicht verwendet werden.</value></data>
   <data name="Err_UmbuchungNichtBearbeitbar" xml:space="preserve"><value>Umbuchungen können nicht als Einzelbuchung bearbeitet werden.</value></data>
   <data name="Err_OrdnerNichtWaehlbar" xml:space="preserve"><value>Ordner konnte nicht gewählt werden: {0}</value></data>
   <data name="Err_SucheFehlgeschlagen" xml:space="preserve"><value>Die Suche konnte nicht abgeschlossen werden.</value></data>

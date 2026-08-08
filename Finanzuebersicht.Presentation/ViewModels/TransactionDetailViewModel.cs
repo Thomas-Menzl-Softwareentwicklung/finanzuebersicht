@@ -172,7 +172,7 @@ public partial class TransactionDetailViewModel(
                 return;
             }
 
-            await _saveTransactionDetailUseCase.ExecuteAsync(
+            var result = await _saveTransactionDetailUseCase.ExecuteAsync(
                 _existingTransaction,
                 betrag,
                 Titel,
@@ -182,6 +182,13 @@ public partial class TransactionDetailViewModel(
                 Typ,
                 Verwendungszweck,
                 SelectedSparZiel?.Id);
+
+            if (!result.IsSuccess)
+            {
+                await UseCaseErrorPresenter.ShowAsync(_dialogService, _loc, result.Error!);
+                return;
+            }
+
             _appEvents.NotifyDataChanged();
             await _navigationService.GoBackAsync();
             await _feedbackService.ShowSnackbarAsync(_loc.GetString(ResourceKeys.Msg_Gespeichert));

@@ -1,3 +1,4 @@
+using Finanzuebersicht.Application.Results;
 using Finanzuebersicht.Core.Licensing;
 using Finanzuebersicht.Models;
 
@@ -10,7 +11,7 @@ public class SaveAccountDetailUseCase(
     private readonly IAccountRepository _accountRepository = accountRepository;
     private readonly ILicenseService _licenseService = licenseService ?? UnrestrictedLicenseService.Instance;
 
-    public async Task<Account> ExecuteAsync(
+    public async Task<UseCaseResult<Account>> ExecuteAsync(
         Account? existingAccount,
         string name,
         AccountType type,
@@ -24,7 +25,14 @@ public class SaveAccountDetailUseCase(
         if (existingAccount == null)
         {
             var accounts = await _accountRepository.GetAccountsAsync() ?? [];
-            _licenseService.EnsureCanCreate(LimitedResource.Accounts, accounts.Count);
+            var limitCheck = _licenseService.CheckCreateLimit(LimitedResource.Accounts, accounts.Count);
+            if (!limitCheck.Allowed)
+            {
+                return UseCaseResult.Fail<Account>(
+                    UseCaseErrorCode.LicenseLimitReached,
+                    limitCheck.CurrentCount,
+                    limitCheck.Limit ?? 0);
+            }
         }
 
         var account = existingAccount ?? new Account();
@@ -35,6 +43,6 @@ public class SaveAccountDetailUseCase(
         account.OpeningBalanceDate = openingBalanceDate;
 
         await _accountRepository.SaveAccountAsync(account);
-        return account;
+        return UseCaseResult.Ok(account);
     }
 }

@@ -115,6 +115,9 @@ public static class ResourceKeys
     public const string Err_LoeschenFehlgeschlagen = nameof(Err_LoeschenFehlgeschlagen);
     public const string Err_LadenFehlgeschlagen = nameof(Err_LadenFehlgeschlagen);
     public const string Err_TransferKontenUnterschiedlich = nameof(Err_TransferKontenUnterschiedlich);
+    public const string Err_TransferKontenErforderlich = nameof(Err_TransferKontenErforderlich);
+    public const string Err_KontoNichtGefunden = nameof(Err_KontoNichtGefunden);
+    public const string Err_KontoArchiviert = nameof(Err_KontoArchiviert);
     public const string Err_UmbuchungNichtBearbeitbar = nameof(Err_UmbuchungNichtBearbeitbar);
     public const string Err_OrdnerNichtWaehlbar = nameof(Err_OrdnerNichtWaehlbar);
     public const string Err_SucheFehlgeschlagen = nameof(Err_SucheFehlgeschlagen);
