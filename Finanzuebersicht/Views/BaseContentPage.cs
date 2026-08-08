@@ -1,4 +1,6 @@
+using Finanzuebersicht.Presentation.Services;
 using Finanzuebersicht.ViewModels;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Finanzuebersicht.Views;
 
@@ -19,19 +21,46 @@ namespace Finanzuebersicht.Views;
 /// </remarks>
 public abstract class BaseContentPage : ContentPage
 {
+    private IAppEvents? _appEvents;
+
+    /// <summary>Cached after first resolve; safe to use in <see cref="OnDisappearing"/>.</summary>
+    protected IAppEvents? CachedAppEvents => _appEvents;
+
+    /// <summary>
+    /// Resolves the DI-backed app event bus (not static <c>App</c> events).
+    /// </summary>
+    protected IAppEvents AppEvents
+    {
+        get
+        {
+            if (_appEvents is not null)
+                return _appEvents;
+
+            var services = Handler?.MauiContext?.Services
+                ?? Application.Current?.Handler?.MauiContext?.Services;
+            _appEvents = services?.GetService<IAppEvents>()
+                ?? throw new InvalidOperationException("IAppEvents is not registered in the MAUI service provider.");
+            return _appEvents;
+        }
+    }
+
     protected override void OnAppearing()
     {
         base.OnAppearing();
-        App.LanguageChanged += OnLanguageChanged;
-        App.CurrencyChanged += OnCurrencyChanged;
+        AppEvents.LanguageChanged += OnLanguageChanged;
+        AppEvents.CurrencyChanged += OnCurrencyChanged;
         if (BindingContext is IAutoLoadViewModel vm && vm.ShouldAutoLoad)
             vm.AutoLoadCommand.Execute(null);
     }
 
     protected override void OnDisappearing()
     {
-        App.LanguageChanged -= OnLanguageChanged;
-        App.CurrencyChanged -= OnCurrencyChanged;
+        if (_appEvents is not null)
+        {
+            _appEvents.LanguageChanged -= OnLanguageChanged;
+            _appEvents.CurrencyChanged -= OnCurrencyChanged;
+        }
+
         base.OnDisappearing();
     }
 

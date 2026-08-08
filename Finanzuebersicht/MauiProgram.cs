@@ -104,7 +104,7 @@ public static class MauiProgram
 		builder.Services.AddSingleton<IOnboardingCoordinator, OnboardingCoordinator>();
 		builder.Services.AddSingleton<IMainThreadDispatcher, MauiMainThreadDispatcher>();
 		builder.Services.AddSingleton<Finanzuebersicht.Presentation.Services.IFilePicker, MauiFilePicker>();
-		builder.Services.AddSingleton<IAppEvents, MauiAppEvents>();
+		builder.Services.AddSingleton<IAppEvents, AppEvents>();
 		builder.Services.AddSingleton<IWidgetTimelineReloader, MauiWidgetTimelineReloader>();
 		builder.Services.AddSingleton<ICategoryCreateSheetService, CategoryCreateSheetService>();
 		builder.Services.AddSingleton<IRecurringTransactionCreateSheetService, RecurringTransactionCreateSheetService>();
@@ -154,7 +154,6 @@ public static class MauiProgram
 #endif
 
 		var app = builder.Build();
-		_ = app.Services.GetRequiredService<IAppEvents>();
 
 		return app;
 	}
