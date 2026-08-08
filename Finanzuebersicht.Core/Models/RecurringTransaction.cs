@@ -21,4 +21,13 @@ public class RecurringTransaction
     public int ReminderDaysBefore { get; set; } = 0;
     // Ausnahmeregeln (Skip / Shift) für einzelne Instanzen
     public List<RecurringException> Exceptions { get; set; } = new();
+
+    /// <summary>Optional id in an external system (CloudKit / bank). Null for local-only rows.</summary>
+    public string? ExternalId { get; set; }
+
+    /// <summary>Optional origin marker (see <c>EntitySources</c>). Null means local/unspecified.</summary>
+    public string? Source { get; set; }
+
+    /// <summary>Last content change for future sync. Null on legacy data.</summary>
+    public DateTime? UpdatedAt { get; set; }
 }
