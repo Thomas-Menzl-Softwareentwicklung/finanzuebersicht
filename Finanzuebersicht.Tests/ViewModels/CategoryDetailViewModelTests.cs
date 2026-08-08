@@ -10,8 +10,37 @@ namespace Finanzuebersicht.Tests.ViewModels;
 public class CategoryDetailViewModelTests
 {
     [Fact]
-    public async Task TrySaveAsync_WhenBudgetSaveFails_SecondAttemptReusesSavedCategory()
+    public void SelectIcon_UpdatesIconChoicesSelection()
     {
+        var sut = CreateSut(
+            Substitute.For<ICategoryRepository>(),
+            Substitute.For<IBudgetRepository>(),
+            Substitute.For<IDialogService>(),
+            CreateLocalizationService());
+
+        sut.SelectIconCommand.Execute("✈️");
+
+        Assert.Equal("✈️", sut.Icon);
+        Assert.Contains(sut.IconChoices, item => item.Value == "✈️" && item.IsSelected);
+        Assert.DoesNotContain(sut.IconChoices, item => item.Value != "✈️" && item.IsSelected);
+    }
+
+    [Fact]
+    public void SelectColor_UpdatesColorChoicesSelection()
+    {
+        var sut = CreateSut(
+            Substitute.For<ICategoryRepository>(),
+            Substitute.For<IBudgetRepository>(),
+            Substitute.For<IDialogService>(),
+            CreateLocalizationService());
+
+        sut.SelectColorCommand.Execute("#FF3B30");
+
+        Assert.Equal("#FF3B30", sut.Color);
+        Assert.Contains(sut.ColorChoices, item => item.Value == "#FF3B30" && item.IsSelected);
+        Assert.DoesNotContain(sut.ColorChoices, item => item.Value != "#FF3B30" && item.IsSelected);
+    }
+
         var categoryRepository = Substitute.For<ICategoryRepository>();
         var savedCategories = new List<Category>();
         categoryRepository.SaveCategoryAsync(Arg.Any<Category>())
