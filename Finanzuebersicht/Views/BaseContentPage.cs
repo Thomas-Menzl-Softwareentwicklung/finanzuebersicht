@@ -37,7 +37,7 @@ public abstract class BaseContentPage : ContentPage
                 return _appEvents;
 
             var services = Handler?.MauiContext?.Services
-                ?? Application.Current?.Handler?.MauiContext?.Services;
+                ?? Microsoft.Maui.Controls.Application.Current?.Handler?.MauiContext?.Services;
             _appEvents = services?.GetService<IAppEvents>()
                 ?? throw new InvalidOperationException("IAppEvents is not registered in the MAUI service provider.");
             return _appEvents;
