@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using Finanzuebersicht.Application.UseCases.Transactions;
 using Finanzuebersicht.Core.Constants;
 using Finanzuebersicht.Core.Licensing;
