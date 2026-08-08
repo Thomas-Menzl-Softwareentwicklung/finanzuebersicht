@@ -24,6 +24,8 @@ public static class PresentationServiceCollectionExtensions
         services.AddTransient<CategoryDetailViewModel>();
         services.AddTransient<AccountDetailViewModel>();
         services.AddTransient<TransferDetailViewModel>();
+        services.AddTransient<TransactionImportCoordinator>();
+        services.AddTransient<TransactionTemplatesCoordinator>();
         services.AddTransient<TransactionsViewModel>();
         services.AddTransient<TransactionDetailViewModel>();
         services.AddTransient<QuickExpenseCaptureViewModel>();
