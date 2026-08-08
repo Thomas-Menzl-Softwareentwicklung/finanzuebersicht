@@ -1,3 +1,4 @@
+using Finanzuebersicht.Application.Results;
 using Finanzuebersicht.Application.UseCases.Accounts;
 using Finanzuebersicht.Core.Licensing;
 using Finanzuebersicht.Models;
@@ -17,18 +18,16 @@ public class SaveAccountDetailLicenseGateTests
         repository.GetAccountsAsync().Returns(accounts);
 
         var license = Substitute.For<ILicenseService>();
-        license.When(l => l.EnsureCanCreate(LimitedResource.Accounts, FreeTierLimits.MaxAccounts))
-            .Do(_ => throw new FeatureGateException(
-                LimitedResource.Accounts,
-                FreeTierLimits.MaxAccounts,
-                FreeTierLimits.MaxAccounts,
-                "limit"));
+        license.CheckCreateLimit(LimitedResource.Accounts, FreeTierLimits.MaxAccounts)
+            .Returns(new LimitCheckResult(false, FreeTierLimits.MaxAccounts, FreeTierLimits.MaxAccounts));
 
         var sut = new SaveAccountDetailUseCase(repository, license);
 
-        await Assert.ThrowsAsync<FeatureGateException>(() =>
-            sut.ExecuteAsync(null, "Extra", AccountType.Girokonto));
+        var result = await sut.ExecuteAsync(null, "Extra", AccountType.Girokonto);
 
+        Assert.False(result.IsSuccess);
+        Assert.Equal(UseCaseErrorCode.LicenseLimitReached, result.Error!.Code);
+        Assert.Equal([FreeTierLimits.MaxAccounts, FreeTierLimits.MaxAccounts], result.Error.FormatArgs);
         await repository.DidNotReceive().SaveAccountAsync(Arg.Any<Account>());
     }
 
@@ -42,9 +41,11 @@ public class SaveAccountDetailLicenseGateTests
         var license = Substitute.For<ILicenseService>();
         var sut = new SaveAccountDetailUseCase(repository, license);
 
-        await sut.ExecuteAsync(existing, "Giro Neu", AccountType.Girokonto);
+        var result = await sut.ExecuteAsync(existing, "Giro Neu", AccountType.Girokonto);
 
-        license.DidNotReceive().EnsureCanCreate(Arg.Any<LimitedResource>(), Arg.Any<int>());
+        Assert.True(result.IsSuccess);
+        Assert.Equal("Giro Neu", result.Value!.Name);
+        license.DidNotReceive().CheckCreateLimit(Arg.Any<LimitedResource>(), Arg.Any<int>());
         await repository.Received(1).SaveAccountAsync(Arg.Any<Account>());
     }
 }

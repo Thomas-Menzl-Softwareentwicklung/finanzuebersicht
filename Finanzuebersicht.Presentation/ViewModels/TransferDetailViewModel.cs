@@ -97,13 +97,19 @@ public partial class TransferDetailViewModel(
                 ? _loc.GetString(ResourceKeys.Title_Umbuchung)
                 : Title.Trim();
 
-            await _saveTransferUseCase.ExecuteAsync(
+            var result = await _saveTransferUseCase.ExecuteAsync(
                 SourceAccount.Id,
                 TargetAccount.Id,
                 amount,
                 Date,
                 title,
                 Note);
+
+            if (!result.IsSuccess)
+            {
+                await UseCaseErrorPresenter.ShowAsync(_dialogService, _loc, result.Error!);
+                return;
+            }
 
             _appEvents.NotifyDataChanged();
             await _navigationService.GoBackAsync();

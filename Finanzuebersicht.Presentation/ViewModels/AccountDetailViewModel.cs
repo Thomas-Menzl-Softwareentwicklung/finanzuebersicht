@@ -170,8 +170,15 @@ public partial class AccountDetailViewModel(
         {
             Type = SelectedTypeOption?.Value ?? Type;
             var openingBalanceDate = UseOpeningBalanceDate ? OpeningBalanceDate : (DateTime?)null;
-            await _saveAccountDetailUseCase.ExecuteAsync(
+            var result = await _saveAccountDetailUseCase.ExecuteAsync(
                 _existingAccount, Name, Type, IsArchived, openingBalance, openingBalanceDate);
+
+            if (!result.IsSuccess)
+            {
+                await UseCaseErrorPresenter.ShowAsync(_dialogService, _loc, result.Error!);
+                return;
+            }
+
             _appEvents.NotifyDataChanged();
             await _feedbackService.ShowSnackbarAsync(_loc.GetString(ResourceKeys.Msg_Gespeichert));
             await _navigationService.GoBackAsync();

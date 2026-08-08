@@ -70,6 +70,8 @@ Layered clean architecture with MVVM (`CommunityToolkit.Mvvm` source generators)
 
 **Data flow:** View → ViewModel → Use Case → Repository (`I*Repository`) → JSON Store
 
+**Use-case errors (#274):** Expected domain failures return `UseCaseResult` / `UseCaseResult<T>` with `UseCaseErrorCode` (no UI strings in Application). ViewModels map via `UseCaseErrorPresenter` → `ResourceKeys`. Unexpected exceptions: log + alert with user feedback. First adopters: Save Transaction / Transfer / Account; extend when touching other use cases (esp. Import/Backup).
+
 **Repositories:** Prefer `ICategoryRepository`, `IAccountRepository`, `ITransactionRepository`, `IRecurringTransactionRepository`, `IBudgetRepository`, `ISparZielRepository`, `ITransactionTemplateRepository`. Reporting/generation: `IReportingService`, `IRecurringGenerationService`.
 
 **DI entry points:**
@@ -119,7 +121,7 @@ Layered clean architecture with MVVM (`CommunityToolkit.Mvvm` source generators)
 - Sparziele with transaction linking and completion forecast
 - Backup/restore (ZIP/JSON), configurable data path
 - CloudKit sync is a backlog idea (#243); no active CloudKit implementation in tree
-- Active architecture milestone: **v1.20** (`docs/ROADMAP.md`) — before Milestone 22 features and v2.0 (encryption / multi-currency). Wave 0 done (#289–#291); wave 1: #268/#270
+- Active architecture milestone: **v1.20** (`docs/ROADMAP.md`) — before Milestone 22 features and v2.0 (encryption / multi-currency). Next open: #274 UseCaseResult, then Import/Backup (#269/#292).
 
 ## Data Persistence
 

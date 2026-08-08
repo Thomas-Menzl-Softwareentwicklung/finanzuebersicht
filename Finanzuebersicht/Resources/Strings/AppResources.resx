@@ -125,6 +125,9 @@
   <data name="Err_LoeschenFehlgeschlagen" xml:space="preserve"><value>Error deleting: {0}</value></data>
   <data name="Err_LadenFehlgeschlagen" xml:space="preserve"><value>Error loading data: {0}</value></data>
   <data name="Err_TransferKontenUnterschiedlich" xml:space="preserve"><value>Please select different source and target accounts.</value></data>
+  <data name="Err_TransferKontenErforderlich" xml:space="preserve"><value>Please select a source and a target account.</value></data>
+  <data name="Err_KontoNichtGefunden" xml:space="preserve"><value>The selected account was not found.</value></data>
+  <data name="Err_KontoArchiviert" xml:space="preserve"><value>Archived accounts cannot be used for this action.</value></data>
   <data name="Err_UmbuchungNichtBearbeitbar" xml:space="preserve"><value>Transfers cannot be edited as a single transaction.</value></data>
   <data name="Err_OrdnerNichtWaehlbar" xml:space="preserve"><value>Folder could not be selected: {0}</value></data>
   <data name="Err_SucheFehlgeschlagen" xml:space="preserve"><value>The search could not be completed.</value></data>
