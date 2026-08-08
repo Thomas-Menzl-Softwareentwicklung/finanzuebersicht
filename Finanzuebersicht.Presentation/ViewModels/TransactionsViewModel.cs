@@ -37,7 +37,6 @@ public partial class TransactionsViewModel(
     IMainThreadDispatcher dispatcher,
     IAppEvents appEvents,
     ILogger<TransactionsViewModel> logger,
-    Finanzuebersicht.Core.Licensing.ILicenseService? licenseService = null,
     CountUncategorizedTransactionsUseCase? countUncategorizedTransactionsUseCase = null,
     IUncategorizedCategoryService? uncategorizedCategoryService = null) : MonthNavigationViewModel, IAutoLoadViewModel, ICurrencyRefreshViewModel
 {
@@ -64,8 +63,6 @@ public partial class TransactionsViewModel(
     private readonly IMainThreadDispatcher _dispatcher = dispatcher;
     private readonly IAppEvents _appEvents = appEvents;
     private readonly ILogger<TransactionsViewModel> _logger = logger;
-    private readonly Finanzuebersicht.Core.Licensing.ILicenseService _licenseService =
-        licenseService ?? Finanzuebersicht.Core.Licensing.UnrestrictedLicenseService.Instance;
     private readonly CountUncategorizedTransactionsUseCase? _countUncategorizedTransactionsUseCase = countUncategorizedTransactionsUseCase;
     private readonly IUncategorizedCategoryService? _uncategorizedCategoryService = uncategorizedCategoryService;
 
@@ -605,15 +602,6 @@ public partial class TransactionsViewModel(
     {
         try
         {
-            if (!_licenseService.HasFeature(Finanzuebersicht.Core.Licensing.AppFeature.QuickExpenseCapture))
-            {
-                await _dialogService.ShowAlertAsync(
-                    _loc.GetString(ResourceKeys.Err_Titel),
-                    _loc.GetString(ResourceKeys.Err_ProErforderlich),
-                    _loc.GetString(ResourceKeys.Btn_OK));
-                return;
-            }
-
             _quickExpenseCaptureViewModel.Reset();
             if (await _quickExpenseCaptureSheetService.ShowAsync(_quickExpenseCaptureViewModel))
                 await LoadTransaktionenCommand.ExecuteAsync(null);

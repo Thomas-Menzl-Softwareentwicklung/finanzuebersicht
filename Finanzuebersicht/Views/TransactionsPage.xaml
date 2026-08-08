@@ -400,7 +400,8 @@
                              InputTransparent="True"
                              CascadeInputTransparent="False">
             <Button Text="{loc:Translate Fab_Import}"
-                    FontSize="22"
+                    FontSize="26"
+                    FontAttributes="Bold"
                     TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
                     BackgroundColor="{AppThemeBinding Light={StaticResource CardBackground}, Dark={StaticResource CardBackgroundDark}}"
                     CornerRadius="24"
@@ -410,7 +411,8 @@
                     Shadow="{Shadow Brush='#40000000', Offset='0,3', Radius=6}"
                     Command="{Binding ImportCsvCommand}" />
             <Button Text="{loc:Translate Fab_Umbuchen}"
-                    FontSize="22"
+                    FontSize="24"
+                    FontAttributes="Bold"
                     TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
                     BackgroundColor="{AppThemeBinding Light={StaticResource CardBackground}, Dark={StaticResource CardBackgroundDark}}"
                     CornerRadius="24"

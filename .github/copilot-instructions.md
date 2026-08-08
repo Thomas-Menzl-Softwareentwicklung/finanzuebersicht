@@ -160,7 +160,7 @@ Full reference: `docs/CREATE_UX.md`.
 
 ### Quick Expense Capture (Pro) + iOS Widget
 
-In-app **Schnell** sheet on Transaktionen (`CaptureQuickExpenseUseCase`, Unkategorisiert + default account, `AppFeature.QuickExpenseCapture`) ships on all targets. iOS Home Screen WidgetKit `.appex` is embedded (presets, App Group inbox, deep link). Rebuild/resign on Mac with Xcode when Swift sources change — do **not** recreate domain/UI.
+In-app **Schnell** sheet (`CaptureQuickExpenseUseCase`, Unkategorisiert + default account) is free on all targets. iOS Home Screen WidgetKit `.appex` (presets, App Group inbox, deep link) stays Pro (`AppFeature.QuickExpenseCapture`). Rebuild/resign on Mac with Xcode when Swift sources change — do **not** recreate domain/UI.
 
 - Agent rule: `.cursor/rules/ios-quick-expense-widget.mdc`
 - Steps: `Finanzuebersicht/Platforms/iOS/Widgets/README.md`

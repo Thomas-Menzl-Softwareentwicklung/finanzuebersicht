@@ -6,6 +6,6 @@ public enum AppFeature
     CsvImport = 1,
     Cashflow = 2,
     CloudSync = 3,
-    /// <summary>Quick expense capture (in-app sheet + interactive iOS widget).</summary>
+    /// <summary>iOS Quick-Expense Widget (Presets, Inbox, deep link). In-app Schnell is free.</summary>
     QuickExpenseCapture = 4
 }

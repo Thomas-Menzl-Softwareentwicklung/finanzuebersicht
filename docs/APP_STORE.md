@@ -14,7 +14,7 @@ Monetarisierung: [`MONETIZATION.md`](MONETIZATION.md).
 | iPhone + iPad | vorhanden |
 | Privacy Manifest + Export Compliance | gesetzt |
 | iOS Release-Entitlements (ohne `get-task-allow`) | gesetzt (inkl. App Group für Quick-Expense-Widget) |
-| Quick Expense Capture (Pro, In-App + iOS-Widget) | ✅ In-App alle Targets; WidgetKit-`.appex` eingebettet — `Platforms/iOS/Widgets/README.md` |
+| Quick Expense Widget (Pro); In-App Schnell Free | ✅ In-App alle Targets; WidgetKit-`.appex` eingebettet — `Platforms/iOS/Widgets/README.md` |
 | Support / Privacy Site | eigenes Repo `finanzuebersicht-site` |
 | License-Gates Free/Pro/Sync | vorhanden |
 | StoreKit (Pro kaufen / Restore) | vorhanden (Store-Build, iOS/Mac Catalyst) |

@@ -31,7 +31,6 @@ public partial class DashboardViewModel : MonthNavigationViewModel, ILocalizable
     private readonly ILocalizationService _loc;
     private readonly INavigationService _navigationService;
     private readonly IDialogService _dialogService;
-    private readonly Finanzuebersicht.Core.Licensing.ILicenseService _licenseService;
     private readonly QuickExpenseCaptureViewModel _quickExpenseCaptureViewModel;
     private readonly IQuickExpenseCaptureSheetService _quickExpenseCaptureSheetService;
     private readonly IClock _clock;
@@ -387,7 +386,6 @@ public partial class DashboardViewModel : MonthNavigationViewModel, ILocalizable
         INavigationService navigationService,
         ISettingsService settingsService,
         IDialogService dialogService,
-        Finanzuebersicht.Core.Licensing.ILicenseService licenseService,
         QuickExpenseCaptureViewModel quickExpenseCaptureViewModel,
         IQuickExpenseCaptureSheetService quickExpenseCaptureSheetService,
         IClock? clock = null,
@@ -409,7 +407,6 @@ public partial class DashboardViewModel : MonthNavigationViewModel, ILocalizable
         _navigationService = navigationService;
         _settingsService = settingsService;
         _dialogService = dialogService;
-        _licenseService = licenseService;
         _quickExpenseCaptureViewModel = quickExpenseCaptureViewModel;
         _quickExpenseCaptureSheetService = quickExpenseCaptureSheetService;
         _logger = logger;
@@ -792,15 +789,6 @@ public partial class DashboardViewModel : MonthNavigationViewModel, ILocalizable
     {
         try
         {
-            if (!_licenseService.HasFeature(Finanzuebersicht.Core.Licensing.AppFeature.QuickExpenseCapture))
-            {
-                await _dialogService.ShowAlertAsync(
-                    _loc.GetString(ResourceKeys.Err_Titel),
-                    _loc.GetString(ResourceKeys.Err_ProErforderlich),
-                    _loc.GetString(ResourceKeys.Btn_OK));
-                return;
-            }
-
             _quickExpenseCaptureViewModel.Reset();
             if (await _quickExpenseCaptureSheetService.ShowAsync(_quickExpenseCaptureViewModel))
                 await LoadDashboardCommand.ExecuteAsync(null);

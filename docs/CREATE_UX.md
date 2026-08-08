@@ -16,7 +16,7 @@ Referenz-Klickdummy (extern): `Finanzübersicht Mobile App Verfeinerung-2` — d
 | Verwaltung › Konten | `AccountCreateSheetService` + `AccountFormView` |
 | Sparziele | `SparZielCreateSheetService` + `SparZielFormView` |
 | Daueraufträge | `RecurringTransactionCreateSheetService` + `RecurringTransactionFormView` |
-| Dashboard Schnell-FAB | `QuickExpenseCaptureSheetService` + `QuickExpenseFormView` (Pro) |
+| Dashboard Schnell-FAB | `QuickExpenseCaptureSheetService` + `QuickExpenseFormView` (kostenlos) |
 | Transaktionen `+` | `TransactionCreateSheetService` + `TransactionFormView` |
 | Transaktionen Umbuchen | `TransferCreateSheetService` + `TransferFormView` |
 | Transaktionen Import | CSV-Flow (kein Sheet) |
@@ -32,7 +32,7 @@ Legacy: `CreateFormCard`, `FormSheetPopup` (CommunityToolkit) — nicht für neu
 
 | Tab / Kontext | FAB öffnet |
 |---------------|-----------|
-| Dashboard | **Schnell** (Pro) |
+| Dashboard | **Schnell** (kostenlos) |
 | Transaktionen | Stack: Import · Umbuchen-Sheet · `+` Sheet |
 | Verwaltung › Kategorien | Sheet **Neue Kategorie** |
 | Verwaltung › Konten | Sheet **Neues Konto** |
@@ -50,7 +50,7 @@ Mockup-Fehler: globaler `openSheet` → immer Schnellerfassung. Das ist **kein**
 
 ```
 FAB
-  ├─ Dashboard         → Schnell-Sheet (Pro)
+  ├─ Dashboard         → Schnell-Sheet (kostenlos)
   ├─ Transaktionen     → Import / Umbuchen-Sheet / + Sheet
   ├─ Verwaltung/Cats   → Neue Kategorie
   ├─ Verwaltung/Konten → Neues Konto

@@ -405,8 +405,8 @@ Bitte starte die App neu.</value></data>
   <data name="A11y_TransaktionHinzufuegen" xml:space="preserve"><value>Neue Transaktion hinzufügen</value></data>
   <data name="A11y_UmbuchungHinzufuegen" xml:space="preserve"><value>Neue Umbuchung hinzufügen</value></data>
   <data name="A11y_CsvImport" xml:space="preserve"><value>CSV-Import starten</value></data>
-  <data name="Fab_Umbuchen" xml:space="preserve"><value>⇄</value></data>
-  <data name="Fab_Import" xml:space="preserve"><value>⬇</value></data>
+  <data name="Fab_Umbuchen" xml:space="preserve"><value>↔</value></data>
+  <data name="Fab_Import" xml:space="preserve"><value>↓</value></data>
   <data name="Fab_Schnell" xml:space="preserve"><value>⚡</value></data>
   <data name="A11y_KategorieHinzufuegen" xml:space="preserve"><value>Neue Kategorie hinzufügen</value></data>
   <data name="A11y_KontoHinzufuegen" xml:space="preserve"><value>Neues Konto hinzufügen</value></data>

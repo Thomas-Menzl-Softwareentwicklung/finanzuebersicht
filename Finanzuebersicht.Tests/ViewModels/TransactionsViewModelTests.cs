@@ -6,7 +6,6 @@ using Finanzuebersicht.Application.UseCases.Categories;
 using Finanzuebersicht.Application.UseCases.Import;
 using Finanzuebersicht.Application.UseCases.Transactions;
 using Finanzuebersicht.Application.UseCases.SparZiele;
-using Finanzuebersicht.Core.Licensing;
 using Finanzuebersicht.Core.Services;
 using Finanzuebersicht.Models;
 using Finanzuebersicht.Navigation;
@@ -469,7 +468,6 @@ public class TransactionsViewModelTests
                 loadAccountRepository,
                 uncategorized,
                 new TransactionValidationService(),
-                UnrestrictedLicenseService.Instance,
                 SystemClock.Instance),
             localizationService,
             dialogService,
