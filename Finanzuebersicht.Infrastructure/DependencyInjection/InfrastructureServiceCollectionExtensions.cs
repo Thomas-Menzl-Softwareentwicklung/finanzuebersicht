@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Finanzuebersicht.Core.Licensing;
+using Finanzuebersicht.Core.Services;
 using Finanzuebersicht.Infrastructure.Licensing;
 
 namespace Finanzuebersicht.Infrastructure;
@@ -27,6 +28,12 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddSingleton<ILicenseService, LicenseService>();
 
         services.AddSingleton<IUncategorizedCategoryService, UncategorizedCategoryService>();
+
+        // CSV import parsers + categorization (Application use cases consume these)
+        services.AddSingleton<IStatementParser, DkbCsvParser>();
+        services.AddSingleton<ICategorizationStrategy, KeywordCategorizationStrategy>();
+        services.AddSingleton<ICategorizationStrategy, HistoricalCategorizationStrategy>();
+        services.AddSingleton<CategorizationService>();
 
         // Backup
         services.AddSingleton<IDataMigrator, Finanzuebersicht.Core.Services.Migrations.V1ToV2Migrator>();

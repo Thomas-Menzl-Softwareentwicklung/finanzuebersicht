@@ -3,7 +3,9 @@ using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using Finanzuebersicht.Application.UseCases.Accounts;
 using Finanzuebersicht.Application.UseCases.Categories;
+using Finanzuebersicht.Application.UseCases.Import;
 using Finanzuebersicht.Application.UseCases.Transactions;
+using Finanzuebersicht.Core.Services;
 using Finanzuebersicht.Models;
 using Finanzuebersicht.Navigation;
 using Finanzuebersicht.Presentation.Services;
@@ -243,8 +245,16 @@ public class TransactionsViewModelTests
         importAccountRepository.GetAccountsAsync()
             .Returns(Task.FromResult(new List<Account>()));
 
-        var importLogger = Substitute.For<ILogger<ImportService>>();
-        var importService = new ImportService([parser], importRepository, importLogger, importCategoryRepository, null, importAccountRepository);
+        var importLogger = Substitute.For<ILogger<CsvImportOrchestrator>>();
+        var analyzeUseCase = new AnalyzeCsvImportUseCase(
+            new CsvImportOrchestrator(
+                [parser],
+                importRepository,
+                importLogger,
+                importCategoryRepository,
+                null,
+                importAccountRepository,
+                new UncategorizedCategoryService(importCategoryRepository)));
 
         var pickedFile = new PickFileResult("test.csv", () => Task.FromResult<Stream>(new MemoryStream()));
         var filePicker = Substitute.For<IFilePicker>();
@@ -264,7 +274,7 @@ public class TransactionsViewModelTests
             out _,
             out var navigationService,
             filePicker: filePicker,
-            importService: importService,
+            analyzeCsvImportUseCase: analyzeUseCase,
             importSessionStore: importSessionStore);
 
         await viewModel.ImportCsvCommand.ExecuteAsync(null);
@@ -286,7 +296,7 @@ public class TransactionsViewModelTests
         out INavigationService navigationService,
         ITransactionRepository? deleteTransactionRepository = null,
         IFilePicker? filePicker = null,
-        ImportService? importService = null,
+        AnalyzeCsvImportUseCase? analyzeCsvImportUseCase = null,
         IImportSessionStore? importSessionStore = null)
     {
         dialogService = Substitute.For<IDialogService>();
@@ -310,13 +320,14 @@ public class TransactionsViewModelTests
         filePicker ??= Substitute.For<IFilePicker>();
         var appEvents = Substitute.For<IAppEvents>();
         var logger = Substitute.For<ILogger<TransactionsViewModel>>();
-        importService ??= new ImportService(
-            [],
-            Substitute.For<ITransactionRepository>(),
-            Substitute.For<ILogger<ImportService>>(),
-            Substitute.For<ICategoryRepository>(),
-            null,
-            Substitute.For<IAccountRepository>());
+        analyzeCsvImportUseCase ??= new AnalyzeCsvImportUseCase(
+            new CsvImportOrchestrator(
+                [],
+                Substitute.For<ITransactionRepository>(),
+                Substitute.For<ILogger<CsvImportOrchestrator>>(),
+                Substitute.For<ICategoryRepository>(),
+                null,
+                Substitute.For<IAccountRepository>()));
 
         deleteTransactionRepository ??= Substitute.For<ITransactionRepository>();
         deleteTransactionRepository.DeleteTransactionAsync(Arg.Any<string>()).Returns(Task.CompletedTask);
@@ -332,7 +343,7 @@ public class TransactionsViewModelTests
             new LoadTransactionsMonthUseCase(loadTransactionRepository, loadCategoryRepository, loadAccountRepository),
             new SearchTransactionsUseCase(searchTransactionRepository, searchCategoryRepository, searchAccountRepository),
             navigationService,
-            importService,
+            analyzeCsvImportUseCase,
             dialogService,
             feedbackService,
             localizationService,

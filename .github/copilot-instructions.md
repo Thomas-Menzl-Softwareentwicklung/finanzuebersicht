@@ -121,7 +121,7 @@ Layered clean architecture with MVVM (`CommunityToolkit.Mvvm` source generators)
 - Sparziele with transaction linking and completion forecast
 - Backup/restore (ZIP/JSON), configurable data path
 - CloudKit sync is a backlog idea (#243); no active CloudKit implementation in tree
-- Active architecture milestone: **v1.20** (`docs/ROADMAP.md`) — before Milestone 22 features and v2.0 (encryption / multi-currency). Next open: #274 UseCaseResult, then Import/Backup (#269/#292).
+- Active architecture milestone: **v1.20** (`docs/ROADMAP.md`) — before Milestone 22 features and v2.0 (encryption / multi-currency). Next open after #274: Import (#269) / Backup (#292).
 
 ## Data Persistence
 
@@ -208,7 +208,7 @@ Directory.Build.props              ← TreatWarningsAsErrors, Nerdbank.GitVersio
 
 Finanzuebersicht.Core/             ← net10.0
 ├── Models/                        ← Transaction, Category, Account, SparZiel, …
-├── Services/                      ← I*Repository, IClock, ForecastService, ImportService, …
+├── Services/                      ← I*Repository, IClock, ForecastService, parsers, …
 └── Constants/
 
 Finanzuebersicht.Application/      ← net10.0

@@ -378,6 +378,8 @@ Please restart the app.</value></data>
   <data name="Msg_ImportStatusMissingDate" xml:space="preserve"><value>Missing booking date</value></data>
   <data name="Msg_ImportStatusPossibleDuplicate" xml:space="preserve"><value>Possible duplicate</value></data>
   <data name="Msg_ImportStatusCategoryUnresolved" xml:space="preserve"><value>Category not assigned</value></data>
+  <data name="Msg_ImportFileReadFailed" xml:space="preserve"><value>The file could not be read.</value></data>
+  <data name="Msg_ImportNoParserMatched" xml:space="preserve"><value>No matching parser found or the file contains no records.</value></data>
   <data name="Btn_Duplizieren" xml:space="preserve"><value>Duplicate</value></data>
   <data name="Btn_Verwenden" xml:space="preserve"><value>Use</value></data>
   <data name="Btn_AlsVorlageSpeichern" xml:space="preserve"><value>Save as template</value></data>

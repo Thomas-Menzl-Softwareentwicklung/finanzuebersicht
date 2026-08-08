@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Finanzuebersicht.Application.UseCases.Import;
 using Finanzuebersicht.Core.Services;
 using Finanzuebersicht.Models;
 using Finanzuebersicht.Navigation;
@@ -12,7 +13,7 @@ using Microsoft.Extensions.Logging;
 namespace Finanzuebersicht.ViewModels;
 
 public partial class ImportPreviewViewModel(
-    ImportService importService,
+    CommitCsvImportUseCase commitCsvImportUseCase,
     IImportSessionStore importSessionStore,
     ICategoryRepository categoryRepository,
     INavigationService navigationService,
@@ -22,7 +23,7 @@ public partial class ImportPreviewViewModel(
     IFeedbackService feedbackService,
     ILogger<ImportPreviewViewModel>? logger = null) : ObservableObject, IAutoLoadViewModel, ILocalizableViewModel
 {
-    private readonly ImportService _importService = importService;
+    private readonly CommitCsvImportUseCase _commitCsvImportUseCase = commitCsvImportUseCase;
     private readonly IImportSessionStore _importSessionStore = importSessionStore;
     private readonly ICategoryRepository _categoryRepository = categoryRepository;
     private readonly INavigationService _navigationService = navigationService;
@@ -134,7 +135,7 @@ public partial class ImportPreviewViewModel(
 
         try
         {
-            var result = await _importService.CommitImportAsync(_activeSession, selectedRowIds);
+            var result = await _commitCsvImportUseCase.ExecuteAsync(_activeSession, selectedRowIds);
             var summaryLines = new List<string>
             {
                 string.Format(_loc.GetString(ResourceKeys.Msg_ImportiertCount), result.Imported.Count)

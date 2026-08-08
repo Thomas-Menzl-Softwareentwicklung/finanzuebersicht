@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Finanzuebersicht.Application.UseCases.Accounts;
 using Finanzuebersicht.Application.UseCases.Categories;
+using Finanzuebersicht.Application.UseCases.Import;
 using Finanzuebersicht.Application.UseCases.Transactions;
 using Finanzuebersicht.Core.Services;
 using Finanzuebersicht.Models;
@@ -21,7 +22,7 @@ public partial class TransactionsViewModel(
     LoadTransactionsMonthUseCase loadTransactionsMonthUseCase,
     SearchTransactionsUseCase searchTransactionsUseCase,
     INavigationService navigationService,
-    ImportService importService,
+    AnalyzeCsvImportUseCase analyzeCsvImportUseCase,
     IDialogService dialogService,
     IFeedbackService feedbackService,
     ILocalizationService localizationService,
@@ -46,7 +47,7 @@ public partial class TransactionsViewModel(
     public System.Windows.Input.ICommand AutoLoadCommand => LoadTransaktionenCommand;
     private readonly SearchTransactionsUseCase _searchTransactionsUseCase = searchTransactionsUseCase;
     private readonly INavigationService _navigationService = navigationService;
-    private readonly ImportService _importService = importService;
+    private readonly AnalyzeCsvImportUseCase _analyzeCsvImportUseCase = analyzeCsvImportUseCase;
     private readonly IDialogService _dialogService = dialogService;
     private readonly IFeedbackService _feedbackService = feedbackService;
     private readonly ILocalizationService _loc = localizationService;
@@ -678,10 +679,10 @@ public partial class TransactionsViewModel(
         }
 
         // Defensive checks to avoid NullReferenceExceptions when DI failed
-        if (_importService == null)
+        if (_analyzeCsvImportUseCase == null)
         {
             var title = _loc?.GetString(Finanzuebersicht.Resources.Strings.ResourceKeys.Msg_ImportFehlgeschlagen_Title) ?? "Import fehlgeschlagen";
-            var msg = _loc?.GetString(Finanzuebersicht.Resources.Strings.ResourceKeys.Msg_ImportServiceNichtVerfuegbar) ?? "ImportService nicht verfügbar.";
+            var msg = _loc?.GetString(Finanzuebersicht.Resources.Strings.ResourceKeys.Msg_ImportServiceNichtVerfuegbar) ?? "Import nicht verfügbar.";
             var ok = _loc?.GetString(Finanzuebersicht.Resources.Strings.ResourceKeys.Btn_OK) ?? "OK";
 
             if (_dialogService != null)
@@ -690,7 +691,7 @@ public partial class TransactionsViewModel(
             }
             else
             {
-                LogError("ImportCsv: DialogService is null while handling missing ImportService");
+                LogError("ImportCsv: DialogService is null while handling missing AnalyzeCsvImportUseCase");
             }
 
             return;
@@ -702,13 +703,19 @@ public partial class TransactionsViewModel(
             if (result == null) return;
 
             using var stream = await result.OpenReadAsync();
-            var preview = await _importService.AnalyzeCsvAsync(stream, SelectedAccountId);
+            var preview = await _analyzeCsvImportUseCase.ExecuteAsync(stream, SelectedAccountId);
 
             if (!preview.Success)
             {
+                var errorDetail = string.IsNullOrWhiteSpace(preview.ErrorMessage)
+                    ? "Unbekannter Fehler beim Import."
+                    : _loc.GetString(preview.ErrorMessage);
+                if (string.IsNullOrWhiteSpace(errorDetail) || errorDetail == preview.ErrorMessage)
+                    errorDetail = preview.ErrorMessage ?? errorDetail;
+
                 await _dialogService.ShowAlertAsync(
                     _loc.GetString(ResourceKeys.Msg_ImportFehlgeschlagen_Title),
-                    preview.ErrorMessage ?? "Unbekannter Fehler beim Import.",
+                    errorDetail,
                     _loc.GetString(ResourceKeys.Btn_OK));
                 return;
             }
