@@ -1,5 +1,6 @@
 using Finanzuebersicht.Application.UseCases.Categories;
 using Finanzuebersicht.Application.UseCases.Accounts;
+using Finanzuebersicht.Application.UseCases.Backup;
 using Finanzuebersicht.Application.UseCases.Dashboard;
 using Finanzuebersicht.Application.UseCases.Import;
 using Finanzuebersicht.Application.UseCases.RecurringTransactions;
@@ -66,6 +67,12 @@ public static class ApplicationServiceCollectionExtensions
         services.AddTransient<CsvImportOrchestrator>();
         services.AddTransient<AnalyzeCsvImportUseCase>();
         services.AddTransient<CommitCsvImportUseCase>();
+
+        services.AddTransient<CreateBackupUseCase>();
+        services.AddTransient<ListBackupsUseCase>();
+        services.AddTransient<RestoreBackupUseCase>();
+        services.AddTransient<DeleteBackupUseCase>();
+        services.AddTransient<ExportCsvUseCase>();
 
         services.AddTransient<LoadSparZieleUseCase>();
         services.AddTransient<SaveSparZielUseCase>();

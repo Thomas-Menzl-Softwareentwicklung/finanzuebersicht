@@ -1,3 +1,4 @@
+using Finanzuebersicht.Application.UseCases.Backup;
 using Finanzuebersicht.Core.Constants;
 using Finanzuebersicht.Navigation;
 using Finanzuebersicht.Resources.Strings;
@@ -8,26 +9,6 @@ namespace Finanzuebersicht.Tests.ViewModels.Settings;
 
 public class BackupViewModelTests
 {
-    [Fact]
-    public async Task CreateBackup_WhenBackupServiceNull_ShowsAlert()
-    {
-        using var settingsScope = new SettingsScope(nameof(BackupViewModelTests));
-        var dialogService = CreateDialogService();
-        var sut = new BackupViewModel(
-            settingsScope.Settings,
-            null,
-            dialogService,
-            CreateLocalizationService(),
-            Substitute.For<INavigationService>());
-
-        await sut.CreateBackupCommand.ExecuteAsync(null);
-
-        await dialogService.Received(1).ShowAlertAsync(
-            ResourceKeys.Err_Titel,
-            ResourceKeys.Msg_BackupServiceNotAvailable,
-            ResourceKeys.Btn_OK);
-    }
-
     [Fact]
     public async Task CreateBackup_WhenSuccessful_ShowsSuccessAlert()
     {
@@ -45,12 +26,7 @@ public class BackupViewModelTests
             }));
 
         var dialogService = CreateDialogService();
-        var sut = new BackupViewModel(
-            settingsScope.Settings,
-            backupService,
-            dialogService,
-            CreateLocalizationService(),
-            Substitute.For<INavigationService>());
+        var sut = CreateSut(settingsScope.Settings, backupService, dialogService);
 
         await sut.CreateBackupCommand.ExecuteAsync(null);
 
@@ -67,14 +43,12 @@ public class BackupViewModelTests
         using var settingsScope = new SettingsScope(nameof(BackupViewModelTests));
         var backupService = Substitute.For<IBackupService>();
         var dialogService = CreateDialogService();
-        var sut = new BackupViewModel(
+        var sut = CreateSut(
             settingsScope.Settings,
             backupService,
             dialogService,
-            CreateLocalizationService(),
-            Substitute.For<INavigationService>(),
-            null,
-            new FixedClock(new DateTime(2026, 3, 15)));
+            fileSaver: null,
+            clock: new FixedClock(new DateTime(2026, 3, 15)));
 
         await sut.ExportAsCSVCommand.ExecuteAsync(null);
 
@@ -87,12 +61,11 @@ public class BackupViewModelTests
     {
         using var settingsScope = new SettingsScope(nameof(BackupViewModelTests));
         var navigationService = Substitute.For<INavigationService>();
-        var sut = new BackupViewModel(
+        var sut = CreateSut(
             settingsScope.Settings,
             Substitute.For<IBackupService>(),
             CreateDialogService(),
-            CreateLocalizationService(),
-            navigationService);
+            navigationService: navigationService);
 
         await sut.RestoreBackupCommand.ExecuteAsync(null);
 
@@ -110,12 +83,7 @@ public class BackupViewModelTests
             .Returns(Task.FromResult<IEnumerable<BackupMetadata>>(Array.Empty<BackupMetadata>()));
 
         var dialogService = CreateDialogService();
-        var sut = new BackupViewModel(
-            settingsScope.Settings,
-            backupService,
-            dialogService,
-            CreateLocalizationService(),
-            Substitute.For<INavigationService>());
+        var sut = CreateSut(settingsScope.Settings, backupService, dialogService);
 
         await sut.BrowseBackupsCommand.ExecuteAsync(null);
 
@@ -124,6 +92,24 @@ public class BackupViewModelTests
             ResourceKeys.Msg_NoBackupsDesc,
             ResourceKeys.Btn_OK);
     }
+
+    private static BackupViewModel CreateSut(
+        ISettingsService settings,
+        IBackupService backupService,
+        IDialogService dialogService,
+        INavigationService? navigationService = null,
+        IFileSaver? fileSaver = null,
+        IClock? clock = null)
+        => new(
+            settings,
+            new CreateBackupUseCase(backupService),
+            new ListBackupsUseCase(backupService),
+            new ExportCsvUseCase(backupService),
+            dialogService,
+            CreateLocalizationService(),
+            navigationService ?? Substitute.For<INavigationService>(),
+            fileSaver,
+            clock);
 
     private static IDialogService CreateDialogService()
     {
@@ -140,5 +126,4 @@ public class BackupViewModelTests
         localizationService.GetString(Arg.Any<string>(), Arg.Any<object[]>()).Returns(call => call.ArgAtNotNull<string>(0));
         return localizationService;
     }
-
 }

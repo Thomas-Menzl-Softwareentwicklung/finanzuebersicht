@@ -42,6 +42,20 @@ namespace Finanzuebersicht.Core.Services
     }
 
     /// <summary>
+    /// Structured restore failure kind (UI maps via Application UseCaseErrorCode — no DE strings).
+    /// </summary>
+    public enum BackupErrorKind
+    {
+        None = 0,
+        NotFound,
+        CorruptOrIncomplete,
+        SchemaIncompatible,
+        SaveFailed,
+        RestoreFailed,
+        RestoreAndRollbackFailed
+    }
+
+    /// <summary>
     /// Ergebnis einer Restore-Operation.
     /// </summary>
     public class RestoreResult
@@ -52,7 +66,12 @@ namespace Finanzuebersicht.Core.Services
         public bool Success { get; set; }
 
         /// <summary>
-        /// Fehlermeldung falls Success = false.
+        /// Structured failure kind when <see cref="Success"/> is false.
+        /// </summary>
+        public BackupErrorKind ErrorKind { get; set; }
+
+        /// <summary>
+        /// Optional technical detail for logs (not for UI). Prefer <see cref="ErrorKind"/>.
         /// </summary>
         public string? ErrorMessage { get; set; }
 

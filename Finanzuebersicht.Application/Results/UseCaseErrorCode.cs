@@ -11,5 +11,12 @@ public enum UseCaseErrorCode
     TransferAccountsMustDiffer,
     TransferAmountMustBePositive,
     TransferMustUseTransferFlow,
-    LicenseLimitReached
+    LicenseLimitReached,
+    BackupFailed,
+    BackupNotFound,
+    BackupCorrupt,
+    BackupSchemaIncompatible,
+    BackupRestoreFailed,
+    BackupDataInconsistent,
+    BackupExportFailed
 }

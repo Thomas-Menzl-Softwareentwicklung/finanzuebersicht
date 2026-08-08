@@ -161,8 +161,8 @@ Offene Issues in Abarbeitungsreihenfolge (#274 vor Import/Backup, damit neue Use
 | Nr. | Issue | Fokus | Stand |
 |-----|--------|--------|-------|
 | 1 | [#274](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/274) | Einheitliches Fehler- & Result-Modell | ✅ |
-| 2 | [#269](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/269) | Import in Application-Layer (Use Cases) | in Arbeit (`feature/269-import-use-cases`) |
-| 3 | [#292](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/292) | Backup in Application-Layer (Use Cases) | offen |
+| 2 | [#269](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/269) | Import in Application-Layer (Use Cases) | ✅ |
+| 3 | [#292](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/292) | Backup in Application-Layer (Use Cases) | in Arbeit (`feature/292-backup-use-cases`) |
 | 4 | [#293](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/293) | TransactionsViewModel aufteilen (nach #269) | offen |
 | 5 | [#267](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/267) | DashboardViewModel aufteilen | offen |
 | 6 | [#294](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/294) | CategoriesViewModel aufteilen | offen |

@@ -123,6 +123,9 @@ public static class ResourceKeys
     public const string Err_SucheFehlgeschlagen = nameof(Err_SucheFehlgeschlagen);
     public const string Err_ProErforderlich = nameof(Err_ProErforderlich);
     public const string Err_LimitErreicht = nameof(Err_LimitErreicht);
+    public const string Err_BackupNichtGefunden = nameof(Err_BackupNichtGefunden);
+    public const string Err_BackupBeschaedigt = nameof(Err_BackupBeschaedigt);
+    public const string Err_BackupSchemaInkompatibel = nameof(Err_BackupSchemaInkompatibel);
 
     // Licensing
     public const string Lic_SectionTitle = nameof(Lic_SectionTitle);
