@@ -343,6 +343,8 @@ Bitte starte die App neu.</value></data>
   <data name="Lbl_SuchergebnisseAnzahl" xml:space="preserve"><value>{0} Ergebnis(se)</value></data>
   <data name="Lbl_AlleKategorien" xml:space="preserve"><value>Alle Kategorien</value></data>
   <data name="Lbl_AlleTypen" xml:space="preserve"><value>Alle Typen</value></data>
+  <data name="Lbl_Gesamt" xml:space="preserve"><value>Gesamt</value></data>
+  <data name="A11y_GesamtAnzeigen" xml:space="preserve"><value>Alle Transaktionen anzeigen</value></data>
   <data name="Lbl_VonDatum" xml:space="preserve"><value>Von</value></data>
   <data name="Lbl_BisDatum" xml:space="preserve"><value>Bis</value></data>
   <data name="Hint_SucheTransaktionen" xml:space="preserve"><value>Transaktionen suchen…</value></data>
@@ -400,6 +402,7 @@ Bitte starte die App neu.</value></data>
   <data name="Btn_ZielHinzufuegen" xml:space="preserve"><value>Ziel hinzufügen</value></data>
   <data name="A11y_VorherigerMonat" xml:space="preserve"><value>Vorheriger Monat</value></data>
   <data name="A11y_NaechsterMonat" xml:space="preserve"><value>Nächster Monat</value></data>
+  <data name="A11y_AktuellerMonat" xml:space="preserve"><value>Aktueller Monat</value></data>
   <data name="A11y_VorherigesJahr" xml:space="preserve"><value>Vorheriges Jahr</value></data>
   <data name="A11y_NaechstesJahr" xml:space="preserve"><value>Nächstes Jahr</value></data>
   <data name="A11y_TransaktionHinzufuegen" xml:space="preserve"><value>Neue Transaktion hinzufügen</value></data>

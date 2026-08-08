@@ -15,6 +15,8 @@
         <conv:TransactionTypToColorConverter x:Key="TypToColor" />
         <conv:BetragDisplayConverter x:Key="BetragDisplay" />
         <conv:KategorieIdToIconConverter x:Key="KategorieIdToIcon" />
+        <conv:KategorieIdToColorConverter x:Key="KategorieIdToColor" />
+        <conv:KategorieIdToNameConverter x:Key="KategorieIdToName" />
         <conv:AccountIdToNameConverter x:Key="AccountIdToName" />
         <conv:InvertBoolConverter x:Key="InvertBool" />
         <conv:TransactionRowAccessibilityConverter x:Key="TransactionAccessibility" />
@@ -23,60 +25,91 @@
         <conv:RecurringRowAccessibilityConverter x:Key="RecurringAccessibility" />
         <conv:SparZielRowAccessibilityConverter x:Key="SparZielAccessibility" />
 
-        <!-- Shared transaction row layout (tap-only, no swipe).
-             Reused in search results. Month view uses same structure
-             wrapped in SwipeView (see CollectionView below). -->
-        <DataTemplate x:Key="TransactionRowTemplate" x:DataType="models:Transaction">
-            <Grid ColumnDefinitions="44, *, Auto" Padding="16,10" ColumnSpacing="12">
-                <SemanticProperties.Description>
-                    <MultiBinding Converter="{StaticResource TransactionAccessibility}">
-                        <Binding Path="." />
-                        <Binding Source="{RelativeSource AncestorType={x:Type vm:TransactionsViewModel}}" Path="CategoryNameMap" />
-                        <Binding Source="{RelativeSource AncestorType={x:Type vm:TransactionsViewModel}}" Path="AccountMap" />
-                    </MultiBinding>
-                </SemanticProperties.Description>
-                <Grid.GestureRecognizers>
-                    <TapGestureRecognizer
-                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:TransactionsViewModel}}, Path=GoToDetailCommand}"
-                        CommandParameter="{Binding .}" />
-                </Grid.GestureRecognizers>
-                <Border Grid.Column="0"
-                        BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}"
-                        StrokeShape="RoundRectangle 10" Stroke="Transparent"
-                        WidthRequest="40" HeightRequest="40"
-                        HorizontalOptions="Center" VerticalOptions="Center">
-                    <Label FontSize="18" HorizontalOptions="Center" VerticalOptions="Center">
-                        <Label.Text>
-                            <MultiBinding Converter="{StaticResource KategorieIdToIcon}">
-                                <Binding Path="KategorieId" />
-                                <Binding Source="{RelativeSource AncestorType={x:Type views:BaseContentPage}}"
-                                         Path="BindingContext.IconMap" />
-                            </MultiBinding>
-                        </Label.Text>
-                    </Label>
+        <!-- Shared day/group card template (tap → GoToDetail, swipe → duplicate/delete).
+             Used by both month and search CollectionViews (IsGrouped="False"),
+             one card per TransactionGroup with rows rendered via BindableLayout. -->
+        <DataTemplate x:Key="TransactionGroupCardTemplate" x:DataType="models:TransactionGroup">
+            <VerticalStackLayout Padding="16,0,16,12" Spacing="8">
+                <Label Text="{Binding DatumFormatiert}"
+                       FontSize="12" FontAttributes="Bold"
+                       TextTransform="Uppercase"
+                       TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}"
+                       Margin="6,8,6,0" />
+                <Border StrokeShape="RoundRectangle 18" Stroke="Transparent"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource CardBackground}, Dark={StaticResource CardBackgroundDark}}"
+                        Padding="4,0">
+                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding .}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="models:Transaction">
+                                <SwipeView>
+                                    <SwipeView.RightItems>
+                                        <SwipeItems>
+                                            <SwipeItem Text="{loc:Translate Btn_Duplizieren}"
+                                                       BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                                       Command="{Binding Source={RelativeSource AncestorType={x:Type views:BaseContentPage}}, Path=BindingContext.DuplicateTransaktionCommand}"
+                                                       CommandParameter="{Binding .}" />
+                                            <SwipeItem Text="{loc:Translate Btn_Loeschen}"
+                                                       BackgroundColor="{AppThemeBinding Light={StaticResource Ausgabe}, Dark={StaticResource AusgabeDark}}"
+                                                       Command="{Binding Source={RelativeSource AncestorType={x:Type views:BaseContentPage}}, Path=BindingContext.DeleteTransaktionCommand}"
+                                                       CommandParameter="{Binding .}" />
+                                        </SwipeItems>
+                                    </SwipeView.RightItems>
+                                    <Grid ColumnDefinitions="44,*,Auto" Padding="14,10" ColumnSpacing="12">
+                                        <SemanticProperties.Description>
+                                            <MultiBinding Converter="{StaticResource TransactionAccessibility}">
+                                                <Binding Path="." />
+                                                <Binding Source="{RelativeSource AncestorType={x:Type views:BaseContentPage}}" Path="BindingContext.CategoryNameMap" />
+                                                <Binding Source="{RelativeSource AncestorType={x:Type views:BaseContentPage}}" Path="BindingContext.AccountMap" />
+                                            </MultiBinding>
+                                        </SemanticProperties.Description>
+                                        <Grid.GestureRecognizers>
+                                            <TapGestureRecognizer
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type views:BaseContentPage}}, Path=BindingContext.GoToDetailCommand}"
+                                                CommandParameter="{Binding .}" />
+                                        </Grid.GestureRecognizers>
+                                        <Border Grid.Column="0" WidthRequest="38" HeightRequest="38"
+                                                StrokeShape="RoundRectangle 11" Stroke="Transparent">
+                                            <Border.BackgroundColor>
+                                                <MultiBinding Converter="{StaticResource KategorieIdToColor}">
+                                                    <Binding Path="KategorieId" />
+                                                    <Binding Source="{RelativeSource AncestorType={x:Type views:BaseContentPage}}" Path="BindingContext.ColorMap" />
+                                                </MultiBinding>
+                                            </Border.BackgroundColor>
+                                            <Label FontSize="18" HorizontalOptions="Center" VerticalOptions="Center">
+                                                <Label.Text>
+                                                    <MultiBinding Converter="{StaticResource KategorieIdToIcon}">
+                                                        <Binding Path="KategorieId" />
+                                                        <Binding Source="{RelativeSource AncestorType={x:Type views:BaseContentPage}}"
+                                                                 Path="BindingContext.IconMap" />
+                                                    </MultiBinding>
+                                                </Label.Text>
+                                            </Label>
+                                        </Border>
+                                        <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                                            <Label Text="{Binding Titel}" FontSize="15" FontAttributes="Bold" LineBreakMode="TailTruncation" />
+                                            <Label FontSize="12"
+                                                   TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}"
+                                                   LineBreakMode="TailTruncation">
+                                                <Label.Text>
+                                                    <MultiBinding Converter="{StaticResource KategorieIdToName}">
+                                                        <Binding Path="KategorieId" />
+                                                        <Binding Source="{RelativeSource AncestorType={x:Type views:BaseContentPage}}" Path="BindingContext.CategoryNameMap" />
+                                                    </MultiBinding>
+                                                </Label.Text>
+                                            </Label>
+                                        </VerticalStackLayout>
+                                        <Label Grid.Column="2"
+                                               Text="{Binding ., Converter={StaticResource BetragDisplay}}"
+                                               TextColor="{Binding Typ, Converter={StaticResource TypToColor}}"
+                                               FontSize="15" FontAttributes="Bold"
+                                               VerticalTextAlignment="Center" />
+                                    </Grid>
+                                </SwipeView>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
                 </Border>
-                <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
-                    <Label Text="{Binding Titel}" FontSize="16" FontAttributes="Bold"
-                           LineBreakMode="TailTruncation" />
-                    <Label Text="{Binding Verwendungszweck}" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}"
-                           LineBreakMode="TailTruncation" />
-                    <Label FontSize="11" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}"
-                           LineBreakMode="TailTruncation">
-                        <Label.Text>
-                            <MultiBinding Converter="{StaticResource AccountIdToName}">
-                                <Binding Path="AccountId" />
-                                <Binding Source="{RelativeSource AncestorType={x:Type views:BaseContentPage}}"
-                                         Path="BindingContext.AccountMap" />
-                            </MultiBinding>
-                        </Label.Text>
-                    </Label>
-                </VerticalStackLayout>
-                <Label Grid.Column="2"
-                       Text="{Binding ., Converter={StaticResource BetragDisplay}}"
-                       TextColor="{Binding Typ, Converter={StaticResource TypToColor}}"
-                       FontSize="16" FontAttributes="Bold"
-                       VerticalTextAlignment="Center" />
-            </Grid>
+            </VerticalStackLayout>
         </DataTemplate>
     </views:BaseContentPage.Resources>
 
@@ -108,24 +141,95 @@
             </Button>
         </Grid>
 
-        <!-- Row 1: Monatsnavigation (nur im Monatsmodus sichtbar) -->
-        <Grid Grid.Row="1" ColumnDefinitions="Auto, *, Auto"
-              Padding="16,4"
-              IsVisible="{Binding IsMonthMode}">
-            <Button Grid.Column="0" Text="{loc:Translate Btn_Prev}" FontSize="28"
-                    BackgroundColor="Transparent" TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                    Command="{Binding PreviousMonthCommand}"
-                    SemanticProperties.Description="{loc:Translate A11y_VorherigerMonat}"
-                    WidthRequest="44" />
-            <Label Grid.Column="1" Text="{Binding MonatAnzeige}"
-                   FontSize="18" FontAttributes="Bold"
-                   HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
-            <Button Grid.Column="2" Text="{loc:Translate Btn_Next}" FontSize="28"
-                    BackgroundColor="Transparent" TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                    Command="{Binding NextMonthCommand}"
-                    SemanticProperties.Description="{loc:Translate A11y_NaechsterMonat}"
-                    WidthRequest="44" />
-        </Grid>
+        <!-- Row 1: Monats-Chips (Vormonat / Aktuell / Nächster / Gesamt) — immer sichtbar,
+             damit Gesamt auch im Suchmodus erreichbar bleibt. -->
+        <ScrollView Grid.Row="1" Orientation="Horizontal" HorizontalScrollBarVisibility="Never"
+                    Padding="16,8,16,8">
+            <HorizontalStackLayout Spacing="8">
+                <!-- Vormonat -->
+                <Border StrokeShape="RoundRectangle 99" Stroke="Transparent" Padding="14,7"
+                        MinimumHeightRequest="44" MinimumWidthRequest="44"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource CardBackground}, Dark={StaticResource CardBackgroundDark}}">
+                    <SemanticProperties.Description>
+                        <MultiBinding StringFormat="{}{0}, {1}">
+                            <Binding Path="VormonatChipLabel" />
+                            <loc:Translate Key="A11y_VorherigerMonat" />
+                        </MultiBinding>
+                    </SemanticProperties.Description>
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding PreviousMonthCommand}" />
+                    </Border.GestureRecognizers>
+                    <Label Text="{Binding VormonatChipLabel}" FontSize="13" FontAttributes="Bold"
+                           HorizontalOptions="Center" VerticalOptions="Center"
+                           TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
+                </Border>
+                <!-- Aktuell -->
+                <Border StrokeShape="RoundRectangle 99" Stroke="Transparent" Padding="14,7"
+                        MinimumHeightRequest="44" MinimumWidthRequest="44">
+                    <Border.Triggers>
+                        <DataTrigger TargetType="Border" Binding="{Binding IsCurrentMonthChipActive}" Value="True">
+                            <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource PrimaryTint}, Dark={StaticResource PrimaryTintDark}}" />
+                        </DataTrigger>
+                        <DataTrigger TargetType="Border" Binding="{Binding IsCurrentMonthChipActive}" Value="False">
+                            <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource CardBackground}, Dark={StaticResource CardBackgroundDark}}" />
+                        </DataTrigger>
+                    </Border.Triggers>
+                    <SemanticProperties.Description>
+                        <MultiBinding StringFormat="{}{0}, {1}">
+                            <Binding Path="MonatAnzeige" />
+                            <loc:Translate Key="A11y_AktuellerMonat" />
+                        </MultiBinding>
+                    </SemanticProperties.Description>
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding SelectCurrentMonthChipCommand}" />
+                    </Border.GestureRecognizers>
+                    <Label Text="{Binding MonatAnzeige}" FontSize="13" FontAttributes="Bold"
+                           HorizontalOptions="Center" VerticalOptions="Center"
+                           TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+                </Border>
+                <!-- Nächster -->
+                <Border StrokeShape="RoundRectangle 99" Stroke="Transparent" Padding="14,7"
+                        MinimumHeightRequest="44" MinimumWidthRequest="44"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource CardBackground}, Dark={StaticResource CardBackgroundDark}}">
+                    <SemanticProperties.Description>
+                        <MultiBinding StringFormat="{}{0}, {1}">
+                            <Binding Path="NaechsterChipLabel" />
+                            <loc:Translate Key="A11y_NaechsterMonat" />
+                        </MultiBinding>
+                    </SemanticProperties.Description>
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding NextMonthCommand}" />
+                    </Border.GestureRecognizers>
+                    <Label Text="{Binding NaechsterChipLabel}" FontSize="13" FontAttributes="Bold"
+                           HorizontalOptions="Center" VerticalOptions="Center"
+                           TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
+                </Border>
+                <!-- Gesamt -->
+                <Border StrokeShape="RoundRectangle 99" Stroke="Transparent" Padding="14,7"
+                        MinimumHeightRequest="44" MinimumWidthRequest="44">
+                    <Border.Triggers>
+                        <DataTrigger TargetType="Border" Binding="{Binding IsGesamtChipActive}" Value="True">
+                            <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource PrimaryTint}, Dark={StaticResource PrimaryTintDark}}" />
+                        </DataTrigger>
+                        <DataTrigger TargetType="Border" Binding="{Binding IsGesamtChipActive}" Value="False">
+                            <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource CardBackground}, Dark={StaticResource CardBackgroundDark}}" />
+                        </DataTrigger>
+                    </Border.Triggers>
+                    <SemanticProperties.Description>
+                        <MultiBinding StringFormat="{}{0}, {1}">
+                            <Binding Path="GesamtChipLabel" />
+                            <loc:Translate Key="A11y_GesamtAnzeigen" />
+                        </MultiBinding>
+                    </SemanticProperties.Description>
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding EnterGesamtModeCommand}" />
+                    </Border.GestureRecognizers>
+                    <Label Text="{Binding GesamtChipLabel}" FontSize="13" FontAttributes="Bold"
+                           HorizontalOptions="Center" VerticalOptions="Center"
+                           TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+                </Border>
+            </HorizontalStackLayout>
+        </ScrollView>
 
         <!-- Row 2: Filter-Panel (collapsible) -->
         <Border Grid.Row="2"
@@ -278,8 +382,9 @@
                          IsRefreshing="{Binding IsLoading}"
                          IsVisible="{Binding IsMonthMode}">
                 <CollectionView ItemsSource="{Binding TransaktionsGruppen}"
-                                IsGrouped="True"
-                                SelectionMode="None">
+                                IsGrouped="False"
+                                SelectionMode="None"
+                                ItemTemplate="{StaticResource TransactionGroupCardTemplate}">
                     <CollectionView.EmptyView>
                         <controls:EmptyStateView IconImage="transactions.png"
                                                  IconAccessibilityDescription="{loc:Translate Nav_Transaktionen}"
@@ -288,103 +393,36 @@
                                                  ActionText="{loc:Translate Btn_ErsteTransaktion}"
                                                  ActionCommand="{Binding GoToDetailCommand}" />
                     </CollectionView.EmptyView>
-                    <CollectionView.GroupHeaderTemplate>
-                        <DataTemplate x:DataType="models:TransactionGroup">
-                            <Label Text="{Binding DatumFormatiert}"
-                                   FontSize="14" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}"
-                                   Padding="16,12,16,4" />
-                        </DataTemplate>
-                    </CollectionView.GroupHeaderTemplate>
-                    <CollectionView.ItemTemplate>
-                        <DataTemplate x:DataType="models:Transaction">
-                            <SwipeView>
-                                <SwipeView.RightItems>
-                                    <SwipeItems>
-                                        <SwipeItem Text="{loc:Translate Btn_Duplizieren}"
-                                                   BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                                                   Command="{Binding Source={RelativeSource AncestorType={x:Type vm:TransactionsViewModel}}, Path=DuplicateTransaktionCommand}"
-                                                   CommandParameter="{Binding .}" />
-                                        <SwipeItem Text="{loc:Translate Btn_Loeschen}"
-                                                   BackgroundColor="{AppThemeBinding Light={StaticResource Ausgabe}, Dark={StaticResource AusgabeDark}}"
-                                                   Command="{Binding Source={RelativeSource AncestorType={x:Type vm:TransactionsViewModel}}, Path=DeleteTransaktionCommand}"
-                                                   CommandParameter="{Binding .}" />
-                                    </SwipeItems>
-                                </SwipeView.RightItems>
-                                <Grid ColumnDefinitions="44, *, Auto" Padding="16,10" ColumnSpacing="12">
-                                    <SemanticProperties.Description>
-                                        <MultiBinding Converter="{StaticResource TransactionAccessibility}">
-                                            <Binding Path="." />
-                                            <Binding Source="{RelativeSource AncestorType={x:Type vm:TransactionsViewModel}}" Path="CategoryNameMap" />
-                                            <Binding Source="{RelativeSource AncestorType={x:Type vm:TransactionsViewModel}}" Path="AccountMap" />
-                                        </MultiBinding>
-                                    </SemanticProperties.Description>
-                                    <Grid.GestureRecognizers>
-                                        <TapGestureRecognizer
-                                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:TransactionsViewModel}}, Path=GoToDetailCommand}"
-                                            CommandParameter="{Binding .}" />
-                                    </Grid.GestureRecognizers>
-                                    <Border Grid.Column="0"
-                                            BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}"
-                                            StrokeShape="RoundRectangle 10" Stroke="Transparent"
-                                            WidthRequest="40" HeightRequest="40"
-                                            HorizontalOptions="Center" VerticalOptions="Center">
-                                        <Label FontSize="18" HorizontalOptions="Center" VerticalOptions="Center">
-                                            <Label.Text>
-                                                <MultiBinding Converter="{StaticResource KategorieIdToIcon}">
-                                                    <Binding Path="KategorieId" />
-                                                    <Binding Source="{RelativeSource AncestorType={x:Type views:BaseContentPage}}"
-                                                             Path="BindingContext.IconMap" />
-                                                </MultiBinding>
-                                            </Label.Text>
-                                        </Label>
-                                    </Border>
-                                    <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
-                                        <Label Text="{Binding Titel}" FontSize="16" FontAttributes="Bold"
-                                               LineBreakMode="TailTruncation" />
-                                        <Label Text="{Binding Verwendungszweck}" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}"
-                                               LineBreakMode="TailTruncation" />
-                                    </VerticalStackLayout>
-                                    <Label Grid.Column="2"
-                                           Text="{Binding ., Converter={StaticResource BetragDisplay}}"
-                                           TextColor="{Binding Typ, Converter={StaticResource TypToColor}}"
-                                           FontSize="16" FontAttributes="Bold"
-                                           VerticalTextAlignment="Center" />
-                                </Grid>
-                            </SwipeView>
-                        </DataTemplate>
-                    </CollectionView.ItemTemplate>
                 </CollectionView>
             </RefreshView>
 
-            <!-- Suchergebnisse -->
-            <VerticalStackLayout IsVisible="{Binding IsSearchActive}" Spacing="0">
+            <!-- Suchergebnisse / Gesamt.
+                 Grid (Auto,*) statt VerticalStackLayout: CollectionView needs a bounded
+                 height to scroll; in a stack it expands to content and rubber-bands. -->
+            <Grid IsVisible="{Binding IsSearchActive}" RowDefinitions="Auto, *">
 
                 <!-- Ergebnis-Anzahl -->
-                <Label Padding="16,8,16,4"
+                <Label Grid.Row="0"
+                       Padding="16,8,16,4"
                        FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}"
                        IsVisible="{Binding HasSearchResults}"
                        Text="{Binding SearchCountText}" />
 
                 <!-- Keine Ergebnisse -->
-                <Label Text="{loc:Translate Empty_KeineSuchergebnisse}"
+                <Label Grid.Row="1"
+                       Text="{loc:Translate Empty_KeineSuchergebnisse}"
                        FontSize="16" HorizontalTextAlignment="Center" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}"
+                       VerticalOptions="Start"
                        Margin="0,40,0,0"
                        IsVisible="{Binding HasSearchResults, Converter={StaticResource InvertBool}}" />
 
-                <CollectionView ItemsSource="{Binding SearchErgebnisGruppen}"
-                                IsGrouped="True"
+                <CollectionView Grid.Row="1"
+                                ItemsSource="{Binding SearchErgebnisGruppen}"
+                                IsGrouped="False"
                                 SelectionMode="None"
                                 IsVisible="{Binding HasSearchResults}"
-                                ItemTemplate="{StaticResource TransactionRowTemplate}">
-                    <CollectionView.GroupHeaderTemplate>
-                        <DataTemplate x:DataType="models:TransactionGroup">
-                            <Label Text="{Binding DatumFormatiert}"
-                                   FontSize="14" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" FontAttributes="Bold"
-                                   Padding="16,12,16,4" />
-                        </DataTemplate>
-                    </CollectionView.GroupHeaderTemplate>
-                </CollectionView>
-            </VerticalStackLayout>
+                                ItemTemplate="{StaticResource TransactionGroupCardTemplate}" />
+            </Grid>
 
         </Grid>
 

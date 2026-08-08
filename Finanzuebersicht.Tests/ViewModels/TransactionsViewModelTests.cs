@@ -82,6 +82,318 @@ public class TransactionsViewModelTests
     }
 
     [Fact]
+    public async Task EnterGesamtMode_ActivatesSearchPathAndLoadsAll()
+    {
+        var transactionRepository = Substitute.For<ITransactionRepository>();
+        transactionRepository.GetTransactionsAsync(Arg.Any<DateTime>(), Arg.Any<DateTime>())
+            .Returns(Task.FromResult(new List<Transaction>()));
+
+        var searchTransactionRepository = Substitute.For<ITransactionRepository>();
+        searchTransactionRepository.GetTransactionsAsync(Arg.Any<DateTime>(), Arg.Any<DateTime>())
+            .Returns(Task.FromResult(new List<Transaction> { new() { Id = "t1", Titel = "Test" } }));
+
+        var categoryRepository = Substitute.For<ICategoryRepository>();
+        categoryRepository.GetCategoriesAsync()
+            .Returns(Task.FromResult(new List<Category>()));
+
+        var accountRepository = Substitute.For<IAccountRepository>();
+        accountRepository.GetAccountsAsync()
+            .Returns(Task.FromResult(new List<Account>()));
+
+        var searchCategoryRepository = Substitute.For<ICategoryRepository>();
+        searchCategoryRepository.GetCategoriesAsync()
+            .Returns(Task.FromResult(new List<Category>()));
+
+        var searchAccountRepository = Substitute.For<IAccountRepository>();
+        searchAccountRepository.GetAccountsAsync()
+            .Returns(Task.FromResult(new List<Account>()));
+
+        var viewModel = CreateSut(
+            transactionRepository,
+            categoryRepository,
+            searchTransactionRepository,
+            searchCategoryRepository,
+            accountRepository,
+            searchAccountRepository,
+            out _,
+            out _,
+            out _,
+            out _,
+            out _,
+            out _);
+
+        Assert.False(viewModel.IsSearchActive);
+
+        await viewModel.EnterGesamtModeCommand.ExecuteAsync(null);
+
+        Assert.True(viewModel.IsGesamtMode);
+        Assert.True(viewModel.IsSearchActive);
+        Assert.False(viewModel.IsMonthMode);
+        await searchTransactionRepository.Received().GetTransactionsAsync(
+            Arg.Is<DateTime>(d => d == DateTime.MinValue),
+            Arg.Is<DateTime>(d => d == DateTime.MaxValue));
+    }
+
+    [Fact]
+    public async Task ClearSearch_ResetsIsGesamtMode()
+    {
+        var transactionRepository = Substitute.For<ITransactionRepository>();
+        transactionRepository.GetTransactionsAsync(Arg.Any<DateTime>(), Arg.Any<DateTime>())
+            .Returns(Task.FromResult(new List<Transaction>()));
+
+        var searchTransactionRepository = Substitute.For<ITransactionRepository>();
+        searchTransactionRepository.GetTransactionsAsync(Arg.Any<DateTime>(), Arg.Any<DateTime>())
+            .Returns(Task.FromResult(new List<Transaction>()));
+
+        var categoryRepository = Substitute.For<ICategoryRepository>();
+        categoryRepository.GetCategoriesAsync()
+            .Returns(Task.FromResult(new List<Category>()));
+
+        var accountRepository = Substitute.For<IAccountRepository>();
+        accountRepository.GetAccountsAsync()
+            .Returns(Task.FromResult(new List<Account>()));
+
+        var searchCategoryRepository = Substitute.For<ICategoryRepository>();
+        searchCategoryRepository.GetCategoriesAsync()
+            .Returns(Task.FromResult(new List<Category>()));
+
+        var searchAccountRepository = Substitute.For<IAccountRepository>();
+        searchAccountRepository.GetAccountsAsync()
+            .Returns(Task.FromResult(new List<Account>()));
+
+        var viewModel = CreateSut(
+            transactionRepository,
+            categoryRepository,
+            searchTransactionRepository,
+            searchCategoryRepository,
+            accountRepository,
+            searchAccountRepository,
+            out _,
+            out _,
+            out _,
+            out _,
+            out _,
+            out _);
+
+        await viewModel.EnterGesamtModeCommand.ExecuteAsync(null);
+        await viewModel.ClearSearchCommand.ExecuteAsync(null);
+
+        Assert.False(viewModel.IsGesamtMode);
+        Assert.True(viewModel.IsMonthMode);
+    }
+
+    [Fact]
+    public async Task PreviousMonth_WhileGesamt_ExitsGesamtAndShowsMonth()
+    {
+        var transactionRepository = Substitute.For<ITransactionRepository>();
+        transactionRepository.GetTransactionsAsync(Arg.Any<DateTime>(), Arg.Any<DateTime>())
+            .Returns(Task.FromResult(new List<Transaction>()));
+
+        var searchTransactionRepository = Substitute.For<ITransactionRepository>();
+        searchTransactionRepository.GetTransactionsAsync(Arg.Any<DateTime>(), Arg.Any<DateTime>())
+            .Returns(Task.FromResult(new List<Transaction>()));
+
+        var categoryRepository = Substitute.For<ICategoryRepository>();
+        categoryRepository.GetCategoriesAsync()
+            .Returns(Task.FromResult(new List<Category>()));
+
+        var accountRepository = Substitute.For<IAccountRepository>();
+        accountRepository.GetAccountsAsync()
+            .Returns(Task.FromResult(new List<Account>()));
+
+        var searchCategoryRepository = Substitute.For<ICategoryRepository>();
+        searchCategoryRepository.GetCategoriesAsync()
+            .Returns(Task.FromResult(new List<Category>()));
+
+        var searchAccountRepository = Substitute.For<IAccountRepository>();
+        searchAccountRepository.GetAccountsAsync()
+            .Returns(Task.FromResult(new List<Account>()));
+
+        var viewModel = CreateSut(
+            transactionRepository,
+            categoryRepository,
+            searchTransactionRepository,
+            searchCategoryRepository,
+            accountRepository,
+            searchAccountRepository,
+            out _,
+            out _,
+            out _,
+            out _,
+            out _,
+            out _);
+
+        var before = viewModel.AktuellerMonat;
+        await viewModel.EnterGesamtModeCommand.ExecuteAsync(null);
+        await viewModel.PreviousMonthCommand.ExecuteAsync(null);
+
+        Assert.False(viewModel.IsGesamtMode);
+        Assert.Equal(before.AddMonths(-1), viewModel.AktuellerMonat);
+        Assert.True(viewModel.IsMonthMode);
+    }
+
+    [Fact]
+    public async Task NextMonth_WhileCategoryFilterActive_ExitsToMonthModeAndClearsFilter()
+    {
+        var transactionRepository = Substitute.For<ITransactionRepository>();
+        transactionRepository.GetTransactionsAsync(Arg.Any<DateTime>(), Arg.Any<DateTime>())
+            .Returns(Task.FromResult(new List<Transaction>()));
+
+        var searchTransactionRepository = Substitute.For<ITransactionRepository>();
+        searchTransactionRepository.GetTransactionsAsync(Arg.Any<DateTime>(), Arg.Any<DateTime>())
+            .Returns(Task.FromResult(new List<Transaction>()));
+
+        var categoryRepository = Substitute.For<ICategoryRepository>();
+        categoryRepository.GetCategoriesAsync()
+            .Returns(Task.FromResult(new List<Category>()));
+
+        var accountRepository = Substitute.For<IAccountRepository>();
+        accountRepository.GetAccountsAsync()
+            .Returns(Task.FromResult(new List<Account>()));
+
+        var searchCategoryRepository = Substitute.For<ICategoryRepository>();
+        searchCategoryRepository.GetCategoriesAsync()
+            .Returns(Task.FromResult(new List<Category>()));
+
+        var searchAccountRepository = Substitute.For<IAccountRepository>();
+        searchAccountRepository.GetAccountsAsync()
+            .Returns(Task.FromResult(new List<Account>()));
+
+        var viewModel = CreateSut(
+            transactionRepository,
+            categoryRepository,
+            searchTransactionRepository,
+            searchCategoryRepository,
+            accountRepository,
+            searchAccountRepository,
+            out _,
+            out _,
+            out _,
+            out _,
+            out _,
+            out _);
+
+        var before = viewModel.AktuellerMonat;
+        viewModel.SelectedKategorieId = "cat-1";
+        Assert.True(viewModel.IsSearchActive);
+
+        await viewModel.NextMonthCommand.ExecuteAsync(null);
+
+        Assert.Null(viewModel.SelectedKategorieId);
+        Assert.False(viewModel.IsSearchActive);
+        Assert.True(viewModel.IsMonthMode);
+        Assert.Equal(before.AddMonths(1), viewModel.AktuellerMonat);
+        await transactionRepository.Received().GetTransactionsAsync(Arg.Any<DateTime>(), Arg.Any<DateTime>());
+    }
+
+    [Fact]
+    public async Task SelectCurrentMonthChip_ExitsGesamtAndClearsFilters()
+    {
+        var transactionRepository = Substitute.For<ITransactionRepository>();
+        transactionRepository.GetTransactionsAsync(Arg.Any<DateTime>(), Arg.Any<DateTime>())
+            .Returns(Task.FromResult(new List<Transaction>()));
+
+        var searchTransactionRepository = Substitute.For<ITransactionRepository>();
+        searchTransactionRepository.GetTransactionsAsync(Arg.Any<DateTime>(), Arg.Any<DateTime>())
+            .Returns(Task.FromResult(new List<Transaction>()));
+
+        var categoryRepository = Substitute.For<ICategoryRepository>();
+        categoryRepository.GetCategoriesAsync()
+            .Returns(Task.FromResult(new List<Category>()));
+
+        var accountRepository = Substitute.For<IAccountRepository>();
+        accountRepository.GetAccountsAsync()
+            .Returns(Task.FromResult(new List<Account>()));
+
+        var searchCategoryRepository = Substitute.For<ICategoryRepository>();
+        searchCategoryRepository.GetCategoriesAsync()
+            .Returns(Task.FromResult(new List<Category>()));
+
+        var searchAccountRepository = Substitute.For<IAccountRepository>();
+        searchAccountRepository.GetAccountsAsync()
+            .Returns(Task.FromResult(new List<Account>()));
+
+        var viewModel = CreateSut(
+            transactionRepository,
+            categoryRepository,
+            searchTransactionRepository,
+            searchCategoryRepository,
+            accountRepository,
+            searchAccountRepository,
+            out _,
+            out _,
+            out _,
+            out _,
+            out _,
+            out _);
+
+        await viewModel.LoadTransaktionenCommand.ExecuteAsync(null);
+        viewModel.SelectedKategorieId = "cat-1";
+        viewModel.SelectedKategorieFilterItem = new KategorieFilterItem("cat-1", "Test Kategorie");
+        await viewModel.EnterGesamtModeCommand.ExecuteAsync(null);
+        viewModel.SearchText = "Miete";
+
+        await viewModel.SelectCurrentMonthChipCommand.ExecuteAsync(null);
+
+        Assert.False(viewModel.IsGesamtMode);
+        Assert.Null(viewModel.SelectedKategorieId);
+        Assert.Equal(string.Empty, viewModel.SearchText);
+        Assert.False(viewModel.IsSearchActive);
+        Assert.True(viewModel.IsMonthMode);
+    }
+
+    [Fact]
+    public async Task SelectCurrentMonthChip_WhenGesamtOnly_ShowsMonthMode()
+    {
+        var transactionRepository = Substitute.For<ITransactionRepository>();
+        transactionRepository.GetTransactionsAsync(Arg.Any<DateTime>(), Arg.Any<DateTime>())
+            .Returns(Task.FromResult(new List<Transaction>()));
+
+        var searchTransactionRepository = Substitute.For<ITransactionRepository>();
+        searchTransactionRepository.GetTransactionsAsync(Arg.Any<DateTime>(), Arg.Any<DateTime>())
+            .Returns(Task.FromResult(new List<Transaction>()));
+
+        var categoryRepository = Substitute.For<ICategoryRepository>();
+        categoryRepository.GetCategoriesAsync()
+            .Returns(Task.FromResult(new List<Category>()));
+
+        var accountRepository = Substitute.For<IAccountRepository>();
+        accountRepository.GetAccountsAsync()
+            .Returns(Task.FromResult(new List<Account>()));
+
+        var searchCategoryRepository = Substitute.For<ICategoryRepository>();
+        searchCategoryRepository.GetCategoriesAsync()
+            .Returns(Task.FromResult(new List<Category>()));
+
+        var searchAccountRepository = Substitute.For<IAccountRepository>();
+        searchAccountRepository.GetAccountsAsync()
+            .Returns(Task.FromResult(new List<Account>()));
+
+        var viewModel = CreateSut(
+            transactionRepository,
+            categoryRepository,
+            searchTransactionRepository,
+            searchCategoryRepository,
+            accountRepository,
+            searchAccountRepository,
+            out _,
+            out _,
+            out _,
+            out _,
+            out _,
+            out _);
+
+        await viewModel.EnterGesamtModeCommand.ExecuteAsync(null);
+
+        await viewModel.SelectCurrentMonthChipCommand.ExecuteAsync(null);
+
+        Assert.False(viewModel.IsGesamtMode);
+        Assert.True(viewModel.IsMonthMode);
+        Assert.False(viewModel.IsSearchActive);
+        await transactionRepository.Received().GetTransactionsAsync(Arg.Any<DateTime>(), Arg.Any<DateTime>());
+    }
+
+    [Fact]
     public async Task LoadTransaktionen_WhenAlreadyLoading_QueuesSecondLoad()
     {
         var started = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);

@@ -93,6 +93,9 @@ public partial class TransactionsViewModel(
     private Dictionary<string, string> categoryNameMap = [];
 
     [ObservableProperty]
+    private Dictionary<string, string> colorMap = [];
+
+    [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasTransactionTemplates))]
     [NotifyPropertyChangedFor(nameof(ShowTransactionTemplates))]
     private ObservableCollection<TransactionTemplate> transactionTemplates = [];
@@ -109,6 +112,8 @@ public partial class TransactionsViewModel(
     [NotifyPropertyChangedFor(nameof(IsSearchActive))]
     [NotifyPropertyChangedFor(nameof(IsMonthMode))]
     [NotifyPropertyChangedFor(nameof(ShowTransactionTemplates))]
+    [NotifyPropertyChangedFor(nameof(IsGesamtChipActive))]
+    [NotifyPropertyChangedFor(nameof(IsCurrentMonthChipActive))]
     private string searchText = string.Empty;
 
     [ObservableProperty]
@@ -116,6 +121,8 @@ public partial class TransactionsViewModel(
     [NotifyPropertyChangedFor(nameof(IsSearchActive))]
     [NotifyPropertyChangedFor(nameof(IsMonthMode))]
     [NotifyPropertyChangedFor(nameof(ShowTransactionTemplates))]
+    [NotifyPropertyChangedFor(nameof(IsGesamtChipActive))]
+    [NotifyPropertyChangedFor(nameof(IsCurrentMonthChipActive))]
     private string? selectedKategorieId = null;
 
     [ObservableProperty]
@@ -123,6 +130,8 @@ public partial class TransactionsViewModel(
     [NotifyPropertyChangedFor(nameof(IsSearchActive))]
     [NotifyPropertyChangedFor(nameof(IsMonthMode))]
     [NotifyPropertyChangedFor(nameof(ShowTransactionTemplates))]
+    [NotifyPropertyChangedFor(nameof(IsGesamtChipActive))]
+    [NotifyPropertyChangedFor(nameof(IsCurrentMonthChipActive))]
     private TransactionTypeFilter selectedTypFilter = TransactionTypeFilter.Alle;
 
     [ObservableProperty]
@@ -130,6 +139,8 @@ public partial class TransactionsViewModel(
     [NotifyPropertyChangedFor(nameof(IsSearchActive))]
     [NotifyPropertyChangedFor(nameof(IsMonthMode))]
     [NotifyPropertyChangedFor(nameof(ShowTransactionTemplates))]
+    [NotifyPropertyChangedFor(nameof(IsGesamtChipActive))]
+    [NotifyPropertyChangedFor(nameof(IsCurrentMonthChipActive))]
     private DateTime? vonDatum = null;
 
     [ObservableProperty]
@@ -137,7 +148,17 @@ public partial class TransactionsViewModel(
     [NotifyPropertyChangedFor(nameof(IsSearchActive))]
     [NotifyPropertyChangedFor(nameof(IsMonthMode))]
     [NotifyPropertyChangedFor(nameof(ShowTransactionTemplates))]
+    [NotifyPropertyChangedFor(nameof(IsGesamtChipActive))]
+    [NotifyPropertyChangedFor(nameof(IsCurrentMonthChipActive))]
     private DateTime? bisDatum = null;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsSearchActive))]
+    [NotifyPropertyChangedFor(nameof(IsMonthMode))]
+    [NotifyPropertyChangedFor(nameof(ShowTransactionTemplates))]
+    [NotifyPropertyChangedFor(nameof(IsGesamtChipActive))]
+    [NotifyPropertyChangedFor(nameof(IsCurrentMonthChipActive))]
+    private bool isGesamtMode;
 
     [ObservableProperty]
     private bool isFilterPanelOpen;
@@ -163,9 +184,23 @@ public partial class TransactionsViewModel(
         SelectedTypFilter != TransactionTypeFilter.Alle ||
         IsDateFilterEnabled;
 
-    public bool IsSearchActive => !string.IsNullOrWhiteSpace(SearchText) || IsFilterActive;
+    public bool IsSearchActive =>
+        IsGesamtMode ||
+        !string.IsNullOrWhiteSpace(SearchText) ||
+        IsFilterActive;
 
     public bool IsMonthMode => !IsSearchActive;
+
+    public bool IsCurrentMonthChipActive => IsMonthMode;
+    public bool IsGesamtChipActive => IsSearchActive;
+
+    public string VormonatChipLabel =>
+        AktuellerMonat.AddMonths(-1).ToString("MMMM", System.Globalization.CultureInfo.CurrentCulture);
+
+    public string NaechsterChipLabel =>
+        AktuellerMonat.AddMonths(1).ToString("MMMM", System.Globalization.CultureInfo.CurrentCulture);
+
+    public string GesamtChipLabel => _loc.GetString(ResourceKeys.Lbl_Gesamt);
 
     public bool HasSearchResults => SearchErgebnisGruppen.Count > 0;
 
@@ -194,6 +229,8 @@ public partial class TransactionsViewModel(
     [NotifyPropertyChangedFor(nameof(IsSearchActive))]
     [NotifyPropertyChangedFor(nameof(IsMonthMode))]
     [NotifyPropertyChangedFor(nameof(ShowTransactionTemplates))]
+    [NotifyPropertyChangedFor(nameof(IsGesamtChipActive))]
+    [NotifyPropertyChangedFor(nameof(IsCurrentMonthChipActive))]
     private bool isDateFilterEnabled;
 
     [ObservableProperty]
@@ -277,7 +314,19 @@ public partial class TransactionsViewModel(
         if (IsDateFilterEnabled) BisDatum = value;
     }
 
-    protected override async Task OnMonthChangedAsync() => await LoadTransaktionen();
+    protected override void OnMonatAnzeigeUpdated()
+    {
+        OnPropertyChanged(nameof(VormonatChipLabel));
+        OnPropertyChanged(nameof(NaechsterChipLabel));
+    }
+
+    protected override async Task OnMonthChangedAsync()
+    {
+        if (IsSearchActive)
+            await ExitToMonthModeAsync();
+        else
+            await LoadTransaktionen();
+    }
 
     partial void OnSearchTextChanged(string value) => TriggerSearchDebounced();
     partial void OnSelectedKategorieIdChanged(string? value) => TriggerSearchDebounced();
@@ -330,6 +379,7 @@ public partial class TransactionsViewModel(
             TotalSearchCount = result.TotalCount;
             IconMap = result.IconMap;
             CategoryNameMap = result.CategoryNameMap;
+            ColorMap = result.ColorMap;
             AccountMap = result.AccountMap;
         }
         catch (Exception ex)
@@ -354,9 +404,33 @@ public partial class TransactionsViewModel(
     private void ToggleFilterPanel() => IsFilterPanelOpen = !IsFilterPanelOpen;
 
     [RelayCommand]
-    private async Task ClearSearch()
+    private async Task EnterGesamtMode()
+    {
+        IsGesamtMode = true;
+        await ExecuteSearchAsync();
+    }
+
+    [RelayCommand]
+    private async Task SelectCurrentMonthChip()
+    {
+        if (IsMonthMode)
+            return;
+
+        await ExitToMonthModeAsync();
+    }
+
+    [RelayCommand]
+    private async Task ClearSearch() => await ExitToMonthModeAsync();
+
+    /// <summary>
+    /// Leaves search/Gesamt/filter state and returns to plain month mode, matching
+    /// the spec: tapping a month chip (or clearing search) always shows the current
+    /// month's transactions with no filters left active.
+    /// </summary>
+    private async Task ExitToMonthModeAsync()
     {
         _searchDebounce?.Cancel();
+        IsGesamtMode = false;
         SearchText = string.Empty;
         SelectedKategorieId = null;
         SelectedKategorieFilterItem = AvailableKategorien.FirstOrDefault();
@@ -423,6 +497,7 @@ public partial class TransactionsViewModel(
                 TransaktionsGruppen = new ObservableCollection<TransactionGroup>(data.Gruppen);
                 IconMap = data.IconMap;
                 CategoryNameMap = data.CategoryNameMap;
+                ColorMap = data.ColorMap;
                 AccountMap = data.AccountMap;
 
                 if (AvailableKategorien.Count == 0)
