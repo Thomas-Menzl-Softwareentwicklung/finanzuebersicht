@@ -12,6 +12,7 @@
 
 - Recurring-Schedule-Logik konsolidiert; Repository-Zugriffe in Use Cases (#275)
 - Microsoft.Maui.Controls 10.0.80, Nerdbank.GitVersioning, Test-SDK
+- Create-UX: Anlegen nach UIScene-Stabilisierung wieder über Detail-Pages; Soll (kontextsensitiver FAB + Bottom-Sheet) in `docs/CREATE_UX.md`
 
 ### Behoben
 

@@ -150,18 +150,13 @@ Layered clean architecture with MVVM (`CommunityToolkit.Mvvm` source generators)
 
 Native `Picker` controls freeze on **macOS 27 Beta** when scrolling inside picker dialogs in `ScrollView` forms. Workaround: **`SelectionField`** + **`SelectionPopup`** (`Finanzuebersicht/Controls/`, `Finanzuebersicht/Views/Popups/`). Used across detail pages, filters, and import preview. `DatePicker` remains native. Revert to native `Picker` when MAUI SR6 ([#33146](https://github.com/dotnet/maui/pull/33146)) is available. Details: `.cursor/rules/maccatalyst-picker-investigation.mdc`
 
-### Create UX (#265, v1.19)
+### Create UX (#265 / Mockup Soll)
 
-Unified **create** flows — no navigation push for new entries from list FAB/empty state:
+**Ist:** FAB/Empty-State Anlegen navigates to `*DetailPage` for all entities (post-UIScene revert). Schnell uses modal `QuickExpenseCaptureSheetService` (no Toolkit Popup).
 
-| Entity | Create | Edit |
-|--------|--------|------|
-| Konto | `CreateFormCard` inline top (`CategoriesPage`) | `AccountDetailPage` |
-| Sparziel | `CreateFormCard` inline top (`SparZielePage`) | `SparZielDetailPage` |
-| Kategorie | `FormSheetPopup` + `CategoryFormView` | `CategoryDetailPage` |
-| Dauerauftrag | `FormSheetPopup` + `RecurringTransactionFormView` | `RecurringTransactionDetailPage` |
+**Soll:** Context-sensitive FAB + bottom sheet/modal (same chrome, form per tab): Transactions → Schnellerfassung; Verwaltung/Sparziele/Daueraufträge → entity create forms. Edit stays on detail pages. Do **not** revive CommunityToolkit `FormSheetPopup` or inline `CreateFormCard` as the target pattern.
 
-Components: `CreateFormCard`, `FormSheetPopup`, `CategoryCreateSheetService`, `RecurringTransactionCreateSheetService`. Full reference: `docs/CREATE_UX.md`.
+Full reference (Ist/Soll, wireframes, tech Leitbild): `docs/CREATE_UX.md`.
 
 ### Quick Expense Capture (Pro) + iOS Widget
 

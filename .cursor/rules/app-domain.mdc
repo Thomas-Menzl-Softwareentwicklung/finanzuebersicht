@@ -26,11 +26,11 @@ alwaysApply: true
 - Build/Resign: `.cursor/rules/ios-quick-expense-widget.mdc` + `Finanzuebersicht/Platforms/iOS/Widgets/README.md`
 - Nicht mit Anzeige-Widget #242 vermischen
 
-## Einheitliches Anlegen (#265 ✅ v1.19)
+## Anlegen / Create UX
 
-- **Inline:** `CreateFormCard` — Konten, Sparziele (Panel oben, Scroll-to-top)
-- **Sheet:** `FormSheetPopup` — Kategorien, Daueraufträge
-- **Bearbeiten:** weiter auf `*DetailPage`
+- **Ist:** FAB → `*DetailPage` (nach Revert Aug 2026); Schnell = Modal ohne Toolkit-Popup
+- **Soll:** kontextsensitiver FAB + Bottom-Sheet (Mockup); kein globales „immer Schnellerfassung“
+- **Bearbeiten:** weiter `*DetailPage`
 - Doku: `docs/CREATE_UX.md`
 
 ## Konten & Salden
