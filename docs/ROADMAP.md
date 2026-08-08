@@ -163,8 +163,8 @@ Offene Issues in Abarbeitungsreihenfolge (#274 vor Import/Backup, damit neue Use
 | 1 | [#274](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/274) | Einheitliches Fehler- & Result-Modell | ✅ |
 | 2 | [#269](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/269) | Import in Application-Layer (Use Cases) | ✅ |
 | 3 | [#292](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/292) | Backup in Application-Layer (Use Cases) | ✅ |
-| 4 | [#293](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/293) | TransactionsViewModel aufteilen (nach #269) | in Arbeit (`feature/293-transactions-vm-split`) |
-| 5 | [#267](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/267) | DashboardViewModel aufteilen | offen |
+| 4 | [#293](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/293) | TransactionsViewModel aufteilen (nach #269) | ✅ |
+| 5 | [#267](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/267) | DashboardViewModel aufteilen | in Arbeit (`feature/267-dashboard-vm-split`) |
 | 6 | [#294](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/294) | CategoriesViewModel aufteilen | offen |
 | 7 | [#271](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/271) | App-Static-Events → `IAppEvents` | offen |
 | 8 | [#295](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/295) | Shell-Tab-Routes / ID-Navigation härten | offen |

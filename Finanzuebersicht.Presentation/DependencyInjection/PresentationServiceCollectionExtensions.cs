@@ -19,6 +19,10 @@ public static class PresentationServiceCollectionExtensions
     /// </param>
     public static IServiceCollection AddPresentationViewModels(this IServiceCollection services, Assembly? appAssembly = null)
     {
+        services.AddTransient<DashboardAccountsCoordinator>();
+        services.AddTransient<DashboardCashflowPreviewCoordinator>();
+        services.AddTransient<DashboardDueRecurringCoordinator>();
+        services.AddTransient<DashboardExpandSettingsHelper>();
         services.AddTransient<DashboardViewModel>();
         services.AddTransient<CategoriesViewModel>();
         services.AddTransient<CategoryDetailViewModel>();

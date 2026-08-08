@@ -47,7 +47,7 @@ Aktiver thematischer Milestone: **v1.20 – Architektur-Fundament** (vor Feature
 
 - Welle 0: DataPath-Restart (#289 ✅), DataFileNames (#290 ✅), Doc-Drift (#291 ✅)
 - Welle 1: Legacy `IDataService` (#268 ✅), Budget Use Case (#270 ✅)
-- Als Nächstes: TransactionsViewModel-Split (#293 in Arbeit), dann Dashboard/Categories (#267/#294)
+- Als Nächstes: DashboardViewModel-Split (#267 in Arbeit), dann Categories (#294)
 - CloudKit nur als Idee (#243); kein Sync-Code im Tree
 
 ## Nicht wiederholen
