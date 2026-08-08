@@ -2,9 +2,11 @@ using Finanzuebersicht.Application.UseCases.Accounts;
 using Finanzuebersicht.Application.UseCases.Dashboard;
 using Finanzuebersicht.Application.UseCases.RecurringTransactions;
 using Finanzuebersicht.Application.UseCases.Transactions;
+using Finanzuebersicht.Core.Licensing;
 using Finanzuebersicht.Core.Services;
 using Finanzuebersicht.Navigation;
 using Finanzuebersicht.Models;
+using Finanzuebersicht.Presentation.Services;
 using Finanzuebersicht.Tests.TestHelpers;
 using Finanzuebersicht.ViewModels;
 
@@ -291,6 +293,20 @@ public class DashboardViewModelTests
             settingsService,
             dialogService,
             Substitute.For<Finanzuebersicht.Core.Licensing.ILicenseService>(),
+            new QuickExpenseCaptureViewModel(
+                new CaptureQuickExpenseUseCase(
+                    transactionRepository,
+                    accountRepository,
+                    Substitute.For<IUncategorizedCategoryService>(),
+                    new TransactionValidationService(),
+                    UnrestrictedLicenseService.Instance,
+                    clock),
+                localizationService,
+                dialogService,
+                navigationService,
+                Substitute.For<IFeedbackService>(),
+                Substitute.For<IAppEvents>()),
+            Substitute.For<IQuickExpenseCaptureSheetService>(),
             clock);
     }
 }

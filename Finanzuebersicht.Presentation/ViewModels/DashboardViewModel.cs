@@ -32,6 +32,8 @@ public partial class DashboardViewModel : MonthNavigationViewModel, ILocalizable
     private readonly INavigationService _navigationService;
     private readonly IDialogService _dialogService;
     private readonly Finanzuebersicht.Core.Licensing.ILicenseService _licenseService;
+    private readonly QuickExpenseCaptureViewModel _quickExpenseCaptureViewModel;
+    private readonly IQuickExpenseCaptureSheetService _quickExpenseCaptureSheetService;
     private readonly IClock _clock;
     private readonly ILogger<DashboardViewModel>? _logger;
 
@@ -386,6 +388,8 @@ public partial class DashboardViewModel : MonthNavigationViewModel, ILocalizable
         ISettingsService settingsService,
         IDialogService dialogService,
         Finanzuebersicht.Core.Licensing.ILicenseService licenseService,
+        QuickExpenseCaptureViewModel quickExpenseCaptureViewModel,
+        IQuickExpenseCaptureSheetService quickExpenseCaptureSheetService,
         IClock? clock = null,
         ILogger<DashboardViewModel>? logger = null) : base(clock)
     {
@@ -406,6 +410,8 @@ public partial class DashboardViewModel : MonthNavigationViewModel, ILocalizable
         _settingsService = settingsService;
         _dialogService = dialogService;
         _licenseService = licenseService;
+        _quickExpenseCaptureViewModel = quickExpenseCaptureViewModel;
+        _quickExpenseCaptureSheetService = quickExpenseCaptureSheetService;
         _logger = logger;
         IsBudgetSectionExpanded = _expandSettings.Read(DashboardExpandSettingsHelper.Keys.Budget);
         IsYearMonthTrendExpanded = _expandSettings.Read(DashboardExpandSettingsHelper.Keys.YearMonthTrend);
@@ -795,7 +801,9 @@ public partial class DashboardViewModel : MonthNavigationViewModel, ILocalizable
                 return;
             }
 
-            await _navigationService.GoToAsync(Routes.QuickExpenseCapture);
+            _quickExpenseCaptureViewModel.Reset();
+            if (await _quickExpenseCaptureSheetService.ShowAsync(_quickExpenseCaptureViewModel))
+                await LoadDashboardCommand.ExecuteAsync(null);
         }
         catch (Exception ex)
         {

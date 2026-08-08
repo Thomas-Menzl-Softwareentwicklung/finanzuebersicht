@@ -16,9 +16,11 @@ Referenz-Klickdummy (extern): `Finanzübersicht Mobile App Verfeinerung-2` — d
 | Verwaltung › Konten | `AccountCreateSheetService` + `AccountFormView` |
 | Sparziele | `SparZielCreateSheetService` + `SparZielFormView` |
 | Daueraufträge | `RecurringTransactionCreateSheetService` + `RecurringTransactionFormView` |
-| Dashboard Schnell-FAB | `QuickExpenseCapture` (Pro) |
-| Transaktionen FABs | `+` → Detail, Umbuchen → Transfer, Import → CSV |
-| Umbuchen / volle Transaktion | weiterhin Detail-Page (`TransferDetail` / `TransactionDetail`) |
+| Dashboard Schnell-FAB | `QuickExpenseCaptureSheetService` + `QuickExpenseFormView` (Pro) |
+| Transaktionen `+` | `TransactionCreateSheetService` + `TransactionFormView` |
+| Transaktionen Umbuchen | `TransferCreateSheetService` + `TransferFormView` |
+| Transaktionen Import | CSV-Flow (kein Sheet) |
+| Umbuchen / volle Transaktion (Bearbeiten) | Detail-Page (`TransferDetail` nur Create-Fallback / `TransactionDetail`) |
 
 **Bearbeiten** (Tap auf Zeile) bleibt Detail-Page.
 
@@ -31,7 +33,7 @@ Legacy: `CreateFormCard`, `FormSheetPopup` (CommunityToolkit) — nicht für neu
 | Tab / Kontext | FAB öffnet |
 |---------------|-----------|
 | Dashboard | **Schnell** (Pro) |
-| Transaktionen | Stack: Import · Umbuchen · `+` (volle Buchung) |
+| Transaktionen | Stack: Import · Umbuchen-Sheet · `+` Sheet |
 | Verwaltung › Kategorien | Sheet **Neue Kategorie** |
 | Verwaltung › Konten | Sheet **Neues Konto** |
 | Sparziele | Sheet **Neues Sparziel** |
@@ -48,8 +50,8 @@ Mockup-Fehler: globaler `openSheet` → immer Schnellerfassung. Das ist **kein**
 
 ```
 FAB
-  ├─ Dashboard         → Schnellerfassung (Pro)
-  ├─ Transaktionen     → Import / Umbuchen / + Buchung
+  ├─ Dashboard         → Schnell-Sheet (Pro)
+  ├─ Transaktionen     → Import / Umbuchen-Sheet / + Sheet
   ├─ Verwaltung/Cats   → Neue Kategorie
   ├─ Verwaltung/Konten → Neues Konto
   ├─ Sparziele         → Neues Sparziel

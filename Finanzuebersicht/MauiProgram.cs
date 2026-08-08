@@ -111,6 +111,8 @@ public static class MauiProgram
 		builder.Services.AddSingleton<IAccountCreateSheetService, AccountCreateSheetService>();
 		builder.Services.AddSingleton<ISparZielCreateSheetService, SparZielCreateSheetService>();
 		builder.Services.AddSingleton<IRecurringTransactionCreateSheetService, RecurringTransactionCreateSheetService>();
+		builder.Services.AddSingleton<ITransactionCreateSheetService, TransactionCreateSheetService>();
+		builder.Services.AddSingleton<ITransferCreateSheetService, TransferCreateSheetService>();
 		builder.Services.AddSingleton<IQuickExpenseCaptureSheetService, QuickExpenseCaptureSheetService>();
 		builder.Services.AddSingleton<IImportSessionStore, ImportSessionStore>();
 		builder.Services.AddSingleton<IFolderPicker, MauiFolderPicker>();

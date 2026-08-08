@@ -5,6 +5,8 @@ using Finanzuebersicht.Application.UseCases.Accounts;
 using Finanzuebersicht.Application.UseCases.Categories;
 using Finanzuebersicht.Application.UseCases.Import;
 using Finanzuebersicht.Application.UseCases.Transactions;
+using Finanzuebersicht.Application.UseCases.SparZiele;
+using Finanzuebersicht.Core.Licensing;
 using Finanzuebersicht.Core.Services;
 using Finanzuebersicht.Models;
 using Finanzuebersicht.Navigation;
@@ -50,6 +52,8 @@ public class TransactionsViewModelTests
             searchCategoryRepository,
             accountRepository,
             searchAccountRepository,
+            out _,
+            out _,
             out _,
             out _,
             out _,
@@ -122,6 +126,8 @@ public class TransactionsViewModelTests
             out _,
             out _,
             out _,
+            out _,
+            out _,
             out _);
 
         var firstLoad = viewModel.LoadTransaktionenCommand.ExecuteAsync(null);
@@ -154,6 +160,8 @@ public class TransactionsViewModelTests
             out _,
             out _,
             out _,
+            out _,
+            out _,
             deleteRepository);
 
         dialogService.ShowConfirmationAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>())
@@ -179,6 +187,8 @@ public class TransactionsViewModelTests
             Substitute.For<IAccountRepository>(),
             Substitute.For<IAccountRepository>(),
             out var dialogService,
+            out _,
+            out _,
             out _,
             out _,
             out _,
@@ -210,6 +220,8 @@ public class TransactionsViewModelTests
             Substitute.For<IAccountRepository>(),
             Substitute.For<IAccountRepository>(),
             out var dialogService,
+            out _,
+            out _,
             out _,
             out _,
             out _,
@@ -273,6 +285,8 @@ public class TransactionsViewModelTests
             out _,
             out _,
             out var navigationService,
+            out _,
+            out _,
             filePicker: filePicker,
             analyzeCsvImportUseCase: analyzeUseCase,
             importSessionStore: importSessionStore);
@@ -281,6 +295,65 @@ public class TransactionsViewModelTests
 
         Assert.NotNull(importSessionStore.GetActiveSession());
         await navigationService.Received(1).GoToAsync(Routes.ImportPreview, Arg.Any<IDictionary<string, object>>());
+    }
+
+    [Fact]
+    public async Task GoToDetail_WhenNoItem_OpensCreateSheet()
+    {
+        var categoryRepository = Substitute.For<ICategoryRepository>();
+        categoryRepository.GetCategoriesAsync().Returns(Task.FromResult(new List<Category>()));
+        var accountRepository = Substitute.For<IAccountRepository>();
+        accountRepository.GetAccountsAsync().Returns(Task.FromResult(new List<Account>()));
+
+        var viewModel = CreateSut(
+            Substitute.For<ITransactionRepository>(),
+            categoryRepository,
+            Substitute.For<ITransactionRepository>(),
+            Substitute.For<ICategoryRepository>(),
+            accountRepository,
+            Substitute.For<IAccountRepository>(),
+            out _,
+            out _,
+            out _,
+            out var navigationService,
+            out var transactionCreateSheet,
+            out _);
+
+        await viewModel.GoToDetailCommand.ExecuteAsync(null);
+
+        await transactionCreateSheet.Received(1).ShowAsync(Arg.Any<TransactionDetailViewModel>());
+        await navigationService.DidNotReceive().GoToAsync(Routes.TransactionDetail, Arg.Any<IDictionary<string, object>>());
+        await navigationService.DidNotReceive().GoToAsync(Routes.TransactionDetail);
+    }
+
+    [Fact]
+    public async Task GoToTransfer_OpensTransferCreateSheet()
+    {
+        var accountRepository = Substitute.For<IAccountRepository>();
+        accountRepository.GetAccountsAsync().Returns(Task.FromResult(new List<Account>
+        {
+            new() { Id = "a1", Name = "Giro", SystemKey = Finanzuebersicht.Constants.SystemAccountKeys.Default },
+            new() { Id = "a2", Name = "Spar" }
+        }));
+
+        var viewModel = CreateSut(
+            Substitute.For<ITransactionRepository>(),
+            Substitute.For<ICategoryRepository>(),
+            Substitute.For<ITransactionRepository>(),
+            Substitute.For<ICategoryRepository>(),
+            accountRepository,
+            Substitute.For<IAccountRepository>(),
+            out _,
+            out _,
+            out _,
+            out var navigationService,
+            out _,
+            out var transferCreateSheet);
+
+        await viewModel.GoToTransferCommand.ExecuteAsync(null);
+
+        await transferCreateSheet.Received(1).ShowAsync(Arg.Any<TransferDetailViewModel>());
+        await navigationService.DidNotReceive().GoToAsync(Routes.TransferDetail);
     }
 
     private static TransactionsViewModel CreateSut(
@@ -294,6 +367,8 @@ public class TransactionsViewModelTests
         out ILocalizationService localizationService,
         out IMainThreadDispatcher dispatcher,
         out INavigationService navigationService,
+        out ITransactionCreateSheetService transactionCreateSheet,
+        out ITransferCreateSheetService transferCreateSheet,
         ITransactionRepository? deleteTransactionRepository = null,
         IFilePicker? filePicker = null,
         AnalyzeCsvImportUseCase? analyzeCsvImportUseCase = null,
@@ -332,6 +407,10 @@ public class TransactionsViewModelTests
         deleteTransactionRepository ??= Substitute.For<ITransactionRepository>();
         deleteTransactionRepository.DeleteTransactionAsync(Arg.Any<string>()).Returns(Task.CompletedTask);
         deleteTransactionRepository.SaveTransactionAsync(Arg.Any<Transaction>()).Returns(Task.CompletedTask);
+        deleteTransactionRepository.GetTransactionsAsync(Arg.Any<DateTime>(), Arg.Any<DateTime>())
+            .Returns(Task.FromResult(new List<Transaction>()));
+        deleteTransactionRepository.GetAllTransactionsAsync(Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(new List<Transaction>()));
 
         var feedbackService = Substitute.For<IFeedbackService>();
         feedbackService.ShowSnackbarAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<Func<Task>>())
@@ -350,6 +429,54 @@ public class TransactionsViewModelTests
             dialogService,
             localizationService);
 
+        transactionCreateSheet = Substitute.For<ITransactionCreateSheetService>();
+        transactionCreateSheet.ShowAsync(Arg.Any<TransactionDetailViewModel>()).Returns(false);
+        transferCreateSheet = Substitute.For<ITransferCreateSheetService>();
+        transferCreateSheet.ShowAsync(Arg.Any<TransferDetailViewModel>()).Returns(false);
+
+        var sparZielRepository = Substitute.For<ISparZielRepository>();
+        sparZielRepository.GetSparZieleAsync().Returns(Task.FromResult(new List<SparZiel>()));
+
+        var createTransactionVm = new TransactionDetailViewModel(
+            new SaveTransactionDetailUseCase(deleteTransactionRepository, loadAccountRepository),
+            new LoadTransactionDetailDataUseCase(loadCategoryRepository, loadAccountRepository),
+            new GetTransactionByIdUseCase(deleteTransactionRepository),
+            new LoadSparZieleUseCase(sparZielRepository, deleteTransactionRepository),
+            new TransactionValidationService(),
+            localizationService,
+            navigationService,
+            dialogService,
+            feedbackService,
+            appEvents);
+
+        var createTransferVm = new TransferDetailViewModel(
+            new SaveTransferUseCase(deleteTransactionRepository, loadAccountRepository),
+            new LoadActiveAccountsUseCase(loadAccountRepository),
+            navigationService,
+            dialogService,
+            localizationService,
+            feedbackService,
+            appEvents);
+
+        var quickExpenseSheet = Substitute.For<IQuickExpenseCaptureSheetService>();
+        quickExpenseSheet.ShowAsync(Arg.Any<QuickExpenseCaptureViewModel>()).Returns(false);
+
+        var uncategorized = Substitute.For<IUncategorizedCategoryService>();
+        uncategorized.EnsureAsync(Arg.Any<CancellationToken>()).Returns("cat-uncat");
+        var quickExpenseVm = new QuickExpenseCaptureViewModel(
+            new CaptureQuickExpenseUseCase(
+                deleteTransactionRepository,
+                loadAccountRepository,
+                uncategorized,
+                new TransactionValidationService(),
+                UnrestrictedLicenseService.Instance,
+                SystemClock.Instance),
+            localizationService,
+            dialogService,
+            navigationService,
+            feedbackService,
+            appEvents);
+
         return new TransactionsViewModel(
             new DeleteTransactionUseCase(deleteTransactionRepository),
             new RestoreTransactionUseCase(deleteTransactionRepository),
@@ -358,6 +485,12 @@ public class TransactionsViewModelTests
             navigationService,
             importCoordinator,
             templatesCoordinator,
+            createTransactionVm,
+            createTransferVm,
+            quickExpenseVm,
+            transactionCreateSheet,
+            transferCreateSheet,
+            quickExpenseSheet,
             dialogService,
             feedbackService,
             localizationService,

@@ -55,6 +55,8 @@ public partial class TransferDetailViewModel(
     [ObservableProperty]
     private DateTime date;
 
+    public string PageTitle => _loc.GetString(ResourceKeys.Title_Umbuchung);
+
     [RelayCommand]
     private async Task LoadAccounts()
     {
@@ -70,8 +72,26 @@ public partial class TransferDetailViewModel(
         TargetAccount = accounts.FirstOrDefault(a => a.Id != SourceAccount?.Id);
     }
 
+    public async Task ResetForCreateAsync()
+    {
+        AmountText = string.Empty;
+        Title = string.Empty;
+        Note = string.Empty;
+        Date = _clock.Today;
+        SourceAccount = null;
+        TargetAccount = null;
+        OnPropertyChanged(nameof(PageTitle));
+        await LoadAccountsCommand.ExecuteAsync(null);
+    }
+
     [RelayCommand]
     private async Task Save()
+    {
+        if (await TrySaveAsync())
+            await _navigationService.GoBackAsync();
+    }
+
+    public async Task<bool> TrySaveAsync()
     {
         if (!decimal.TryParse(AmountText, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.CurrentCulture, out var amount) || amount <= 0)
         {
@@ -79,7 +99,7 @@ public partial class TransferDetailViewModel(
                 _loc.GetString(ResourceKeys.Err_Titel),
                 _loc.GetString(ResourceKeys.Err_BetragGroesserNull),
                 _loc.GetString(ResourceKeys.Btn_OK));
-            return;
+            return false;
         }
 
         if (SourceAccount == null || TargetAccount == null || SourceAccount.Id == TargetAccount.Id)
@@ -88,7 +108,7 @@ public partial class TransferDetailViewModel(
                 _loc.GetString(ResourceKeys.Err_Titel),
                 _loc.GetString(ResourceKeys.Err_TransferKontenUnterschiedlich),
                 _loc.GetString(ResourceKeys.Btn_OK));
-            return;
+            return false;
         }
 
         try
@@ -108,12 +128,12 @@ public partial class TransferDetailViewModel(
             if (!result.IsSuccess)
             {
                 await UseCaseErrorPresenter.ShowAsync(_dialogService, _loc, result.Error!);
-                return;
+                return false;
             }
 
             _appEvents.NotifyDataChanged();
-            await _navigationService.GoBackAsync();
             await _feedbackService.ShowSnackbarAsync(_loc.GetString(ResourceKeys.Msg_Gespeichert));
+            return true;
         }
         catch (Exception ex)
         {
@@ -122,6 +142,7 @@ public partial class TransferDetailViewModel(
                 _loc.GetString(ResourceKeys.Err_Titel),
                 _loc.GetString(ResourceKeys.Err_SpeichernFehlgeschlagen, ex.Message),
                 _loc.GetString(ResourceKeys.Btn_OK));
+            return false;
         }
     }
 }

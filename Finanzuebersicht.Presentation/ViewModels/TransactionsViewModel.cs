@@ -23,6 +23,12 @@ public partial class TransactionsViewModel(
     INavigationService navigationService,
     TransactionImportCoordinator importCoordinator,
     TransactionTemplatesCoordinator templatesCoordinator,
+    TransactionDetailViewModel createTransactionViewModel,
+    TransferDetailViewModel createTransferViewModel,
+    QuickExpenseCaptureViewModel quickExpenseCaptureViewModel,
+    ITransactionCreateSheetService transactionCreateSheetService,
+    ITransferCreateSheetService transferCreateSheetService,
+    IQuickExpenseCaptureSheetService quickExpenseCaptureSheetService,
     IDialogService dialogService,
     IFeedbackService feedbackService,
     ILocalizationService localizationService,
@@ -44,6 +50,12 @@ public partial class TransactionsViewModel(
     private readonly INavigationService _navigationService = navigationService;
     private readonly TransactionImportCoordinator _importCoordinator = importCoordinator;
     private readonly TransactionTemplatesCoordinator _templatesCoordinator = templatesCoordinator;
+    private readonly TransactionDetailViewModel _createTransactionViewModel = createTransactionViewModel;
+    private readonly TransferDetailViewModel _createTransferViewModel = createTransferViewModel;
+    private readonly QuickExpenseCaptureViewModel _quickExpenseCaptureViewModel = quickExpenseCaptureViewModel;
+    private readonly ITransactionCreateSheetService _transactionCreateSheetService = transactionCreateSheetService;
+    private readonly ITransferCreateSheetService _transferCreateSheetService = transferCreateSheetService;
+    private readonly IQuickExpenseCaptureSheetService _quickExpenseCaptureSheetService = quickExpenseCaptureSheetService;
     private readonly IDialogService _dialogService = dialogService;
     private readonly IFeedbackService _feedbackService = feedbackService;
     private readonly ILocalizationService _loc = localizationService;
@@ -533,13 +545,20 @@ public partial class TransactionsViewModel(
                 return;
             }
 
-            _logger?.LogDebug("GoToDetail called for transaction {Id}", transaktion?.Id ?? "(new)");
-
-            var parameter = new Dictionary<string, object>();
-            if (transaktion != null)
+            if (transaktion == null)
             {
-                parameter[NavigationQueryKeys.TransactionId] = transaktion.Id;
+                await _createTransactionViewModel.ResetForCreateAsync();
+                if (await _transactionCreateSheetService.ShowAsync(_createTransactionViewModel))
+                    await LoadTransaktionenCommand.ExecuteAsync(null);
+                return;
             }
+
+            _logger?.LogDebug("GoToDetail called for transaction {Id}", transaktion.Id);
+
+            var parameter = new Dictionary<string, object>
+            {
+                [NavigationQueryKeys.TransactionId] = transaktion.Id
+            };
 
             if (_navigationService == null)
             {
@@ -576,7 +595,9 @@ public partial class TransactionsViewModel(
     [RelayCommand]
     private async Task GoToTransfer()
     {
-        await _navigationService.GoToAsync(Routes.TransferDetail);
+        await _createTransferViewModel.ResetForCreateAsync();
+        if (await _transferCreateSheetService.ShowAsync(_createTransferViewModel))
+            await LoadTransaktionenCommand.ExecuteAsync(null);
     }
 
     [RelayCommand]
@@ -593,8 +614,9 @@ public partial class TransactionsViewModel(
                 return;
             }
 
-            // Same Shell navigation path as Umbuchen / Detail pages — no modal/popup.
-            await _navigationService.GoToAsync(Routes.QuickExpenseCapture);
+            _quickExpenseCaptureViewModel.Reset();
+            if (await _quickExpenseCaptureSheetService.ShowAsync(_quickExpenseCaptureViewModel))
+                await LoadTransaktionenCommand.ExecuteAsync(null);
         }
         catch (Exception ex)
         {

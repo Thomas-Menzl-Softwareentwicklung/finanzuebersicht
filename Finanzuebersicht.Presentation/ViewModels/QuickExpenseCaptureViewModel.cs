@@ -98,6 +98,8 @@ public partial class QuickExpenseCaptureViewModel(
                 return false;
             }
 
+            _appEvents.NotifyDataChanged();
+            await _feedbackService.ShowSnackbarAsync(_loc.GetString(ResourceKeys.Msg_SchnellAusgabeGespeichert));
             return true;
         }
         catch (FeatureGateException)
@@ -113,8 +115,6 @@ public partial class QuickExpenseCaptureViewModel(
         if (!await TrySaveAsync())
             return;
 
-        _appEvents.NotifyDataChanged();
-        await _feedbackService.ShowSnackbarAsync(_loc.GetString(ResourceKeys.Msg_SchnellAusgabeGespeichert));
         await _navigationService.GoToAsync("..");
     }
 
