@@ -22,7 +22,7 @@ Monetarisierung: [`MONETIZATION.md`](MONETIZATION.md).
 | Sync-IAP Verkauf | **später** (CloudKit #243) |
 | App Store Connect App + Zertifikate | **manuell** |
 | TestFlight IPA Upload | **manuell auf dem Mac** |
-| Store-Screenshots | **noch offen** |
+| Store-Screenshots | Automatisierung lokal (`fastlane snapshot`) — siehe [Screenshot-Automatisierung](#screenshot-automatisierung) |
 
 ## Product IDs (App Store Connect)
 
@@ -100,3 +100,46 @@ Oder in Xcode: Archive öffnen → Distribute App → **App Store Connect** → 
 ## Feature-Gates
 
 Siehe `MONETIZATION.md`. Kurz: Direct = immer Pro, kein Sync. Store = Free-Limits + Pro-IAP; Sync-Abo später ohne Pro-Pflicht.
+
+## Screenshot-Automatisierung
+
+Lokal App-Store-Screenshots (iPhone + iPad, `de-DE` + `en-US`) und ausgewählte DE-iPhone-Frames fürs README erzeugen. Rohdaten unter `fastlane/screenshots/` sind **gitignored**; kuratierte README-PNGs liegen in `docs/screenshots/`.
+
+### Voraussetzungen
+
+- macOS mit **Xcode** (Simulator-Namen in `fastlane/Snapfile` ggf. anpassen — `xcrun simctl list devices available`)
+- **Ruby + Bundler:** `bundle install` (Repo-Root, `Gemfile`)
+- **.NET 10 + MAUI:** iOS-Simulator-Build der Host-App
+
+### Ablauf
+
+1. **MAUI-App bauen und auf Simulator installieren** (vor jedem Lauf, wenn sich die App geändert hat):
+
+```bash
+dotnet build Finanzuebersicht/Finanzuebersicht.csproj \
+  -f net10.0-ios -c Debug -p:RuntimeIdentifier=iossimulator-arm64
+xcrun simctl install booted \
+  Finanzuebersicht/bin/Debug/net10.0-ios/iossimulator-arm64/Finanzübersicht.app
+```
+
+2. **Screenshots aufnehmen** (fastlane snapshot, 7 Screens × 2 Geräte × 2 Sprachen):
+
+```bash
+bundle exec fastlane screenshots
+```
+
+PNG-Ausgabe: `fastlane/screenshots/<locale>/<Gerät>/01-dashboard.png` … `07-settings.png`.  
+Details zu UITest-Flow und Simulator-Pfaden: `Finanzuebersicht/Platforms/iOS/UITests/README.md`.
+
+3. **README-Bilder aktualisieren** (nur DE-iPhone → bestehende `docs/screenshots/`-Namen):
+
+```bash
+./scripts/copy-readme-screenshots.sh
+git add docs/screenshots/
+```
+
+Das Skript mappt sechs der sieben Aufnahmen (`03-quick-expense` hat noch keinen README-Slot). Legacy-README-Assets ohne Gegenstück (z. B. `dashboard-jahr.png`, Filter/Swipe/Detail) bleiben unverändert, bis passende Flows ergänzt werden.
+
+4. **App Store Connect:** passende Gerätegrößen aus `fastlane/screenshots/` manuell hochladen (kein `frameit` in Wave 1).
+
+Demo-Daten: Launch-Argument `--screenshot-demo` (nur Debug; isolierter Demo-Pfad). Release/Store-Builds sind nicht betroffen.
