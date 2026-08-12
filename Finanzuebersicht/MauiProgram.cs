@@ -2,6 +2,7 @@
 using CommunityToolkit.Maui;
 using Finanzuebersicht.Application.DependencyInjection;
 using Finanzuebersicht.Core.Services;
+using Finanzuebersicht.Core.Services.ScreenshotDemo;
 using Finanzuebersicht.Infrastructure;
 using Finanzuebersicht.Presentation.DependencyInjection;
 using Finanzuebersicht.Presentation.Services;
@@ -23,6 +24,12 @@ public static class MauiProgram
 {
 	public static MauiApp CreateMauiApp()
 	{
+#if (IOS || MACCATALYST) && DEBUG
+		// Before DI / DataPathResolver — XCTest launchArguments live in NSProcessInfo, not Environment.
+		ScreenshotDemoLaunchOptions.PlatformArgsProvider = () =>
+			Foundation.NSProcessInfo.ProcessInfo.Arguments.Select(a => (string)a);
+#endif
+
 		var builder = MauiApp.CreateBuilder();
 		builder
 			.UseMauiApp<App>()

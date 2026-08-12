@@ -47,5 +47,40 @@ public class ScreenshotDemoLaunchOptionsTests
             ScreenshotDemoLaunchOptions.CommandLineArgsOverride = null;
         }
     }
+
+    [Fact]
+    public void IsRequested_ReturnsTrue_WhenLaunchArgumentInPlatformArgsProvider()
+    {
+        ScreenshotDemoLaunchOptions.CommandLineArgsOverride = null;
+        ScreenshotDemoLaunchOptions.PlatformArgsProvider = () =>
+            ["Finanzuebersicht", ScreenshotDemoLaunchOptions.LaunchArgument];
+
+        try
+        {
+            Assert.True(ScreenshotDemoLaunchOptions.IsRequested());
+        }
+        finally
+        {
+            ScreenshotDemoLaunchOptions.PlatformArgsProvider = null;
+        }
+    }
+
+    [Fact]
+    public void IsRequested_IgnoresPlatformArgsProvider_WhenCommandLineArgsOverrideSet()
+    {
+        ScreenshotDemoLaunchOptions.PlatformArgsProvider = () =>
+            ["Finanzuebersicht", ScreenshotDemoLaunchOptions.LaunchArgument];
+        ScreenshotDemoLaunchOptions.CommandLineArgsOverride = () => ["Finanzuebersicht"];
+
+        try
+        {
+            Assert.False(ScreenshotDemoLaunchOptions.IsRequested());
+        }
+        finally
+        {
+            ScreenshotDemoLaunchOptions.PlatformArgsProvider = null;
+            ScreenshotDemoLaunchOptions.CommandLineArgsOverride = null;
+        }
+    }
 #endif
 }
