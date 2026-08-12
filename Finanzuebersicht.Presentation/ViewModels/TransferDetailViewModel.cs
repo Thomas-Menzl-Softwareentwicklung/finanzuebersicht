@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Finanzuebersicht.Application.UseCases.Accounts;
 using Finanzuebersicht.Application.UseCases.Transactions;
+using Finanzuebersicht.Core.Services;
 using Finanzuebersicht.Models;
 using Finanzuebersicht.Navigation;
 using Finanzuebersicht.Presentation.Services;
@@ -93,7 +94,7 @@ public partial class TransferDetailViewModel(
 
     public async Task<bool> TrySaveAsync()
     {
-        if (!decimal.TryParse(AmountText, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.CurrentCulture, out var amount) || amount <= 0)
+        if (!FlexibleAmountParser.TryParse(AmountText, out var amount) || amount <= 0)
         {
             await _dialogService.ShowAlertAsync(
                 _loc.GetString(ResourceKeys.Err_Titel),

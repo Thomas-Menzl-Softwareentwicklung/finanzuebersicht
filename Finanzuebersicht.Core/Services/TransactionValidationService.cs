@@ -14,7 +14,8 @@ public class TransactionValidationService : ITransactionValidationService
     {
         error = null;
 
-        if (!decimal.TryParse(amountText, NumberStyles.Any, culture, out amount))
+        // Accept both comma and dot — OS numeric keyboards follow device locale, not app language.
+        if (!FlexibleAmountParser.TryParse(amountText, out amount))
         {
             error = TransactionInputError.InvalidAmountFormat;
             return false;
