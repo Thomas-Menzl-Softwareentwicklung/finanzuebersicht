@@ -13,6 +13,7 @@ namespace Finanzuebersicht.ViewModels;
 
 public partial class AccountDetailViewModel(
     SaveAccountDetailUseCase saveAccountDetailUseCase,
+    GetAccountByIdUseCase getAccountByIdUseCase,
     GetAccountBalancesUseCase getAccountBalancesUseCase,
     ReconcileAccountBalanceUseCase reconcileAccountBalanceUseCase,
     INavigationService navigationService,
@@ -23,6 +24,7 @@ public partial class AccountDetailViewModel(
     ILogger<AccountDetailViewModel>? logger = null) : ObservableObject, IApplyQueryAttributes, ILocalizableViewModel
 {
     private readonly SaveAccountDetailUseCase _saveAccountDetailUseCase = saveAccountDetailUseCase;
+    private readonly GetAccountByIdUseCase _getAccountByIdUseCase = getAccountByIdUseCase;
     private readonly GetAccountBalancesUseCase _getAccountBalancesUseCase = getAccountBalancesUseCase;
     private readonly ReconcileAccountBalanceUseCase _reconcileAccountBalanceUseCase = reconcileAccountBalanceUseCase;
     private readonly INavigationService _navigationService = navigationService;
@@ -126,8 +128,53 @@ public partial class AccountDetailViewModel(
 
     public void ApplyQueryAttributes(IDictionary<string, object> query)
     {
+        if (query.TryGetValue(NavigationQueryKeys.AccountId, out var idVal) && idVal is string accountId && !string.IsNullOrWhiteSpace(accountId))
+        {
+            _ = LoadExistingByIdAsync(accountId);
+            return;
+        }
+
         if (query.TryGetValue(NavigationQueryKeys.Account, out var val) && val is Account a)
             Account = a;
+        else
+            ResetForCreate();
+    }
+
+    private async Task LoadExistingByIdAsync(string accountId)
+    {
+        try
+        {
+            var account = await _getAccountByIdUseCase.ExecuteAsync(accountId);
+            if (account is not null)
+                Account = account;
+            else
+                ResetForCreate();
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogError(ex, "AccountDetailViewModel: LoadExistingByIdAsync failed for {Id}", accountId);
+            ResetForCreate();
+        }
+    }
+
+    public void ResetForCreate()
+    {
+        _existingAccount = null;
+        Name = string.Empty;
+        Type = AccountType.Girokonto;
+        IsArchived = false;
+        OpeningBalanceText = string.Empty;
+        UseOpeningBalanceDate = false;
+        OpeningBalanceDate = DateTime.Today;
+        ActualBalanceText = string.Empty;
+        CalculatedBalanceText = string.Empty;
+        SelectedTypeOption = VerfuegbareTypen.FirstOrDefault(t => t.Value == Type);
+        OnPropertyChanged(nameof(PageTitle));
+        OnPropertyChanged(nameof(IsSystemAccount));
+        OnPropertyChanged(nameof(CanArchive));
+        OnPropertyChanged(nameof(SystemAccountHint));
+        OnPropertyChanged(nameof(ArchiveStatusText));
+        OnPropertyChanged(nameof(CanReconcile));
     }
 
     [RelayCommand]
@@ -148,8 +195,15 @@ public partial class AccountDetailViewModel(
         {
             Type = SelectedTypeOption?.Value ?? Type;
             var openingBalanceDate = UseOpeningBalanceDate ? OpeningBalanceDate : (DateTime?)null;
-            await _saveAccountDetailUseCase.ExecuteAsync(
+            var result = await _saveAccountDetailUseCase.ExecuteAsync(
                 _existingAccount, Name, Type, IsArchived, openingBalance, openingBalanceDate);
+
+            if (!result.IsSuccess)
+            {
+                await UseCaseErrorPresenter.ShowAsync(_dialogService, _loc, result.Error!);
+                return;
+            }
+
             _appEvents.NotifyDataChanged();
             await _feedbackService.ShowSnackbarAsync(_loc.GetString(ResourceKeys.Msg_Gespeichert));
             await _navigationService.GoBackAsync();
@@ -169,7 +223,7 @@ public partial class AccountDetailViewModel(
     {
         if (_existingAccount == null) return;
 
-        if (!decimal.TryParse(ActualBalanceText, NumberStyles.Number, CultureInfo.CurrentCulture, out var actualBalance))
+        if (!FlexibleAmountParser.TryParse(ActualBalanceText, out var actualBalance))
         {
             await _dialogService.ShowAlertAsync(
                 _loc.GetString(ResourceKeys.Err_Titel),
@@ -218,11 +272,7 @@ public partial class AccountDetailViewModel(
             return true;
         }
 
-        return decimal.TryParse(
-            OpeningBalanceText,
-            NumberStyles.Number,
-            CultureInfo.CurrentCulture,
-            out openingBalance);
+        return FlexibleAmountParser.TryParse(OpeningBalanceText, out openingBalance);
     }
 }
 

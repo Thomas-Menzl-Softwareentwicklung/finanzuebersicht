@@ -1,5 +1,8 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Finanzuebersicht.Core.Licensing;
+using Finanzuebersicht.Core.Services;
+using Finanzuebersicht.Infrastructure.Licensing;
 
 namespace Finanzuebersicht.Infrastructure;
 
@@ -10,6 +13,27 @@ public static class InfrastructureServiceCollectionExtensions
         // Settings (file-based JSON persistence)
         services.AddSingleton<ISettingsService, SettingsService>();
         services.AddSingleton<IDisplayCurrencyService, DisplayCurrencyService>();
+
+        // Licensing (IDistributionChannelProvider + IStoreBillingService registered by the host)
+        // Entitlement stubs only in Debug — Release/Store builds must not honor free Pro toggles.
+        services.AddSingleton<ILicenseEntitlementStore>(sp =>
+            new LicenseEntitlementStore(
+                sp.GetRequiredService<ISettingsService>(),
+                sp.GetRequiredService<IStoreBillingService>(),
+#if DEBUG
+                allowEntitlementStubs: true));
+#else
+                allowEntitlementStubs: false));
+#endif
+        services.AddSingleton<ILicenseService, LicenseService>();
+
+        services.AddSingleton<IUncategorizedCategoryService, UncategorizedCategoryService>();
+
+        // CSV import parsers + categorization (Application use cases consume these)
+        services.AddSingleton<IStatementParser, DkbCsvParser>();
+        services.AddSingleton<ICategorizationStrategy, KeywordCategorizationStrategy>();
+        services.AddSingleton<ICategorizationStrategy, HistoricalCategorizationStrategy>();
+        services.AddSingleton<CategorizationService>();
 
         // Backup
         services.AddSingleton<IDataMigrator, Finanzuebersicht.Core.Services.Migrations.V1ToV2Migrator>();
@@ -81,6 +105,17 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddSingleton<IBudgetRepository>(sp => sp.GetRequiredService<LocalDataService>());
         services.AddSingleton<ISparZielRepository>(sp => sp.GetRequiredService<LocalDataService>());
         services.AddSingleton<ITransactionTemplateRepository>(sp => sp.GetRequiredService<LocalDataService>());
+
+        // Default inbox (tests / non-iOS). MAUI host may replace with App Group store.
+        services.AddSingleton<IQuickExpenseInboxStore>(sp =>
+            new FileQuickExpenseInboxStore(
+                GetDataDir(sp),
+                sp.GetService<ILogger<FileQuickExpenseInboxStore>>()));
+
+        services.AddSingleton<IQuickExpenseWidgetPresetStore>(sp =>
+            new FileQuickExpenseWidgetPresetStore(
+                GetDataDir(sp),
+                sp.GetService<ILogger<FileQuickExpenseWidgetPresetStore>>()));
 
         return services;
     }

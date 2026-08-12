@@ -113,6 +113,34 @@ public class CategoryDetailViewModelTests
             b != null && b.KategorieId == "cat-1" && b.Betrag == 75m));
     }
 
+    [Fact]
+    public void SelectIconCommand_SetsIcon()
+    {
+        var sut = CreateSut(
+            Substitute.For<ICategoryRepository>(),
+            Substitute.For<IBudgetRepository>(),
+            Substitute.For<IDialogService>(),
+            CreateLocalizationService());
+
+        sut.SelectIconCommand.Execute("🛒");
+
+        Assert.Equal("🛒", sut.Icon);
+    }
+
+    [Fact]
+    public void SelectColorCommand_SetsColor()
+    {
+        var sut = CreateSut(
+            Substitute.For<ICategoryRepository>(),
+            Substitute.For<IBudgetRepository>(),
+            Substitute.For<IDialogService>(),
+            CreateLocalizationService());
+
+        sut.SelectColorCommand.Execute("#34C759");
+
+        Assert.Equal("#34C759", sut.Color);
+    }
+
     private static CategoryDetailViewModel CreateSut(
         ICategoryRepository categoryRepository,
         IBudgetRepository budgetRepository,
@@ -123,6 +151,7 @@ public class CategoryDetailViewModelTests
             new SaveCategoryDetailUseCase(categoryRepository),
             new SaveCategoryBudgetUseCase(budgetRepository),
             new LoadCategoryBudgetUseCase(budgetRepository),
+            new GetCategoryByIdUseCase(categoryRepository),
             Substitute.For<INavigationService>(),
             localizationService,
             feedbackService ?? Substitute.For<IFeedbackService>(),

@@ -9,13 +9,13 @@
 
     <ScrollView Padding="16">
         <VerticalStackLayout Spacing="16" Padding="0,0,0,24">
-            <Label Text="{loc:Translate Lbl_OriginalDatum}" FontSize="13" TextColor="Gray" />
+            <Label Text="{loc:Translate Lbl_OriginalDatum}" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
             <Label Text="{Binding InstanceDate, StringFormat='{0:dd.MM.yyyy}'}" FontSize="18" />
 
-            <Label Text="{loc:Translate Lbl_NeuesDatum}" FontSize="13" TextColor="Gray" />
+            <Label Text="{loc:Translate Lbl_NeuesDatum}" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
             <DatePicker Date="{Binding NewDate}" Format="dd. MMMM yyyy" />
 
-            <Label Text="{loc:Translate Hint_NotizOptional}" FontSize="13" TextColor="Gray" />
+            <Label Text="{loc:Translate Hint_NotizOptional}" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
             <Entry Text="{Binding Note}" Placeholder="{loc:Translate Hint_NotizOptional}" />
 
             <Button Text="{loc:Translate Btn_Speichern}" Command="{Binding SaveCommand}" BackgroundColor="{DynamicResource Primary}" TextColor="White" />

@@ -1,3 +1,4 @@
+using Finanzuebersicht.Application.Results;
 using Finanzuebersicht.Application.UseCases.Transactions;
 using Finanzuebersicht.Models;
 using NSubstitute;
@@ -18,8 +19,9 @@ public class SaveTransferUseCaseTests
         });
         var sut = new SaveTransferUseCase(repository, accountRepository);
 
-        await sut.ExecuteAsync("acc-1", "acc-2", 150m, new DateTime(2026, 4, 10), "Umbuchung", "Test");
+        var result = await sut.ExecuteAsync("acc-1", "acc-2", 150m, new DateTime(2026, 4, 10), "Umbuchung", "Test");
 
+        Assert.True(result.IsSuccess);
         await repository.Received(1).SaveTransactionsAsync(NonNullArg.Is<IEnumerable<Transaction>>(items =>
             items.Count() == 2
             && items.All(t => t.IsTransfer)
@@ -29,7 +31,7 @@ public class SaveTransferUseCaseTests
     }
 
     [Fact]
-    public async Task ExecuteAsync_Throws_WhenAccountsEqual()
+    public async Task ExecuteAsync_Fails_WhenAccountsEqual()
     {
         var repository = Substitute.For<ITransactionRepository>();
         var accountRepository = Substitute.For<IAccountRepository>();
@@ -39,7 +41,10 @@ public class SaveTransferUseCaseTests
         });
         var sut = new SaveTransferUseCase(repository, accountRepository);
 
-        await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            sut.ExecuteAsync("acc-1", "acc-1", 150m, new DateTime(2026, 4, 10)));
+        var result = await sut.ExecuteAsync("acc-1", "acc-1", 150m, new DateTime(2026, 4, 10));
+
+        Assert.False(result.IsSuccess);
+        Assert.Equal(UseCaseErrorCode.TransferAccountsMustDiffer, result.Error!.Code);
+        await repository.DidNotReceive().SaveTransactionsAsync(Arg.Any<IEnumerable<Transaction>>());
     }
 }

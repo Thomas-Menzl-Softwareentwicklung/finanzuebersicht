@@ -124,5 +124,12 @@ namespace Finanzuebersicht.Core.Services
         /// ISO currency code for amount display formatting (EUR, CHF, USD, GBP).
         /// </summary>
         public const string DisplayCurrency = "DisplayCurrency";
+
+        // Licensing stubs (Store builds until StoreKit is wired)
+        /// <summary>Stub: Pro unlocked (true/false). Ignored for Direct builds.</summary>
+        public const string LicenseStubHasPro = "License.Stub.HasPro";
+
+        /// <summary>Stub: Sync subscription active (true/false). Ignored for Direct builds.</summary>
+        public const string LicenseStubHasSync = "License.Stub.HasSync";
     }
 }

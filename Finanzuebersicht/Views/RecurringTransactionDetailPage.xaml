@@ -17,7 +17,7 @@
                 <controls:RecurringTransactionFormView BindingContext="{Binding .}" />
 
                 <VerticalStackLayout Spacing="4" IsVisible="{Binding IsEditing}">
-                    <Label Text="{loc:Translate Lbl_Ausnahmen}" FontSize="13" TextColor="Gray" />
+                    <Label Text="{loc:Translate Lbl_Ausnahmen}" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
                     <CollectionView ItemsSource="{Binding Exceptions}" SelectionMode="None" HeightRequest="180" VerticalOptions="Start" Margin="0,6,0,0">
                         <CollectionView.ItemTemplate>
                             <DataTemplate x:DataType="models:RecurringException">

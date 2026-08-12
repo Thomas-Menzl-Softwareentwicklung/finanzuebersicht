@@ -19,4 +19,28 @@ public partial class TransactionsPage : BaseContentPage
             BindingContext = viewModel;
         }
     }
+
+    protected override void OnAppearing()
+    {
+        base.OnAppearing();
+        // Widget inbox / saves — only Transactions needs live reload (not all BaseContentPage tabs).
+        AppEvents.DataChanged += OnDataChanged;
+    }
+
+    protected override void OnDisappearing()
+    {
+        if (CachedAppEvents is not null)
+            CachedAppEvents.DataChanged -= OnDataChanged;
+
+        base.OnDisappearing();
+    }
+
+    private void OnDataChanged()
+    {
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            if (BindingContext is IAutoLoadViewModel vm && vm.ShouldAutoLoad)
+                vm.AutoLoadCommand.Execute(null);
+        });
+    }
 }

@@ -10,47 +10,13 @@ namespace Finanzuebersicht.Tests.ViewModels;
 public class SparZieleViewModelTests
 {
     [Fact]
-    public void ToggleAddForm_OpensFormAndHidesEmptyState()
+    public async Task OpenCreateForm_NavigatesToSparZielDetail()
     {
-        var viewModel = CreateSut(Substitute.For<ISparZielRepository>(), out _, out _);
-        Assert.True(viewModel.IsEmptyStateVisible);
+        var viewModel = CreateSut(Substitute.For<ISparZielRepository>(), out _, out var navigationService);
 
-        viewModel.ToggleAddFormCommand.Execute(null);
+        await viewModel.OpenCreateFormCommand.ExecuteAsync(null);
 
-        Assert.True(viewModel.ShowAddForm);
-        Assert.False(viewModel.IsEmptyStateVisible);
-    }
-
-    [Fact]
-    public async Task SaveNewSparZiel_WithEmptyTitel_ShowsAlertAndDoesNotSave()
-    {
-        var repository = Substitute.For<ISparZielRepository>();
-        repository.GetSparZieleAsync().Returns(Task.FromResult(new List<SparZiel>()));
-
-        var viewModel = CreateSut(repository, out var dialogService, out _);
-        viewModel.NeuerTitel = string.Empty;
-        viewModel.NeuesZielBetrag = 100m;
-
-        await viewModel.SaveNewSparZielCommand.ExecuteAsync(null);
-
-        await dialogService.Received(1).ShowAlertAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>());
-        await repository.DidNotReceive().SaveSparZielAsync(Arg.Any<SparZiel>());
-    }
-
-    [Fact]
-    public async Task SaveNewSparZiel_WithZeroBetrag_ShowsAlertAndDoesNotSave()
-    {
-        var repository = Substitute.For<ISparZielRepository>();
-        repository.GetSparZieleAsync().Returns(Task.FromResult(new List<SparZiel>()));
-
-        var viewModel = CreateSut(repository, out var dialogService, out _);
-        viewModel.NeuerTitel = "Test";
-        viewModel.NeuesZielBetrag = 0m;
-
-        await viewModel.SaveNewSparZielCommand.ExecuteAsync(null);
-
-        await dialogService.Received(1).ShowAlertAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>());
-        await repository.DidNotReceive().SaveSparZielAsync(Arg.Any<SparZiel>());
+        await navigationService.Received(1).GoToAsync(Routes.SparZielDetail);
     }
 
     [Fact]
@@ -78,7 +44,7 @@ public class SparZieleViewModelTests
     private static SparZieleViewModel CreateSut(
         ISparZielRepository repository,
         out IDialogService dialogService,
-        out ILocalizationService localizationService)
+        out INavigationService navigationService)
     {
         dialogService = Substitute.For<IDialogService>();
         dialogService.ShowAlertAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>())
@@ -86,9 +52,11 @@ public class SparZieleViewModelTests
         dialogService.ShowConfirmationAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>())
             .Returns(Task.FromResult(false));
 
-        localizationService = Substitute.For<ILocalizationService>();
+        var localizationService = Substitute.For<ILocalizationService>();
         localizationService.GetString(Arg.Any<string>()).Returns(call => call.ArgNotNull<string>());
         localizationService.GetString(Arg.Any<string>(), Arg.Any<object[]>()).Returns(call => call.ArgNotNull<string>());
+
+        navigationService = Substitute.For<INavigationService>();
 
         var transactionRepository = Substitute.For<ITransactionRepository>();
         transactionRepository.GetTransactionsAsync(Arg.Any<DateTime>(), Arg.Any<DateTime>())
@@ -98,7 +66,7 @@ public class SparZieleViewModelTests
             new LoadSparZieleUseCase(repository, transactionRepository),
             new SaveSparZielUseCase(repository),
             new DeleteSparZielUseCase(repository),
-            Substitute.For<INavigationService>(),
+            navigationService,
             dialogService,
             localizationService,
             Substitute.For<IFeedbackService>(),

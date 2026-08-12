@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Finanzuebersicht.Application.UseCases.Categories;
+using Finanzuebersicht.Core.Services;
 using Finanzuebersicht.Models;
 using Finanzuebersicht.Navigation;
 using Finanzuebersicht.Presentation.Services;
@@ -14,6 +15,7 @@ public partial class CategoryDetailViewModel(
     SaveCategoryDetailUseCase saveCategoryDetailUseCase,
     SaveCategoryBudgetUseCase saveCategoryBudgetUseCase,
     LoadCategoryBudgetUseCase loadCategoryBudgetUseCase,
+    GetCategoryByIdUseCase getCategoryByIdUseCase,
     INavigationService navigationService,
     ILocalizationService localizationService,
     IFeedbackService feedbackService,
@@ -24,6 +26,7 @@ public partial class CategoryDetailViewModel(
     private readonly SaveCategoryDetailUseCase _saveCategoryDetailUseCase = saveCategoryDetailUseCase;
     private readonly SaveCategoryBudgetUseCase _saveCategoryBudgetUseCase = saveCategoryBudgetUseCase;
     private readonly LoadCategoryBudgetUseCase _loadCategoryBudgetUseCase = loadCategoryBudgetUseCase;
+    private readonly GetCategoryByIdUseCase _getCategoryByIdUseCase = getCategoryByIdUseCase;
     private readonly INavigationService _navigationService = navigationService;
     private readonly ILocalizationService _loc = localizationService;
     private readonly IFeedbackService _feedbackService = feedbackService;
@@ -118,8 +121,28 @@ public partial class CategoryDetailViewModel(
 
     public void ApplyQueryAttributes(IDictionary<string, object> query)
     {
+        if (query.TryGetValue(NavigationQueryKeys.CategoryId, out var idVal) && idVal is string categoryId && !string.IsNullOrWhiteSpace(categoryId))
+        {
+            _ = LoadExistingByIdAsync(categoryId);
+            return;
+        }
+
         if (query.TryGetValue(NavigationQueryKeys.Category, out var val) && val is Category c)
             Category = c;
+    }
+
+    private async Task LoadExistingByIdAsync(string categoryId)
+    {
+        try
+        {
+            var category = await _getCategoryByIdUseCase.ExecuteAsync(categoryId);
+            if (category is not null)
+                Category = category;
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogError(ex, "CategoryDetailViewModel: LoadExistingByIdAsync failed for {Id}", categoryId);
+        }
     }
 
     private async Task LoadBudgetAsync(string kategorieId)
@@ -134,6 +157,20 @@ public partial class CategoryDetailViewModel(
         {
             _logger?.LogError(ex, "CategoryDetailViewModel: {Context}", nameof(LoadBudgetAsync));
         }
+    }
+
+    [RelayCommand]
+    private void SelectIcon(string? icon)
+    {
+        if (!string.IsNullOrEmpty(icon))
+            Icon = icon;
+    }
+
+    [RelayCommand]
+    private void SelectColor(string? color)
+    {
+        if (!string.IsNullOrEmpty(color))
+            Color = color;
     }
 
     [RelayCommand]
@@ -174,7 +211,9 @@ public partial class CategoryDetailViewModel(
 
             if (!string.IsNullOrEmpty(savedCategory.Id))
             {
-                decimal.TryParse(MonthlyBudgetText, NumberStyles.Any, CultureInfo.CurrentCulture, out var budget);
+                var budget = 0m;
+                if (!string.IsNullOrWhiteSpace(MonthlyBudgetText))
+                    FlexibleAmountParser.TryParse(MonthlyBudgetText, out budget);
                 await _saveCategoryBudgetUseCase.ExecuteAsync(savedCategory.Id, budget);
             }
 

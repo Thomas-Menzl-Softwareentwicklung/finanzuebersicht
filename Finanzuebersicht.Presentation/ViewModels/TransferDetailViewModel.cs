@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Finanzuebersicht.Application.UseCases.Accounts;
 using Finanzuebersicht.Application.UseCases.Transactions;
+using Finanzuebersicht.Core.Services;
 using Finanzuebersicht.Models;
 using Finanzuebersicht.Navigation;
 using Finanzuebersicht.Presentation.Services;
@@ -73,7 +74,7 @@ public partial class TransferDetailViewModel(
     [RelayCommand]
     private async Task Save()
     {
-        if (!decimal.TryParse(AmountText, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.CurrentCulture, out var amount) || amount <= 0)
+        if (!FlexibleAmountParser.TryParse(AmountText, out var amount) || amount <= 0)
         {
             await _dialogService.ShowAlertAsync(
                 _loc.GetString(ResourceKeys.Err_Titel),
@@ -97,13 +98,19 @@ public partial class TransferDetailViewModel(
                 ? _loc.GetString(ResourceKeys.Title_Umbuchung)
                 : Title.Trim();
 
-            await _saveTransferUseCase.ExecuteAsync(
+            var result = await _saveTransferUseCase.ExecuteAsync(
                 SourceAccount.Id,
                 TargetAccount.Id,
                 amount,
                 Date,
                 title,
                 Note);
+
+            if (!result.IsSuccess)
+            {
+                await UseCaseErrorPresenter.ShowAsync(_dialogService, _loc, result.Error!);
+                return;
+            }
 
             _appEvents.NotifyDataChanged();
             await _navigationService.GoBackAsync();

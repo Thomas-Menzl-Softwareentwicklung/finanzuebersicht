@@ -10,12 +10,16 @@ public partial class SettingsViewModel(
     StorageViewModel storage,
     BackupViewModel backup,
     AboutViewModel about,
+    LicenseViewModel license,
+    QuickExpenseWidgetPresetsViewModel widgetPresets,
     INavigationService navigationService) : ObservableObject
 {
     public AppearanceViewModel Appearance { get; } = appearance;
     public StorageViewModel Storage { get; } = storage;
     public BackupViewModel Backup { get; } = backup;
     public AboutViewModel About { get; } = about;
+    public LicenseViewModel License { get; } = license;
+    public QuickExpenseWidgetPresetsViewModel WidgetPresets { get; } = widgetPresets;
 
     [RelayCommand]
     private Task ShowOnboardingAgain()

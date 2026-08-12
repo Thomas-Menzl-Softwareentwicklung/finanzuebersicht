@@ -38,6 +38,7 @@
         </Style>
         <conv:BilanzColorConverter x:Key="BilanzColor" />
         <conv:DecimalCurrencyConverter x:Key="Currency" />
+        <conv:ItemCountToHeightConverter x:Key="ItemsHeight" />
         <conv:BilanzDisplayConverter x:Key="BilanzDisplay" />
         <conv:ProzentToWidthConverter x:Key="ProzentToWidth" />
         <conv:CountToBoolConverter x:Key="CountToBool" />
@@ -105,10 +106,15 @@
                                 </Label.GestureRecognizers>
                             </Label>
                         </Grid>
-                        <VerticalStackLayout Spacing="10"
-                                             IsVisible="{Binding ShowDueDetailsList}"
-                                             BindableLayout.ItemsSource="{Binding DueRecurringItems}">
-                            <BindableLayout.ItemTemplate>
+                        <CollectionView ItemsSource="{Binding DueRecurringItems}"
+                                        IsVisible="{Binding ShowDueDetailsList}"
+                                        SelectionMode="None"
+                                        HeightRequest="{Binding DueRecurringItems, Converter={StaticResource ItemsHeight}, ConverterParameter=168}"
+                                        VerticalScrollBarVisibility="Never">
+                            <CollectionView.ItemsLayout>
+                                <LinearItemsLayout Orientation="Vertical" ItemSpacing="10" />
+                            </CollectionView.ItemsLayout>
+                            <CollectionView.ItemTemplate>
                                 <DataTemplate x:DataType="recurring:DueRecurringItem">
                                     <VerticalStackLayout Spacing="8">
                                         <Label Text="{Binding Recurring.Titel}" FontSize="15" FontAttributes="Bold"
@@ -131,8 +137,8 @@
                                         </Grid>
                                     </VerticalStackLayout>
                                 </DataTemplate>
-                            </BindableLayout.ItemTemplate>
-                        </VerticalStackLayout>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
                     </VerticalStackLayout>
                 </Border>
 
@@ -143,52 +149,50 @@
                                          ActionCommand="{Binding NavigateToTransaktionenCommand}"
                                          IsVisible="{Binding HasAnyData, Converter={StaticResource InvertBool}}" />
 
-                <VerticalStackLayout Spacing="16" IsVisible="{Binding HasAnyData}">
-
-                    <!-- Monatsnavigation -->
-                    <Grid ColumnDefinitions="Auto, *, Auto" IsVisible="{Binding IsMonthView}">
-                        <Button Grid.Column="0" Text="‹" FontSize="32"
-                                BackgroundColor="Transparent"
-                                TextColor="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}"
-                                Command="{Binding PreviousMonthCommand}"
-                                SemanticProperties.Description="{loc:Translate A11y_VorherigerMonat}"
-                                WidthRequest="44" Padding="0" />
-                        <VerticalStackLayout Grid.Column="1" HorizontalOptions="Center" VerticalOptions="Center">
-                            <Label Text="{Binding MonatAnzeige}"
-                                   FontSize="18" FontAttributes="Bold"
-                                   HorizontalTextAlignment="Center" />
-                            <Label Text="{loc:Translate Lbl_Prognose}" FontSize="11"
-                                   TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}"
-                                   HorizontalTextAlignment="Center"
-                                   IsVisible="{Binding IstPrognose}" />
-                        </VerticalStackLayout>
-                        <Button Grid.Column="2" Text="›" FontSize="32"
-                                BackgroundColor="Transparent"
-                                TextColor="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}"
-                                Command="{Binding NextMonthCommand}"
-                                SemanticProperties.Description="{loc:Translate A11y_NaechsterMonat}"
-                                WidthRequest="44" Padding="0" />
-                    </Grid>
-
-                    <!-- Jahresnavigation -->
-                    <Grid ColumnDefinitions="Auto, *, Auto" IsVisible="{Binding IsYearView}">
-                        <Button Grid.Column="0" Text="‹" FontSize="32"
-                                BackgroundColor="Transparent"
-                                TextColor="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}"
-                                Command="{Binding PreviousYearCommand}"
-                                SemanticProperties.Description="{loc:Translate A11y_VorherigesJahr}"
-                                WidthRequest="44" Padding="0" />
-                        <Label Grid.Column="1" Text="{Binding JahrAnzeige}"
+                <!-- Monats-/Jahresnavigation immer sichtbar sobald Konten oder Historie existieren -->
+                <Grid ColumnDefinitions="Auto, *, Auto" IsVisible="{Binding ShowMonthView}">
+                    <Button Grid.Column="0" Text="‹" FontSize="32"
+                            BackgroundColor="Transparent"
+                            TextColor="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}"
+                            Command="{Binding PreviousMonthCommand}"
+                            SemanticProperties.Description="{loc:Translate A11y_VorherigerMonat}"
+                            WidthRequest="44" Padding="0" />
+                    <VerticalStackLayout Grid.Column="1" HorizontalOptions="Center" VerticalOptions="Center">
+                        <Label Text="{Binding MonatAnzeige}"
                                FontSize="18" FontAttributes="Bold"
-                               HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
-                        <Button Grid.Column="2" Text="›" FontSize="32"
-                                BackgroundColor="Transparent"
-                                TextColor="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}"
-                                Command="{Binding NextYearCommand}"
-                                SemanticProperties.Description="{loc:Translate A11y_NaechstesJahr}"
-                                WidthRequest="44" Padding="0" />
-                    </Grid>
+                               HorizontalTextAlignment="Center" />
+                        <Label Text="{loc:Translate Lbl_Prognose}" FontSize="11"
+                               TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}"
+                               HorizontalTextAlignment="Center"
+                               IsVisible="{Binding IstPrognose}" />
+                    </VerticalStackLayout>
+                    <Button Grid.Column="2" Text="›" FontSize="32"
+                            BackgroundColor="Transparent"
+                            TextColor="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}"
+                            Command="{Binding NextMonthCommand}"
+                            SemanticProperties.Description="{loc:Translate A11y_NaechsterMonat}"
+                            WidthRequest="44" Padding="0" />
+                </Grid>
 
+                <Grid ColumnDefinitions="Auto, *, Auto" IsVisible="{Binding ShowYearView}">
+                    <Button Grid.Column="0" Text="‹" FontSize="32"
+                            BackgroundColor="Transparent"
+                            TextColor="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}"
+                            Command="{Binding PreviousYearCommand}"
+                            SemanticProperties.Description="{loc:Translate A11y_VorherigesJahr}"
+                            WidthRequest="44" Padding="0" />
+                    <Label Grid.Column="1" Text="{Binding JahrAnzeige}"
+                           FontSize="18" FontAttributes="Bold"
+                           HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
+                    <Button Grid.Column="2" Text="›" FontSize="32"
+                            BackgroundColor="Transparent"
+                            TextColor="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}"
+                            Command="{Binding NextYearCommand}"
+                            SemanticProperties.Description="{loc:Translate A11y_NaechstesJahr}"
+                            WidthRequest="44" Padding="0" />
+                </Grid>
+
+                <VerticalStackLayout Spacing="16" IsVisible="{Binding HasAnyData}">
                     <!-- KPI-Kacheln -->
                     <Grid ColumnDefinitions="*, *, *" ColumnSpacing="8" IsVisible="{Binding ShowMonthKpis}">
                         <Border Grid.Column="0" Style="{StaticResource DashboardKpiCard}"
@@ -244,8 +248,14 @@
                                                       IsVisible="{Binding ShowKontenInsightRow}" />
                         <VerticalStackLayout Spacing="8" IsVisible="{Binding IsAccountsSectionExpanded}"
                                              Margin="0,0,0,4">
-                            <VerticalStackLayout BindableLayout.ItemsSource="{Binding KontenUebersicht}" Spacing="8">
-                                <BindableLayout.ItemTemplate>
+                            <CollectionView ItemsSource="{Binding KontenUebersicht}"
+                                            SelectionMode="None"
+                                            HeightRequest="{Binding KontenUebersicht, Converter={StaticResource ItemsHeight}, ConverterParameter=36}"
+                                            VerticalScrollBarVisibility="Never">
+                                <CollectionView.ItemsLayout>
+                                    <LinearItemsLayout Orientation="Vertical" ItemSpacing="8" />
+                                </CollectionView.ItemsLayout>
+                                <CollectionView.ItemTemplate>
                                     <DataTemplate x:DataType="vm:AccountOverviewItem">
                                         <Grid ColumnDefinitions="*, Auto" Padding="4,0">
                                             <Grid.GestureRecognizers>
@@ -260,8 +270,8 @@
                                                    TextColor="{Binding Saldo, Converter={StaticResource BilanzColor}}" />
                                         </Grid>
                                     </DataTemplate>
-                                </BindableLayout.ItemTemplate>
-                            </VerticalStackLayout>
+                                </CollectionView.ItemTemplate>
+                            </CollectionView>
                         </VerticalStackLayout>
                         <controls:DashboardInsightRow Title="{loc:Translate Lbl_BudgetHinweise}"
                                                       Detail="{Binding BudgetInsightDetail}"
@@ -317,8 +327,14 @@
 
                                 <!-- Budget-Balken -->
                                 <VerticalStackLayout Spacing="10" IsVisible="{Binding HasBudgetHinweise}" Margin="0,0,0,4">
-                                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding BudgetHinweise}" Spacing="10">
-                                        <BindableLayout.ItemTemplate>
+                                    <CollectionView ItemsSource="{Binding BudgetHinweise}"
+                                                    SelectionMode="None"
+                                                    HeightRequest="{Binding BudgetHinweise, Converter={StaticResource ItemsHeight}, ConverterParameter=52}"
+                                                    VerticalScrollBarVisibility="Never">
+                                        <CollectionView.ItemsLayout>
+                                            <LinearItemsLayout Orientation="Vertical" ItemSpacing="10" />
+                                        </CollectionView.ItemsLayout>
+                                        <CollectionView.ItemTemplate>
                                             <DataTemplate x:DataType="models:BudgetHintSummary">
                                                 <VerticalStackLayout Spacing="6">
                                                     <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="8">
@@ -340,8 +356,8 @@
                                                         BackgroundColor="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray900}}" />
                                                 </VerticalStackLayout>
                                             </DataTemplate>
-                                        </BindableLayout.ItemTemplate>
-                                    </VerticalStackLayout>
+                                        </CollectionView.ItemTemplate>
+                                    </CollectionView>
                                     <BoxView Style="{StaticResource DashboardSectionDivider}"
                                              IsVisible="{Binding KategorieAusgaben, Converter={StaticResource CountToBool}}" />
                                 </VerticalStackLayout>
@@ -359,11 +375,16 @@
                                                       VerticalOptions="Start"
                                                       HorizontalOptions="Center"
                                                       SemanticProperties.Description="{Binding MonthDonutAccessibilitySummary}" />
-                                        <VerticalStackLayout Grid.Column="1"
-                                                             BindableLayout.ItemsSource="{Binding KategorieAusgaben}"
-                                                             Spacing="6"
-                                                             VerticalOptions="Center">
-                                            <BindableLayout.ItemTemplate>
+                                        <CollectionView Grid.Column="1"
+                                                        ItemsSource="{Binding KategorieAusgaben}"
+                                                        SelectionMode="None"
+                                                        HeightRequest="{Binding KategorieAusgaben, Converter={StaticResource ItemsHeight}, ConverterParameter=32}"
+                                                        VerticalScrollBarVisibility="Never"
+                                                        VerticalOptions="Center">
+                                            <CollectionView.ItemsLayout>
+                                                <LinearItemsLayout Orientation="Vertical" ItemSpacing="6" />
+                                            </CollectionView.ItemsLayout>
+                                            <CollectionView.ItemTemplate>
                                                 <DataTemplate x:DataType="models:CategorySummary">
                                                     <Grid ColumnDefinitions="10, Auto, *, Auto, Auto"
                                                           ColumnSpacing="6"
@@ -400,8 +421,8 @@
                                                                VerticalTextAlignment="Center" />
                                                     </Grid>
                                                 </DataTemplate>
-                                            </BindableLayout.ItemTemplate>
-                                        </VerticalStackLayout>
+                                            </CollectionView.ItemTemplate>
+                                        </CollectionView>
                                     </Grid>
                                 </VerticalStackLayout>
 
@@ -442,8 +463,11 @@
                                     </Grid>
                                 </Border>
                                 <VerticalStackLayout IsVisible="{Binding IsMonthIncomeSectionExpanded}" Margin="4,0,0,0">
-                                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding KategorieEinnahmen}" Spacing="0">
-                                        <BindableLayout.ItemTemplate>
+                                    <CollectionView ItemsSource="{Binding KategorieEinnahmen}"
+                                                    SelectionMode="None"
+                                                    HeightRequest="{Binding KategorieEinnahmen, Converter={StaticResource ItemsHeight}, ConverterParameter=36}"
+                                                    VerticalScrollBarVisibility="Never">
+                                        <CollectionView.ItemTemplate>
                                             <DataTemplate x:DataType="models:CategorySummary">
                                                 <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="8" Padding="0,6">
                                                     <Label Grid.Column="0" Text="{Binding Icon}" FontSize="14" />
@@ -454,8 +478,8 @@
                                                            TextColor="{AppThemeBinding Light={StaticResource Einnahme}, Dark={StaticResource EinnahmeDark}}" />
                                                 </Grid>
                                             </DataTemplate>
-                                        </BindableLayout.ItemTemplate>
-                                    </VerticalStackLayout>
+                                        </CollectionView.ItemTemplate>
+                                    </CollectionView>
                                 </VerticalStackLayout>
 
                                 <!-- Forecast -->
@@ -531,11 +555,16 @@
                                                           VerticalOptions="Start"
                                                           IsVisible="{Binding JahrKategorien, Converter={StaticResource CountToBool}}"
                                                           SemanticProperties.Description="{Binding YearDonutAccessibilitySummary}" />
-                                            <VerticalStackLayout Grid.Column="1"
-                                                                 BindableLayout.ItemsSource="{Binding JahrKategorien}"
-                                                                 Spacing="6"
-                                                                 VerticalOptions="Center">
-                                                <BindableLayout.ItemTemplate>
+                                            <CollectionView Grid.Column="1"
+                                                            ItemsSource="{Binding JahrKategorien}"
+                                                            SelectionMode="None"
+                                                            HeightRequest="{Binding JahrKategorien, Converter={StaticResource ItemsHeight}, ConverterParameter=32}"
+                                                            VerticalScrollBarVisibility="Never"
+                                                            VerticalOptions="Center">
+                                                <CollectionView.ItemsLayout>
+                                                    <LinearItemsLayout Orientation="Vertical" ItemSpacing="6" />
+                                                </CollectionView.ItemsLayout>
+                                                <CollectionView.ItemTemplate>
                                                     <DataTemplate x:DataType="models:CategorySummary">
                                                         <Grid ColumnDefinitions="10, Auto, *, Auto, Auto"
                                                               ColumnSpacing="6"
@@ -569,8 +598,8 @@
                                                                    VerticalTextAlignment="Center" />
                                                         </Grid>
                                                     </DataTemplate>
-                                                </BindableLayout.ItemTemplate>
-                                            </VerticalStackLayout>
+                                                </CollectionView.ItemTemplate>
+                                            </CollectionView>
                                         </Grid>
                                     </VerticalStackLayout>
                                 </VerticalStackLayout>

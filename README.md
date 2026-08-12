@@ -23,6 +23,7 @@ Kurz: .NET 10 + MAUI, Multi-Language UI (Deutsch & Englisch), MVVM-Architektur.
 - **30-Tage-Cashflow-Vorschau** inkl. geplanter Daueraufträge
 - **Mehrere Konten** mit Anfangssaldo, Saldo pro Konto und **Umbuchungen** zwischen Konten
 - Transaktionen anlegen, editieren, suchen, filtern, duplizieren und als Vorlage speichern
+- **Schnellerfassung** (Pro): In-App „Schnell“ auf allen Plattformen; auf iOS zusätzlich Home-Screen-Widget mit konfigurierbaren Shortcuts
 - CSV-Import (DKB-Format) mit Vorschau, Auto-Kategorisierung und Duplikat-Erkennung
 - Wiederkehrende Buchungen (Daueraufträge) mit Instanz-Verschieben und Ausnahmen
 - Kategorien mit Icon, Farbe und monatlichem Budget
@@ -105,7 +106,7 @@ Darstellung, Sprache, Anzeige-Währung, Speicherort, Backup & Restore und App-In
 | Plattform | Status |
 |-----------|--------|
 | macOS (Mac Catalyst) | ✅ Unterstützt |
-| iOS | ✅ Unterstützt / kein Build wegen fehlendem Dev Account |
+| iOS (iPhone / iPad) | ✅ Unterstützt · Widget + Store/TestFlight-Vorbereitung ([docs/APP_STORE.md](docs/APP_STORE.md)) |
 | Windows | ✅ Unterstützt / eingeschränkt getestet |
 
 ## Voraussetzungen
@@ -201,6 +202,9 @@ Finanzuebersicht.Tests/            ← xUnit Tests (net10.0)
 | [docs/GUIDE.md](docs/GUIDE.md) | Entwickler-Leitfaden (Deutsch): Setup, Architektur, Konventionen |
 | [docs/QUICK_START.md](docs/QUICK_START.md) | Quick Start (Englisch) |
 | [docs/ROADMAP.md](docs/ROADMAP.md) | Geplante Features und Milestones |
+| [docs/APP_STORE.md](docs/APP_STORE.md) | App Store / TestFlight Vorbereitung (iPhone / iPad) |
+| [docs/MONETIZATION.md](docs/MONETIZATION.md) | Free / Pro / Sync — Preis- und Feature-Schnitt (Entwurf) |
+| [finanzuebersicht-site](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht-site) | Support, Datenschutz, Impressum (`finanzuebersicht.thomasmenzl.de`) |
 | [docs/CATEGORIZATION_RULES.md](docs/CATEGORIZATION_RULES.md) | Auto-Kategorisierung beim CSV-Import |
 | [docs/RECURRING_UI.md](docs/RECURRING_UI.md) | Dauerauftrag: Instanz verschieben |
 | [docs/ARCHITECTURE_CLEAN_CODE_REVIEW.md](docs/ARCHITECTURE_CLEAN_CODE_REVIEW.md) | Historisches Architektur-Review (Mai 2026) |

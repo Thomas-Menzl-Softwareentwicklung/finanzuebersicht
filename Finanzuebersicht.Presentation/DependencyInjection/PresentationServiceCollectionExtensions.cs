@@ -19,19 +19,30 @@ public static class PresentationServiceCollectionExtensions
     /// </param>
     public static IServiceCollection AddPresentationViewModels(this IServiceCollection services, Assembly? appAssembly = null)
     {
+        services.AddTransient<DashboardAccountsCoordinator>();
+        services.AddTransient<DashboardCashflowPreviewCoordinator>();
+        services.AddTransient<DashboardDueRecurringCoordinator>();
+        services.AddTransient<DashboardExpandSettingsHelper>();
         services.AddTransient<DashboardViewModel>();
+        services.AddTransient<CategoriesListCoordinator>();
+        services.AddTransient<AccountsListCoordinator>();
         services.AddTransient<CategoriesViewModel>();
         services.AddTransient<CategoryDetailViewModel>();
         services.AddTransient<AccountDetailViewModel>();
         services.AddTransient<TransferDetailViewModel>();
+        services.AddTransient<TransactionImportCoordinator>();
+        services.AddTransient<TransactionTemplatesCoordinator>();
         services.AddTransient<TransactionsViewModel>();
         services.AddTransient<TransactionDetailViewModel>();
+        services.AddTransient<QuickExpenseCaptureViewModel>();
         services.AddTransient<RecurringTransactionsViewModel>();
         services.AddTransient<RecurringTransactionDetailViewModel>();
         services.AddTransient<RecurringInstanceShiftViewModel>();
         services.AddTransient<AppearanceViewModel>();
         services.AddTransient<StorageViewModel>();
         services.AddTransient<BackupViewModel>();
+        services.AddTransient<LicenseViewModel>();
+        services.AddTransient<QuickExpenseWidgetPresetsViewModel>();
         services.AddTransient<AboutViewModel>(sp =>
             new AboutViewModel(appAssembly, sp.GetService<Microsoft.Extensions.Logging.ILogger<AboutViewModel>>()));
         services.AddTransient<SettingsViewModel>(sp =>
@@ -40,6 +51,8 @@ public static class PresentationServiceCollectionExtensions
                 sp.GetRequiredService<StorageViewModel>(),
                 sp.GetRequiredService<BackupViewModel>(),
                 sp.GetRequiredService<AboutViewModel>(),
+                sp.GetRequiredService<LicenseViewModel>(),
+                sp.GetRequiredService<QuickExpenseWidgetPresetsViewModel>(),
                 sp.GetRequiredService<INavigationService>()));
         services.AddTransient<SparZieleViewModel>();
         services.AddTransient<SparZielDetailViewModel>();

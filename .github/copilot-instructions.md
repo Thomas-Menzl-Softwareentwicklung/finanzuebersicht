@@ -70,6 +70,8 @@ Layered clean architecture with MVVM (`CommunityToolkit.Mvvm` source generators)
 
 **Data flow:** View → ViewModel → Use Case → Repository (`I*Repository`) → JSON Store
 
+**Use-case errors (#274):** Expected domain failures return `UseCaseResult` / `UseCaseResult<T>` with `UseCaseErrorCode` (no UI strings in Application). ViewModels map via `UseCaseErrorPresenter` → `ResourceKeys`. Unexpected exceptions: log + alert with user feedback. First adopters: Save Transaction / Transfer / Account; extend when touching other use cases (esp. Import/Backup).
+
 **Repositories:** Prefer `ICategoryRepository`, `IAccountRepository`, `ITransactionRepository`, `IRecurringTransactionRepository`, `IBudgetRepository`, `ISparZielRepository`, `ITransactionTemplateRepository`. Reporting/generation: `IReportingService`, `IRecurringGenerationService`.
 
 **DI entry points:**
@@ -119,7 +121,8 @@ Layered clean architecture with MVVM (`CommunityToolkit.Mvvm` source generators)
 - Sparziele with transaction linking and completion forecast
 - Backup/restore (ZIP/JSON), configurable data path
 - CloudKit sync is a backlog idea (#243); no active CloudKit implementation in tree
-- Active architecture milestone: **v1.20** (`docs/ROADMAP.md`) — before Milestone 22 features and v2.0 (encryption / multi-currency). Wave 0 done (#289–#291); wave 1: #268/#270
+- Active architecture milestone: **v1.20** recommended sequence (#274–#300) is **done**. Next: Milestone 22 product backlog (`docs/ROADMAP.md`) before v2.0.
+- Sync prep (#300 ✅): optional `ExternalId` / `Source` / `UpdatedAt` on Account, Transaction, Category, RecurringTransaction, SparZiel — no sync pipeline or UI yet. Known source constants: `EntitySources`. CloudKit (#243) remains backlog-only.
 
 ## Data Persistence
 
@@ -160,6 +163,14 @@ Unified **create** flows — no navigation push for new entries from list FAB/em
 
 Components: `CreateFormCard`, `FormSheetPopup`, `CategoryCreateSheetService`, `RecurringTransactionCreateSheetService`. Full reference: `docs/CREATE_UX.md`.
 
+### Quick Expense Capture (Pro) + iOS Widget
+
+In-app **Schnell** sheet on Transaktionen (`CaptureQuickExpenseUseCase`, Unkategorisiert + default account, `AppFeature.QuickExpenseCapture`) ships on all targets. iOS Home Screen WidgetKit `.appex` is embedded (presets, App Group inbox, deep link). Rebuild/resign on Mac with Xcode when Swift sources change — do **not** recreate domain/UI.
+
+- Agent rule: `.cursor/rules/ios-quick-expense-widget.mdc`
+- Steps: `Finanzuebersicht/Platforms/iOS/Widgets/README.md`
+- Separate from display widget #242
+
 ## Versioning
 
 Automatic **SemVer** via **Nerdbank.GitVersioning** (`version.json`):
@@ -198,7 +209,7 @@ Directory.Build.props              ← TreatWarningsAsErrors, Nerdbank.GitVersio
 
 Finanzuebersicht.Core/             ← net10.0
 ├── Models/                        ← Transaction, Category, Account, SparZiel, …
-├── Services/                      ← I*Repository, IClock, ForecastService, ImportService, …
+├── Services/                      ← I*Repository, IClock, ForecastService, parsers, …
 └── Constants/
 
 Finanzuebersicht.Application/      ← net10.0

@@ -47,7 +47,6 @@ public class FormSheetPopup : Popup<FormSheetResult>
         var card = new CreateFormCard
         {
             Title = title,
-            FormContent = formContent,
             CancelText = cancelText,
             SaveText = saveText,
             ScrollFormContent = true,
@@ -55,6 +54,21 @@ public class FormSheetPopup : Popup<FormSheetResult>
             AccessibilityDescription = sheetDescription,
             CancelCommand = new Command(() => _ = CloseWithResultAsync(FormSheetResult.Cancelled)),
             SaveCommand = new Command(async () => await OnSaveAsync(trySaveAsync))
+        };
+
+        // Defer FormContent until the card is in the visual tree — synchronous assignment
+        // during popup construction deadlocks on Mac Catalyst / UIScene.
+        void AssignFormContent()
+        {
+            if (card.FormContent is null)
+                card.FormContent = formContent;
+        }
+
+        card.Loaded += (_, _) => AssignFormContent();
+        card.HandlerChanged += (_, _) =>
+        {
+            if (card.Handler is not null)
+                AssignFormContent();
         };
 
         var cardBackground = ColorResourceHelper.GetThemeColor(

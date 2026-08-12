@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using Finanzuebersicht.Application.UseCases.Accounts;
 using Finanzuebersicht.Application.UseCases.Categories;
 using Finanzuebersicht.Application.UseCases.Transactions;
+using Finanzuebersicht.Core.Services;
 using Finanzuebersicht.Models;
 using Finanzuebersicht.Navigation;
 using Finanzuebersicht.Presentation;
@@ -20,20 +21,19 @@ public partial class TransactionsViewModel(
     LoadTransactionsMonthUseCase loadTransactionsMonthUseCase,
     SearchTransactionsUseCase searchTransactionsUseCase,
     INavigationService navigationService,
-    ImportService importService,
+    TransactionImportCoordinator importCoordinator,
+    TransactionTemplatesCoordinator templatesCoordinator,
     IDialogService dialogService,
     IFeedbackService feedbackService,
     ILocalizationService localizationService,
     LoadCategoriesUseCase loadCategoriesUseCase,
     LoadAccountsUseCase loadAccountsUseCase,
     IMainThreadDispatcher dispatcher,
-    IFilePicker filePicker,
     IAppEvents appEvents,
     ILogger<TransactionsViewModel> logger,
-    IImportSessionStore? importSessionStore = null,
-    LoadTransactionTemplatesUseCase? loadTransactionTemplatesUseCase = null,
-    DeleteTransactionTemplateUseCase? deleteTransactionTemplateUseCase = null,
-    UseTransactionTemplateUseCase? useTransactionTemplateUseCase = null) : MonthNavigationViewModel, IAutoLoadViewModel, ICurrencyRefreshViewModel
+    Finanzuebersicht.Core.Licensing.ILicenseService? licenseService = null,
+    CountUncategorizedTransactionsUseCase? countUncategorizedTransactionsUseCase = null,
+    IUncategorizedCategoryService? uncategorizedCategoryService = null) : MonthNavigationViewModel, IAutoLoadViewModel, ICurrencyRefreshViewModel
 {
     private readonly DeleteTransactionUseCase _deleteTransactionUseCase = deleteTransactionUseCase;
     private readonly RestoreTransactionUseCase _restoreTransactionUseCase = restoreTransactionUseCase;
@@ -42,23 +42,24 @@ public partial class TransactionsViewModel(
     public System.Windows.Input.ICommand AutoLoadCommand => LoadTransaktionenCommand;
     private readonly SearchTransactionsUseCase _searchTransactionsUseCase = searchTransactionsUseCase;
     private readonly INavigationService _navigationService = navigationService;
-    private readonly ImportService _importService = importService;
+    private readonly TransactionImportCoordinator _importCoordinator = importCoordinator;
+    private readonly TransactionTemplatesCoordinator _templatesCoordinator = templatesCoordinator;
     private readonly IDialogService _dialogService = dialogService;
     private readonly IFeedbackService _feedbackService = feedbackService;
     private readonly ILocalizationService _loc = localizationService;
     private readonly LoadCategoriesUseCase _loadCategoriesUseCase = loadCategoriesUseCase;
     private readonly LoadAccountsUseCase _loadAccountsUseCase = loadAccountsUseCase;
     private readonly IMainThreadDispatcher _dispatcher = dispatcher;
-    private readonly IFilePicker _filePicker = filePicker;
     private readonly IAppEvents _appEvents = appEvents;
     private readonly ILogger<TransactionsViewModel> _logger = logger;
-    private readonly IImportSessionStore? _importSessionStore = importSessionStore;
-    private readonly LoadTransactionTemplatesUseCase? _loadTransactionTemplatesUseCase = loadTransactionTemplatesUseCase;
-    private readonly DeleteTransactionTemplateUseCase? _deleteTransactionTemplateUseCase = deleteTransactionTemplateUseCase;
-    private readonly UseTransactionTemplateUseCase? _useTransactionTemplateUseCase = useTransactionTemplateUseCase;
+    private readonly Finanzuebersicht.Core.Licensing.ILicenseService _licenseService =
+        licenseService ?? Finanzuebersicht.Core.Licensing.UnrestrictedLicenseService.Instance;
+    private readonly CountUncategorizedTransactionsUseCase? _countUncategorizedTransactionsUseCase = countUncategorizedTransactionsUseCase;
+    private readonly IUncategorizedCategoryService? _uncategorizedCategoryService = uncategorizedCategoryService;
 
     private CancellationTokenSource? _searchDebounce;
     private int _searchVersion;
+    private bool _reloadQueued;
 
     private void LogError(string context, Exception? ex = null)
     {
@@ -191,6 +192,17 @@ public partial class TransactionsViewModel(
 
     [ObservableProperty]
     private DateTime bisDatumPicker = DateTime.Today;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasUncategorizedTransactions))]
+    [NotifyPropertyChangedFor(nameof(UncategorizedBadgeText))]
+    private int uncategorizedCount;
+
+    public bool HasUncategorizedTransactions => UncategorizedCount > 0;
+
+    public string UncategorizedBadgeText => UncategorizedCount > 0
+        ? _loc.GetString(ResourceKeys.Btn_UnkategorisiertFilter, UncategorizedCount)
+        : _loc.GetString(ResourceKeys.Btn_UnkategorisiertFilterZero);
 
     // Typ-Filter als Index (0=Alle, 1=Einnahmen, 2=Ausgaben) für Picker
     private int _selectedTypIndex;
@@ -385,23 +397,33 @@ public partial class TransactionsViewModel(
     private async Task LoadTransaktionen()
     {
         CurrencyRefreshRegistry.Register(this);
-        if (IsLoading) return;
-        IsLoading = true;
+        if (IsLoading)
+        {
+            // Overlapping OnAppearing + DataChanged (widget inbox) must not drop the second load.
+            _reloadQueued = true;
+            return;
+        }
 
+        IsLoading = true;
         try
         {
-            var data = await _loadTransactionsMonthUseCase.ExecuteAsync(AktuellerMonat, SelectedAccountId);
-            TransaktionsGruppen = new ObservableCollection<TransactionGroup>(data.Gruppen);
-            IconMap = data.IconMap;
-            CategoryNameMap = data.CategoryNameMap;
-            AccountMap = data.AccountMap;
+            do
+            {
+                _reloadQueued = false;
+                var data = await _loadTransactionsMonthUseCase.ExecuteAsync(AktuellerMonat, SelectedAccountId);
+                TransaktionsGruppen = new ObservableCollection<TransactionGroup>(data.Gruppen);
+                IconMap = data.IconMap;
+                CategoryNameMap = data.CategoryNameMap;
+                AccountMap = data.AccountMap;
 
-            if (AvailableKategorien.Count == 0)
-                await LoadKategorienAsync();
-            if (AvailableKonten.Count == 0)
-                await LoadKontenAsync();
+                if (AvailableKategorien.Count == 0)
+                    await LoadKategorienAsync();
+                if (AvailableKonten.Count == 0)
+                    await LoadKontenAsync();
 
-            await LoadTemplatesAsync();
+                await LoadTemplatesAsync();
+                await RefreshUncategorizedCountAsync();
+            } while (_reloadQueued);
         }
         catch (Exception ex)
         {
@@ -417,12 +439,28 @@ public partial class TransactionsViewModel(
         }
     }
 
+    private async Task RefreshUncategorizedCountAsync()
+    {
+        if (_countUncategorizedTransactionsUseCase == null)
+        {
+            UncategorizedCount = 0;
+            return;
+        }
+
+        try
+        {
+            UncategorizedCount = await _countUncategorizedTransactionsUseCase.ExecuteAsync();
+        }
+        catch (Exception ex)
+        {
+            LogError(nameof(RefreshUncategorizedCountAsync), ex);
+            UncategorizedCount = 0;
+        }
+    }
+
     private async Task LoadTemplatesAsync()
     {
-        if (_loadTransactionTemplatesUseCase == null) return;
-
-        var templates = await _loadTransactionTemplatesUseCase.ExecuteAsync();
-        TransactionTemplates = new ObservableCollection<TransactionTemplate>(templates);
+        TransactionTemplates = await _templatesCoordinator.LoadAsync();
     }
 
     [RelayCommand]
@@ -445,31 +483,31 @@ public partial class TransactionsViewModel(
             if (transaktion.IsTransfer && !string.IsNullOrWhiteSpace(transaktion.TransferGroupId))
             {
                 await _deleteTransactionUseCase.ExecuteTransferGroupAsync(transaktion.TransferGroupId);
+            }
+            else
+            {
+                var snapshot = CloneTransaction(transaktion);
+                await _deleteTransactionUseCase.ExecuteAsync(transaktion.Id);
+
+                // TransactionGroup is a plain List — mutating it does not refresh CollectionView.
+                // Reload the month list so the row disappears immediately.
                 await LoadTransaktionen();
                 _appEvents.NotifyDataChanged();
-                await _feedbackService.ShowSnackbarAsync(_loc.GetString(ResourceKeys.Msg_Geloescht));
+                await _feedbackService.ShowSnackbarAsync(
+                    _loc.GetString(ResourceKeys.Msg_Geloescht),
+                    _loc.GetString(ResourceKeys.Btn_Rueckgaengig),
+                    async () =>
+                    {
+                        await _restoreTransactionUseCase.ExecuteAsync(snapshot);
+                        await LoadTransaktionen();
+                        _appEvents.NotifyDataChanged();
+                    });
                 return;
             }
 
-            var snapshot = CloneTransaction(transaktion);
-            await _deleteTransactionUseCase.ExecuteAsync(transaktion.Id);
-            var gruppe = TransaktionsGruppen.FirstOrDefault(g => g.Contains(transaktion));
-            if (gruppe == null) return;
-
-            gruppe.Remove(transaktion);
-            if (gruppe.Count == 0)
-                TransaktionsGruppen.Remove(gruppe);
-
+            await LoadTransaktionen();
             _appEvents.NotifyDataChanged();
-            await _feedbackService.ShowSnackbarAsync(
-                _loc.GetString(ResourceKeys.Msg_Geloescht),
-                _loc.GetString(ResourceKeys.Btn_Rueckgaengig),
-                async () =>
-                {
-                    await _restoreTransactionUseCase.ExecuteAsync(snapshot);
-                    await LoadTransaktionen();
-                    _appEvents.NotifyDataChanged();
-                });
+            await _feedbackService.ShowSnackbarAsync(_loc.GetString(ResourceKeys.Msg_Geloescht));
         }
         catch (Exception ex)
         {
@@ -500,7 +538,7 @@ public partial class TransactionsViewModel(
             var parameter = new Dictionary<string, object>();
             if (transaktion != null)
             {
-                parameter[NavigationQueryKeys.Transaction] = transaktion;
+                parameter[NavigationQueryKeys.TransactionId] = transaktion.Id;
             }
 
             if (_navigationService == null)
@@ -531,18 +569,8 @@ public partial class TransactionsViewModel(
     [RelayCommand]
     private async Task CreateFromTemplate(TransactionTemplate template)
     {
-        if (template == null) return;
-
-        if (_useTransactionTemplateUseCase != null)
-        {
-            await _useTransactionTemplateUseCase.ExecuteAsync(template);
-            await LoadTemplatesAsync();
-        }
-
-        await _navigationService.GoToAsync(Routes.TransactionDetail, new Dictionary<string, object>
-        {
-            [NavigationQueryKeys.TransactionTemplate] = template
-        });
+        await _templatesCoordinator.CreateFromTemplateAsync(template);
+        await LoadTemplatesAsync();
     }
 
     [RelayCommand]
@@ -552,90 +580,64 @@ public partial class TransactionsViewModel(
     }
 
     [RelayCommand]
+    private async Task QuickCapture()
+    {
+        try
+        {
+            if (!_licenseService.HasFeature(Finanzuebersicht.Core.Licensing.AppFeature.QuickExpenseCapture))
+            {
+                await _dialogService.ShowAlertAsync(
+                    _loc.GetString(ResourceKeys.Err_Titel),
+                    _loc.GetString(ResourceKeys.Err_ProErforderlich),
+                    _loc.GetString(ResourceKeys.Btn_OK));
+                return;
+            }
+
+            // Same Shell navigation path as Umbuchen / Detail pages — no modal/popup.
+            await _navigationService.GoToAsync(Routes.QuickExpenseCapture);
+        }
+        catch (Exception ex)
+        {
+            LogError(nameof(QuickCapture), ex);
+            await _dialogService.ShowAlertAsync(
+                _loc.GetString(ResourceKeys.Err_Titel),
+                _loc.GetString(ResourceKeys.Err_SpeichernFehlgeschlagen, ex.Message),
+                _loc.GetString(ResourceKeys.Btn_OK));
+        }
+    }
+
+    [RelayCommand]
+    private async Task FilterUncategorized()
+    {
+        if (_uncategorizedCategoryService == null)
+            return;
+
+        var id = await _uncategorizedCategoryService.FindIdAsync();
+        if (string.IsNullOrWhiteSpace(id))
+        {
+            await _dialogService.ShowAlertAsync(
+                _loc.GetString(ResourceKeys.Err_Titel),
+                _loc.GetString(ResourceKeys.Msg_KeineUnkategorisierten),
+                _loc.GetString(ResourceKeys.Btn_OK));
+            return;
+        }
+
+        IsFilterPanelOpen = true;
+        SelectedKategorieFilterItem = AvailableKategorien.FirstOrDefault(k => k.Id == id)
+            ?? new KategorieFilterItem(id, _loc.GetString(ResourceKeys.Lbl_ImportStatusUnkategorisiert));
+        SelectedKategorieId = id;
+    }
+
+    [RelayCommand]
     private async Task DeleteTemplate(TransactionTemplate template)
     {
-        if (template == null || _deleteTransactionTemplateUseCase == null) return;
-
-        var confirm = await _dialogService.ShowConfirmationAsync(
-            _loc.GetString(ResourceKeys.Dlg_VorlageLoeschen),
-            _loc.GetString(ResourceKeys.Dlg_VorlageLoeschenFrage, template.Name),
-            _loc.GetString(ResourceKeys.Btn_Ja),
-            _loc.GetString(ResourceKeys.Btn_Nein));
-        if (!confirm) return;
-
-        await _deleteTransactionTemplateUseCase.ExecuteAsync(template.Id);
-        await LoadTemplatesAsync();
+        if (await _templatesCoordinator.DeleteAsync(template))
+            await LoadTemplatesAsync();
     }
 
     [RelayCommand]
     private async Task ImportCsv()
-    {
-        // Defensive checks to avoid NullReferenceExceptions when DI failed
-        if (_importService == null)
-        {
-            var title = _loc?.GetString(Finanzuebersicht.Resources.Strings.ResourceKeys.Msg_ImportFehlgeschlagen_Title) ?? "Import fehlgeschlagen";
-            var msg = _loc?.GetString(Finanzuebersicht.Resources.Strings.ResourceKeys.Msg_ImportServiceNichtVerfuegbar) ?? "ImportService nicht verfügbar.";
-            var ok = _loc?.GetString(Finanzuebersicht.Resources.Strings.ResourceKeys.Btn_OK) ?? "OK";
-
-            if (_dialogService != null)
-            {
-                await _dialogService.ShowAlertAsync(title, msg, ok);
-            }
-            else
-            {
-                LogError("ImportCsv: DialogService is null while handling missing ImportService");
-            }
-
-            return;
-        }
-
-        try
-        {
-            var result = await _filePicker.PickAsync();
-            if (result == null) return;
-
-            using var stream = await result.OpenReadAsync();
-            var preview = await _importService.AnalyzeCsvAsync(stream, SelectedAccountId);
-
-            if (!preview.Success)
-            {
-                await _dialogService.ShowAlertAsync(
-                    _loc.GetString(ResourceKeys.Msg_ImportFehlgeschlagen_Title),
-                    preview.ErrorMessage ?? "Unbekannter Fehler beim Import.",
-                    _loc.GetString(ResourceKeys.Btn_OK));
-                return;
-            }
-
-            if (_importSessionStore == null)
-            {
-                await _dialogService.ShowAlertAsync(
-                    _loc.GetString(ResourceKeys.Msg_ImportVorschauNichtVerfuegbar_Title),
-                    _loc.GetString(ResourceKeys.Msg_ImportVorschauNichtVerfuegbar_Body),
-                    _loc.GetString(ResourceKeys.Btn_OK));
-                return;
-            }
-
-            _importSessionStore.Clear();
-            _importSessionStore.SetActiveSession(preview);
-            await _navigationService.GoToAsync(Routes.ImportPreview);
-        }
-        catch (System.Exception ex)
-        {
-            // Log full exception for debugging
-            try
-            {
-                _logger?.LogError(ex, "ImportCsv failed");
-            }
-            catch { /* swallow logger exceptions */ }
-
-            // Ensure we don't call a null dialog service in the catch
-            var msg = ex.Message + (ex.InnerException != null ? " - " + ex.InnerException.Message : string.Empty);
-            var errTitle = _loc?.GetString(Finanzuebersicht.Resources.Strings.ResourceKeys.Msg_ImportFehler_Title) ?? "Fehler beim Import";
-            var okError = _loc?.GetString(Finanzuebersicht.Resources.Strings.ResourceKeys.Btn_OK) ?? "OK";
-
-            await _dialogService.ShowAlertAsync(errTitle, msg, okError);
-        }
-    }
+        => await _importCoordinator.ImportCsvAsync(SelectedAccountId);
 
     public void RefreshCurrencyDisplay()
     {

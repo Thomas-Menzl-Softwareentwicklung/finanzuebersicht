@@ -13,6 +13,7 @@ namespace Finanzuebersicht.ViewModels;
 public partial class TransactionDetailViewModel(
     SaveTransactionDetailUseCase saveTransactionDetailUseCase,
     LoadTransactionDetailDataUseCase loadTransactionDetailDataUseCase,
+    GetTransactionByIdUseCase getTransactionByIdUseCase,
     LoadSparZieleUseCase loadSparZieleUseCase,
     ITransactionValidationService validationService,
     ILocalizationService localizationService,
@@ -26,6 +27,7 @@ public partial class TransactionDetailViewModel(
 {
     private readonly SaveTransactionDetailUseCase _saveTransactionDetailUseCase = saveTransactionDetailUseCase;
     private readonly LoadTransactionDetailDataUseCase _loadTransactionDetailDataUseCase = loadTransactionDetailDataUseCase;
+    private readonly GetTransactionByIdUseCase _getTransactionByIdUseCase = getTransactionByIdUseCase;
     private readonly LoadSparZieleUseCase _loadSparZieleUseCase = loadSparZieleUseCase;
     private readonly ITransactionValidationService _validationService = validationService;
     private Transaction? _existingTransaction;
@@ -103,6 +105,12 @@ public partial class TransactionDetailViewModel(
 
     public void ApplyQueryAttributes(IDictionary<string, object> query)
     {
+        if (TryGetStringId(query, NavigationQueryKeys.TransactionId, out var transactionId))
+        {
+            _ = LoadExistingByIdAsync(transactionId);
+            return;
+        }
+
         if (query.TryGetValue(NavigationQueryKeys.Transaction, out var val) && val is Transaction t)
         {
             Transaction = t;
@@ -119,6 +127,32 @@ public partial class TransactionDetailViewModel(
         {
             ApplySparZielContribution(sparZiel);
         }
+    }
+
+    private async Task LoadExistingByIdAsync(string transactionId)
+    {
+        try
+        {
+            var transaction = await _getTransactionByIdUseCase.ExecuteAsync(transactionId);
+            if (transaction is not null)
+                Transaction = transaction;
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogError(ex, "TransactionDetailViewModel: LoadExistingByIdAsync failed for {Id}", transactionId);
+        }
+    }
+
+    private static bool TryGetStringId(IDictionary<string, object> query, string key, out string id)
+    {
+        if (query.TryGetValue(key, out var value) && value is string s && !string.IsNullOrWhiteSpace(s))
+        {
+            id = s;
+            return true;
+        }
+
+        id = string.Empty;
+        return false;
     }
 
     [RelayCommand]
@@ -172,7 +206,7 @@ public partial class TransactionDetailViewModel(
                 return;
             }
 
-            await _saveTransactionDetailUseCase.ExecuteAsync(
+            var result = await _saveTransactionDetailUseCase.ExecuteAsync(
                 _existingTransaction,
                 betrag,
                 Titel,
@@ -182,6 +216,13 @@ public partial class TransactionDetailViewModel(
                 Typ,
                 Verwendungszweck,
                 SelectedSparZiel?.Id);
+
+            if (!result.IsSuccess)
+            {
+                await UseCaseErrorPresenter.ShowAsync(_dialogService, _loc, result.Error!);
+                return;
+            }
+
             _appEvents.NotifyDataChanged();
             await _navigationService.GoBackAsync();
             await _feedbackService.ShowSnackbarAsync(_loc.GetString(ResourceKeys.Msg_Gespeichert));

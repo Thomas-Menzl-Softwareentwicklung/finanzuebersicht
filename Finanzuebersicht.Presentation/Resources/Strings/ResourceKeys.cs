@@ -91,6 +91,7 @@ public static class ResourceKeys
     public const string Hint_Titelbeispiel = nameof(Hint_Titelbeispiel);
     public const string Hint_KategorieWaehlen = nameof(Hint_KategorieWaehlen);
     public const string Hint_iCloudTipp = nameof(Hint_iCloudTipp);
+    public const string Hint_SpeicherortAppContainer = nameof(Hint_SpeicherortAppContainer);
 
     // Empty States
     public const string Empty_KeineKategorien = nameof(Empty_KeineKategorien);
@@ -114,9 +115,43 @@ public static class ResourceKeys
     public const string Err_LoeschenFehlgeschlagen = nameof(Err_LoeschenFehlgeschlagen);
     public const string Err_LadenFehlgeschlagen = nameof(Err_LadenFehlgeschlagen);
     public const string Err_TransferKontenUnterschiedlich = nameof(Err_TransferKontenUnterschiedlich);
+    public const string Err_TransferKontenErforderlich = nameof(Err_TransferKontenErforderlich);
+    public const string Err_KontoNichtGefunden = nameof(Err_KontoNichtGefunden);
+    public const string Err_KontoArchiviert = nameof(Err_KontoArchiviert);
     public const string Err_UmbuchungNichtBearbeitbar = nameof(Err_UmbuchungNichtBearbeitbar);
     public const string Err_OrdnerNichtWaehlbar = nameof(Err_OrdnerNichtWaehlbar);
     public const string Err_SucheFehlgeschlagen = nameof(Err_SucheFehlgeschlagen);
+    public const string Err_ProErforderlich = nameof(Err_ProErforderlich);
+    public const string Err_LimitErreicht = nameof(Err_LimitErreicht);
+    public const string Err_BackupNichtGefunden = nameof(Err_BackupNichtGefunden);
+    public const string Err_BackupBeschaedigt = nameof(Err_BackupBeschaedigt);
+    public const string Err_BackupSchemaInkompatibel = nameof(Err_BackupSchemaInkompatibel);
+
+    // Licensing
+    public const string Lic_SectionTitle = nameof(Lic_SectionTitle);
+    public const string Lic_ChannelDirect = nameof(Lic_ChannelDirect);
+    public const string Lic_ChannelStore = nameof(Lic_ChannelStore);
+    public const string Lic_TierFree = nameof(Lic_TierFree);
+    public const string Lic_TierPro = nameof(Lic_TierPro);
+    public const string Lic_SyncUnavailableDirect = nameof(Lic_SyncUnavailableDirect);
+    public const string Lic_SyncInactive = nameof(Lic_SyncInactive);
+    public const string Lic_SyncActive = nameof(Lic_SyncActive);
+    public const string Lic_SyncEntitledComingSoon = nameof(Lic_SyncEntitledComingSoon);
+    public const string Lic_DirectFullLocal = nameof(Lic_DirectFullLocal);
+    public const string Lic_FreeLimitsHint = nameof(Lic_FreeLimitsHint);
+    public const string Lic_StubHint = nameof(Lic_StubHint);
+    public const string Lic_StubPro = nameof(Lic_StubPro);
+    public const string Lic_StubSync = nameof(Lic_StubSync);
+    public const string Lic_StubApply = nameof(Lic_StubApply);
+    public const string Lic_BuyPro = nameof(Lic_BuyPro);
+    public const string Lic_RestorePurchases = nameof(Lic_RestorePurchases);
+    public const string Lic_PurchaseSuccess = nameof(Lic_PurchaseSuccess);
+    public const string Lic_PurchaseFailed = nameof(Lic_PurchaseFailed);
+    public const string Lic_RestoreSuccess = nameof(Lic_RestoreSuccess);
+    public const string Lic_RestoreEmpty = nameof(Lic_RestoreEmpty);
+    public const string Lic_SyncComingSoon = nameof(Lic_SyncComingSoon);
+    public const string Lic_SyncPurchaseLater = nameof(Lic_SyncPurchaseLater);
+    public const string Lic_UseStoreKit = nameof(Lic_UseStoreKit);
 
     // Confirmation Dialogs
     public const string Dlg_KategorieLoeschen = nameof(Dlg_KategorieLoeschen);
@@ -233,8 +268,24 @@ public static class ResourceKeys
     public const string Btn_Import = nameof(Btn_Import);
     public const string Btn_Filter = nameof(Btn_Filter);
     public const string Btn_Umbuchen = nameof(Btn_Umbuchen);
+    public const string Btn_SchnellAusgabe = nameof(Btn_SchnellAusgabe);
+    public const string Btn_UnkategorisiertFilter = nameof(Btn_UnkategorisiertFilter);
+    public const string Btn_UnkategorisiertFilterZero = nameof(Btn_UnkategorisiertFilterZero);
     public const string Btn_FilterZuruecksetzen = nameof(Btn_FilterZuruecksetzen);
     public const string Title_ShiftInstance = nameof(Title_ShiftInstance);
+    public const string Title_SchnellAusgabe = nameof(Title_SchnellAusgabe);
+    public const string Lbl_SchnellAusgabeHinweis = nameof(Lbl_SchnellAusgabeHinweis);
+    public const string Lbl_Info = nameof(Lbl_Info);
+    public const string Hint_SchnellAusgabeInfo = nameof(Hint_SchnellAusgabeInfo);
+    public const string Msg_SchnellAusgabeGespeichert = nameof(Msg_SchnellAusgabeGespeichert);
+    public const string Msg_KeineUnkategorisierten = nameof(Msg_KeineUnkategorisierten);
+    public const string A11y_SchnellAusgabe = nameof(A11y_SchnellAusgabe);
+    public const string Stn_WidgetShortcutsTitle = nameof(Stn_WidgetShortcutsTitle);
+    public const string Stn_WidgetShortcutsHint = nameof(Stn_WidgetShortcutsHint);
+    public const string Stn_WidgetShortcutSlot = nameof(Stn_WidgetShortcutSlot);
+    public const string Stn_WidgetShortcutTitle = nameof(Stn_WidgetShortcutTitle);
+    public const string Stn_WidgetShortcutAmount = nameof(Stn_WidgetShortcutAmount);
+    public const string Msg_WidgetShortcutsGespeichert = nameof(Msg_WidgetShortcutsGespeichert);
 
     // Additional common buttons / app info
     public const string Btn_Hinzufuegen = nameof(Btn_Hinzufuegen);

@@ -37,12 +37,7 @@ public class DeleteAccountUseCase(
             await _accountRepository.SaveAccountAsync(fallback);
         }
 
-        var transactions = await _transactionRepository.GetTransactionsAsync(DateTime.MinValue, DateTime.MaxValue);
-        foreach (var transaction in transactions.Where(t => t.AccountId == accountId))
-        {
-            transaction.AccountId = fallback.Id;
-            await _transactionRepository.SaveTransactionAsync(transaction);
-        }
+        await _transactionRepository.RemapAccountIdAsync(accountId, fallback.Id, cancellationToken);
 
         var templates = await _transactionTemplateRepository.GetTransactionTemplatesAsync();
         foreach (var template in templates.Where(t => t.AccountId == accountId))

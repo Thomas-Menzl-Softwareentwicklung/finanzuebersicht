@@ -68,6 +68,60 @@ public sealed class InMemoryFinanceStore :
     public Task<List<Transaction>> GetTransactionsAsync(DateTime vonDatum, DateTime bisDatum) =>
         Task.FromResult(_transactions.Where(t => t.Datum >= vonDatum && t.Datum <= bisDatum).ToList());
 
+    public Task<List<Transaction>> GetAllTransactionsAsync(CancellationToken cancellationToken = default) =>
+        Task.FromResult(_transactions.ToList());
+
+    public Task<int?> GetEarliestTransactionYearAsync(CancellationToken cancellationToken = default) =>
+        Task.FromResult(_transactions.Count > 0 ? (int?)_transactions.Min(t => t.Datum.Year) : null);
+
+    public Task<bool> HasTransactionsForCategoryAsync(string categoryId, CancellationToken cancellationToken = default) =>
+        Task.FromResult(!string.IsNullOrEmpty(categoryId) && _transactions.Any(t => t.KategorieId == categoryId));
+
+    public Task<bool> HasTransactionsForAccountAsync(string accountId, CancellationToken cancellationToken = default) =>
+        Task.FromResult(!string.IsNullOrEmpty(accountId) && _transactions.Any(t => t.AccountId == accountId));
+
+    public Task<int> RemapCategoryIdAsync(string fromCategoryId, string toCategoryId, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrEmpty(fromCategoryId) || string.IsNullOrEmpty(toCategoryId) || fromCategoryId == toCategoryId)
+            return Task.FromResult(0);
+
+        var changed = 0;
+        foreach (var transaction in _transactions.Where(t => t.KategorieId == fromCategoryId))
+        {
+            transaction.KategorieId = toCategoryId;
+            changed++;
+        }
+        return Task.FromResult(changed);
+    }
+
+    public Task<int> RemapAccountIdAsync(string fromAccountId, string toAccountId, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrEmpty(fromAccountId) || string.IsNullOrEmpty(toAccountId) || fromAccountId == toAccountId)
+            return Task.FromResult(0);
+
+        var changed = 0;
+        foreach (var transaction in _transactions.Where(t => t.AccountId == fromAccountId))
+        {
+            transaction.AccountId = toAccountId;
+            changed++;
+        }
+        return Task.FromResult(changed);
+    }
+
+    public Task<int> AssignMissingAccountIdsAsync(string defaultAccountId, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrEmpty(defaultAccountId))
+            return Task.FromResult(0);
+
+        var changed = 0;
+        foreach (var transaction in _transactions.Where(t => string.IsNullOrWhiteSpace(t.AccountId)))
+        {
+            transaction.AccountId = defaultAccountId;
+            changed++;
+        }
+        return Task.FromResult(changed);
+    }
+
     public Task SaveTransactionAsync(Transaction transaction)
     {
         Upsert(_transactions, transaction, t => t.Id == transaction.Id);
@@ -213,6 +267,20 @@ public sealed class FailingInMemoryFinanceStore :
 
     public Task<List<Transaction>> GetTransactionsAsync(DateTime vonDatum, DateTime bisDatum) =>
         Task.FromResult(new List<Transaction>());
+    public Task<List<Transaction>> GetAllTransactionsAsync(CancellationToken cancellationToken = default) =>
+        Task.FromResult(new List<Transaction>());
+    public Task<int?> GetEarliestTransactionYearAsync(CancellationToken cancellationToken = default) =>
+        Task.FromResult<int?>(null);
+    public Task<bool> HasTransactionsForCategoryAsync(string categoryId, CancellationToken cancellationToken = default) =>
+        Task.FromResult(false);
+    public Task<bool> HasTransactionsForAccountAsync(string accountId, CancellationToken cancellationToken = default) =>
+        Task.FromResult(false);
+    public Task<int> RemapCategoryIdAsync(string fromCategoryId, string toCategoryId, CancellationToken cancellationToken = default) =>
+        Task.FromResult(0);
+    public Task<int> RemapAccountIdAsync(string fromAccountId, string toAccountId, CancellationToken cancellationToken = default) =>
+        Task.FromResult(0);
+    public Task<int> AssignMissingAccountIdsAsync(string defaultAccountId, CancellationToken cancellationToken = default) =>
+        Task.FromResult(0);
     public Task SaveTransactionAsync(Transaction transaction) => Task.CompletedTask;
     public Task SaveTransactionsAsync(IEnumerable<Transaction> transactions) => Task.CompletedTask;
     public Task DeleteTransactionAsync(string id) => Task.CompletedTask;

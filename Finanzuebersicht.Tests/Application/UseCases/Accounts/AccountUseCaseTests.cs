@@ -13,8 +13,10 @@ public class AccountUseCaseTests
 
         var sut = new SaveAccountDetailUseCase(repository);
 
-        var saved = await sut.ExecuteAsync(null, "Tagesgeld", AccountType.Tagesgeld);
+        var result = await sut.ExecuteAsync(null, "Tagesgeld", AccountType.Tagesgeld);
 
+        Assert.True(result.IsSuccess);
+        var saved = result.Value!;
         await repository.Received(1).SaveAccountAsync(NonNullArg.Is<Account>(a =>
             a.Name == "Tagesgeld" &&
             a.Type == AccountType.Tagesgeld));
@@ -33,11 +35,8 @@ public class AccountUseCaseTests
         accountRepository.DeleteAccountAsync(Arg.Any<string>()).Returns(Task.CompletedTask);
 
         var transactionRepository = Substitute.For<ITransactionRepository>();
-        transactionRepository.GetTransactionsAsync(Arg.Any<DateTime>(), Arg.Any<DateTime>())
-            .Returns(new List<Transaction>
-            {
-                new() { Id = "t1", AccountId = "acc-old" }
-            });
+        transactionRepository.RemapAccountIdAsync("acc-old", "acc-default", Arg.Any<CancellationToken>())
+            .Returns(1);
         transactionRepository.SaveTransactionAsync(Arg.Any<Transaction>()).Returns(Task.CompletedTask);
 
         var templateRepository = Substitute.For<ITransactionTemplateRepository>();
@@ -51,7 +50,7 @@ public class AccountUseCaseTests
 
         await sut.ExecuteAsync("acc-old");
 
-        await transactionRepository.Received(1).SaveTransactionAsync(NonNullArg.Is<Transaction>(t => t.AccountId == "acc-default"));
+        await transactionRepository.Received(1).RemapAccountIdAsync("acc-old", "acc-default", Arg.Any<CancellationToken>());
         await templateRepository.Received(1).SaveTransactionTemplateAsync(NonNullArg.Is<TransactionTemplate>(t => t.AccountId == "acc-default"));
         await accountRepository.Received(1).DeleteAccountAsync("acc-old");
     }
@@ -181,8 +180,10 @@ public class AccountUseCaseTests
         var sut = new SaveAccountDetailUseCase(repository);
         var stichtag = new DateTime(2026, 1, 1);
 
-        var saved = await sut.ExecuteAsync(null, "Tagesgeld", AccountType.Tagesgeld, false, 2500m, stichtag);
+        var result = await sut.ExecuteAsync(null, "Tagesgeld", AccountType.Tagesgeld, false, 2500m, stichtag);
 
+        Assert.True(result.IsSuccess);
+        var saved = result.Value!;
         await repository.Received(1).SaveAccountAsync(NonNullArg.Is<Account>(a =>
             a.Name == "Tagesgeld" &&
             a.Type == AccountType.Tagesgeld &&

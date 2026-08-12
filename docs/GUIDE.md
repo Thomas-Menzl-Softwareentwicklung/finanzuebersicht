@@ -174,7 +174,7 @@ main      → v1.x-Tag (löst release.yml aus)
 - **Repos:** Features arbeiten gegen spezifische `I*Repository`-Interfaces (`LocalDataService` als Composite)
 - **Pfad:** Standardmäßig `~/Library/Application Support/Finanzuebersicht`, konfigurierbar über Einstellungen
 - **Konten & Salden:** `GetAccountBalancesUseCase` — Saldo = Anfangssaldo + Σ Buchungen (Umbuchungen auf beiden Konten)
-- **CloudKit:** nur noch als Produktidee im Backlog ([#243](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/243)); kein aktiver CloudKit-Code im Repo. Sync-Vorbereitung: [#300](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/300) (v1.20)
+- **CloudKit:** nur noch als Produktidee im Backlog ([#243](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/243)); kein aktiver CloudKit-Code im Repo. Sync-Vorbereitung [#300](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/300): optionale `ExternalId` / `Source` / `UpdatedAt` an Account, Transaction, Category, RecurringTransaction, SparZiel (keine Sync-UI).
 - **Daueraufträge:** Automatische Generierung auf `App.OnStart()` und `Window.Resumed`
 
 ## 10. Backup & Restore

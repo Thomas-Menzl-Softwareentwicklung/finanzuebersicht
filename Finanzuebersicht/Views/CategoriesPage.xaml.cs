@@ -1,42 +1,51 @@
-using System.ComponentModel;
+using Finanzuebersicht.Services;
 using Finanzuebersicht.ViewModels;
+using Microsoft.Extensions.Logging;
 
 namespace Finanzuebersicht.Views;
 
 public partial class CategoriesPage : BaseContentPage
 {
-    private CategoriesViewModel? _viewModel;
+    private readonly ILogger<CategoriesPage>? _logger;
 
-    public CategoriesPage(CategoriesViewModel viewModel)
+    public CategoriesPage(CategoriesViewModel viewModel, ILogger<CategoriesPage>? logger = null)
     {
-        InitializeComponent();
-        BindingContext = viewModel;
-    }
-
-    protected override void OnBindingContextChanged()
-    {
-        base.OnBindingContextChanged();
-
-        if (_viewModel is not null)
-            _viewModel.PropertyChanged -= OnViewModelPropertyChanged;
-
-        if (BindingContext is CategoriesViewModel viewModel)
+        _logger = logger;
+        try
         {
-            _viewModel = viewModel;
-            viewModel.PropertyChanged += OnViewModelPropertyChanged;
+            InitializeComponent();
+            BindingContext = viewModel;
         }
-        else
+        catch (Exception ex)
         {
-            _viewModel = null;
+            CrashLog.Write("CategoriesPage InitializeComponent failed", ex);
+            _logger?.LogError(ex, "CategoriesPage InitializeComponent failed");
+            Content = CreateErrorContent("Init", ex);
         }
     }
 
-    private async void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    protected override void OnAppearing()
     {
-        if (e.PropertyName != nameof(CategoriesViewModel.ShowAddKontoForm) || _viewModel?.ShowAddKontoForm != true)
-            return;
-
-        await KontenScrollView.ScrollToAsync(0, 0, false);
-        AddKontoForm.FocusForm();
+        try
+        {
+            base.OnAppearing();
+        }
+        catch (Exception ex)
+        {
+            CrashLog.Write("CategoriesPage OnAppearing failed", ex);
+            _logger?.LogError(ex, "CategoriesPage OnAppearing failed");
+            Content = CreateErrorContent("OnAppearing", ex);
+        }
     }
+
+    private static View CreateErrorContent(string phase, Exception ex) =>
+        new ScrollView
+        {
+            Padding = 20,
+            Content = new Label
+            {
+                Text = $"Verwaltung-Fehler ({phase}):\n\n{ex}",
+                FontSize = 13
+            }
+        };
 }

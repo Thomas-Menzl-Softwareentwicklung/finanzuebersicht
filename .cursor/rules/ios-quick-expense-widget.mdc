@@ -1,0 +1,57 @@
+---
+description: iOS Quick-Expense-Widget — Mac/Xcode Handoff für lokale Cursor-Agents
+alwaysApply: false
+globs:
+  - Finanzuebersicht/Platforms/iOS/Widgets/**
+  - Finanzuebersicht/Services/AppGroupQuickExpenseInboxStore.cs
+  - Finanzuebersicht/Platforms/iOS/Entitlements*.plist
+  - docs/APP_STORE.md
+---
+
+# iOS Quick-Expense-Widget — Mac-Agent-Handoff
+
+**Wann lesen:** Aufgabe erwähnt Widget, WidgetKit, Home Screen Capture, `.appex`, App Groups, oder „Schnell Ausgabe“ auf dem iPhone von außen.
+
+**Status:** In-App + Domain + Pro-Gate + Inbox + Swift + XcodeGen + MSBuild-Embed + `.appex` in `PlugIns/` + Presets/Deep Link.  
+**Noch manuell:** App Group im Developer Portal für Extension-ID (falls neu); Gerätetest (Widget → Drain → Unkategorisiert); Store-Upload.
+
+Vollständige Schrittfolge: `Finanzuebersicht/Platforms/iOS/Widgets/README.md` (Abschnitt „Mac-Agent: Xcode-Extension bündeln“).
+
+## Schon fertig — nicht neu erfinden
+
+| Stück | Ort |
+|-------|-----|
+| Capture-Use-Case | `CaptureQuickExpenseUseCase` → echte Ausgabe, `Unkategorisiert` + Default-Konto |
+| Pro | `AppFeature.QuickExpenseCapture` |
+| In-App UI | Transaktionen → „Schnell“ (`QuickExpenseCaptureSheetService`) |
+| Inbox drain | `ProcessQuickExpenseInboxUseCase` in `App` OnStart/Resume |
+| App Group ID | `group.de.thomasmenzl.finanzuebersicht` (`AppGroupIds.Finanzuebersicht`) |
+| Pending-Datei | `quick-expense-pending.json` (camelCase JSON) |
+| Swift-Quellen | `Finanzuebersicht/Platforms/iOS/Widgets/QuickExpenseWidget/` |
+| XcodeGen | `Platforms/iOS/Widgets/project.yml` → Target `QuickExpenseWidget` |
+| MAUI-Embed | `Finanzuebersicht.csproj`: Target `BuildWidgetExtension` + `AdditionalAppExtensions` (`QuickExpenseWidget`) |
+| Haupt-App Entitlements | `Platforms/iOS/Entitlements.plist` + `.Debug.plist` (App Group schon drin) |
+| Extension Entitlements (Resign) | `Platforms/iOS/Entitlements.WidgetExtension.plist` |
+
+## Dein Job auf dem Mac (Rest)
+
+1. **Xcode 16+** installieren und `xcode-select` darauf zeigen (nur CLT reicht nicht).
+2. Extension-App-ID `de.thomasmenzl.finanzuebersicht.QuickExpenseWidget` + App Group im Developer Portal.
+3. `dotnet build Finanzuebersicht/Finanzuebersicht.csproj -f net10.0-ios` (baut `.appex` automatisch) **oder** `Platforms/iOS/Widgets/build-release.sh`.
+4. Auf Gerät/Simulator: Widget speichern → App öffnen → Transaktion Unkategorisiert; ohne Pro Intent ablehnen.
+5. Ohne Xcode lokal: `-p:EmbedQuickExpenseWidget=false`.
+
+## Nicht tun
+
+- Capture-Domain oder In-App-Sheet neu bauen
+- Separate Draft-Entity statt `Transaction` + Unkategorisiert
+- Anzeige-Widget #242 hier mitmischen (Saldo/KPIs = anderes Feature)
+- Linux/Cloud-CI für WidgetKit erwarten (geht nicht ohne Xcode)
+
+## Verifikation
+
+```bash
+dotnet test Finanzuebersicht.Tests/Finanzuebersicht.Tests.csproj -c Release
+dotnet build Finanzuebersicht/Finanzuebersicht.csproj -f net10.0-ios
+# danach: .app enthält PlugIns/*.appex; Home-Screen-Widget manuell testen
+```

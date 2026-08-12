@@ -64,14 +64,18 @@ public partial class SparZielDetailViewModel(
 
     public bool HasFaelligkeit => UseFaelligkeit;
 
+    public bool IsEditing => _sparZiel != null;
+
     public System.Windows.Input.ICommand AutoLoadCommand => LoadProgressCommand;
 
-    public string PageTitle => _loc.GetString(ResourceKeys.Title_SparZielBearbeiten);
+    public string PageTitle => _loc.GetString(
+        IsEditing ? ResourceKeys.Title_SparZielBearbeiten : ResourceKeys.Btn_NeuesZiel);
 
     public void RefreshLocalizedStrings()
     {
         OnPropertyChanged(nameof(PageTitle));
-        _ = LoadProgressAsync();
+        if (IsEditing)
+            _ = LoadProgressAsync();
     }
 
     public SparZiel? SparZiel
@@ -87,6 +91,8 @@ public partial class SparZielDetailViewModel(
             MonatlicheSparrateText = value.MonatlicheSparrate?.ToString("F2", CultureInfo.CurrentCulture) ?? string.Empty;
             UseFaelligkeit = value.Faelligkeitsdatum.HasValue;
             Faelligkeitsdatum = value.Faelligkeitsdatum ?? DateTime.Today;
+            OnPropertyChanged(nameof(IsEditing));
+            OnPropertyChanged(nameof(PageTitle));
             _ = LoadProgressAsync();
         }
     }
@@ -95,6 +101,24 @@ public partial class SparZielDetailViewModel(
     {
         if (query.TryGetValue(NavigationQueryKeys.SparZiel, out var val) && val is SparZiel sz)
             SparZiel = sz;
+        else
+            ResetForCreate();
+    }
+
+    public void ResetForCreate()
+    {
+        _sparZiel = null;
+        Titel = string.Empty;
+        Icon = "🎯";
+        ZielBetragText = string.Empty;
+        AktuellerBetragText = string.Empty;
+        MonatlicheSparrateText = string.Empty;
+        UseFaelligkeit = false;
+        Faelligkeitsdatum = DateTime.Today;
+        FortschrittProzent = 0;
+        FortschrittText = string.Empty;
+        OnPropertyChanged(nameof(IsEditing));
+        OnPropertyChanged(nameof(PageTitle));
     }
 
     [RelayCommand]
@@ -117,8 +141,6 @@ public partial class SparZielDetailViewModel(
     [RelayCommand]
     private async Task Save()
     {
-        if (_sparZiel == null) return;
-
         if (string.IsNullOrWhiteSpace(Titel))
         {
             await _dialogService.ShowAlertAsync(
@@ -164,17 +186,19 @@ public partial class SparZielDetailViewModel(
 
         try
         {
-            _sparZiel.Titel = Titel.Trim();
-            _sparZiel.Icon = string.IsNullOrWhiteSpace(Icon) ? "🎯" : Icon;
-            _sparZiel.ZielBetrag = zielBetrag;
-            _sparZiel.AktuellerBetrag = aktuellerBetrag;
-            _sparZiel.MonatlicheSparrate = monatlicheSparrate;
-            _sparZiel.Faelligkeitsdatum = UseFaelligkeit ? Faelligkeitsdatum : null;
+            var sparZiel = _sparZiel ?? new SparZiel();
+            sparZiel.Titel = Titel.Trim();
+            sparZiel.Icon = string.IsNullOrWhiteSpace(Icon) ? "🎯" : Icon;
+            sparZiel.ZielBetrag = zielBetrag;
+            sparZiel.AktuellerBetrag = aktuellerBetrag;
+            sparZiel.MonatlicheSparrate = monatlicheSparrate;
+            sparZiel.Faelligkeitsdatum = UseFaelligkeit ? Faelligkeitsdatum : null;
 
-            await _saveSparZielUseCase.ExecuteAsync(_sparZiel);
+            await _saveSparZielUseCase.ExecuteAsync(sparZiel);
             _appEvents.NotifyDataChanged();
             await _feedbackService.ShowSnackbarAsync(_loc.GetString(ResourceKeys.Msg_Gespeichert));
-            await LoadProgressAsync();
+            if (IsEditing)
+                await LoadProgressAsync();
             await _navigationService.GoBackAsync();
         }
         catch (Exception ex)
@@ -235,6 +259,6 @@ public partial class SparZielDetailViewModel(
             return true;
         }
 
-        return decimal.TryParse(text, NumberStyles.Number, CultureInfo.CurrentCulture, out amount);
+        return FlexibleAmountParser.TryParse(text, out amount);
     }
 }

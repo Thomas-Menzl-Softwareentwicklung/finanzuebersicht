@@ -74,6 +74,17 @@ public partial class CashflowViewModel(
             ProjectedExpenses = data.ProjectedExpenses;
             HasData = data.Days.Count > 0;
         }
+        catch (Finanzuebersicht.Core.Licensing.FeatureGateException)
+        {
+            Days = [];
+            ProjectedIncome = 0;
+            ProjectedExpenses = 0;
+            HasData = false;
+            await _dialogService.ShowAlertAsync(
+                _loc.GetString(ResourceKeys.Err_Titel),
+                _loc.GetString(ResourceKeys.Err_ProErforderlich),
+                _loc.GetString(ResourceKeys.Btn_OK));
+        }
         catch (Exception ex)
         {
             _logger?.LogError(ex, "CashflowViewModel load failed");

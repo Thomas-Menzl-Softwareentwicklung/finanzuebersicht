@@ -100,6 +100,7 @@
   <data name="Hint_KategorieWaehlen" xml:space="preserve"><value>Select Category</value></data>
   <data name="Hint_KontoWaehlen" xml:space="preserve"><value>Select Account</value></data>
   <data name="Hint_iCloudTipp" xml:space="preserve"><value>💡 Tip: Choose a folder in iCloud Drive to automatically back up your data.</value></data>
+  <data name="Hint_SpeicherortAppContainer" xml:space="preserve"><value>On iPhone and iPad, data stays in the app sandbox. The path above is fixed and cannot be changed.</value></data>
 
   <!-- Empty States -->
   <data name="Empty_KeineKategorien" xml:space="preserve"><value>No categories available</value></data>
@@ -124,9 +125,42 @@
   <data name="Err_LoeschenFehlgeschlagen" xml:space="preserve"><value>Error deleting: {0}</value></data>
   <data name="Err_LadenFehlgeschlagen" xml:space="preserve"><value>Error loading data: {0}</value></data>
   <data name="Err_TransferKontenUnterschiedlich" xml:space="preserve"><value>Please select different source and target accounts.</value></data>
+  <data name="Err_TransferKontenErforderlich" xml:space="preserve"><value>Please select a source and a target account.</value></data>
+  <data name="Err_KontoNichtGefunden" xml:space="preserve"><value>The selected account was not found.</value></data>
+  <data name="Err_KontoArchiviert" xml:space="preserve"><value>Archived accounts cannot be used for this action.</value></data>
   <data name="Err_UmbuchungNichtBearbeitbar" xml:space="preserve"><value>Transfers cannot be edited as a single transaction.</value></data>
   <data name="Err_OrdnerNichtWaehlbar" xml:space="preserve"><value>Folder could not be selected: {0}</value></data>
   <data name="Err_SucheFehlgeschlagen" xml:space="preserve"><value>The search could not be completed.</value></data>
+  <data name="Err_ProErforderlich" xml:space="preserve"><value>This feature requires Finanzübersicht Pro.</value></data>
+  <data name="Err_LimitErreicht" xml:space="preserve"><value>Free limit reached ({0}/{1}). Unlock Pro for unlimited use.</value></data>
+  <data name="Err_BackupNichtGefunden" xml:space="preserve"><value>The selected backup was not found.</value></data>
+  <data name="Err_BackupBeschaedigt" xml:space="preserve"><value>The backup file is damaged or incomplete.</value></data>
+  <data name="Err_BackupSchemaInkompatibel" xml:space="preserve"><value>This backup is not compatible with this app version.</value></data>
+
+  <data name="Lic_SectionTitle" xml:space="preserve"><value>License</value></data>
+  <data name="Lic_ChannelDirect" xml:space="preserve"><value>Distribution: Direct build (GitHub / self-built)</value></data>
+  <data name="Lic_ChannelStore" xml:space="preserve"><value>Distribution: App Store</value></data>
+  <data name="Lic_TierFree" xml:space="preserve"><value>Plan: Free</value></data>
+  <data name="Lic_TierPro" xml:space="preserve"><value>Plan: Pro</value></data>
+  <data name="Lic_SyncUnavailableDirect" xml:space="preserve"><value>Cloud Sync: not available for Direct builds</value></data>
+  <data name="Lic_SyncInactive" xml:space="preserve"><value>Cloud Sync: inactive</value></data>
+  <data name="Lic_SyncActive" xml:space="preserve"><value>Cloud Sync: active</value></data>
+  <data name="Lic_SyncEntitledComingSoon" xml:space="preserve"><value>Cloud Sync: entitled (engine coming soon)</value></data>
+  <data name="Lic_DirectFullLocal" xml:space="preserve"><value>All local features unlocked. Sync is only offered via App Store.</value></data>
+  <data name="Lic_FreeLimitsHint" xml:space="preserve"><value>Free limits: 3 accounts, 8 recurring, 1 savings goal, 3 templates. CSV import &amp; cashflow require Pro.</value></data>
+  <data name="Lic_StubHint" xml:space="preserve"><value>StoreKit stub (dev): toggle entitlements until real purchases are wired.</value></data>
+  <data name="Lic_StubPro" xml:space="preserve"><value>Stub: Pro unlocked</value></data>
+  <data name="Lic_StubSync" xml:space="preserve"><value>Stub: Sync subscription</value></data>
+  <data name="Lic_StubApply" xml:space="preserve"><value>Apply stub entitlements</value></data>
+  <data name="Lic_BuyPro" xml:space="preserve"><value>Unlock Pro</value></data>
+  <data name="Lic_RestorePurchases" xml:space="preserve"><value>Restore purchases</value></data>
+  <data name="Lic_PurchaseSuccess" xml:space="preserve"><value>Pro unlocked</value></data>
+  <data name="Lic_PurchaseFailed" xml:space="preserve"><value>Purchase could not be completed.</value></data>
+  <data name="Lic_RestoreSuccess" xml:space="preserve"><value>Purchases restored</value></data>
+  <data name="Lic_RestoreEmpty" xml:space="preserve"><value>No purchases found for this Apple ID</value></data>
+  <data name="Lic_SyncComingSoon" xml:space="preserve"><value>Cloud Sync: coming later (not for sale yet)</value></data>
+  <data name="Lic_SyncPurchaseLater" xml:space="preserve"><value>Cloud Sync yearly subscription will be offered once CloudKit is ready.</value></data>
+  <data name="Lic_UseStoreKit" xml:space="preserve"><value>Use App Store purchases (clear stub)</value></data>
 
   <!-- Confirmation Dialogs -->
   <data name="Dlg_KategorieLoeschen" xml:space="preserve"><value>Delete Category</value></data>
@@ -255,8 +289,24 @@ Please restart the app.</value></data>
   <data name="Btn_Import" xml:space="preserve"><value>Import</value></data>
   <data name="Btn_Filter" xml:space="preserve"><value>Filter</value></data>
   <data name="Btn_Umbuchen" xml:space="preserve"><value>Transfer</value></data>
+  <data name="Btn_SchnellAusgabe" xml:space="preserve"><value>Quick</value></data>
+  <data name="Btn_UnkategorisiertFilter" xml:space="preserve"><value>Uncategorized ({0})</value></data>
+  <data name="Btn_UnkategorisiertFilterZero" xml:space="preserve"><value>Uncategorized</value></data>
   <data name="Btn_FilterZuruecksetzen" xml:space="preserve"><value>Clear filter</value></data>
   <data name="Title_ShiftInstance" xml:space="preserve"><value>Shift instance</value></data>
+  <data name="Title_SchnellAusgabe" xml:space="preserve"><value>Quick expense</value></data>
+  <data name="Lbl_SchnellAusgabeHinweis" xml:space="preserve"><value>Amount and note only — assign category and account later.</value></data>
+  <data name="Lbl_Info" xml:space="preserve"><value>Note</value></data>
+  <data name="Hint_SchnellAusgabeInfo" xml:space="preserve"><value>e.g. Coffee</value></data>
+  <data name="Msg_SchnellAusgabeGespeichert" xml:space="preserve"><value>Expense saved (uncategorized)</value></data>
+  <data name="Msg_KeineUnkategorisierten" xml:space="preserve"><value>No uncategorized transactions.</value></data>
+  <data name="A11y_SchnellAusgabe" xml:space="preserve"><value>Quick expense capture</value></data>
+  <data name="Stn_WidgetShortcutsTitle" xml:space="preserve"><value>Widget shortcuts</value></data>
+  <data name="Stn_WidgetShortcutsHint" xml:space="preserve"><value>Up to four presets on the Home Screen widget. Empty slots are hidden. Tap books immediately; the edit button opens Quick expense.</value></data>
+  <data name="Stn_WidgetShortcutSlot" xml:space="preserve"><value>Slot {0}</value></data>
+  <data name="Stn_WidgetShortcutTitle" xml:space="preserve"><value>Title</value></data>
+  <data name="Stn_WidgetShortcutAmount" xml:space="preserve"><value>Amount</value></data>
+  <data name="Msg_WidgetShortcutsGespeichert" xml:space="preserve"><value>Widget shortcuts saved</value></data>
   <data name="Btn_Hinzufuegen" xml:space="preserve"><value>+</value></data>
   <data name="Btn_Prev" xml:space="preserve"><value>‹</value></data>
   <data name="Btn_Next" xml:space="preserve"><value>›</value></data>
@@ -331,6 +381,8 @@ Please restart the app.</value></data>
   <data name="Msg_ImportStatusMissingDate" xml:space="preserve"><value>Missing booking date</value></data>
   <data name="Msg_ImportStatusPossibleDuplicate" xml:space="preserve"><value>Possible duplicate</value></data>
   <data name="Msg_ImportStatusCategoryUnresolved" xml:space="preserve"><value>Category not assigned</value></data>
+  <data name="Msg_ImportFileReadFailed" xml:space="preserve"><value>The file could not be read.</value></data>
+  <data name="Msg_ImportNoParserMatched" xml:space="preserve"><value>No matching parser found or the file contains no records.</value></data>
   <data name="Btn_Duplizieren" xml:space="preserve"><value>Duplicate</value></data>
   <data name="Btn_Verwenden" xml:space="preserve"><value>Use</value></data>
   <data name="Btn_AlsVorlageSpeichern" xml:space="preserve"><value>Save as template</value></data>

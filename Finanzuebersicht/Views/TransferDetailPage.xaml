@@ -14,7 +14,7 @@
     <ScrollView Grid.Row="0" Padding="16">
         <VerticalStackLayout Spacing="20">
             <VerticalStackLayout Spacing="4">
-                <Label Text="{loc:Translate Lbl_VonKonto}" FontSize="13" TextColor="Gray" />
+                <Label Text="{loc:Translate Lbl_VonKonto}" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
                 <controls:SelectionField ItemsSource="{Binding Accounts}"
                                          SelectedItem="{Binding SourceAccount, Mode=TwoWay}"
                                          DisplayMemberPath="Name"
@@ -23,7 +23,7 @@
             </VerticalStackLayout>
 
             <VerticalStackLayout Spacing="4">
-                <Label Text="{loc:Translate Lbl_NachKonto}" FontSize="13" TextColor="Gray" />
+                <Label Text="{loc:Translate Lbl_NachKonto}" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
                 <controls:SelectionField ItemsSource="{Binding Accounts}"
                                          SelectedItem="{Binding TargetAccount, Mode=TwoWay}"
                                          DisplayMemberPath="Name"
@@ -32,24 +32,24 @@
             </VerticalStackLayout>
 
             <VerticalStackLayout Spacing="4">
-                <Label Text="{loc:Translate Lbl_Betrag}" FontSize="13" TextColor="Gray" />
+                <Label Text="{loc:Translate Lbl_Betrag}" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
                 <Entry Text="{Binding AmountText}" Placeholder="{loc:Translate Hint_Betrag}"
                        Keyboard="Numeric" FontSize="28" FontAttributes="Bold"
                        HorizontalTextAlignment="Center" />
             </VerticalStackLayout>
 
             <VerticalStackLayout Spacing="4">
-                <Label Text="{loc:Translate Lbl_Titel}" FontSize="13" TextColor="Gray" />
+                <Label Text="{loc:Translate Lbl_Titel}" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
                 <Entry Text="{Binding Title}" FontSize="16" />
             </VerticalStackLayout>
 
             <VerticalStackLayout Spacing="4">
-                <Label Text="{loc:Translate Lbl_Verwendungszweck}" FontSize="13" TextColor="Gray" />
+                <Label Text="{loc:Translate Lbl_Verwendungszweck}" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
                 <Editor Text="{Binding Note}" HeightRequest="100" AutoSize="TextChanges" />
             </VerticalStackLayout>
 
             <VerticalStackLayout Spacing="4">
-                <Label Text="{loc:Translate Lbl_Datum}" FontSize="13" TextColor="Gray" />
+                <Label Text="{loc:Translate Lbl_Datum}" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
                 <DatePicker Date="{Binding Date}" FontSize="16"
                             Format="dd. MMMM yyyy" />
             </VerticalStackLayout>

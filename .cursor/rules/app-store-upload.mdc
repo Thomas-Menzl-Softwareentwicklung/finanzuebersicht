@@ -1,0 +1,15 @@
+---
+description: App Store / Transporter Upload — Commit vor Publish für neue Build-Nummer
+alwaysApply: true
+---
+
+# App Store / Transporter Upload
+
+Vor jedem Store-IPA-Build und Transporter-Upload:
+
+1. **Zuerst committen** (alle Upload-relevanten Änderungen). Nerdbank.GitVersioning setzt `CFBundleVersion` / `ApplicationVersion` aus der Git-Höhe (`BuildVersionSimple`). Ohne neuen Commit bleibt die Build-Nummer gleich → ASC lehnt den Upload ab („already uploaded“).
+2. **Dann** Widget neu bauen (falls Swift geändert) und `dotnet publish` mit `-p:AppDistribution=Store`.
+3. IPA-Pfad: `Finanzuebersicht/bin/Release/net10.0-ios/ios-arm64/publish/Finanzuebersicht.ipa`
+4. Vor Übergabe an Transporter: App + `.appex` haben dieselbe `CFBundleShortVersionString` / `CFBundleVersion`, Distribution-Signatur, kein `Platforms/`-Duplikat im Bundle.
+
+Nie „fertig für Transporter“ melden, solange uncommittete Upload-Änderungen existieren oder die Build-Nummer schon hochgeladen wurde.

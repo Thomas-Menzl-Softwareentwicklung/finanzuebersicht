@@ -1,0 +1,186 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "Quick expense" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schnelle Ausgabe"
+          }
+        }
+      }
+    },
+    "Tap a preset — open the app to sync" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voreinstellung tippen — App öffnen zum Übernehmen"
+          }
+        }
+      }
+    },
+    "Pro unlocks Home Screen capture" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pro schaltet Home-Screen-Erfassung frei"
+          }
+        }
+      }
+    },
+    "Capture a small expense without opening the full app." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kleine Ausgabe erfassen, ohne die App zu öffnen."
+          }
+        }
+      }
+    },
+    "Save quick expense" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schnelle Ausgabe speichern"
+          }
+        }
+      }
+    },
+    "Captures amount and note for Finanzübersicht." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erfasst Betrag und Info für Finanzübersicht."
+          }
+        }
+      }
+    },
+    "Amount" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Betrag"
+          }
+        }
+      }
+    },
+    "Note" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Info"
+          }
+        }
+      }
+    },
+    "Finanzübersicht Pro is required for quick capture." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Für die Schnellerfassung ist Finanzübersicht Pro nötig."
+          }
+        }
+      }
+    },
+    "Amount and note are required." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Betrag und Info sind erforderlich."
+          }
+        }
+      }
+    },
+    "Saved — open the app to sync." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gespeichert — App öffnen zum Übernehmen."
+          }
+        }
+      }
+    },
+    "Coffee" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kaffee"
+          }
+        }
+      }
+    },
+    "Snack" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Snack"
+          }
+        }
+      }
+    },
+    "Coffee %@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kaffee %@"
+          }
+        }
+      }
+    },
+    "Snack %@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Snack %@"
+          }
+        }
+      }
+    },
+    "Configure shortcuts in Settings" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shortcuts in den Einstellungen festlegen"
+          }
+        }
+      }
+    },
+    "Tap to book — pencil to edit" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tippen bucht — Stift zum Anpassen"
+          }
+        }
+      }
+    },
+    "Edit amount" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Betrag anpassen"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

@@ -148,7 +148,7 @@
                            FontSize="12"
                            TextColor="{StaticResource TextTertiary}" />
 
-                    <HorizontalStackLayout Spacing="8">
+                    <HorizontalStackLayout Spacing="8" IsVisible="{Binding Storage.CanChangeDataPath}">
                         <Button Text="{loc:Translate Btn_OrdnerWaehlen}"
                                 Command="{Binding Storage.ChooseDataPathCommand}"
                                 FontSize="14"
@@ -162,6 +162,12 @@
                     </HorizontalStackLayout>
 
                     <Label Text="{loc:Translate Hint_iCloudTipp}"
+                           IsVisible="{Binding Storage.CanChangeDataPath}"
+                           FontSize="12"
+                           TextColor="{StaticResource TextTertiary}" />
+
+                    <Label Text="{loc:Translate Hint_SpeicherortAppContainer}"
+                           IsVisible="{Binding Storage.ShowAppContainerStorageHint}"
                            FontSize="12"
                            TextColor="{StaticResource TextTertiary}" />
                 </VerticalStackLayout>
@@ -211,6 +217,134 @@
                            FontSize="12"
                            TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray400}}"
                            Margin="0,4,0,0" />
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Widget-Shortcuts (Pro / Quick Expense) -->
+            <Border StrokeShape="RoundRectangle 12"
+                    Stroke="{AppThemeBinding Light={StaticResource Separator}, Dark={StaticResource SeparatorDark}}"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource CardBackground}, Dark={StaticResource CardBackgroundDark}}"
+                    Padding="16">
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="{Binding WidgetPresets.SectionTitle}"
+                           FontSize="18"
+                           FontAttributes="Bold"
+                           TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
+                    <Label Text="{Binding WidgetPresets.SectionHint}"
+                           FontSize="12"
+                           TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray400}}" />
+                    <Label Text="{Binding WidgetPresets.ProHint}"
+                           IsVisible="{Binding WidgetPresets.ShowProHint}"
+                           FontSize="13"
+                           TextColor="{AppThemeBinding Light={StaticResource Warning}, Dark={StaticResource WarningDark}}" />
+
+                    <!-- HasProAccess only (not CanEdit/IsBusy): disabling Entries mid-save drops focus
+                         before TwoWay Text is committed on iOS. -->
+                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding WidgetPresets.Slots}"
+                                         Spacing="12"
+                                         IsEnabled="{Binding WidgetPresets.HasProAccess}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="vm:QuickExpenseWidgetPresetSlotItem">
+                                <VerticalStackLayout Spacing="6">
+                                    <Label Text="{Binding SlotLabel, StringFormat='#{0}'}"
+                                           FontSize="13"
+                                           FontAttributes="Bold"
+                                           TextColor="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}" />
+                                    <Entry Text="{Binding Title, Mode=TwoWay}"
+                                           Placeholder="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.WidgetPresets.TitlePlaceholder}"
+                                           FontSize="16" />
+                                    <Entry Text="{Binding AmountText, Mode=TwoWay}"
+                                           Placeholder="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.WidgetPresets.AmountPlaceholder}"
+                                           Keyboard="Numeric"
+                                           FontSize="16" />
+                                </VerticalStackLayout>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+
+                    <Button Text="{loc:Translate Btn_Speichern}"
+                            Clicked="OnWidgetPresetsSaveClicked"
+                            IsEnabled="{Binding WidgetPresets.CanEdit}"
+                            FontSize="14"
+                            Padding="12,8"
+                            BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                            TextColor="White" />
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Lizenz / Free · Pro · Sync -->
+            <Border StrokeShape="RoundRectangle 12"
+                    Stroke="{AppThemeBinding Light={StaticResource Separator}, Dark={StaticResource SeparatorDark}}"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource CardBackground}, Dark={StaticResource CardBackgroundDark}}"
+                    Padding="16">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="{loc:Translate Lic_SectionTitle}"
+                           FontSize="18"
+                           FontAttributes="Bold"
+                           TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
+                    <Label Text="{Binding License.ChannelLabel}"
+                           FontSize="14"
+                           TextColor="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}" />
+                    <Label Text="{Binding License.TierLabel}"
+                           FontSize="16"
+                           FontAttributes="Bold"
+                           TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
+                    <Label Text="{Binding License.SyncLabel}"
+                           FontSize="14"
+                           TextColor="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}" />
+                    <Label Text="{Binding License.LimitsHint}"
+                           FontSize="12"
+                           TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray400}}" />
+
+                    <VerticalStackLayout Spacing="8"
+                                         IsVisible="{Binding License.ShowStorePurchaseControls}">
+                        <Label Text="{Binding License.ProPriceLabel}"
+                               FontSize="14"
+                               TextColor="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}" />
+                        <Button Text="{loc:Translate Lic_BuyPro}"
+                                Command="{Binding License.BuyProCommand}"
+                                IsEnabled="{Binding License.CanBuyPro}"
+                                FontSize="14"
+                                Padding="12,8"
+                                BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                TextColor="White" />
+                        <Button Text="{loc:Translate Lic_RestorePurchases}"
+                                Command="{Binding License.RestorePurchasesCommand}"
+                                FontSize="14"
+                                Padding="12,8" />
+                        <Label Text="{loc:Translate Lic_SyncPurchaseLater}"
+                               FontSize="12"
+                               TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray400}}" />
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Spacing="8"
+                                         IsVisible="{Binding License.ShowStoreStubControls}">
+                        <Label Text="{loc:Translate Lic_StubHint}"
+                               FontSize="12"
+                               TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray400}}" />
+                        <Grid ColumnDefinitions="*, Auto">
+                            <Label Text="{loc:Translate Lic_StubPro}"
+                                   VerticalOptions="Center"
+                                   TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
+                            <Switch Grid.Column="1"
+                                    IsToggled="{Binding License.StubProEnabled}" />
+                        </Grid>
+                        <Grid ColumnDefinitions="*, Auto">
+                            <Label Text="{loc:Translate Lic_StubSync}"
+                                   VerticalOptions="Center"
+                                   TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
+                            <Switch Grid.Column="1"
+                                    IsToggled="{Binding License.StubSyncEnabled}" />
+                        </Grid>
+                        <Button Text="{loc:Translate Lic_StubApply}"
+                                Command="{Binding License.ApplyStubEntitlementsCommand}"
+                                FontSize="14"
+                                Padding="12,8" />
+                        <Button Text="{loc:Translate Lic_UseStoreKit}"
+                                Command="{Binding License.UseStoreKitInsteadOfStubCommand}"
+                                FontSize="14"
+                                Padding="12,8" />
+                    </VerticalStackLayout>
                 </VerticalStackLayout>
             </Border>
 

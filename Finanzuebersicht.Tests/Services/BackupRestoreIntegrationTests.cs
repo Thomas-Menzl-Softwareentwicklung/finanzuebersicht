@@ -283,7 +283,7 @@ namespace Finanzuebersicht.Tests.Services
 
             // Assert
             Assert.False(result.Success);
-            Assert.Contains("nicht gefunden", result.ErrorMessage, StringComparison.OrdinalIgnoreCase);
+            Assert.Equal(BackupErrorKind.NotFound, result.ErrorKind);
         }
 
         [Fact]

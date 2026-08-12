@@ -54,128 +54,90 @@
                 <RefreshView Command="{Binding LoadKategorienCommand}"
                              IsRefreshing="{Binding IsLoading}"
                              IsVisible="{Binding IsKategorienVisible}">
-                    <ScrollView>
-                        <VerticalStackLayout Spacing="12" Padding="16">
-
+                    <CollectionView ItemsSource="{Binding Kategorien}"
+                                    SelectionMode="None"
+                                    Margin="16,0">
+                        <CollectionView.EmptyView>
                             <controls:EmptyStateView IconImage="categories.png"
                                                      IconAccessibilityDescription="{loc:Translate Nav_Kategorien}"
                                                      Message="{loc:Translate Empty_KeineKategorien}"
                                                      Hint="{loc:Translate Empty_HintKategorien}"
                                                      ActionText="{loc:Translate Btn_Hinzufuegen}"
-                                                     ActionCommand="{Binding GoToDetailCommand}"
-                                                     IsVisible="{Binding IsKategorienEmpty}" />
-
-                            <VerticalStackLayout BindableLayout.ItemsSource="{Binding Kategorien}" Spacing="12">
-                                <BindableLayout.ItemTemplate>
-                                    <DataTemplate x:DataType="models:Category">
-                                        <SwipeView>
-                                            <SwipeView.RightItems>
-                                                <SwipeItems>
-                                                    <SwipeItem Text="{loc:Translate Btn_Loeschen}"
-                                                               BackgroundColor="{AppThemeBinding Light={StaticResource Ausgabe}, Dark={StaticResource AusgabeDark}}"
-                                                               Command="{Binding Source={RelativeSource AncestorType={x:Type vm:CategoriesViewModel}}, Path=DeleteKategorieCommand}"
-                                                               CommandParameter="{Binding .}" />
-                                                </SwipeItems>
-                                            </SwipeView.RightItems>
-                                            <Border StrokeShape="RoundRectangle 12"
-                                                    Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray900}}"
-                                                    BackgroundColor="{AppThemeBinding Light={StaticResource CardBackground}, Dark={StaticResource CardBackgroundDark}}"
-                                                    Padding="16"
-                                                    SemanticProperties.Description="{Binding ., Converter={StaticResource CategoryAccessibility}}">
-                                                <Border.GestureRecognizers>
-                                                    <TapGestureRecognizer
-                                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:CategoriesViewModel}}, Path=GoToDetailCommand}"
-                                                        CommandParameter="{Binding .}" />
-                                                </Border.GestureRecognizers>
-                                                <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="10">
-                                                    <Border Grid.Column="0"
-                                                            BackgroundColor="{Binding Color}"
-                                                            StrokeShape="RoundRectangle 12"
-                                                            Stroke="Transparent"
-                                                            WidthRequest="44" HeightRequest="44"
-                                                            HorizontalOptions="Center" VerticalOptions="Center">
-                                                        <Label Text="{Binding Icon}" FontSize="22"
-                                                               HorizontalOptions="Center" VerticalOptions="Center" />
-                                                    </Border>
-                                                    <VerticalStackLayout Grid.Column="1" VerticalOptions="Center">
-                                                        <Label Text="{Binding ., Converter={StaticResource KategorieName}}"
-                                                               FontSize="16" FontAttributes="Bold" />
-                                                    </VerticalStackLayout>
-                                                    <Label Grid.Column="2"
-                                                           Text="{Binding Typ, Converter={StaticResource TransactionTypeToLocalizedStringConverter}}"
-                                                           FontSize="13"
-                                                           FontAttributes="Bold"
-                                                           TextColor="{Binding Typ, Converter={StaticResource TransactionTypColor}}"
-                                                           HorizontalTextAlignment="End"
-                                                           VerticalTextAlignment="Center" />
-                                                </Grid>
+                                                     ActionCommand="{Binding GoToDetailCommand}" />
+                        </CollectionView.EmptyView>
+                        <CollectionView.ItemsLayout>
+                            <LinearItemsLayout Orientation="Vertical" ItemSpacing="12" />
+                        </CollectionView.ItemsLayout>
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="models:Category">
+                                <SwipeView>
+                                    <SwipeView.RightItems>
+                                        <SwipeItems>
+                                            <SwipeItem Text="{loc:Translate Btn_Loeschen}"
+                                                       BackgroundColor="{AppThemeBinding Light={StaticResource Ausgabe}, Dark={StaticResource AusgabeDark}}"
+                                                       Command="{Binding Source={RelativeSource AncestorType={x:Type vm:CategoriesViewModel}}, Path=DeleteKategorieCommand}"
+                                                       CommandParameter="{Binding .}" />
+                                        </SwipeItems>
+                                    </SwipeView.RightItems>
+                                    <Border StrokeShape="RoundRectangle 12"
+                                            Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray900}}"
+                                            BackgroundColor="{AppThemeBinding Light={StaticResource CardBackground}, Dark={StaticResource CardBackgroundDark}}"
+                                            Padding="16"
+                                            SemanticProperties.Description="{Binding ., Converter={StaticResource CategoryAccessibility}}">
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:CategoriesViewModel}}, Path=GoToDetailCommand}"
+                                                CommandParameter="{Binding .}" />
+                                        </Border.GestureRecognizers>
+                                        <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="10">
+                                            <Border Grid.Column="0"
+                                                    BackgroundColor="{Binding Color}"
+                                                    StrokeShape="RoundRectangle 12"
+                                                    Stroke="Transparent"
+                                                    WidthRequest="44" HeightRequest="44"
+                                                    HorizontalOptions="Center" VerticalOptions="Center">
+                                                <Label Text="{Binding Icon}" FontSize="22"
+                                                       HorizontalOptions="Center" VerticalOptions="Center" />
                                             </Border>
-                                        </SwipeView>
-                                    </DataTemplate>
-                                </BindableLayout.ItemTemplate>
-                            </VerticalStackLayout>
-
-                        </VerticalStackLayout>
-                    </ScrollView>
+                                            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center">
+                                                <Label Text="{Binding ., Converter={StaticResource KategorieName}}"
+                                                       FontSize="16" FontAttributes="Bold" />
+                                            </VerticalStackLayout>
+                                            <Label Grid.Column="2"
+                                                   Text="{Binding Typ, Converter={StaticResource TransactionTypeToLocalizedStringConverter}}"
+                                                   FontSize="13"
+                                                   FontAttributes="Bold"
+                                                   TextColor="{Binding Typ, Converter={StaticResource TransactionTypColor}}"
+                                                   HorizontalTextAlignment="End"
+                                                   VerticalTextAlignment="Center" />
+                                        </Grid>
+                                    </Border>
+                                </SwipeView>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
                 </RefreshView>
 
                 <RefreshView Command="{Binding LoadKategorienCommand}"
                              IsRefreshing="{Binding IsLoading}"
                              IsVisible="{Binding IsKontenVisible}">
-                    <ScrollView x:Name="KontenScrollView">
-                        <VerticalStackLayout Spacing="12" Padding="16">
-
-                            <controls:CreateFormCard x:Name="AddKontoForm"
-                                                     Title="{Binding NeuesKontoFormTitle}"
-                                                     IsVisible="{Binding ShowAddKontoForm}"
-                                                     AccessibilityDescription="{loc:Translate A11y_CreateFormPanel}"
-                                                     CancelText="{loc:Translate Btn_Abbrechen}"
-                                                     SaveText="{loc:Translate Title_KontoHinzufuegen}"
-                                                     CancelCommand="{Binding ToggleAddKontoFormCommand}"
-                                                     SaveCommand="{Binding SaveNewKontoCommand}">
-                                <VerticalStackLayout Spacing="14">
-
-                                    <VerticalStackLayout Spacing="4">
-                                        <Label Text="{loc:Translate Lbl_Name}" FontSize="13"
-                                               TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
-                                        <Entry Text="{Binding NeuerKontoName}"
-                                               Placeholder="{loc:Translate Lbl_Konto}"
-                                               FontSize="16" />
-                                    </VerticalStackLayout>
-
-                                    <VerticalStackLayout Spacing="4">
-                                        <Label Text="{loc:Translate Lbl_Typ}" FontSize="13"
-                                               TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
-                                        <controls:SelectionField ItemsSource="{Binding VerfuegbareKontoTypen}"
-                                                                 SelectedItem="{Binding SelectedKontoTypeOption, Mode=TwoWay}"
-                                                                 DisplayMemberPath="DisplayName"
-                                                                 FieldLabel="{loc:Translate Lbl_Typ}" />
-                                    </VerticalStackLayout>
-
-                                    <VerticalStackLayout Spacing="4">
-                                        <Label Text="{loc:Translate Lbl_Anfangssaldo}" FontSize="13"
-                                               TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
-                                        <Entry Text="{Binding NeuerAnfangssaldoText}"
-                                               Placeholder="{loc:Translate Hint_Betrag}"
-                                               Keyboard="Numeric"
-                                               FontSize="16" />
-                                    </VerticalStackLayout>
-
-                                </VerticalStackLayout>
-                            </controls:CreateFormCard>
-
+                    <CollectionView ItemsSource="{Binding Konten}"
+                                    SelectionMode="None"
+                                    Margin="16,0">
+                        <CollectionView.EmptyView>
                             <controls:EmptyStateView IconImage="categories.png"
                                                      IconAccessibilityDescription="{loc:Translate Lbl_Konten}"
                                                      Message="{loc:Translate Empty_KeineKonten}"
                                                      Hint="{loc:Translate Empty_KontenHinweis}"
                                                      ActionText="{loc:Translate Btn_Hinzufuegen}"
-                                                     ActionCommand="{Binding GoToDetailCommand}"
-                                                     IsVisible="{Binding IsKontenEmptyStateVisible}" />
-
+                                                     ActionCommand="{Binding GoToDetailCommand}" />
+                        </CollectionView.EmptyView>
+                        <CollectionView.Header>
                             <Border StrokeShape="RoundRectangle 12"
                                     Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray900}}"
                                     BackgroundColor="{AppThemeBinding Light={StaticResource CardBackground}, Dark={StaticResource CardBackgroundDark}}"
                                     Padding="16"
+                                    Margin="0,0,0,12"
                                     IsVisible="{Binding ShowGesamtSaldoHeader}">
                                 <Grid ColumnDefinitions="*, Auto">
                                     <Label Text="{loc:Translate Lbl_GesamtsaldoAktiv}"
@@ -190,87 +152,86 @@
                                            VerticalTextAlignment="Center" />
                                 </Grid>
                             </Border>
+                        </CollectionView.Header>
+                        <CollectionView.ItemsLayout>
+                            <LinearItemsLayout Orientation="Vertical" ItemSpacing="12" />
+                        </CollectionView.ItemsLayout>
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="vm:AccountListItem">
+                                <SwipeView>
+                                    <SwipeView.RightItems>
+                                        <SwipeItems>
+                                            <SwipeItem Text="{loc:Translate Btn_Loeschen}"
+                                                       BackgroundColor="{AppThemeBinding Light={StaticResource Ausgabe}, Dark={StaticResource AusgabeDark}}"
+                                                       IsVisible="{Binding CanDelete}"
+                                                       Command="{Binding Source={RelativeSource AncestorType={x:Type vm:CategoriesViewModel}}, Path=DeleteKontoCommand}"
+                                                       CommandParameter="{Binding .}" />
+                                        </SwipeItems>
+                                    </SwipeView.RightItems>
+                                    <Border StrokeShape="RoundRectangle 12"
+                                            Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray900}}"
+                                            BackgroundColor="{AppThemeBinding Light={StaticResource CardBackground}, Dark={StaticResource CardBackgroundDark}}"
+                                            Padding="16"
+                                            Opacity="{Binding CardOpacity}"
+                                            SemanticProperties.Description="{Binding ., Converter={StaticResource AccountAccessibility}}">
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:CategoriesViewModel}}, Path=GoToDetailCommand}"
+                                                CommandParameter="{Binding .}" />
+                                        </Border.GestureRecognizers>
+                                        <VerticalStackLayout Spacing="10">
 
-                            <VerticalStackLayout BindableLayout.ItemsSource="{Binding Konten}" Spacing="12">
-                                <BindableLayout.ItemTemplate>
-                                    <DataTemplate x:DataType="vm:AccountListItem">
-                                        <SwipeView>
-                                            <SwipeView.RightItems>
-                                                <SwipeItems>
-                                                    <SwipeItem Text="{loc:Translate Btn_Loeschen}"
-                                                               BackgroundColor="{AppThemeBinding Light={StaticResource Ausgabe}, Dark={StaticResource AusgabeDark}}"
-                                                               IsVisible="{Binding CanDelete}"
-                                                               Command="{Binding Source={RelativeSource AncestorType={x:Type vm:CategoriesViewModel}}, Path=DeleteKontoCommand}"
-                                                               CommandParameter="{Binding .}" />
-                                                </SwipeItems>
-                                            </SwipeView.RightItems>
-                                            <Border StrokeShape="RoundRectangle 12"
-                                                    Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray900}}"
-                                                    BackgroundColor="{AppThemeBinding Light={StaticResource CardBackground}, Dark={StaticResource CardBackgroundDark}}"
-                                                    Padding="16"
-                                                    Opacity="{Binding CardOpacity}"
-                                                    SemanticProperties.Description="{Binding ., Converter={StaticResource AccountAccessibility}}">
-                                                <Border.GestureRecognizers>
-                                                    <TapGestureRecognizer
-                                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:CategoriesViewModel}}, Path=GoToDetailCommand}"
-                                                        CommandParameter="{Binding .}" />
-                                                </Border.GestureRecognizers>
-                                                <VerticalStackLayout Spacing="10">
-
-                                                    <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="10">
-                                                        <Label Grid.Column="0" Text="{Binding Icon}"
-                                                               FontSize="24" VerticalTextAlignment="Center" />
-                                                        <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
-                                                            <Label Text="{Binding Name}"
-                                                                   FontSize="16" FontAttributes="Bold" />
-                                                            <Label Text="{Binding Type, Converter={StaticResource AccountTypeToLocalizedStringConverter}}"
-                                                                   FontSize="12"
-                                                                   TextColor="{AppThemeBinding Light=#8E8E93, Dark=#636366}" />
-                                                        </VerticalStackLayout>
-                                                        <Label Grid.Column="2"
-                                                               Text="{Binding Saldo, Converter={StaticResource Currency}}"
-                                                               FontSize="15" FontAttributes="Bold"
-                                                               TextColor="{Binding Saldo, Converter={StaticResource BilanzColor}}"
-                                                               HorizontalTextAlignment="End"
-                                                               VerticalTextAlignment="Center" />
-                                                    </Grid>
-
-                                                    <HorizontalStackLayout Spacing="8" IsVisible="{Binding HasStatusBadge}">
-                                                        <Label Text="{loc:Translate Btn_System}"
-                                                               IsVisible="{Binding IsSystemAccount}"
-                                                               FontSize="12"
-                                                               TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
-                                                        <Label Text="{loc:Translate Lbl_Archiviert}"
-                                                               IsVisible="{Binding IsArchived}"
-                                                               FontSize="12"
-                                                               TextColor="{AppThemeBinding Light=#8E8E93, Dark=#636366}" />
-                                                    </HorizontalStackLayout>
-
-                                                    <Label Text="{Binding BalanceBreakdownText}"
-                                                           IsVisible="{Binding ShowBalanceBreakdown}"
+                                            <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="10">
+                                                <Label Grid.Column="0" Text="{Binding Icon}"
+                                                       FontSize="24" VerticalTextAlignment="Center" />
+                                                <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                                                    <Label Text="{Binding Name}"
+                                                           FontSize="16" FontAttributes="Bold" />
+                                                    <Label Text="{Binding Type, Converter={StaticResource AccountTypeToLocalizedStringConverter}}"
                                                            FontSize="12"
                                                            TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
-
-                                                    <Button Text="{Binding IsArchived, Converter={StaticResource AccountArchiveActionConverter}}"
-                                                            IsVisible="{Binding CanArchive}"
-                                                            BackgroundColor="Transparent"
-                                                            Padding="0"
-                                                            HeightRequest="32"
-                                                            HorizontalOptions="Start"
-                                                            FontSize="12"
-                                                            TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                                                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:CategoriesViewModel}}, Path=ToggleKontoArchivierungCommand}"
-                                                            CommandParameter="{Binding .}" />
-
                                                 </VerticalStackLayout>
-                                            </Border>
-                                        </SwipeView>
-                                    </DataTemplate>
-                                </BindableLayout.ItemTemplate>
-                            </VerticalStackLayout>
+                                                <Label Grid.Column="2"
+                                                       Text="{Binding Saldo, Converter={StaticResource Currency}}"
+                                                       FontSize="15" FontAttributes="Bold"
+                                                       TextColor="{Binding Saldo, Converter={StaticResource BilanzColor}}"
+                                                       HorizontalTextAlignment="End"
+                                                       VerticalTextAlignment="Center" />
+                                            </Grid>
 
-                        </VerticalStackLayout>
-                    </ScrollView>
+                                            <HorizontalStackLayout Spacing="8" IsVisible="{Binding HasStatusBadge}">
+                                                <Label Text="{loc:Translate Btn_System}"
+                                                       IsVisible="{Binding IsSystemAccount}"
+                                                       FontSize="12"
+                                                       TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+                                                <Label Text="{loc:Translate Lbl_Archiviert}"
+                                                       IsVisible="{Binding IsArchived}"
+                                                       FontSize="12"
+                                                       TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
+                                            </HorizontalStackLayout>
+
+                                            <Label Text="{Binding BalanceBreakdownText}"
+                                                   IsVisible="{Binding ShowBalanceBreakdown}"
+                                                   FontSize="12"
+                                                   TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
+
+                                            <Button Text="{Binding IsArchived, Converter={StaticResource AccountArchiveActionConverter}}"
+                                                    IsVisible="{Binding CanArchive}"
+                                                    BackgroundColor="Transparent"
+                                                    Padding="0"
+                                                    HeightRequest="32"
+                                                    HorizontalOptions="Start"
+                                                    FontSize="12"
+                                                    TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:CategoriesViewModel}}, Path=ToggleKontoArchivierungCommand}"
+                                                    CommandParameter="{Binding .}" />
+
+                                        </VerticalStackLayout>
+                                    </Border>
+                                </SwipeView>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
                 </RefreshView>
             </Grid>
 

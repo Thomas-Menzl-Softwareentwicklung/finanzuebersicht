@@ -91,6 +91,42 @@ public class TransferDetailViewModelTests
         await navigationService.Received(1).GoBackAsync();
     }
 
+    [Fact]
+    public async Task Save_WithCommaAmount_InEnglishCulture_Persists()
+    {
+        var previous = CultureInfo.CurrentCulture;
+        try
+        {
+            CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("en-US");
+
+            var transactionRepository = Substitute.For<ITransactionRepository>();
+            transactionRepository.SaveTransactionsAsync(Arg.Any<IEnumerable<Transaction>>()).Returns(Task.CompletedTask);
+
+            var accountRepository = Substitute.For<IAccountRepository>();
+            accountRepository.GetAccountsAsync().Returns(
+            [
+                new Account { Id = "acc-1", Name = "Checking", SystemKey = Finanzuebersicht.Constants.SystemAccountKeys.Default },
+                new Account { Id = "acc-2", Name = "Savings" }
+            ]);
+
+            var viewModel = CreateSut(accountRepository, out _, out var navigationService, transactionRepository);
+            await viewModel.LoadAccountsCommand.ExecuteAsync(null);
+            viewModel.AmountText = "12,50";
+            viewModel.Title = "Transfer";
+
+            await viewModel.SaveCommand.ExecuteAsync(null);
+
+            await transactionRepository.Received(1).SaveTransactionsAsync(
+                NonNullArg.Is<IEnumerable<Transaction>>(txs =>
+                    txs.Any(t => t.Betrag == 12.50m)));
+            await navigationService.Received(1).GoBackAsync();
+        }
+        finally
+        {
+            CultureInfo.CurrentCulture = previous;
+        }
+    }
+
     private static TransferDetailViewModel CreateSut(
         IAccountRepository accountRepository,
         out IDialogService dialogService,

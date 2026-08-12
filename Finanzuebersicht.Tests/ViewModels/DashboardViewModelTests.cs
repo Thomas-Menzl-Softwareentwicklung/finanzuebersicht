@@ -157,6 +157,56 @@ public class DashboardViewModelTests
         settings.Received(1).Set(SettingsKeys.DashboardBudgetExpanded, "false");
     }
 
+    [Fact]
+    public async Task LoadDashboard_WhenTransactionHistoryExistsButMonthEmpty_KeepsNavigationVisible()
+    {
+        var accountRepository = Substitute.For<IAccountRepository>();
+        accountRepository.GetAccountsAsync().Returns(Task.FromResult(new List<Account>
+        {
+            new() { Id = "acc-1", Name = "Giro" }
+        }));
+
+        var transactionRepository = Substitute.For<ITransactionRepository>();
+        transactionRepository.GetTransactionsAsync(Arg.Any<DateTime>(), Arg.Any<DateTime>())
+            .Returns(call =>
+            {
+                var from = call.ArgAt<DateTime>(0);
+                if (from.Year == 2026 && from.Month == 8)
+                {
+                    return Task.FromResult(new List<Transaction>
+                    {
+                        new()
+                        {
+                            Typ = TransactionType.Ausgabe,
+                            Betrag = 12m,
+                            KategorieId = "cat-1",
+                            AccountId = "acc-1",
+                            Datum = new DateTime(2026, 8, 5)
+                        }
+                    });
+                }
+
+                return Task.FromResult(new List<Transaction>());
+            });
+
+        var viewModel = CreateSut(
+            accountRepository,
+            transactionRepository,
+            Substitute.For<ISettingsService>(),
+            new FixedClock(new DateTime(2026, 8, 6)));
+
+        await viewModel.LoadDashboardCommand.ExecuteAsync(null);
+        Assert.True(viewModel.HasAnyData);
+        Assert.True(viewModel.HasMonthData);
+
+        await viewModel.PreviousMonthCommand.ExecuteAsync(null);
+
+        Assert.False(viewModel.HasMonthData);
+        Assert.True(viewModel.HasAnyData);
+        Assert.True(viewModel.ShowMonthView);
+        Assert.Equal(new DateTime(2026, 7, 1), viewModel.AktuellerMonat);
+    }
+
     private static DashboardViewModel CreateSut()
     {
         var accountRepository = Substitute.For<IAccountRepository>();
@@ -185,7 +235,8 @@ public class DashboardViewModelTests
     private static DashboardViewModel CreateSut(
         IAccountRepository accountRepository,
         ITransactionRepository transactionRepository,
-        ISettingsService settingsService)
+        ISettingsService settingsService,
+        Finanzuebersicht.Core.Services.IClock? clock = null)
     {
         var categoryRepository = Substitute.For<ICategoryRepository>();
         categoryRepository.GetCategoriesAsync().Returns(Task.FromResult(new List<Category>
@@ -202,26 +253,41 @@ public class DashboardViewModelTests
 
         var localizationService = Substitute.For<ILocalizationService>();
         var navigationService = Substitute.For<INavigationService>();
+        var dialogService = Substitute.For<IDialogService>();
         var forecastService = Substitute.For<IForecastService>();
         forecastService.GetMovingAverageAsync(Arg.Any<int>(), Arg.Any<int>(), Arg.Any<int>(), Arg.Any<string?>())
             .Returns(Task.FromResult(new ForecastResult()));
-        var clock = new FixedClock(new DateTime(2026, 3, 15));
+        clock ??= new FixedClock(new DateTime(2026, 3, 15));
+
+        var accountsCoordinator = new DashboardAccountsCoordinator(
+            new GetAccountBalancesUseCase(accountRepository, transactionRepository),
+            new LoadActiveAccountsUseCase(accountRepository),
+            localizationService);
+        var cashflowCoordinator = new DashboardCashflowPreviewCoordinator(
+            new LoadCashflowOutlookUseCase(transactionRepository, recurringTransactionRepository, clock),
+            localizationService);
+        var dueRecurringCoordinator = new DashboardDueRecurringCoordinator(
+            new GetDueRecurringWithHintsUseCase(recurringTransactionRepository),
+            new BookDueRecurringInstanceUseCase(recurringTransactionRepository, transactionRepository, accountRepository),
+            new SkipDueRecurringInstanceUseCase(new AddRecurringExceptionUseCase(recurringTransactionRepository)),
+            dialogService,
+            navigationService,
+            localizationService,
+            clock);
+        var expandSettings = new DashboardExpandSettingsHelper(settingsService);
 
         return new DashboardViewModel(
             new LoadDashboardMonthUseCase(categoryRepository, transactionRepository, recurringTransactionRepository, budgetRepository),
             new LoadDashboardYearUseCase(transactionRepository, categoryRepository),
             new LoadForecastUseCase(forecastService),
-            new LoadCashflowOutlookUseCase(transactionRepository, recurringTransactionRepository, clock),
-            new GetDueRecurringWithHintsUseCase(recurringTransactionRepository),
-            new BookDueRecurringInstanceUseCase(recurringTransactionRepository, transactionRepository, accountRepository),
-            new SkipDueRecurringInstanceUseCase(new AddRecurringExceptionUseCase(recurringTransactionRepository)),
+            cashflowCoordinator,
+            dueRecurringCoordinator,
+            accountsCoordinator,
+            expandSettings,
             new GetDefaultBudgetTotalUseCase(budgetRepository),
-            new LoadActiveAccountsUseCase(accountRepository),
             new GetEarliestTransactionYearUseCase(transactionRepository),
             localizationService,
             navigationService,
-            Substitute.For<IDialogService>(),
-            new GetAccountBalancesUseCase(accountRepository, transactionRepository),
             settingsService,
             clock);
     }

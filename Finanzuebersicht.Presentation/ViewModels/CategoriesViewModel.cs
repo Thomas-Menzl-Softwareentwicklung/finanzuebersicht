@@ -1,12 +1,8 @@
 using System.Collections.ObjectModel;
-using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Finanzuebersicht.Application.UseCases.Accounts;
-using Finanzuebersicht.Application.UseCases.Categories;
 using Finanzuebersicht.Core.Services;
 using Finanzuebersicht.Models;
-using Finanzuebersicht.Navigation;
 using Finanzuebersicht.Presentation;
 using Finanzuebersicht.Presentation.Services;
 using Finanzuebersicht.Resources.Strings;
@@ -15,36 +11,16 @@ using Microsoft.Extensions.Logging;
 namespace Finanzuebersicht.ViewModels;
 
 public partial class CategoriesViewModel(
-    DeleteCategoryUseCase deleteCategoryUseCase,
-    LoadCategoriesUseCase loadCategoriesUseCase,
-    LoadAccountsUseCase loadAccountsUseCase,
-    GetAccountBalancesUseCase getAccountBalancesUseCase,
-    SaveAccountDetailUseCase saveAccountDetailUseCase,
-    ToggleAccountArchiveUseCase toggleAccountArchiveUseCase,
-    DeleteAccountUseCase deleteAccountUseCase,
-    CategoryDetailViewModel createCategoryViewModel,
-    ICategoryCreateSheetService categoryCreateSheetService,
+    CategoriesListCoordinator categoriesCoordinator,
+    AccountsListCoordinator accountsCoordinator,
     ILocalizationService localizationService,
-    INavigationService navigationService,
     IDialogService dialogService,
-    IFeedbackService feedbackService,
-    IAppEvents appEvents,
     ILogger<CategoriesViewModel>? logger = null) : ObservableObject, IAutoLoadViewModel, ILocalizableViewModel, ICurrencyRefreshViewModel
 {
-    private readonly DeleteCategoryUseCase _deleteCategoryUseCase = deleteCategoryUseCase;
-    private readonly LoadCategoriesUseCase _loadCategoriesUseCase = loadCategoriesUseCase;
-    private readonly LoadAccountsUseCase _loadAccountsUseCase = loadAccountsUseCase;
-    private readonly GetAccountBalancesUseCase _getAccountBalancesUseCase = getAccountBalancesUseCase;
-    private readonly SaveAccountDetailUseCase _saveAccountDetailUseCase = saveAccountDetailUseCase;
-    private readonly ToggleAccountArchiveUseCase _toggleAccountArchiveUseCase = toggleAccountArchiveUseCase;
-    private readonly DeleteAccountUseCase _deleteAccountUseCase = deleteAccountUseCase;
-    private readonly CategoryDetailViewModel _createCategoryViewModel = createCategoryViewModel;
-    private readonly ICategoryCreateSheetService _categoryCreateSheetService = categoryCreateSheetService;
+    private readonly CategoriesListCoordinator _categoriesCoordinator = categoriesCoordinator;
+    private readonly AccountsListCoordinator _accountsCoordinator = accountsCoordinator;
     private readonly ILocalizationService _loc = localizationService;
-    private readonly INavigationService _navigationService = navigationService;
     private readonly IDialogService _dialogService = dialogService;
-    private readonly IFeedbackService _feedbackService = feedbackService;
-    private readonly IAppEvents _appEvents = appEvents;
     private readonly ILogger<CategoriesViewModel>? _logger = logger;
 
     public System.Windows.Input.ICommand AutoLoadCommand => LoadKategorienCommand;
@@ -86,17 +62,11 @@ public partial class CategoriesViewModel(
     partial void OnSelectedSectionIndexChanged(int value)
     {
         OnPropertyChanged(nameof(FabAccessibilityDescription));
-        if (value == 0)
-            ShowAddKontoForm = false;
     }
 
     public void RefreshLocalizedStrings()
     {
         OnPropertyChanged(nameof(FabAccessibilityDescription));
-        OnPropertyChanged(nameof(NeuesKontoFormTitle));
-        OnPropertyChanged(nameof(VerfuegbareKontoTypen));
-        SelectedKontoTypeOption = VerfuegbareKontoTypen
-            .FirstOrDefault(option => option.Value == SelectedKontoTypeOption?.Value);
         _ = LoadKategorienCore();
     }
 
@@ -105,32 +75,7 @@ public partial class CategoriesViewModel(
     [ObservableProperty]
     private bool isLoading;
 
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsKontenEmptyStateVisible))]
-    private bool showAddKontoForm;
-
-    [ObservableProperty]
-    private string neuerKontoName = string.Empty;
-
-    [ObservableProperty]
-    private AccountTypeOption? selectedKontoTypeOption;
-
-    [ObservableProperty]
-    private string neuerAnfangssaldoText = string.Empty;
-
-    public bool IsKontenEmptyStateVisible => IsKontenEmpty && !ShowAddKontoForm;
-
-    public string NeuesKontoFormTitle => _loc.GetString(ResourceKeys.Title_KontoHinzufuegen);
-
-    public List<AccountTypeOption> VerfuegbareKontoTypen =>
-    [
-        new(AccountType.Girokonto, _loc.GetString(EnumResourceKeys.GetAccountType(AccountType.Girokonto))),
-        new(AccountType.Tagesgeld, _loc.GetString(EnumResourceKeys.GetAccountType(AccountType.Tagesgeld))),
-        new(AccountType.Kreditkarte, _loc.GetString(EnumResourceKeys.GetAccountType(AccountType.Kreditkarte))),
-        new(AccountType.Bargeld, _loc.GetString(EnumResourceKeys.GetAccountType(AccountType.Bargeld))),
-        new(AccountType.Depot, _loc.GetString(EnumResourceKeys.GetAccountType(AccountType.Depot))),
-        new(AccountType.Sonstiges, _loc.GetString(EnumResourceKeys.GetAccountType(AccountType.Sonstiges)))
-    ];
+    public bool IsKontenEmptyStateVisible => IsKontenEmpty;
 
     [RelayCommand]
     private void ShowKategorien() => SelectedSectionIndex = 0;
@@ -149,29 +94,10 @@ public partial class CategoriesViewModel(
 
         try
         {
-            var liste = await _loadCategoriesUseCase.ExecuteAsync();
-            Kategorien = new ObservableCollection<Category>(liste);
-            var accounts = await _loadAccountsUseCase.ExecuteAsync();
-            var balances = await _getAccountBalancesUseCase.ExecuteAsync();
-            var balanceById = balances.ToDictionary(b => b.AccountId);
-            Konten = new ObservableCollection<AccountListItem>(
-                accounts
-                    .OrderBy(a => a.IsArchived)
-                    .ThenBy(a => a.Name)
-                    .Select(a =>
-                    {
-                        balanceById.TryGetValue(a.Id, out var summary);
-                        return new AccountListItem(a, summary)
-                        {
-                            BalanceBreakdownText = summary is { OpeningBalance: not 0 }
-                                ? _loc.GetString(
-                                    ResourceKeys.Fmt_KontoSaldoAufschluesselung,
-                                    summary.OpeningBalance.ToString("C", CurrencyCulture.Instance),
-                                    summary.TransactionBalance.ToString("C", CurrencyCulture.Instance))
-                                : null
-                        };
-                    }));
-            GesamtSaldoAktiv = balances.Where(b => !b.IsArchived).Sum(b => b.Saldo);
+            Kategorien = await _categoriesCoordinator.LoadAsync();
+            var accounts = await _accountsCoordinator.LoadAsync();
+            Konten = accounts.Items;
+            GesamtSaldoAktiv = accounts.GesamtSaldoAktiv;
         }
         catch (Exception ex)
         {
@@ -190,198 +116,45 @@ public partial class CategoriesViewModel(
     [RelayCommand]
     private async Task DeleteKategorie(Category kategorie)
     {
-        var confirm = await _dialogService.ShowConfirmationAsync(
-            _loc.GetString(ResourceKeys.Dlg_KategorieLoeschen),
-            _loc.GetString(ResourceKeys.Dlg_KategorieLoeschenFrage, kategorie.Name),
-            _loc.GetString(ResourceKeys.Btn_Ja), _loc.GetString(ResourceKeys.Btn_Nein));
-        if (!confirm) return;
-
-        try
-        {
-            await _deleteCategoryUseCase.ExecuteAsync(kategorie.Id);
-            Kategorien.Remove(kategorie);
+        if (await _categoriesCoordinator.TryDeleteAsync(kategorie, Kategorien))
             OnPropertyChanged(nameof(IsKategorienEmpty));
-            _appEvents.NotifyDataChanged();
-            await _feedbackService.ShowSnackbarAsync(_loc.GetString(ResourceKeys.Msg_Geloescht));
-        }
-        catch (Exception ex)
-        {
-            _logger?.LogError(ex, "CategoriesViewModel: {Context}", nameof(DeleteKategorie));
-            await _dialogService.ShowAlertAsync(
-                _loc.GetString(ResourceKeys.Err_Titel),
-                _loc.GetString(ResourceKeys.Err_LoeschenFehlgeschlagen, ex.Message),
-                _loc.GetString(ResourceKeys.Btn_OK));
-        }
     }
 
     [RelayCommand]
     private async Task DeleteKonto(AccountListItem konto)
     {
-        if (!konto.CanDelete) return;
+        if (!await _accountsCoordinator.TryDeleteAsync(konto, Konten))
+            return;
 
-        var confirm = await _dialogService.ShowConfirmationAsync(
-            _loc.GetString(ResourceKeys.Dlg_KontoLoeschen),
-            _loc.GetString(ResourceKeys.Dlg_KontoLoeschenFrage, konto.Name),
-            _loc.GetString(ResourceKeys.Btn_Ja), _loc.GetString(ResourceKeys.Btn_Nein));
-        if (!confirm) return;
-
-        try
-        {
-            await _deleteAccountUseCase.ExecuteAsync(konto.Account.Id);
-            Konten.Remove(konto);
-            OnPropertyChanged(nameof(IsKontenEmpty));
-            OnPropertyChanged(nameof(IsKontenEmptyStateVisible));
-            OnPropertyChanged(nameof(ShowGesamtSaldoHeader));
-            _appEvents.NotifyDataChanged();
-            await _feedbackService.ShowSnackbarAsync(_loc.GetString(ResourceKeys.Msg_Geloescht));
-        }
-        catch (Exception ex)
-        {
-            _logger?.LogError(ex, "CategoriesViewModel: {Context}", nameof(DeleteKonto));
-            await _dialogService.ShowAlertAsync(
-                _loc.GetString(ResourceKeys.Err_Titel),
-                _loc.GetString(ResourceKeys.Err_LoeschenFehlgeschlagen, ex.Message),
-                _loc.GetString(ResourceKeys.Btn_OK));
-        }
+        OnPropertyChanged(nameof(IsKontenEmpty));
+        OnPropertyChanged(nameof(IsKontenEmptyStateVisible));
+        OnPropertyChanged(nameof(ShowGesamtSaldoHeader));
     }
 
     [RelayCommand]
     private async Task ToggleKontoArchivierung(AccountListItem konto)
     {
-        if (!konto.CanArchive) return;
+        if (!await _accountsCoordinator.TryToggleArchiveAsync(konto))
+            return;
 
-        var setArchived = !konto.IsArchived;
-        var confirmTitle = setArchived
-            ? _loc.GetString(ResourceKeys.Dlg_KontoArchivieren)
-            : _loc.GetString(ResourceKeys.Dlg_KontoReaktivieren);
-        var confirmBody = setArchived
-            ? _loc.GetString(ResourceKeys.Dlg_KontoArchivierenFrage, konto.Name)
-            : _loc.GetString(ResourceKeys.Dlg_KontoReaktivierenFrage, konto.Name);
-        var confirm = await _dialogService.ShowConfirmationAsync(
-            confirmTitle,
-            confirmBody,
-            _loc.GetString(ResourceKeys.Btn_Ja),
-            _loc.GetString(ResourceKeys.Btn_Nein));
-        if (!confirm) return;
-
-        try
-        {
-            await _toggleAccountArchiveUseCase.ExecuteAsync(konto.Account, setArchived);
-            await LoadKategorien();
-        }
-        catch (Exception ex)
-        {
-            _logger?.LogError(ex, "CategoriesViewModel: {Context}", nameof(ToggleKontoArchivierung));
-            await _dialogService.ShowAlertAsync(
-                _loc.GetString(ResourceKeys.Err_Titel),
-                _loc.GetString(ResourceKeys.Err_SpeichernFehlgeschlagen, ex.Message),
-                _loc.GetString(ResourceKeys.Btn_OK));
-        }
+        await LoadKategorien();
     }
 
     [RelayCommand]
-    private void ToggleAddKontoForm()
-    {
-        ShowAddKontoForm = !ShowAddKontoForm;
-        if (!ShowAddKontoForm)
-            return;
-
-        NeuerKontoName = string.Empty;
-        NeuerAnfangssaldoText = string.Empty;
-        SelectedKontoTypeOption = VerfuegbareKontoTypen.FirstOrDefault(t => t.Value == AccountType.Girokonto)
-            ?? VerfuegbareKontoTypen.FirstOrDefault();
-    }
-
-    [RelayCommand]
-    private async Task SaveNewKonto()
-    {
-        if (string.IsNullOrWhiteSpace(NeuerKontoName))
-        {
-            await _dialogService.ShowAlertAsync(
-                _loc.GetString(ResourceKeys.Err_Titel),
-                _loc.GetString(ResourceKeys.Err_TitelErforderlich),
-                _loc.GetString(ResourceKeys.Btn_OK));
-            return;
-        }
-
-        if (!TryParseAnfangssaldo(out var openingBalance))
-        {
-            await _dialogService.ShowAlertAsync(
-                _loc.GetString(ResourceKeys.Err_Titel),
-                _loc.GetString(ResourceKeys.Err_UngueltigerBetrag),
-                _loc.GetString(ResourceKeys.Btn_OK));
-            return;
-        }
-
-        try
-        {
-            var type = SelectedKontoTypeOption?.Value ?? AccountType.Girokonto;
-            await _saveAccountDetailUseCase.ExecuteAsync(
-                null, NeuerKontoName.Trim(), type, openingBalance: openingBalance);
-            ShowAddKontoForm = false;
-            _appEvents.NotifyDataChanged();
-            await LoadKategorienCore(force: true);
-            await _feedbackService.ShowSnackbarAsync(_loc.GetString(ResourceKeys.Msg_Gespeichert));
-        }
-        catch (Exception ex)
-        {
-            _logger?.LogError(ex, "CategoriesViewModel: {Context}", nameof(SaveNewKonto));
-            await _dialogService.ShowAlertAsync(
-                _loc.GetString(ResourceKeys.Err_Titel),
-                _loc.GetString(ResourceKeys.Err_SpeichernFehlgeschlagen, ex.Message),
-                _loc.GetString(ResourceKeys.Btn_OK));
-        }
-    }
-
-    [RelayCommand]
-    private async Task GoToDetail(object? item = null)
+    private Task GoToDetail(object? item = null)
     {
         if (item is AccountListItem kontoItem)
-        {
-            var kontoParameter = new Dictionary<string, object>
-            {
-                [NavigationQueryKeys.Account] = kontoItem.Account
-            };
-            await _navigationService.GoToAsync(Routes.AccountDetail, kontoParameter);
-            return;
-        }
+            return _accountsCoordinator.NavigateToDetailAsync(kontoItem);
 
         if (item == null && IsKontenVisible)
-        {
-            ToggleAddKontoForm();
-            return;
-        }
+            return _accountsCoordinator.NavigateToCreateAsync(Konten.Count);
 
         if (item == null && IsKategorienVisible)
-        {
-            _createCategoryViewModel.ResetForCreate();
-            if (await _categoryCreateSheetService.ShowAsync(_createCategoryViewModel))
-                await LoadKategorienCore(force: true);
-            return;
-        }
+            return _categoriesCoordinator.NavigateToCreateAsync();
 
         if (item is Category kategorie)
-        {
-            var parameter = new Dictionary<string, object> { [NavigationQueryKeys.Category] = kategorie };
-            await _navigationService.GoToAsync(Routes.CategoryDetail, parameter);
-            return;
-        }
+            return _categoriesCoordinator.NavigateToDetailAsync(kategorie);
 
-        await _navigationService.GoToAsync(Routes.CategoryDetail);
-    }
-
-    private bool TryParseAnfangssaldo(out decimal openingBalance)
-    {
-        if (string.IsNullOrWhiteSpace(NeuerAnfangssaldoText))
-        {
-            openingBalance = 0m;
-            return true;
-        }
-
-        return decimal.TryParse(
-            NeuerAnfangssaldoText,
-            NumberStyles.Number,
-            CultureInfo.CurrentCulture,
-            out openingBalance);
+        return _categoriesCoordinator.NavigateToCreateAsync();
     }
 }
