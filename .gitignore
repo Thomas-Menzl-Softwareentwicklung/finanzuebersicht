@@ -41,6 +41,10 @@ Finanzuebersicht/Platforms/iOS/Widgets/build-dev/
 Finanzuebersicht/Platforms/iOS/Widgets/XReleases/
 Finanzuebersicht/Platforms/iOS/Widgets/*.xcodeproj/xcuserdata/
 Finanzuebersicht/Platforms/iOS/Widgets/*.xcodeproj/project.xcworkspace/
+
+# Screenshot UITests / XcodeGen (Platforms/iOS/UITests)
+Finanzuebersicht/Platforms/iOS/UITests/DerivedData/
+Finanzuebersicht/Platforms/iOS/UITests/*.xcodeproj/
 *.appex
 
 # Stryker.NET

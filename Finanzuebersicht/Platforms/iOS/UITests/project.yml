@@ -1,0 +1,61 @@
+name: FinanzuebersichtUITests
+options:
+  bundleIdPrefix: de.thomasmenzl.finanzuebersicht
+  deploymentTarget:
+    iOS: "17.0"
+  xcodeVersion: "16.0"
+  createIntermediateGroups: true
+  knownRegions:
+    - en
+    - de
+    - Base
+
+settings:
+  base:
+    DEVELOPMENT_TEAM: "XY663DU933"
+
+targets:
+  ScreenshotHost:
+    type: application
+    platform: iOS
+    sources:
+      - path: ScreenshotHost
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: de.thomasmenzl.finanzuebersicht.screenshothost
+        GENERATE_INFOPLIST_FILE: true
+        INFOPLIST_GENERATION_MODE: GeneratedFile
+        CODE_SIGN_IDENTITY: "Apple Development"
+        CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: "XY663DU933"
+        SWIFT_VERSION: "5.9"
+        ENABLE_TESTABILITY: "YES"
+
+  FinanzuebersichtUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: FinanzuebersichtUITests.swift
+      - path: SnapshotHelper.swift
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: de.thomasmenzl.finanzuebersicht.uitests
+        CODE_SIGN_IDENTITY: "Apple Development"
+        CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: "XY663DU933"
+        SWIFT_VERSION: "5.9"
+        GENERATE_INFOPLIST_FILE: true
+        TEST_TARGET_NAME: ScreenshotHost
+    dependencies:
+      - target: ScreenshotHost
+
+schemes:
+  FinanzuebersichtUITests:
+    build:
+      targets:
+        FinanzuebersichtUITests: [test]
+        ScreenshotHost: [run]
+    test:
+      targets:
+        - FinanzuebersichtUITests
+      gatherCoverageData: false
