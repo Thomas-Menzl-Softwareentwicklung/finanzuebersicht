@@ -259,6 +259,6 @@ public partial class SparZielDetailViewModel(
             return true;
         }
 
-        return decimal.TryParse(text, NumberStyles.Number, CultureInfo.CurrentCulture, out amount);
+        return FlexibleAmountParser.TryParse(text, out amount);
     }
 }

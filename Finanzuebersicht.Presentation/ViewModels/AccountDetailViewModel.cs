@@ -223,7 +223,7 @@ public partial class AccountDetailViewModel(
     {
         if (_existingAccount == null) return;
 
-        if (!decimal.TryParse(ActualBalanceText, NumberStyles.Number, CultureInfo.CurrentCulture, out var actualBalance))
+        if (!FlexibleAmountParser.TryParse(ActualBalanceText, out var actualBalance))
         {
             await _dialogService.ShowAlertAsync(
                 _loc.GetString(ResourceKeys.Err_Titel),
@@ -272,11 +272,7 @@ public partial class AccountDetailViewModel(
             return true;
         }
 
-        return decimal.TryParse(
-            OpeningBalanceText,
-            NumberStyles.Number,
-            CultureInfo.CurrentCulture,
-            out openingBalance);
+        return FlexibleAmountParser.TryParse(OpeningBalanceText, out openingBalance);
     }
 }
 

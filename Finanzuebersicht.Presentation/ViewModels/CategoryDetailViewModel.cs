@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Finanzuebersicht.Application.UseCases.Categories;
+using Finanzuebersicht.Core.Services;
 using Finanzuebersicht.Models;
 using Finanzuebersicht.Navigation;
 using Finanzuebersicht.Presentation.Services;
@@ -210,7 +211,9 @@ public partial class CategoryDetailViewModel(
 
             if (!string.IsNullOrEmpty(savedCategory.Id))
             {
-                decimal.TryParse(MonthlyBudgetText, NumberStyles.Any, CultureInfo.CurrentCulture, out var budget);
+                var budget = 0m;
+                if (!string.IsNullOrWhiteSpace(MonthlyBudgetText))
+                    FlexibleAmountParser.TryParse(MonthlyBudgetText, out budget);
                 await _saveCategoryBudgetUseCase.ExecuteAsync(savedCategory.Id, budget);
             }
 
