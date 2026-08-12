@@ -1,13 +1,15 @@
 default_platform(:ios)
 
+REPO_ROOT = File.expand_path("..", __dir__)
+
 # Must match device names in Snapfile.
 SNAPFILE_DEVICES = [
   "iPhone 17",
   "iPad Pro 13-inch (M5)"
 ].freeze
 
-# ApplicationTitle in Finanzuebersicht/Finanzuebersicht.csproj (umlaut in bundle folder name).
-MAUI_APP_NAME = "Finanzübersicht.app"
+# On-disk simulator bundle name from `dotnet build` (ASCII folder; ApplicationTitle may differ).
+MAUI_APP_NAME = "Finanzuebersicht.app"
 
 MAUI_BUILD_CMD = [
   "dotnet build Finanzuebersicht/Finanzuebersicht.csproj",
@@ -17,9 +19,9 @@ MAUI_BUILD_CMD = [
 ].join(" ")
 
 def maui_sim_app_path
-  File.expand_path(
-    "../Finanzuebersicht/bin/Debug/net10.0-ios/iossimulator-arm64/#{MAUI_APP_NAME}",
-    __dir__
+  File.join(
+    REPO_ROOT,
+    "Finanzuebersicht/bin/Debug/net10.0-ios/iossimulator-arm64/#{MAUI_APP_NAME}"
   )
 end
 
@@ -28,7 +30,7 @@ def install_maui_app_on_snapfile_simulators
   unless File.directory?(app_path)
     UI.user_error!(
       "MAUI simulator app not found at:\n  #{app_path}\n\n" \
-      "Build and retry:\n  #{MAUI_BUILD_CMD}"
+      "Build and retry (from repo root):\n  #{MAUI_BUILD_CMD}"
     )
   end
 
@@ -42,16 +44,25 @@ end
 platform :ios do
   desc "Capture App Store screenshots (2 devices × 2 locales)"
   lane :screenshots do
-    uitests_dir = "Finanzuebersicht/Platforms/iOS/UITests"
-    xcodeproj = "#{uitests_dir}/FinanzuebersichtUITests.xcodeproj"
+    uitests_dir = File.join(REPO_ROOT, "Finanzuebersicht/Platforms/iOS/UITests")
+    xcodeproj = File.join(uitests_dir, "FinanzuebersichtUITests.xcodeproj")
 
     unless File.directory?(xcodeproj)
       UI.message("Generating Xcode project via XcodeGen…")
-      sh("cd #{uitests_dir} && xcodegen generate")
+      sh("cd \"#{uitests_dir}\" && xcodegen generate")
     end
 
     install_maui_app_on_snapfile_simulators
 
-    capture_screenshots(skip_open_summary: true)
+    # Pass absolute project path — Snapfile relative paths are unreliable when
+    # fastlane's CWD is the fastlane/ directory.
+    capture_screenshots(
+      skip_open_summary: true,
+      project: File.join(
+        REPO_ROOT,
+        "Finanzuebersicht/Platforms/iOS/UITests/FinanzuebersichtUITests.xcodeproj"
+      ),
+      output_directory: File.join(REPO_ROOT, "fastlane/screenshots")
+    )
   end
 end

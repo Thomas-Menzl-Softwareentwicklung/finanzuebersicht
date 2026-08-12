@@ -37,7 +37,7 @@ Hinweis: Die Benutzeroberfläche unterstützt Deutsch und Englisch; weitere Spra
 
 ## Screenshots
 
-*Stand **v1.17** (Mac Catalyst, Dark Mode) — UI seitdem weiterentwickelt (u. a. Create-Sheets, Transaktionen-Mockup in v1.20). Aktualisierte Aufnahmen: [Screenshot-Automatisierung](docs/APP_STORE.md#screenshot-automatisierung) (`fastlane screenshots` → `./scripts/copy-readme-screenshots.sh`); Zielversion README: **v1.20**.*
+*Stand **v1.20** — sechs Hauptansichten (Dashboard, Transaktionen, Daueraufträge, Verwaltung, Sparziele, Einstellungen) frisch vom iPhone-Simulator (`fastlane screenshots` → `./scripts/copy-readme-screenshots.sh`). Übrige Detail-/Filter-Aufnahmen noch älter.*
 
 ### Dashboard
 

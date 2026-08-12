@@ -153,7 +153,17 @@ public partial class App : global::Microsoft.Maui.Controls.Application
 		{
 			await _initService.InitializeAsync();
 			if (_screenshotDemoMode)
+			{
 				await ScreenshotDemoBootstrap.TrySeedAsync(_seedScreenshotDemoDataUseCase);
+				// Dashboard OnAppearing may race with OnStart — notify now and again after
+				// pages have subscribed to DataChanged.
+				_appEvents.NotifyDataChanged();
+				_ = MainThread.InvokeOnMainThreadAsync(async () =>
+				{
+					await Task.Delay(500);
+					_appEvents.NotifyDataChanged();
+				});
+			}
 			await _licenseService.RefreshAsync();
 			if (!_screenshotDemoMode)
 			{

@@ -21,4 +21,7 @@ override_status_bar(true)
 
 launch_arguments(["--screenshot-demo"])
 
+# One destination at a time — dual-destination xcodebuild hung on this machine (Xcode beta / iOS 27).
+concurrent_simulators(false)
+
 # MAUI host app is built separately (dotnet build) and installed via simctl before snapshot.

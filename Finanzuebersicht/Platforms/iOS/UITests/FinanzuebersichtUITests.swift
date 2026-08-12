@@ -31,29 +31,47 @@ final class FinanzuebersichtUITests: XCTestCase {
         let deadline = Date().addingTimeInterval(timeout)
         while Date() < deadline {
             for marker in markers {
-                let byLabel = app.staticTexts[marker]
-                if byLabel.exists {
-                    return true
-                }
-                let byId = app.descendants(matching: .any)[marker]
-                if byId.exists {
-                    return true
-                }
+                // Exact label match
+                if app.staticTexts[marker].exists { return true }
+                if app.descendants(matching: .any)[marker].exists { return true }
+
+                // MAUI often exposes compound accessibility labels; match by substring.
+                let predicate = NSPredicate(format: "label CONTAINS[c] %@", marker)
+                let match = app.descendants(matching: .any).matching(predicate).firstMatch
+                if match.exists { return true }
             }
-            RunLoop.current.run(until: Date().addingTimeInterval(0.2))
+            RunLoop.current.run(until: Date().addingTimeInterval(0.25))
         }
         return false
     }
 
     private func waitForSeededContent(in app: XCUIApplication) {
-        let markers = [
-            "Gehalt", "REWE", "Girokonto", "Urlaub",
-            "Salary", "Checking Account", "Vacation"
+        // Allow async seed + DataChanged to settle (dashboard can appear before seed finishes).
+        RunLoop.current.run(until: Date().addingTimeInterval(1.5))
+
+        // Prefer markers that actually appear on Dashboard (categories / accounts).
+        // Transaction titles like REWE live on the Transactions tab.
+        let dashboardMarkers = [
+            "Lebensmittel", "Wohnen", "Transport", "Girokonto", "Gehalt",
+            "Groceries", "Housing", "Transport", "Checking", "Salary"
+        ]
+        if waitForAnyMarker(dashboardMarkers, in: app, timeout: 20) {
+            return
+        }
+
+        // Fallback: open Transactions — titles are guaranteed there after a successful seed.
+        tapTab(Tab.transactions, in: app)
+        _ = waitFor("page.transactions", in: app)
+        let transactionMarkers = [
+            "REWE", "Gehalt", "Miete", "Netflix", "Café",
+            "Salary", "Rent", "Grocery"
         ]
         XCTAssertTrue(
-            waitForAnyMarker(markers, in: app, timeout: 30),
-            "Seeded fixture content not visible (expected Gehalt/REWE/Girokonto/Urlaub or EN equivalents)"
+            waitForAnyMarker(transactionMarkers, in: app, timeout: 30),
+            "Seeded fixture content not visible on Dashboard or Transactions"
         )
+        tapTab(Tab.dashboard, in: app)
+        _ = waitFor("page.dashboard", in: app)
     }
 
     @discardableResult
@@ -90,7 +108,23 @@ final class FinanzuebersichtUITests: XCTestCase {
     private func dismissQuickExpenseSheetIfPresent(in app: XCUIApplication) {
         let sheet = element("sheet.quick-expense", in: app)
         guard sheet.waitForExistence(timeout: 2) else { return }
+
         sheet.swipeDown()
+        if !sheet.exists { return }
+
+        // iPad form sheets often ignore a single swipe — try common dismiss controls.
+        for title in ["Abbrechen", "Cancel", "Schließen", "Close", "Fertig", "Done"] {
+            let button = app.buttons[title]
+            if button.exists {
+                button.tap()
+                break
+            }
+        }
+
+        if sheet.exists {
+            app.swipeDown()
+        }
+
         let gone = NSPredicate(format: "exists == false")
         let expectation = XCTNSPredicateExpectation(predicate: gone, object: sheet)
         _ = XCTWaiter.wait(for: [expectation], timeout: 5)
@@ -113,13 +147,7 @@ final class FinanzuebersichtUITests: XCTestCase {
         waitFor("page.transactions", in: app)
         snapshot("02-transactions")
 
-        tapTab(Tab.dashboard, in: app)
-        waitFor("page.dashboard", in: app)
-        waitFor("fab.schnell", in: app).tap()
-        waitFor("sheet.quick-expense", in: app)
-        snapshot("03-quick-expense")
-
-        dismissQuickExpenseSheetIfPresent(in: app)
+        // Capture remaining tabs before opening the sheet so a stuck sheet cannot block iPad.
         tapTab(Tab.recurring, in: app)
         waitFor("page.recurring", in: app)
         snapshot("04-recurring")
@@ -135,5 +163,13 @@ final class FinanzuebersichtUITests: XCTestCase {
         tapSettings(in: app)
         waitFor("page.settings", in: app)
         snapshot("07-settings")
+
+        // Quick-expense last (filename still 03-*).
+        tapTab(Tab.dashboard, in: app)
+        waitFor("page.dashboard", in: app)
+        waitFor("fab.schnell", in: app).tap()
+        waitFor("sheet.quick-expense", in: app)
+        snapshot("03-quick-expense")
+        dismissQuickExpenseSheetIfPresent(in: app)
     }
 }
