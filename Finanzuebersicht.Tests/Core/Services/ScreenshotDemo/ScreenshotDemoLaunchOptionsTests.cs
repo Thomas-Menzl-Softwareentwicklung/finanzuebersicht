@@ -1,16 +1,18 @@
+using Finanzuebersicht.Core.Services;
 using Finanzuebersicht.Core.Services.ScreenshotDemo;
+using Finanzuebersicht.Tests.TestHelpers;
 
 namespace Finanzuebersicht.Tests.Core.Services.ScreenshotDemo;
 
+[Collection(nameof(ScreenshotDemoLaunchOptionsCollection))]
 public class ScreenshotDemoLaunchOptionsTests
 {
     [Fact]
-    public void GetIsolatedDataPath_ReturnsScreenshotDemoFolderUnderLocalAppData()
+    public void GetIsolatedDataPath_ReturnsScreenshotDemoFolderUnderDefaultDataDir()
     {
         var path = ScreenshotDemoLaunchOptions.GetIsolatedDataPath();
 
-        Assert.Contains("Finanzuebersicht", path);
-        Assert.EndsWith("screenshot-demo", path);
+        Assert.Equal(Path.Combine(AppPaths.GetDefaultDataDir(), "screenshot-demo"), path);
         Assert.True(Directory.Exists(path));
     }
 

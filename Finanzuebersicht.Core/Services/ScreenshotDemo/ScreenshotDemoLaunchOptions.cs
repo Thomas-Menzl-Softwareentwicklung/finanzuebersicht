@@ -22,10 +22,7 @@ public static class ScreenshotDemoLaunchOptions
 
     public static string GetIsolatedDataPath()
     {
-        var root = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "Finanzuebersicht",
-            "screenshot-demo");
+        var root = Path.Combine(AppPaths.GetDefaultDataDir(), "screenshot-demo");
         Directory.CreateDirectory(root);
         return root;
     }

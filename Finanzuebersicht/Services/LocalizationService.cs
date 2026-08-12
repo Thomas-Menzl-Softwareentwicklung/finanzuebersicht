@@ -1,5 +1,6 @@
 using System.Globalization;
-using Finanzuebersicht.Services;
+using Finanzuebersicht.Core.Services;
+using Finanzuebersicht.Core.Services.ScreenshotDemo;
 using Finanzuebersicht.Resources.Strings;
 
 namespace Finanzuebersicht.Services;
@@ -21,7 +22,9 @@ public class LocalizationService(ISettingsService settings) : ILocalizationServi
     {
         LocalizationResourceManager.Current.Init(AppResources.ResourceManager);
 
-        var saved = _settings.Get(SettingsKeys.LanguageCode);
+        var saved = ScreenshotDemoLaunchOptions.IsRequested()
+            ? null
+            : _settings.Get(SettingsKeys.LanguageCode);
         var culture = string.IsNullOrEmpty(saved)
             ? CultureInfo.CurrentUICulture
             : new CultureInfo(saved);

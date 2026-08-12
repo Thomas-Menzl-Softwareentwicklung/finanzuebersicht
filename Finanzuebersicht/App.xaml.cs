@@ -83,8 +83,10 @@ public partial class App : global::Microsoft.Maui.Controls.Application
 		_logger = logger;
 		_screenshotDemoMode = ScreenshotDemoBootstrap.IsRequested();
 
-		// Gespeichertes Theme anwenden (MAUI-Ebene)
-		_savedTheme = settings.Get(SettingsKeys.Theme, ThemeValues.System);
+		// Gespeichertes Theme anwenden (MAUI-Ebene); Screenshot-Demo erzwingt Light ohne Settings-Persistenz
+		_savedTheme = _screenshotDemoMode
+			? ThemeValues.Light
+			: settings.Get(SettingsKeys.Theme, ThemeValues.System);
 		_themeService.Apply(_savedTheme);
 
 		if (_pendingAppLinkBeforeApp is not null)

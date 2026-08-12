@@ -1,3 +1,5 @@
+using Finanzuebersicht.Core.Services.ScreenshotDemo;
+
 namespace Finanzuebersicht.Infrastructure.Services;
 
 /// <summary>
@@ -13,6 +15,10 @@ public static class DataPathResolver
     public static string ResolveDataDir(ISettingsService settings)
     {
         ArgumentNullException.ThrowIfNull(settings);
+
+        if (ScreenshotDemoLaunchOptions.IsRequested())
+            return ScreenshotDemoLaunchOptions.GetIsolatedDataPath();
+
         ApplyPendingDataPath(settings);
 
         var customPath = settings.Get(SettingsKeys.DataPath, "");
