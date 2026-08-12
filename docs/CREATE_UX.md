@@ -24,8 +24,6 @@ Referenz-Klickdummy (extern): `Finanzübersicht Mobile App Verfeinerung-2` — d
 
 **Bearbeiten** (Tap auf Zeile) bleibt Detail-Page.
 
-Legacy: `CreateFormCard`, `FormSheetPopup` (CommunityToolkit) — nicht für neue Create-Flows.
-
 ---
 
 ## Soll-Verhalten: kontextsensitiver FAB
@@ -141,30 +139,27 @@ Wiederverwenden: `RecurringTransactionFormView`.
    - Forminhalt austauschbar (View / BindingContext je Entity)
 2. **Form-Views wiederverwenden** (`CategoryFormView`, `RecurringTransactionFormView`, …) statt paralleler XAML-Duplikate.
 3. **FAB-Command tab-kontextsensitiv** in der jeweiligen List-Page / dem Coordinator — kein globaler „immer Schnell“-Handler.
-4. Mac/iOS: `FormContent` / schwere Child-Trees **nicht** synchron während Parent-`InitializeComponent` setzen (Loaded/HandlerChanged-Deferral, siehe frühere `FormSheetPopup`-Workarounds).
+4. Mac/iOS: `FormContent` / schwere Child-Trees **nicht** synchron während Parent-`InitializeComponent` setzen (Loaded/HandlerChanged-Deferral).
 
 ### Don’t
 
-- CommunityToolkit **`FormSheetPopup` / `Popup`** für neue Create-Flows (Crash-Historie iOS/Mac nach UIScene).
-- **`CreateFormCard` Inline-Panel** als Ziel-UX wiederherstellen (#265 Stufe A) — Soll ist Sheet, nicht Panel oben.
+- CommunityToolkit **`Popup`** für neue Create-Flows (Crash-Historie iOS/Mac nach UIScene).
+- **Inline-Panel** als Ziel-UX wiederherstellen (#265 Stufe A) — Soll ist Sheet, nicht Panel oben.
 - `NavigationPage` als Sheet-Wrapper, wenn sie historisch mitgecrashst hat (Schnell-Kommentar).
 
 ### Empfohlene Baustein-Evolution (Implementierung später)
 
 ```
 Finanzuebersicht/Services/
-  QuickExpenseCaptureSheetService.cs     — Referenz-Host (Buchungen)
-  CreateFormModalService.cs              — geplant: generischer Host
-  CategoryCreateSheetService.cs          — umbauen oder ersetzen (kein Toolkit)
-  RecurringTransactionCreateSheetService.cs
+  CreateFormModalService.cs              — generischer Host (Modal ContentPage)
+  *CreateSheetService.cs                 — Tab-spezifische Create-Flows
+  QuickExpenseCaptureSheetService.cs
 
 Finanzuebersicht/Controls/
-  CategoryFormView.xaml                  — Sheet + Detail
-  RecurringTransactionFormView.xaml
-  CreateFormCard.xaml                    — Legacy; nur noch intern/optional
+  *FormView.xaml                         — Sheet + Detail (shared forms)
 ```
 
-Legacy `FormSheetPopup` darf tot im Tree bleiben, bis absichtlich entfernt.
+Entfernt (Aug 2026): Legacy `FormSheetPopup` (CommunityToolkit) und `CreateFormCard`.
 
 ### Reihenfolge der Umsetzung (wenn implementiert wird)
 

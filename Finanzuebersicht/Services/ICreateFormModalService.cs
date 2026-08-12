@@ -1,7 +1,7 @@
 namespace Finanzuebersicht.Services;
 
 /// <summary>
-/// Stable create-form host (modal ContentPage). Avoids CommunityToolkit Popup / FormSheetPopup.
+/// Stable create-form host (modal ContentPage). Avoids CommunityToolkit Popup.
 /// </summary>
 public interface ICreateFormModalService
 {
