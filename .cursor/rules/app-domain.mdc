@@ -43,11 +43,11 @@ alwaysApply: true
 
 ## Architektur-Backlog
 
-Aktiver thematischer Milestone: **v1.20 – Architektur-Fundament** (vor Feature-Backlog / v2.0). Details: `docs/ROADMAP.md`.
+**v1.20 – Architektur-Fundament** ✅ abgeschlossen. Aktiver Fokus: **Milestone 22** / Produkt-Backlog (vor v2.0). Details: `docs/ROADMAP.md`.
 
 - Welle 0: DataPath-Restart (#289 ✅), DataFileNames (#290 ✅), Doc-Drift (#291 ✅)
 - Welle 1: Legacy `IDataService` (#268 ✅), Budget Use Case (#270 ✅)
-- v1.20 empfohlene Reihenfolge (#274–#300) ✅ — als Nächstes Milestone 22 / Produkt-Backlog (`docs/ROADMAP.md`)
+- v1.20 empfohlene Reihenfolge (#274–#300) ✅
 - CloudKit nur als Idee (#243); Sync-Felder vorbereitet (#300 ✅); kein Sync-Code im Tree
 
 ## Nicht wiederholen

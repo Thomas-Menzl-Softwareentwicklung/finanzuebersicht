@@ -121,7 +121,7 @@ Layered clean architecture with MVVM (`CommunityToolkit.Mvvm` source generators)
 - Sparziele with transaction linking and completion forecast
 - Backup/restore (ZIP/JSON), configurable data path
 - CloudKit sync is a backlog idea (#243); no active CloudKit implementation in tree
-- Active architecture milestone: **v1.20** recommended sequence (#274–#300) is **done**. Next: Milestone 22 product backlog (`docs/ROADMAP.md`) before v2.0.
+- Architecture milestone **v1.20** (#274–#300) is **done**. Active focus: Milestone 22 product backlog (`docs/ROADMAP.md`) before v2.0.
 - Sync prep (#300 ✅): optional `ExternalId` / `Source` / `UpdatedAt` on Account, Transaction, Category, RecurringTransaction, SparZiel — no sync pipeline or UI yet. Known source constants: `EntitySources`. CloudKit (#243) remains backlog-only.
 
 ## Data Persistence

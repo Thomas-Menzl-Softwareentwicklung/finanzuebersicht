@@ -4,7 +4,7 @@
 
 > **Hinweis:** Die Milestone-Bezeichnungen (v1.14, v1.2, v2.0) sind thematische GitHub-Planungslabels, keine sequenziellen Release-Versionen. Tatsächliche Releases (v1.0, v1.6, v1.12 …) werden durch Git-Commit-Höhe via Nerdbank.GitVersioning bestimmt.
 
-**Aktueller Stand:** Release **v1.19** (Latest). Als Nächstes thematisch: **[v1.20 – Architektur-Fundament](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/milestone/24)** (ein Meilenstein, kein Zwischen-Release nötig). Danach Feature-Ideen (**Milestone 22**), dann **v2.0** (Verschlüsselung, echte Mehrwährung).
+**Aktueller Stand:** Release **v1.19** (Latest). **[v1.20 – Architektur-Fundament](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/milestone/24)** abgeschlossen (kein Zwischen-Release). Als Nächstes: Feature-Ideen (**[Milestone 22](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/milestone/22)**), dann **v2.0** (Verschlüsselung, echte Mehrwährung).
 
 ---
 
@@ -146,9 +146,9 @@ Weitere Umsetzungen in v1.17: Live-Währungsrefresh (`CurrencyRefreshRegistry`),
 
 ---
 
-## 🏗️ v1.20 — Architektur-Fundament *(aktiv)* · [Milestone](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/milestone/24)
+## ✅ v1.20 — Architektur-Fundament *(abgeschlossen)* · [Milestone](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/milestone/24)
 
-Ein großer thematischer Meilenstein **vor** Feature-Backlog und v2.0. Kein Zwischen-Release nötig — Reihenfolge unten abarbeiten. Architektur-Arbeit bewusst vor Mehrwährung/Verschlüsselung (v2.0).
+Ein großer thematischer Meilenstein **vor** Feature-Backlog und v2.0 — abgeschlossen. Kein Zwischen-Release. Architektur-Arbeit bewusst vor Mehrwährung/Verschlüsselung (v2.0).
 
 Setup-Hilfe (Milestone/Labels): `scripts/setup-v120-architecture-milestone.sh` (einmalig mit Issue-Schreibrechten; #272 bereits geschlossen).
 
@@ -156,7 +156,7 @@ Setup-Hilfe (Milestone/Labels): `scripts/setup-v120-architecture-milestone.sh` (
 
 Abgeschlossen: Welle 0 (#289–#291), Welle 1 (#268, #270), Vollscan (#273), MAUI #297–#299.
 
-Offene Issues in Abarbeitungsreihenfolge (#274 vor Import/Backup, damit neue Use Cases die Fehlerkonvention gleich mitnehmen):
+Issues in Abarbeitungsreihenfolge (#274 vor Import/Backup, damit neue Use Cases die Fehlerkonvention gleich mitnehmen):
 
 | Nr. | Issue | Fokus | Stand |
 |-----|--------|--------|-------|
@@ -175,7 +175,7 @@ Offene Issues in Abarbeitungsreihenfolge (#274 vor Import/Backup, damit neue Use
 
 ---
 
-## 💡 Weiterer Backlog — Milestone 22 *(nach v1.20, vor v2)* · [Milestone](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/milestone/22)
+## 💡 Weiterer Backlog — Milestone 22 *(aktiv, vor v2)* · [Milestone](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/milestone/22)
 
 Größere Produkt-Features. Sync/Open Banking setzen idealerweise #300 (und stabile Import-Grenze #269) voraus.
 
