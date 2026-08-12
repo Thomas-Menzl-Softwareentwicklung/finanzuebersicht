@@ -28,7 +28,7 @@ alwaysApply: true
 
 ## Anlegen / Create UX
 
-- **Ist:** FAB → Modal-Sheet (`CreateFormModalService`) für Kategorie/Konto/Sparziel/Dauerauftrag; Schnell separat; Umbuchen/volle Buchung weiter Detail
+- **Ist:** FAB → Modal-Sheet (`CreateFormModalService`) für Kategorie/Konto/Sparziel/Dauerauftrag/Transaktion/Umbuchung; Schnell (Free) auf Dashboard
 - **Soll:** Mockup-Chrome (Schnell-Keypad etc.); kein Toolkit-Popup
 - **Bearbeiten:** weiter `*DetailPage`
 - Doku: `docs/CREATE_UX.md`

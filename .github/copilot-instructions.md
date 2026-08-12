@@ -10,7 +10,7 @@ Personal finance app built with **.NET 10** and **.NET MAUI**, targeting **macOS
 Data is persisted locally as JSON. Architecture: **Clean Architecture + MVVM**.
 Languages: **German and English** (`AppResources.resx` / `AppResources.de.resx`).
 
-Current version baseline: `version.json` → `1.19` (patch = git height via Nerdbank.GitVersioning).
+Current version baseline: `version.json` → `1.20` (patch = git height via Nerdbank.GitVersioning).
 
 ## Build & Run
 
@@ -152,7 +152,7 @@ Native `Picker` controls freeze on **macOS 27 Beta** when scrolling inside picke
 
 ### Create UX (#265 / Mockup Soll)
 
-**Ist:** Context-sensitive FAB opens modal create sheets via `CreateFormModalService` (QuickExpense-style ContentPage, no Toolkit Popup) for Kategorie, Konto, Sparziel, Dauerauftrag. Schnell remains `QuickExpenseCaptureSheetService`. Full transaction / transfer create still use detail pages. Edit stays on `*DetailPage`.
+**Ist:** Context-sensitive FAB opens modal create sheets via `CreateFormModalService` (QuickExpense-style ContentPage, no Toolkit Popup) for Kategorie, Konto, Sparziel, Dauerauftrag, Transaktion, and Umbuchung. Schnell (Free) uses `QuickExpenseCaptureSheetService` from the Dashboard. Edit stays on `*DetailPage`.
 
 **Soll (Mockup):** same pattern; polish Schnell sheet UX; #266 for richer transaction create.
 
@@ -170,7 +170,7 @@ In-app **Schnell** sheet (`CaptureQuickExpenseUseCase`, Unkategorisiert + defaul
 
 Automatic **SemVer** via **Nerdbank.GitVersioning** (`version.json`):
 
-- Version = `<major>.<minor>.<git-height>` (e.g. `1.19.5`)
+- Version = `<major>.<minor>.<git-height>` (e.g. `1.20.5`)
 - Bump: edit `version.json` or `nbgv set-version <version>`
 - Current: `nbgv get-version`
 - Stable releases: `main` and `release/v*` branches

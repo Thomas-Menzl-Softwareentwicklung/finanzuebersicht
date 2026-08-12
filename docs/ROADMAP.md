@@ -4,7 +4,7 @@
 
 > **Hinweis:** Die Milestone-Bezeichnungen (v1.14, v1.2, v2.0) sind thematische GitHub-Planungslabels, keine sequenziellen Release-Versionen. Tatsächliche Releases (v1.0, v1.6, v1.12 …) werden durch Git-Commit-Höhe via Nerdbank.GitVersioning bestimmt.
 
-**Aktueller Stand:** Release **v1.19** (Latest). **[v1.20 – Architektur-Fundament](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/milestone/24)** abgeschlossen (kein Zwischen-Release). Als Nächstes: Feature-Ideen (**[Milestone 22](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/milestone/22)**), dann **v2.0** (Verschlüsselung, echte Mehrwährung).
+**Aktueller Stand:** Release **v1.20** (Latest). Architektur-Fundament ([Milestone 24](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/milestone/24)) und Create-UX-Modal-Sheets sind enthalten. Als Nächstes: Feature-Ideen (**[Milestone 22](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/milestone/22)**), dann **v2.0** (Verschlüsselung, echte Mehrwährung).
 
 ---
 
@@ -131,28 +131,26 @@ Weitere Umsetzungen in v1.17: Live-Währungsrefresh (`CurrencyRefreshRegistry`),
 
 ---
 
-## ✅ v1.19 — Einheitliches Anlegen *(Release; Create-UX nach Revert wieder Detail)* · [Milestone](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/milestone/23)
+## ✅ v1.19 — Einheitliches Anlegen *(Release)* · [Milestone](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/milestone/23)
 
-- #265 landete kurz mit Inline-/Sheet-Create; nach UIScene/Widget-Stabilisierung (Aug 2026) wieder **Detail-Page** für Anlegen
-- Bearbeiten bleibt auf den jeweiligen Detailseiten
-- **Soll (Mockup):** kontextsensitiver FAB + Bottom-Sheet (Schnell-Muster) — siehe `docs/CREATE_UX.md`
+- #265: Create-UX-Doku und erste Sheet-/Inline-Versuche; nach UIScene/Widget-Stabilisierung zeitweise wieder Detail-Pages
 - Architektur: Recurring-Schedule konsolidiert, Repository-Reads in Use Cases (#275)
 - Fixes: Systemkonto-Löschen (#277), Shift-Ausnahmen, Test-Stabilität (#282)
 - Magic Strings zentralisiert (#272 / PR #285)
 
 | Issue | Thema | Status |
 |-------|-------|--------|
-| [#266](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/266) | Transaktionen & Umbuchen per Sheet + „Häufig verwendet“ | Offen (UX; Sheet-Muster wie `CREATE_UX.md`) |
+| [#266](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/266) | Transaktionen & Umbuchen per Sheet + „Häufig verwendet“ | Teilweise in v1.20 (Sheets); „Häufig verwendet“ noch offen |
 
 ---
 
-## ✅ v1.20 — Architektur-Fundament *(abgeschlossen)* · [Milestone](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/milestone/24)
+## ✅ v1.20 — Architektur-Fundament & Create-UX *(Release)* · [Milestone](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/milestone/24)
 
-Ein großer thematischer Meilenstein **vor** Feature-Backlog und v2.0 — abgeschlossen. Kein Zwischen-Release. Architektur-Arbeit bewusst vor Mehrwährung/Verschlüsselung (v2.0).
+Release-Linie `1.20` (Nerdbank). Enthält das abgeschlossene Architektur-Fundament plus Create-UX-Modal-Sheets und Transaktionen-Mockup.
 
 Setup-Hilfe (Milestone/Labels): `scripts/setup-v120-architecture-milestone.sh` (einmalig mit Issue-Schreibrechten; #272 bereits geschlossen).
 
-### Empfohlene Reihenfolge
+### Empfohlene Reihenfolge (Architektur)
 
 Abgeschlossen: Welle 0 (#289–#291), Welle 1 (#268, #270), Vollscan (#273), MAUI #297–#299.
 
@@ -171,7 +169,7 @@ Issues in Abarbeitungsreihenfolge (#274 vor Import/Backup, damit neue Use Cases 
 | 9 | [#296](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/296) | Listen auf CollectionView virtualisieren | ✅ |
 | 10 | [#300](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/300) | Sync-Persistenz-Prep (`ExternalId`/`Source`) | ✅ |
 
-**v1.20 empfohlene Reihenfolge:** abgeschlossen.
+**v1.20 empfohlene Reihenfolge:** abgeschlossen. Create-UX-Sheets und Transaktionen-Mockup: siehe `docs/CREATE_UX.md` / CHANGELOG.
 
 ---
 

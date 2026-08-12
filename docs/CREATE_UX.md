@@ -161,12 +161,11 @@ Finanzuebersicht/Controls/
 
 Entfernt (Aug 2026): Legacy `FormSheetPopup` (CommunityToolkit) und `CreateFormCard`.
 
-### Reihenfolge der Umsetzung (wenn implementiert wird)
+### Reihenfolge der Umsetzung (Rest)
 
-1. Buchungen: Schnell-Sheet UX an Mockup angleichen (Chrome/Keypad/Chips)  
-2. Shared Host extrahieren  
-3. Kategorie → Konto → Sparziel → Dauerauftrag Create auf Host umbiegen  
-4. #266 (Transaktionen voll / Umbuchen / Häufig verwendet) auf demselben Muster  
+1. Schnell-Sheet UX an Mockup angleichen (Chrome/Keypad/Chips)  
+2. #266 Rest: „Häufig verwendet“ / Template-Chips im Create-Flow  
+3. Mockup-Chrome an übrigen Sheets (wo sinnvoll)  
 
 ---
 
@@ -189,6 +188,6 @@ Doku und Rules, die Stufe A/B als **live** beschrieben haben, waren nach dem Rev
 
 ## Verwandte Docs
 
-- `docs/ROADMAP.md` — v1.19 / offene UX (#266)  
+- `docs/ROADMAP.md` — v1.20 / offene UX (#266 „Häufig verwendet“)  
 - `.github/copilot-instructions.md` — Create UX Kurzreferenz  
 - Mockup (lokal): Downloads `Finanzübersicht Mobile App Verfeinerung-2`
