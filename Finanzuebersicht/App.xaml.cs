@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using Finanzuebersicht.Application.UseCases.ScreenshotDemo;
 using Finanzuebersicht.Application.UseCases.Transactions;
 using Finanzuebersicht.Core.Constants;
 using Finanzuebersicht.Core.Licensing;
@@ -21,8 +22,10 @@ public partial class App : global::Microsoft.Maui.Controls.Application
 	private readonly INavigationService _navigationService;
 	private readonly IAppEvents _appEvents;
 	private readonly IQuickExpenseWidgetPresetStore? _quickExpenseWidgetPresetStore;
+	private readonly SeedScreenshotDemoDataUseCase _seedScreenshotDemoDataUseCase;
 	private readonly ILogger<App>? _logger;
 	private readonly string _savedTheme;
+	private readonly bool _screenshotDemoMode;
 	private Uri? _pendingAppLink;
 	private bool _startupComplete;
 	private static Uri? _pendingAppLinkBeforeApp;
@@ -46,6 +49,7 @@ public partial class App : global::Microsoft.Maui.Controls.Application
 		ILocalizationService localizationService,
 		IDisplayCurrencyService displayCurrency,
 		ProcessQuickExpenseInboxUseCase processQuickExpenseInboxUseCase,
+		SeedScreenshotDemoDataUseCase seedScreenshotDemoDataUseCase,
 		ILicenseService licenseService,
 		INavigationService navigationService,
 		IAppEvents appEvents,
@@ -75,7 +79,9 @@ public partial class App : global::Microsoft.Maui.Controls.Application
 		_licenseService = licenseService;
 		_navigationService = navigationService;
 		_quickExpenseWidgetPresetStore = quickExpenseWidgetPresetStore;
+		_seedScreenshotDemoDataUseCase = seedScreenshotDemoDataUseCase;
 		_logger = logger;
+		_screenshotDemoMode = ScreenshotDemoBootstrap.IsRequested();
 
 		// Gespeichertes Theme anwenden (MAUI-Ebene)
 		_savedTheme = settings.Get(SettingsKeys.Theme, ThemeValues.System);
@@ -140,6 +146,8 @@ public partial class App : global::Microsoft.Maui.Controls.Application
 		try
 		{
 			await _initService.InitializeAsync();
+			if (_screenshotDemoMode)
+				await ScreenshotDemoBootstrap.TrySeedAsync(_seedScreenshotDemoDataUseCase);
 			await _licenseService.RefreshAsync();
 			await EnsureWidgetPresetsMirroredAsync();
 			PublishWidgetSharedState();
