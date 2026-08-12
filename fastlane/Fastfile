@@ -1,5 +1,44 @@
 default_platform(:ios)
 
+# Must match device names in Snapfile.
+SNAPFILE_DEVICES = [
+  "iPhone 17",
+  "iPad Pro 13-inch (M5)"
+].freeze
+
+# ApplicationTitle in Finanzuebersicht/Finanzuebersicht.csproj (umlaut in bundle folder name).
+MAUI_APP_NAME = "Finanzübersicht.app"
+
+MAUI_BUILD_CMD = [
+  "dotnet build Finanzuebersicht/Finanzuebersicht.csproj",
+  "-f net10.0-ios",
+  "-c Debug",
+  "-p:RuntimeIdentifier=iossimulator-arm64"
+].join(" ")
+
+def maui_sim_app_path
+  File.expand_path(
+    "../Finanzuebersicht/bin/Debug/net10.0-ios/iossimulator-arm64/#{MAUI_APP_NAME}",
+    __dir__
+  )
+end
+
+def install_maui_app_on_snapfile_simulators
+  app_path = maui_sim_app_path
+  unless File.directory?(app_path)
+    UI.user_error!(
+      "MAUI simulator app not found at:\n  #{app_path}\n\n" \
+      "Build and retry:\n  #{MAUI_BUILD_CMD}"
+    )
+  end
+
+  SNAPFILE_DEVICES.each do |device|
+    UI.message("Installing #{MAUI_APP_NAME} on #{device}…")
+    sh("xcrun simctl boot \"#{device}\" 2>/dev/null || true")
+    sh("xcrun simctl install \"#{device}\" \"#{app_path}\"")
+  end
+end
+
 platform :ios do
   desc "Capture App Store screenshots (2 devices × 2 locales)"
   lane :screenshots do
@@ -11,9 +50,7 @@ platform :ios do
       sh("cd #{uitests_dir} && xcodegen generate")
     end
 
-    UI.important("Prerequisite: build and install the MAUI simulator app before capture:")
-    UI.message("  dotnet build Finanzuebersicht/Finanzuebersicht.csproj -f net10.0-ios -c Debug -p:RuntimeIdentifier=iossimulator-arm64")
-    UI.message("  xcrun simctl install booted Finanzuebersicht/bin/Debug/net10.0-ios/iossimulator-arm64/Finanzuebersicht.app")
+    install_maui_app_on_snapfile_simulators
 
     capture_screenshots(skip_open_summary: true)
   end

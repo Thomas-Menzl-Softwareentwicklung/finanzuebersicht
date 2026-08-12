@@ -25,6 +25,20 @@ public static class ScreenshotDemoLaunchOptions
 #endif
     }
 
+    /// <summary>
+    /// True when screenshot demo mode is active for this build (DEBUG, non-Store distribution).
+    /// Session hooks (DataPath, localization, onboarding, widget isolation) use this instead of
+    /// <see cref="IsRequested"/> so Store Debug builds do not apply demo side effects.
+    /// </summary>
+    public static bool IsActive()
+    {
+#if DEBUG && !APP_DISTRIBUTION_STORE
+        return IsRequested();
+#else
+        return false;
+#endif
+    }
+
 #if DEBUG
     private static IEnumerable<string> GetEffectiveArgs()
     {

@@ -22,7 +22,7 @@ public class LocalizationService(ISettingsService settings) : ILocalizationServi
     {
         LocalizationResourceManager.Current.Init(AppResources.ResourceManager);
 
-        var saved = ScreenshotDemoLaunchOptions.IsRequested()
+        var saved = ScreenshotDemoLaunchOptions.IsActive()
             ? null
             : _settings.Get(SettingsKeys.LanguageCode);
         var culture = string.IsNullOrEmpty(saved)

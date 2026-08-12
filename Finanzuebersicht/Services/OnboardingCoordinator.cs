@@ -11,7 +11,7 @@ public class OnboardingCoordinator(
 {
     public async Task<bool> ShouldShowOnboardingAsync(CancellationToken cancellationToken = default)
     {
-        if (ScreenshotDemoLaunchOptions.IsRequested())
+        if (ScreenshotDemoLaunchOptions.IsActive())
             return false;
 
         if (settingsService.Get(SettingsKeys.OnboardingCompleted, "false") == "true")

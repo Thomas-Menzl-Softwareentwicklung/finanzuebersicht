@@ -128,7 +128,7 @@ xcrun simctl install booted \
 bundle exec fastlane screenshots
 ```
 
-PNG-Ausgabe: `fastlane/screenshots/<locale>/<Gerät>/01-dashboard.png` … `07-settings.png`.  
+PNG-Ausgabe: `fastlane/screenshots/<locale>/<Gerät>-<shot>.png` (flaches Layout, z. B. `de-DE/iPhone 17-01-dashboard.png` … `07-settings.png`).  
 Details zu UITest-Flow und Simulator-Pfaden: `Finanzuebersicht/Platforms/iOS/UITests/README.md`.
 
 3. **README-Bilder aktualisieren** (nur DE-iPhone → bestehende `docs/screenshots/`-Namen):

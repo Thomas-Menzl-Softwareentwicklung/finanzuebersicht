@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 # Copy German iPhone snapshot PNGs into docs/screenshots/ using README filenames.
 # Prerequisite: bundle exec fastlane screenshots (see docs/APP_STORE.md).
+#
+# fastlane snapshot writes a flat layout per locale, e.g.:
+#   fastlane/screenshots/de-DE/iPhone 17-01-dashboard.png
+# (device name prefix + hyphen + shot name — not a per-device subdirectory).
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -10,12 +14,6 @@ DEST="${ROOT}/docs/screenshots"
 if [[ ! -d "$SRC" ]]; then
   echo "Keine fastlane-Ausgabe unter ${SRC}." >&2
   echo "Zuerst: bundle exec fastlane screenshots (siehe docs/APP_STORE.md)" >&2
-  exit 1
-fi
-
-IPHONE_DIR="$(find "$SRC" -maxdepth 1 -type d -name 'iPhone*' | sort | head -1)"
-if [[ -z "$IPHONE_DIR" || ! -d "$IPHONE_DIR" ]]; then
-  echo "Kein iPhone-Simulator-Ordner unter ${SRC} gefunden." >&2
   exit 1
 fi
 
@@ -37,23 +35,29 @@ declare -a PAIRS=(
 #   umbuchung, import-vorschau, dauerauftrag-detail, verwaltung-konten,
 #   konto-bearbeiten, sparziel-neu, einstellungen-ueber
 
+find_iphone_shot() {
+  local shot_name="$1"
+  # Prefer iPhone over iPad; match flat fastlane names like "iPhone 17-01-dashboard.png".
+  find "$SRC" -maxdepth 1 -type f -name "iPhone*-${shot_name}" | sort | head -1
+}
+
 copied=0
 for pair in "${PAIRS[@]}"; do
   src_name="${pair%%:*}"
   dest_name="${pair##*:}"
-  src_file="${IPHONE_DIR}/${src_name}"
-  if [[ ! -f "$src_file" ]]; then
-    echo "Übersprungen (fehlt): ${src_name}" >&2
+  src_file="$(find_iphone_shot "$src_name")"
+  if [[ -z "$src_file" || ! -f "$src_file" ]]; then
+    echo "Übersprungen (fehlt): iPhone*-${src_name}" >&2
     continue
   fi
   cp "$src_file" "${DEST}/${dest_name}"
-  echo "  ${src_name} → ${dest_name}"
+  echo "  $(basename "$src_file") → ${dest_name}"
   copied=$((copied + 1))
 done
 
 if [[ "$copied" -eq 0 ]]; then
-  echo "Keine PNGs kopiert — prüfe ${IPHONE_DIR}" >&2
+  echo "Keine PNGs kopiert — prüfe flache Dateien unter ${SRC} (z. B. iPhone*-01-dashboard.png)" >&2
   exit 1
 fi
 
-echo "Kopiert ${copied} README-Screenshot(s) aus ${IPHONE_DIR}"
+echo "Kopiert ${copied} README-Screenshot(s) aus ${SRC}"

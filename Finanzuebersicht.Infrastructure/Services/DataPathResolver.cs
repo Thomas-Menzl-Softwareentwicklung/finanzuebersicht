@@ -16,7 +16,7 @@ public static class DataPathResolver
     {
         ArgumentNullException.ThrowIfNull(settings);
 
-        if (ScreenshotDemoLaunchOptions.IsRequested())
+        if (ScreenshotDemoLaunchOptions.IsActive())
             return ScreenshotDemoLaunchOptions.GetIsolatedDataPath();
 
         ApplyPendingDataPath(settings);

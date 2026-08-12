@@ -1,3 +1,4 @@
+using System.Globalization;
 using Finanzuebersicht.Application.UseCases.ScreenshotDemo;
 using Finanzuebersicht.Constants;
 using Finanzuebersicht.Core.Services;
@@ -77,9 +78,33 @@ public class SeedScreenshotDemoDataUseCaseTests
 
         var recurringList = capturedRecurring!.ToList();
         Assert.Contains(recurringList, r => r.Aktiv && r.Titel.Length > 0);
+        Assert.Contains(recurringList, r => r.LetzteAusfuehrung.HasValue);
 
         var sparZielList = capturedSparZiele!.ToList();
         Assert.Contains(sparZielList, s => s.ZielBetrag > 0 && s.AktuellerBetrag > 0);
+    }
+
+    [Fact]
+    public void Fixture_Create_UsesGermanNames_ByDefault()
+    {
+        var clock = new FixedClock(FixedToday);
+        var snapshot = ScreenshotDemoFixture.Create(clock);
+
+        Assert.Contains(snapshot.Accounts, a => a.Name == "Girokonto");
+        Assert.Contains(snapshot.Transactions, t => t.Titel == "Gehalt");
+        Assert.Contains(snapshot.SparZiele, s => s.Titel == "Urlaub 2027");
+    }
+
+    [Fact]
+    public void Fixture_Create_UsesEnglishNames_WhenCultureIsEnglish()
+    {
+        var clock = new FixedClock(FixedToday);
+        var snapshot = ScreenshotDemoFixture.Create(clock, new CultureInfo("en-US"));
+
+        Assert.Contains(snapshot.Accounts, a => a.Name == "Checking Account");
+        Assert.Contains(snapshot.Transactions, t => t.Titel == "Salary");
+        Assert.Contains(snapshot.SparZiele, s => s.Titel == "Vacation 2027");
+        Assert.Equal(snapshot.Accounts.Select(a => a.Id), ScreenshotDemoFixture.Create(clock).Accounts.Select(a => a.Id));
     }
 
     [Fact]

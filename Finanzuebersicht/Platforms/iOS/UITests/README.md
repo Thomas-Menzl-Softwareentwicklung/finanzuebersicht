@@ -38,10 +38,10 @@ dotnet build Finanzuebersicht/Finanzuebersicht.csproj \
   -p:RuntimeIdentifier=iossimulator-arm64
 ```
 
-Typical `.app` path (arm64 simulator):
+Typical `.app` path (arm64 simulator; name matches `ApplicationTitle` in csproj):
 
 ```text
-Finanzuebersicht/bin/Debug/net10.0-ios/iossimulator-arm64/Finanzuebersicht.app
+Finanzuebersicht/bin/Debug/net10.0-ios/iossimulator-arm64/Finanzübersicht.app
 ```
 
 Bundle id (unchanged): `de.thomasmenzl.finanzuebersicht`.
@@ -49,10 +49,12 @@ Bundle id (unchanged): `de.thomasmenzl.finanzuebersicht`.
 ## Install MAUI app on a booted simulator
 
 ```bash
-APP="Finanzuebersicht/bin/Debug/net10.0-ios/iossimulator-arm64/Finanzuebersicht.app"
+APP="Finanzuebersicht/bin/Debug/net10.0-ios/iossimulator-arm64/Finanzübersicht.app"
 xcrun simctl boot "iPhone 17" 2>/dev/null || true
 xcrun simctl install booted "$APP"
 ```
+
+`bundle exec fastlane screenshots` boots each Snapfile device and installs the MAUI `.app` automatically before capture (see `fastlane/Fastfile`).
 
 Tests use `XCUIApplication(bundleIdentifier: "de.thomasmenzl.finanzuebersicht")` so they launch the **installed MAUI build**, not `ScreenshotHost`.
 
@@ -117,7 +119,7 @@ Snapshot flow (`testScreenshots`): `01-dashboard` → `07-settings` — see `Fin
 
 ## fastlane snapshot
 
-From repo root (after MAUI `.app` is built and installed on simulators):
+From repo root (`fastlane/Fastfile` installs the MAUI `.app` on each Snapfile simulator before capture):
 
 ```bash
 export DEVELOPER_DIR="/Users/thomas/Downloads/Xcode-beta 2.app/Contents/Developer"

@@ -57,13 +57,15 @@ public partial class App : global::Microsoft.Maui.Controls.Application
 		ILogger<App>? logger = null)
 	{
 		_appEvents = appEvents;
+		_screenshotDemoMode = ScreenshotDemoBootstrap.IsActive();
 
 		// Sprache vor InitializeComponent setzen, damit XAML-Bindings korrekt aufgelöst werden
 		localizationService.Initialize();
 		localizationService.LanguageChanged += () =>
 		{
 			_appEvents.NotifyLanguageChanged();
-			PublishWidgetSharedState();
+			if (!_screenshotDemoMode)
+				PublishWidgetSharedState();
 		};
 		displayCurrency.Changed += () =>
 		{
@@ -81,7 +83,6 @@ public partial class App : global::Microsoft.Maui.Controls.Application
 		_quickExpenseWidgetPresetStore = quickExpenseWidgetPresetStore;
 		_seedScreenshotDemoDataUseCase = seedScreenshotDemoDataUseCase;
 		_logger = logger;
-		_screenshotDemoMode = ScreenshotDemoBootstrap.IsRequested();
 
 		// Gespeichertes Theme anwenden (MAUI-Ebene); Screenshot-Demo erzwingt Light ohne Settings-Persistenz
 		_savedTheme = _screenshotDemoMode
@@ -129,6 +130,9 @@ public partial class App : global::Microsoft.Maui.Controls.Application
 			try
 			{
 				await _licenseService.RefreshAsync();
+				if (_screenshotDemoMode)
+					return;
+
 				PublishWidgetSharedState();
 				await _recurringGenerationService.GeneratePendingRecurringTransactionsAsync();
 				await ProcessQuickExpenseInboxAsync();
@@ -151,10 +155,13 @@ public partial class App : global::Microsoft.Maui.Controls.Application
 			if (_screenshotDemoMode)
 				await ScreenshotDemoBootstrap.TrySeedAsync(_seedScreenshotDemoDataUseCase);
 			await _licenseService.RefreshAsync();
-			await EnsureWidgetPresetsMirroredAsync();
-			PublishWidgetSharedState();
-			await _recurringGenerationService.GeneratePendingRecurringTransactionsAsync();
-			await ProcessQuickExpenseInboxAsync();
+			if (!_screenshotDemoMode)
+			{
+				await EnsureWidgetPresetsMirroredAsync();
+				PublishWidgetSharedState();
+				await _recurringGenerationService.GeneratePendingRecurringTransactionsAsync();
+				await ProcessQuickExpenseInboxAsync();
+			}
 		}
 		catch (Exception ex)
 		{
@@ -239,6 +246,9 @@ public partial class App : global::Microsoft.Maui.Controls.Application
 
 	private async Task ProcessQuickExpenseInboxAsync()
 	{
+		if (_screenshotDemoMode)
+			return;
+
 		PublishWidgetSharedState();
 		var saved = await _processQuickExpenseInboxUseCase.ExecuteAsync();
 		if (saved > 0)
@@ -265,6 +275,9 @@ public partial class App : global::Microsoft.Maui.Controls.Application
 
 	private void PublishWidgetSharedState()
 	{
+		if (_screenshotDemoMode)
+			return;
+
 #if IOS
 		try
 		{

@@ -1,3 +1,4 @@
+using System.Globalization;
 using Finanzuebersicht.Core.Services;
 using Finanzuebersicht.Core.Services.ScreenshotDemo;
 
@@ -16,7 +17,7 @@ public class SeedScreenshotDemoDataUseCase(
 
     public async Task ExecuteAsync(CancellationToken cancellationToken = default)
     {
-        var snapshot = ScreenshotDemoFixture.Create(_clock);
+        var snapshot = ScreenshotDemoFixture.Create(_clock, CultureInfo.CurrentUICulture);
 
         await categoryRepository.ReplaceAllCategoriesAsync(snapshot.Categories);
         await accountRepository.ReplaceAllAccountsAsync(snapshot.Accounts);

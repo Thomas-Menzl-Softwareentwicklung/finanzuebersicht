@@ -16,6 +16,8 @@ public static class ScreenshotDemoBootstrap
 
     public static bool IsRequested() => ScreenshotDemoLaunchOptions.IsRequested();
 
+    public static bool IsActive() => ScreenshotDemoLaunchOptions.IsActive();
+
     public static string GetIsolatedDataPath() => ScreenshotDemoLaunchOptions.GetIsolatedDataPath();
 
     /// <summary>

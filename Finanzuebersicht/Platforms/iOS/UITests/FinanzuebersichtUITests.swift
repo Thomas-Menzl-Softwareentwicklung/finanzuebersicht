@@ -27,6 +27,36 @@ final class FinanzuebersichtUITests: XCTestCase {
     }
 
     @discardableResult
+    private func waitForAnyMarker(_ markers: [String], in app: XCUIApplication, timeout: TimeInterval) -> Bool {
+        let deadline = Date().addingTimeInterval(timeout)
+        while Date() < deadline {
+            for marker in markers {
+                let byLabel = app.staticTexts[marker]
+                if byLabel.exists {
+                    return true
+                }
+                let byId = app.descendants(matching: .any)[marker]
+                if byId.exists {
+                    return true
+                }
+            }
+            RunLoop.current.run(until: Date().addingTimeInterval(0.2))
+        }
+        return false
+    }
+
+    private func waitForSeededContent(in app: XCUIApplication) {
+        let markers = [
+            "Gehalt", "REWE", "Girokonto", "Urlaub",
+            "Salary", "Checking Account", "Vacation"
+        ]
+        XCTAssertTrue(
+            waitForAnyMarker(markers, in: app, timeout: 30),
+            "Seeded fixture content not visible (expected Gehalt/REWE/Girokonto/Urlaub or EN equivalents)"
+        )
+    }
+
+    @discardableResult
     private func waitFor(_ id: String, in app: XCUIApplication, timeout: TimeInterval? = nil) -> XCUIElement {
         let el = element(id, in: app)
         let wait = timeout ?? elementTimeout
@@ -76,6 +106,7 @@ final class FinanzuebersichtUITests: XCTestCase {
         app.launch()
 
         waitFor("page.dashboard", in: app, timeout: 30)
+        waitForSeededContent(in: app)
         snapshot("01-dashboard")
 
         tapTab(Tab.transactions, in: app)
