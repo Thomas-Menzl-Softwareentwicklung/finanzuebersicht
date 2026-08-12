@@ -7,7 +7,9 @@
              xmlns:conv="clr-namespace:Finanzuebersicht.Converters"
              xmlns:loc="clr-namespace:Finanzuebersicht.Extensions"
              xmlns:controls="clr-namespace:Finanzuebersicht.Controls"
+             xmlns:screenshot="clr-namespace:Finanzuebersicht.Core.Constants;assembly=Finanzuebersicht.Core"
              x:Class="Finanzuebersicht.Views.DashboardPage"
+             AutomationId="{x:Static screenshot:ScreenshotAutomationIds.PageDashboard}"
              x:DataType="vm:DashboardViewModel"
              Title="{loc:Translate Nav_Dashboard}"
              BackgroundColor="{AppThemeBinding Light={StaticResource PageBackground}, Dark={StaticResource PageBackgroundDark}}">
@@ -622,7 +624,8 @@
         </ScrollView>
     </RefreshView>
 
-        <Border StrokeShape="RoundRectangle 28"
+        <Border AutomationId="{x:Static screenshot:ScreenshotAutomationIds.FabSchnell}"
+                StrokeShape="RoundRectangle 28"
                 Stroke="Transparent"
                 BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
                 WidthRequest="56"

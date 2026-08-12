@@ -7,7 +7,9 @@
              xmlns:conv="clr-namespace:Finanzuebersicht.Converters"
              xmlns:loc="clr-namespace:Finanzuebersicht.Extensions"
              xmlns:controls="clr-namespace:Finanzuebersicht.Controls"
+             xmlns:screenshot="clr-namespace:Finanzuebersicht.Core.Constants;assembly=Finanzuebersicht.Core"
              x:Class="Finanzuebersicht.Views.CategoriesPage"
+             AutomationId="{x:Static screenshot:ScreenshotAutomationIds.PageManagement}"
              x:DataType="vm:CategoriesViewModel"
              Title="{loc:Translate Nav_Verwaltung}">
 

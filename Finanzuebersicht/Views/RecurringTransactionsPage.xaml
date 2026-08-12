@@ -7,7 +7,9 @@
              xmlns:conv="clr-namespace:Finanzuebersicht.Converters"
              xmlns:loc="clr-namespace:Finanzuebersicht.Extensions"
              xmlns:controls="clr-namespace:Finanzuebersicht.Controls"
+             xmlns:screenshot="clr-namespace:Finanzuebersicht.Core.Constants;assembly=Finanzuebersicht.Core"
              x:Class="Finanzuebersicht.Views.RecurringTransactionsPage"
+             AutomationId="{x:Static screenshot:ScreenshotAutomationIds.PageRecurring}"
              x:DataType="vm:RecurringTransactionsViewModel"
              Title="{loc:Translate Nav_Dauerauftraege}">
 
