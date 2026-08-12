@@ -208,7 +208,7 @@ public class SearchTransactionsUseCaseTests
     }
 
     [Fact]
-    public async Task ExecuteAsync_GroupsByMonth_SortedDescending()
+    public async Task ExecuteAsync_GroupsByDay_SortedDescending()
     {
         var transactions = new[]
         {
@@ -221,9 +221,10 @@ public class SearchTransactionsUseCaseTests
         var result = await sut.ExecuteAsync(new SearchTransactionsQuery());
 
         Assert.Equal(3, result.Gruppen.Count);
-        Assert.Equal(new DateTime(2026, 3, 1), result.Gruppen[0].Datum);
-        Assert.Equal(new DateTime(2026, 2, 1), result.Gruppen[1].Datum);
-        Assert.Equal(new DateTime(2026, 1, 1), result.Gruppen[2].Datum);
+        Assert.Equal(new DateTime(2026, 3, 5), result.Gruppen[0].Datum);
+        Assert.Equal(new DateTime(2026, 2, 20), result.Gruppen[1].Datum);
+        Assert.Equal(new DateTime(2026, 1, 10), result.Gruppen[2].Datum);
+        Assert.All(result.Gruppen, g => Assert.False(g.IsMonthGroup));
     }
 
     [Fact]
@@ -261,5 +262,21 @@ public class SearchTransactionsUseCaseTests
         Assert.Equal(1, result.TotalCount);
         Assert.All(result.Gruppen.SelectMany(g => g), t => Assert.Equal("acc-1", t.AccountId));
         Assert.Equal("Girokonto", result.AccountMap["acc-1"]);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_BuildsColorMapFromCategories()
+    {
+        var categories = new[]
+        {
+            new Category { Id = "c1", Icon = "🍔", Color = "#34C759" },
+            new Category { Id = "c2", Icon = "🚗", Color = "#FF9500" }
+        };
+        var sut = CreateSut(categories: categories);
+
+        var result = await sut.ExecuteAsync(new SearchTransactionsQuery());
+
+        Assert.Equal("#34C759", result.ColorMap["c1"]);
+        Assert.Equal("#FF9500", result.ColorMap["c2"]);
     }
 }

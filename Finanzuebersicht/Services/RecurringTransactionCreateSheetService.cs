@@ -1,26 +1,20 @@
 using Finanzuebersicht.Controls;
 using Finanzuebersicht.Presentation.Services;
 using Finanzuebersicht.Resources.Strings;
-using Finanzuebersicht.Services;
 using Finanzuebersicht.ViewModels;
-using Finanzuebersicht.Views.Popups;
 
 namespace Finanzuebersicht.Services;
 
-public sealed class RecurringTransactionCreateSheetService : IRecurringTransactionCreateSheetService
+public sealed class RecurringTransactionCreateSheetService(ICreateFormModalService createFormModalService)
+    : IRecurringTransactionCreateSheetService
 {
-    public async Task<bool> ShowAsync(RecurringTransactionDetailViewModel viewModel)
+    public Task<bool> ShowAsync(RecurringTransactionDetailViewModel viewModel)
     {
-        var page = Shell.Current?.CurrentPage;
-        if (page is null)
-            return false;
-
-        var form = new RecurringTransactionFormView { BindingContext = viewModel };
-
-        return await page.ShowFormSheetAsync(
+        var loc = LocalizationResourceManager.Current;
+        return createFormModalService.ShowAsync(
             viewModel.PageTitle,
-            form,
+            () => new RecurringTransactionFormView { BindingContext = viewModel },
             viewModel.TrySaveAsync,
-            saveText: LocalizationResourceManager.Current[ResourceKeys.Btn_Speichern]);
+            saveText: loc[ResourceKeys.Btn_Speichern]);
     }
 }

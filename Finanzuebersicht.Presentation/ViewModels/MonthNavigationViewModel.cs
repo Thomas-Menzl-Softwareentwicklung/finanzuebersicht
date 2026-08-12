@@ -43,5 +43,8 @@ public abstract partial class MonthNavigationViewModel : ObservableObject
     {
         MonatAnzeige = AktuellerMonat.ToString("MMMM yyyy",
             System.Globalization.CultureInfo.CurrentCulture);
+        OnMonatAnzeigeUpdated();
     }
+
+    protected virtual void OnMonatAnzeigeUpdated() { }
 }

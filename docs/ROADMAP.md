@@ -131,18 +131,18 @@ Weitere Umsetzungen in v1.17: Live-Währungsrefresh (`CurrencyRefreshRegistry`),
 
 ---
 
-## ✅ v1.19 — Einheitliches Anlegen *(Release abgeschlossen; Rest-Issue offen)* · [Milestone](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/milestone/23)
+## ✅ v1.19 — Einheitliches Anlegen *(Release; Create-UX nach Revert wieder Detail)* · [Milestone](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/milestone/23)
 
-- Inline-Anlegen für Konten und Sparziele (`CreateFormCard`, Scroll-to-top)
-- Sheet-Anlegen für Kategorien und Daueraufträge (`FormSheetPopup`)
+- #265 landete kurz mit Inline-/Sheet-Create; nach UIScene/Widget-Stabilisierung (Aug 2026) wieder **Detail-Page** für Anlegen
 - Bearbeiten bleibt auf den jeweiligen Detailseiten
+- **Soll (Mockup):** kontextsensitiver FAB + Bottom-Sheet (Schnell-Muster) — siehe `docs/CREATE_UX.md`
 - Architektur: Recurring-Schedule konsolidiert, Repository-Reads in Use Cases (#275)
 - Fixes: Systemkonto-Löschen (#277), Shift-Ausnahmen, Test-Stabilität (#282)
 - Magic Strings zentralisiert (#272 / PR #285)
 
 | Issue | Thema | Status |
 |-------|-------|--------|
-| [#266](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/266) | Transaktionen & Umbuchen per Sheet + „Häufig verwendet“ | Offen (UX, getrennt von Architektur) |
+| [#266](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/266) | Transaktionen & Umbuchen per Sheet + „Häufig verwendet“ | Offen (UX; Sheet-Muster wie `CREATE_UX.md`) |
 
 ---
 
@@ -183,7 +183,7 @@ Größere Produkt-Features. Sync/Open Banking setzen idealerweise #300 (und stab
 |-------|-------|---------|
 | [#241](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/241) | Kategorien-Hierarchie (Ober-/Unterkategorien) | L |
 | [#242](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/242) | Home-Screen-Widget Anzeige (iOS / macOS) | L |
-| — | Interaktives iOS-Widget + In-App Schnellerfassung Ausgaben (Pro) | ✅ (iOS-Widget + Inbox; Mac/Windows nur In-App „Schnell“) |
+| — | Interaktives iOS-Widget (Pro) + In-App Schnellerfassung (Free) | ✅ (iOS-Widget + Inbox; Mac/Windows nur In-App „Schnell“) |
 | [#244](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/244) | Daueraufträge mit variablem Betrag | M |
 | [#243](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/243) | CloudKit-Sync zwischen Geräten | XL |
 | [#245](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/245) | Open Banking / automatischer Bank-Import | XL |

@@ -50,6 +50,7 @@
         <conv:TrendColorConverter x:Key="TrendColor" />
     </ContentPage.Resources>
 
+    <Grid>
     <RefreshView Command="{Binding LoadDashboardCommand}"
                  IsRefreshing="{Binding IsLoading}">
         <ScrollView>
@@ -620,4 +621,26 @@
             </VerticalStackLayout>
         </ScrollView>
     </RefreshView>
+
+        <Border StrokeShape="RoundRectangle 28"
+                Stroke="Transparent"
+                BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                WidthRequest="56"
+                HeightRequest="56"
+                Padding="14"
+                HorizontalOptions="End"
+                VerticalOptions="End"
+                Margin="20"
+                SemanticProperties.Description="{loc:Translate A11y_SchnellAusgabe}"
+                Shadow="{Shadow Brush='#40000000', Offset='0,4', Radius=8}">
+            <Border.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding QuickCaptureCommand}" />
+            </Border.GestureRecognizers>
+            <Image Source="fab_schnell.png"
+                   Aspect="AspectFit"
+                   HorizontalOptions="Center"
+                   VerticalOptions="Center"
+                   InputTransparent="True" />
+        </Border>
+    </Grid>
 </ContentPage>

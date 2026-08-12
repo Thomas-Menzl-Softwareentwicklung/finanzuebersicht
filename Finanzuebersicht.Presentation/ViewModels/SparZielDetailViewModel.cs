@@ -141,13 +141,19 @@ public partial class SparZielDetailViewModel(
     [RelayCommand]
     private async Task Save()
     {
+        if (await TrySaveAsync())
+            await _navigationService.GoBackAsync();
+    }
+
+    public async Task<bool> TrySaveAsync()
+    {
         if (string.IsNullOrWhiteSpace(Titel))
         {
             await _dialogService.ShowAlertAsync(
                 _loc.GetString(ResourceKeys.Err_Titel),
                 _loc.GetString(ResourceKeys.Err_TitelErforderlich),
                 _loc.GetString(ResourceKeys.Btn_OK));
-            return;
+            return false;
         }
 
         if (!TryParseAmount(ZielBetragText, out var zielBetrag) || zielBetrag <= 0)
@@ -156,7 +162,7 @@ public partial class SparZielDetailViewModel(
                 _loc.GetString(ResourceKeys.Err_Titel),
                 _loc.GetString(ResourceKeys.Err_BetragGroesserNull),
                 _loc.GetString(ResourceKeys.Btn_OK));
-            return;
+            return false;
         }
 
         if (!TryParseAmount(AktuellerBetragText, out var aktuellerBetrag) || aktuellerBetrag < 0)
@@ -165,7 +171,7 @@ public partial class SparZielDetailViewModel(
                 _loc.GetString(ResourceKeys.Err_Titel),
                 _loc.GetString(ResourceKeys.Err_UngueltigerBetrag),
                 _loc.GetString(ResourceKeys.Btn_OK));
-            return;
+            return false;
         }
 
         decimal? monatlicheSparrate = null;
@@ -177,7 +183,7 @@ public partial class SparZielDetailViewModel(
                     _loc.GetString(ResourceKeys.Err_Titel),
                     _loc.GetString(ResourceKeys.Err_UngueltigerBetrag),
                     _loc.GetString(ResourceKeys.Btn_OK));
-                return;
+                return false;
             }
 
             if (rate > 0)
@@ -199,7 +205,7 @@ public partial class SparZielDetailViewModel(
             await _feedbackService.ShowSnackbarAsync(_loc.GetString(ResourceKeys.Msg_Gespeichert));
             if (IsEditing)
                 await LoadProgressAsync();
-            await _navigationService.GoBackAsync();
+            return true;
         }
         catch (Exception ex)
         {
@@ -208,6 +214,7 @@ public partial class SparZielDetailViewModel(
                 _loc.GetString(ResourceKeys.Err_Titel),
                 _loc.GetString(ResourceKeys.Err_SpeichernFehlgeschlagen, ex.Message),
                 _loc.GetString(ResourceKeys.Btn_OK));
+            return false;
         }
     }
 

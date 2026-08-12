@@ -23,6 +23,12 @@ public partial class TransactionsViewModel(
     INavigationService navigationService,
     TransactionImportCoordinator importCoordinator,
     TransactionTemplatesCoordinator templatesCoordinator,
+    TransactionDetailViewModel createTransactionViewModel,
+    TransferDetailViewModel createTransferViewModel,
+    QuickExpenseCaptureViewModel quickExpenseCaptureViewModel,
+    ITransactionCreateSheetService transactionCreateSheetService,
+    ITransferCreateSheetService transferCreateSheetService,
+    IQuickExpenseCaptureSheetService quickExpenseCaptureSheetService,
     IDialogService dialogService,
     IFeedbackService feedbackService,
     ILocalizationService localizationService,
@@ -31,7 +37,6 @@ public partial class TransactionsViewModel(
     IMainThreadDispatcher dispatcher,
     IAppEvents appEvents,
     ILogger<TransactionsViewModel> logger,
-    Finanzuebersicht.Core.Licensing.ILicenseService? licenseService = null,
     CountUncategorizedTransactionsUseCase? countUncategorizedTransactionsUseCase = null,
     IUncategorizedCategoryService? uncategorizedCategoryService = null) : MonthNavigationViewModel, IAutoLoadViewModel, ICurrencyRefreshViewModel
 {
@@ -44,6 +49,12 @@ public partial class TransactionsViewModel(
     private readonly INavigationService _navigationService = navigationService;
     private readonly TransactionImportCoordinator _importCoordinator = importCoordinator;
     private readonly TransactionTemplatesCoordinator _templatesCoordinator = templatesCoordinator;
+    private readonly TransactionDetailViewModel _createTransactionViewModel = createTransactionViewModel;
+    private readonly TransferDetailViewModel _createTransferViewModel = createTransferViewModel;
+    private readonly QuickExpenseCaptureViewModel _quickExpenseCaptureViewModel = quickExpenseCaptureViewModel;
+    private readonly ITransactionCreateSheetService _transactionCreateSheetService = transactionCreateSheetService;
+    private readonly ITransferCreateSheetService _transferCreateSheetService = transferCreateSheetService;
+    private readonly IQuickExpenseCaptureSheetService _quickExpenseCaptureSheetService = quickExpenseCaptureSheetService;
     private readonly IDialogService _dialogService = dialogService;
     private readonly IFeedbackService _feedbackService = feedbackService;
     private readonly ILocalizationService _loc = localizationService;
@@ -52,8 +63,6 @@ public partial class TransactionsViewModel(
     private readonly IMainThreadDispatcher _dispatcher = dispatcher;
     private readonly IAppEvents _appEvents = appEvents;
     private readonly ILogger<TransactionsViewModel> _logger = logger;
-    private readonly Finanzuebersicht.Core.Licensing.ILicenseService _licenseService =
-        licenseService ?? Finanzuebersicht.Core.Licensing.UnrestrictedLicenseService.Instance;
     private readonly CountUncategorizedTransactionsUseCase? _countUncategorizedTransactionsUseCase = countUncategorizedTransactionsUseCase;
     private readonly IUncategorizedCategoryService? _uncategorizedCategoryService = uncategorizedCategoryService;
 
@@ -84,6 +93,9 @@ public partial class TransactionsViewModel(
     private Dictionary<string, string> categoryNameMap = [];
 
     [ObservableProperty]
+    private Dictionary<string, string> colorMap = [];
+
+    [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasTransactionTemplates))]
     [NotifyPropertyChangedFor(nameof(ShowTransactionTemplates))]
     private ObservableCollection<TransactionTemplate> transactionTemplates = [];
@@ -100,6 +112,8 @@ public partial class TransactionsViewModel(
     [NotifyPropertyChangedFor(nameof(IsSearchActive))]
     [NotifyPropertyChangedFor(nameof(IsMonthMode))]
     [NotifyPropertyChangedFor(nameof(ShowTransactionTemplates))]
+    [NotifyPropertyChangedFor(nameof(IsGesamtChipActive))]
+    [NotifyPropertyChangedFor(nameof(IsCurrentMonthChipActive))]
     private string searchText = string.Empty;
 
     [ObservableProperty]
@@ -107,6 +121,8 @@ public partial class TransactionsViewModel(
     [NotifyPropertyChangedFor(nameof(IsSearchActive))]
     [NotifyPropertyChangedFor(nameof(IsMonthMode))]
     [NotifyPropertyChangedFor(nameof(ShowTransactionTemplates))]
+    [NotifyPropertyChangedFor(nameof(IsGesamtChipActive))]
+    [NotifyPropertyChangedFor(nameof(IsCurrentMonthChipActive))]
     private string? selectedKategorieId = null;
 
     [ObservableProperty]
@@ -114,6 +130,8 @@ public partial class TransactionsViewModel(
     [NotifyPropertyChangedFor(nameof(IsSearchActive))]
     [NotifyPropertyChangedFor(nameof(IsMonthMode))]
     [NotifyPropertyChangedFor(nameof(ShowTransactionTemplates))]
+    [NotifyPropertyChangedFor(nameof(IsGesamtChipActive))]
+    [NotifyPropertyChangedFor(nameof(IsCurrentMonthChipActive))]
     private TransactionTypeFilter selectedTypFilter = TransactionTypeFilter.Alle;
 
     [ObservableProperty]
@@ -121,6 +139,8 @@ public partial class TransactionsViewModel(
     [NotifyPropertyChangedFor(nameof(IsSearchActive))]
     [NotifyPropertyChangedFor(nameof(IsMonthMode))]
     [NotifyPropertyChangedFor(nameof(ShowTransactionTemplates))]
+    [NotifyPropertyChangedFor(nameof(IsGesamtChipActive))]
+    [NotifyPropertyChangedFor(nameof(IsCurrentMonthChipActive))]
     private DateTime? vonDatum = null;
 
     [ObservableProperty]
@@ -128,7 +148,17 @@ public partial class TransactionsViewModel(
     [NotifyPropertyChangedFor(nameof(IsSearchActive))]
     [NotifyPropertyChangedFor(nameof(IsMonthMode))]
     [NotifyPropertyChangedFor(nameof(ShowTransactionTemplates))]
+    [NotifyPropertyChangedFor(nameof(IsGesamtChipActive))]
+    [NotifyPropertyChangedFor(nameof(IsCurrentMonthChipActive))]
     private DateTime? bisDatum = null;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsSearchActive))]
+    [NotifyPropertyChangedFor(nameof(IsMonthMode))]
+    [NotifyPropertyChangedFor(nameof(ShowTransactionTemplates))]
+    [NotifyPropertyChangedFor(nameof(IsGesamtChipActive))]
+    [NotifyPropertyChangedFor(nameof(IsCurrentMonthChipActive))]
+    private bool isGesamtMode;
 
     [ObservableProperty]
     private bool isFilterPanelOpen;
@@ -154,9 +184,23 @@ public partial class TransactionsViewModel(
         SelectedTypFilter != TransactionTypeFilter.Alle ||
         IsDateFilterEnabled;
 
-    public bool IsSearchActive => !string.IsNullOrWhiteSpace(SearchText) || IsFilterActive;
+    public bool IsSearchActive =>
+        IsGesamtMode ||
+        !string.IsNullOrWhiteSpace(SearchText) ||
+        IsFilterActive;
 
     public bool IsMonthMode => !IsSearchActive;
+
+    public bool IsCurrentMonthChipActive => IsMonthMode;
+    public bool IsGesamtChipActive => IsSearchActive;
+
+    public string VormonatChipLabel =>
+        AktuellerMonat.AddMonths(-1).ToString("MMMM", System.Globalization.CultureInfo.CurrentCulture);
+
+    public string NaechsterChipLabel =>
+        AktuellerMonat.AddMonths(1).ToString("MMMM", System.Globalization.CultureInfo.CurrentCulture);
+
+    public string GesamtChipLabel => _loc.GetString(ResourceKeys.Lbl_Gesamt);
 
     public bool HasSearchResults => SearchErgebnisGruppen.Count > 0;
 
@@ -185,6 +229,8 @@ public partial class TransactionsViewModel(
     [NotifyPropertyChangedFor(nameof(IsSearchActive))]
     [NotifyPropertyChangedFor(nameof(IsMonthMode))]
     [NotifyPropertyChangedFor(nameof(ShowTransactionTemplates))]
+    [NotifyPropertyChangedFor(nameof(IsGesamtChipActive))]
+    [NotifyPropertyChangedFor(nameof(IsCurrentMonthChipActive))]
     private bool isDateFilterEnabled;
 
     [ObservableProperty]
@@ -268,7 +314,19 @@ public partial class TransactionsViewModel(
         if (IsDateFilterEnabled) BisDatum = value;
     }
 
-    protected override async Task OnMonthChangedAsync() => await LoadTransaktionen();
+    protected override void OnMonatAnzeigeUpdated()
+    {
+        OnPropertyChanged(nameof(VormonatChipLabel));
+        OnPropertyChanged(nameof(NaechsterChipLabel));
+    }
+
+    protected override async Task OnMonthChangedAsync()
+    {
+        if (IsSearchActive)
+            await ExitToMonthModeAsync();
+        else
+            await LoadTransaktionen();
+    }
 
     partial void OnSearchTextChanged(string value) => TriggerSearchDebounced();
     partial void OnSelectedKategorieIdChanged(string? value) => TriggerSearchDebounced();
@@ -321,6 +379,7 @@ public partial class TransactionsViewModel(
             TotalSearchCount = result.TotalCount;
             IconMap = result.IconMap;
             CategoryNameMap = result.CategoryNameMap;
+            ColorMap = result.ColorMap;
             AccountMap = result.AccountMap;
         }
         catch (Exception ex)
@@ -345,9 +404,33 @@ public partial class TransactionsViewModel(
     private void ToggleFilterPanel() => IsFilterPanelOpen = !IsFilterPanelOpen;
 
     [RelayCommand]
-    private async Task ClearSearch()
+    private async Task EnterGesamtMode()
+    {
+        IsGesamtMode = true;
+        await ExecuteSearchAsync();
+    }
+
+    [RelayCommand]
+    private async Task SelectCurrentMonthChip()
+    {
+        if (IsMonthMode)
+            return;
+
+        await ExitToMonthModeAsync();
+    }
+
+    [RelayCommand]
+    private async Task ClearSearch() => await ExitToMonthModeAsync();
+
+    /// <summary>
+    /// Leaves search/Gesamt/filter state and returns to plain month mode, matching
+    /// the spec: tapping a month chip (or clearing search) always shows the current
+    /// month's transactions with no filters left active.
+    /// </summary>
+    private async Task ExitToMonthModeAsync()
     {
         _searchDebounce?.Cancel();
+        IsGesamtMode = false;
         SearchText = string.Empty;
         SelectedKategorieId = null;
         SelectedKategorieFilterItem = AvailableKategorien.FirstOrDefault();
@@ -414,6 +497,7 @@ public partial class TransactionsViewModel(
                 TransaktionsGruppen = new ObservableCollection<TransactionGroup>(data.Gruppen);
                 IconMap = data.IconMap;
                 CategoryNameMap = data.CategoryNameMap;
+                ColorMap = data.ColorMap;
                 AccountMap = data.AccountMap;
 
                 if (AvailableKategorien.Count == 0)
@@ -533,13 +617,20 @@ public partial class TransactionsViewModel(
                 return;
             }
 
-            _logger?.LogDebug("GoToDetail called for transaction {Id}", transaktion?.Id ?? "(new)");
-
-            var parameter = new Dictionary<string, object>();
-            if (transaktion != null)
+            if (transaktion == null)
             {
-                parameter[NavigationQueryKeys.TransactionId] = transaktion.Id;
+                await _createTransactionViewModel.ResetForCreateAsync();
+                if (await _transactionCreateSheetService.ShowAsync(_createTransactionViewModel))
+                    await LoadTransaktionenCommand.ExecuteAsync(null);
+                return;
             }
+
+            _logger?.LogDebug("GoToDetail called for transaction {Id}", transaktion.Id);
+
+            var parameter = new Dictionary<string, object>
+            {
+                [NavigationQueryKeys.TransactionId] = transaktion.Id
+            };
 
             if (_navigationService == null)
             {
@@ -576,7 +667,9 @@ public partial class TransactionsViewModel(
     [RelayCommand]
     private async Task GoToTransfer()
     {
-        await _navigationService.GoToAsync(Routes.TransferDetail);
+        await _createTransferViewModel.ResetForCreateAsync();
+        if (await _transferCreateSheetService.ShowAsync(_createTransferViewModel))
+            await LoadTransaktionenCommand.ExecuteAsync(null);
     }
 
     [RelayCommand]
@@ -584,17 +677,9 @@ public partial class TransactionsViewModel(
     {
         try
         {
-            if (!_licenseService.HasFeature(Finanzuebersicht.Core.Licensing.AppFeature.QuickExpenseCapture))
-            {
-                await _dialogService.ShowAlertAsync(
-                    _loc.GetString(ResourceKeys.Err_Titel),
-                    _loc.GetString(ResourceKeys.Err_ProErforderlich),
-                    _loc.GetString(ResourceKeys.Btn_OK));
-                return;
-            }
-
-            // Same Shell navigation path as Umbuchen / Detail pages — no modal/popup.
-            await _navigationService.GoToAsync(Routes.QuickExpenseCapture);
+            _quickExpenseCaptureViewModel.Reset();
+            if (await _quickExpenseCaptureSheetService.ShowAsync(_quickExpenseCaptureViewModel))
+                await LoadTransaktionenCommand.ExecuteAsync(null);
         }
         catch (Exception ex)
         {

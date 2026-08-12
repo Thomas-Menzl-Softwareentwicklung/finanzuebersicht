@@ -150,22 +150,17 @@ Layered clean architecture with MVVM (`CommunityToolkit.Mvvm` source generators)
 
 Native `Picker` controls freeze on **macOS 27 Beta** when scrolling inside picker dialogs in `ScrollView` forms. Workaround: **`SelectionField`** + **`SelectionPopup`** (`Finanzuebersicht/Controls/`, `Finanzuebersicht/Views/Popups/`). Used across detail pages, filters, and import preview. `DatePicker` remains native. Revert to native `Picker` when MAUI SR6 ([#33146](https://github.com/dotnet/maui/pull/33146)) is available. Details: `.cursor/rules/maccatalyst-picker-investigation.mdc`
 
-### Create UX (#265, v1.19)
+### Create UX (#265 / Mockup Soll)
 
-Unified **create** flows — no navigation push for new entries from list FAB/empty state:
+**Ist:** Context-sensitive FAB opens modal create sheets via `CreateFormModalService` (QuickExpense-style ContentPage, no Toolkit Popup) for Kategorie, Konto, Sparziel, Dauerauftrag. Schnell remains `QuickExpenseCaptureSheetService`. Full transaction / transfer create still use detail pages. Edit stays on `*DetailPage`.
 
-| Entity | Create | Edit |
-|--------|--------|------|
-| Konto | `CreateFormCard` inline top (`CategoriesPage`) | `AccountDetailPage` |
-| Sparziel | `CreateFormCard` inline top (`SparZielePage`) | `SparZielDetailPage` |
-| Kategorie | `FormSheetPopup` + `CategoryFormView` | `CategoryDetailPage` |
-| Dauerauftrag | `FormSheetPopup` + `RecurringTransactionFormView` | `RecurringTransactionDetailPage` |
+**Soll (Mockup):** same pattern; polish Schnell sheet UX; #266 for richer transaction create.
 
-Components: `CreateFormCard`, `FormSheetPopup`, `CategoryCreateSheetService`, `RecurringTransactionCreateSheetService`. Full reference: `docs/CREATE_UX.md`.
+Full reference: `docs/CREATE_UX.md`.
 
 ### Quick Expense Capture (Pro) + iOS Widget
 
-In-app **Schnell** sheet on Transaktionen (`CaptureQuickExpenseUseCase`, Unkategorisiert + default account, `AppFeature.QuickExpenseCapture`) ships on all targets. iOS Home Screen WidgetKit `.appex` is embedded (presets, App Group inbox, deep link). Rebuild/resign on Mac with Xcode when Swift sources change — do **not** recreate domain/UI.
+In-app **Schnell** sheet (`CaptureQuickExpenseUseCase`, Unkategorisiert + default account) is free on all targets. iOS Home Screen WidgetKit `.appex` (presets, App Group inbox, deep link) stays Pro (`AppFeature.QuickExpenseCapture`). Rebuild/resign on Mac with Xcode when Swift sources change — do **not** recreate domain/UI.
 
 - Agent rule: `.cursor/rules/ios-quick-expense-widget.mdc`
 - Steps: `Finanzuebersicht/Platforms/iOS/Widgets/README.md`

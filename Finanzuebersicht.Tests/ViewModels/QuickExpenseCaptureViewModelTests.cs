@@ -1,7 +1,6 @@
 using System.Globalization;
 using Finanzuebersicht.Application.UseCases.Transactions;
 using Finanzuebersicht.Constants;
-using Finanzuebersicht.Core.Licensing;
 using Finanzuebersicht.Core.Services;
 using Finanzuebersicht.Models;
 using Finanzuebersicht.Navigation;
@@ -57,7 +56,6 @@ public class QuickExpenseCaptureViewModelTests
             accounts,
             uncategorized,
             new TransactionValidationService(),
-            UnrestrictedLicenseService.Instance,
             clock);
 
         var loc = Substitute.For<ILocalizationService>();

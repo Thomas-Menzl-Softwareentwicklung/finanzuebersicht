@@ -141,20 +141,28 @@ public partial class CategoriesViewModel(
     }
 
     [RelayCommand]
-    private Task GoToDetail(object? item = null)
+    private async Task GoToDetail(object? item = null)
     {
         if (item is AccountListItem kontoItem)
-            return _accountsCoordinator.NavigateToDetailAsync(kontoItem);
-
-        if (item == null && IsKontenVisible)
-            return _accountsCoordinator.NavigateToCreateAsync(Konten.Count);
-
-        if (item == null && IsKategorienVisible)
-            return _categoriesCoordinator.NavigateToCreateAsync();
+        {
+            await _accountsCoordinator.NavigateToDetailAsync(kontoItem);
+            return;
+        }
 
         if (item is Category kategorie)
-            return _categoriesCoordinator.NavigateToDetailAsync(kategorie);
+        {
+            await _categoriesCoordinator.NavigateToDetailAsync(kategorie);
+            return;
+        }
 
-        return _categoriesCoordinator.NavigateToCreateAsync();
+        if (item == null && IsKontenVisible)
+        {
+            if (await _accountsCoordinator.NavigateToCreateAsync(Konten.Count))
+                await LoadKategorien();
+            return;
+        }
+
+        if (await _categoriesCoordinator.NavigateToCreateAsync())
+            await LoadKategorien();
     }
 }

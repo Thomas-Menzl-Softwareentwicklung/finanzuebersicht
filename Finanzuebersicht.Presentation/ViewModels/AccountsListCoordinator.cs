@@ -23,6 +23,8 @@ public sealed class AccountsListCoordinator(
     GetAccountBalancesUseCase getAccountBalancesUseCase,
     ToggleAccountArchiveUseCase toggleAccountArchiveUseCase,
     DeleteAccountUseCase deleteAccountUseCase,
+    AccountDetailViewModel createAccountViewModel,
+    IAccountCreateSheetService accountCreateSheetService,
     ILocalizationService localizationService,
     INavigationService navigationService,
     IDialogService dialogService,
@@ -35,6 +37,8 @@ public sealed class AccountsListCoordinator(
     private readonly GetAccountBalancesUseCase _getAccountBalancesUseCase = getAccountBalancesUseCase;
     private readonly ToggleAccountArchiveUseCase _toggleAccountArchiveUseCase = toggleAccountArchiveUseCase;
     private readonly DeleteAccountUseCase _deleteAccountUseCase = deleteAccountUseCase;
+    private readonly AccountDetailViewModel _createAccountViewModel = createAccountViewModel;
+    private readonly IAccountCreateSheetService _accountCreateSheetService = accountCreateSheetService;
     private readonly ILocalizationService _loc = localizationService;
     private readonly INavigationService _navigationService = navigationService;
     private readonly IDialogService _dialogService = dialogService;
@@ -141,7 +145,7 @@ public sealed class AccountsListCoordinator(
             [NavigationQueryKeys.AccountId] = konto.Account.Id
         });
 
-    public async Task NavigateToCreateAsync(int currentAccountCount)
+    public async Task<bool> NavigateToCreateAsync(int currentAccountCount)
     {
         var check = _licenseService.CheckCreateLimit(LimitedResource.Accounts, currentAccountCount);
         if (!check.Allowed)
@@ -150,9 +154,10 @@ public sealed class AccountsListCoordinator(
                 _loc.GetString(ResourceKeys.Err_Titel),
                 _loc.GetString(ResourceKeys.Err_LimitErreicht, check.CurrentCount, check.Limit!.Value),
                 _loc.GetString(ResourceKeys.Btn_OK));
-            return;
+            return false;
         }
 
-        await _navigationService.GoToAsync(Routes.AccountDetail);
+        _createAccountViewModel.ResetForCreate();
+        return await _accountCreateSheetService.ShowAsync(_createAccountViewModel);
     }
 }

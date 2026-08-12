@@ -23,21 +23,29 @@
                         Direction="Row"
                         AlignItems="Start"
                         JustifyContent="Start"
-                        BindableLayout.ItemsSource="{Binding VerfuegbareIcons}">
+                        BindableLayout.ItemsSource="{Binding IconChoices}">
                 <BindableLayout.ItemTemplate>
-                    <DataTemplate x:DataType="x:String">
-                        <Border WidthRequest="40" HeightRequest="40"
+                    <DataTemplate x:DataType="vm:CategoryChoiceItem">
+                        <Border WidthRequest="44" HeightRequest="44"
                                 Margin="0,0,8,8"
                                 Padding="8" StrokeShape="RoundRectangle 10"
+                                StrokeThickness="2"
                                 Stroke="Transparent"
                                 BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}"
                                 HorizontalOptions="Center">
+                            <Border.Triggers>
+                                <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
+                                    <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+                                    <Setter Property="StrokeThickness" Value="3" />
+                                    <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}" />
+                                </DataTrigger>
+                            </Border.Triggers>
                             <Border.GestureRecognizers>
                                 <TapGestureRecognizer
                                     Command="{Binding Source={x:Reference Root}, Path=BindingContext.SelectIconCommand}"
-                                    CommandParameter="{Binding .}" />
+                                    CommandParameter="{Binding Value}" />
                             </Border.GestureRecognizers>
-                            <Label Text="{Binding .}" FontSize="22"
+                            <Label Text="{Binding Value}" FontSize="22"
                                    HorizontalOptions="Center" VerticalOptions="Center" />
                         </Border>
                     </DataTemplate>
@@ -51,20 +59,35 @@
                         Direction="Row"
                         AlignItems="Start"
                         JustifyContent="Start"
-                        BindableLayout.ItemsSource="{Binding VerfuegbareFarben}">
+                        BindableLayout.ItemsSource="{Binding ColorChoices}">
                 <BindableLayout.ItemTemplate>
-                    <DataTemplate x:DataType="x:String">
-                        <Border WidthRequest="40" HeightRequest="40"
+                    <DataTemplate x:DataType="vm:CategoryChoiceItem">
+                        <Border WidthRequest="44" HeightRequest="44"
                                 Margin="0,0,10,10"
-                                StrokeShape="RoundRectangle 20"
-                                Stroke="Transparent" Padding="0"
-                                BackgroundColor="{Binding .}"
+                                StrokeShape="RoundRectangle 22"
+                                StrokeThickness="2"
+                                Stroke="Transparent"
+                                Padding="0"
+                                BackgroundColor="{Binding Value}"
                                 HorizontalOptions="Center">
+                            <Border.Triggers>
+                                <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
+                                    <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+                                    <Setter Property="StrokeThickness" Value="3" />
+                                </DataTrigger>
+                            </Border.Triggers>
                             <Border.GestureRecognizers>
                                 <TapGestureRecognizer
                                     Command="{Binding Source={x:Reference Root}, Path=BindingContext.SelectColorCommand}"
-                                    CommandParameter="{Binding .}" />
+                                    CommandParameter="{Binding Value}" />
                             </Border.GestureRecognizers>
+                            <Label Text="✓"
+                                   FontSize="18"
+                                   FontAttributes="Bold"
+                                   TextColor="White"
+                                   HorizontalOptions="Center"
+                                   VerticalOptions="Center"
+                                   IsVisible="{Binding IsSelected}" />
                         </Border>
                     </DataTemplate>
                 </BindableLayout.ItemTemplate>
