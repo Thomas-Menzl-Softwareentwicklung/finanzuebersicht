@@ -51,3 +51,7 @@ Finanzuebersicht.Tests/dotnet-tools.json
 coverage/
 
 /.github/skills/
+
+# Local Mac dev helpers (machine-specific)
+scripts/run-maccatalyst.sh
+scripts/install-maccatalyst-dev-app.sh
