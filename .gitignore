@@ -56,6 +56,13 @@ coverage/
 
 /.github/skills/
 
+# fastlane snapshot outputs
+fastlane/screenshots/
+fastlane/report.xml
+fastlane/test_output/
+fastlane/Preview.html
+vendor/bundle/
+
 # Local Mac dev helpers (machine-specific)
 scripts/run-maccatalyst.sh
 scripts/install-maccatalyst-dev-app.sh

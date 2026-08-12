@@ -1,0 +1,24 @@
+# Device names from: xcrun simctl list devices available
+devices([
+  "iPhone 17",
+  "iPad Pro 13-inch (M5)"
+])
+
+languages([
+  "de-DE",
+  "en-US"
+])
+
+scheme("FinanzuebersichtUITests")
+
+project("./Finanzuebersicht/Platforms/iOS/UITests/FinanzuebersichtUITests.xcodeproj")
+
+output_directory("./fastlane/screenshots")
+
+clear_previous_screenshots(true)
+
+override_status_bar(true)
+
+launch_arguments(["--screenshot-demo"])
+
+# MAUI host app is built separately (dotnet build) and installed via simctl before snapshot.

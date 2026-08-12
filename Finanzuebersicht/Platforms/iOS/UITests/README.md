@@ -106,10 +106,26 @@ The test passes `--screenshot-demo` after `setupSnapshot(app)` so demo mode wins
 | Target | AutomationId | Query used in test |
 |--------|--------------|-------------------|
 | Dashboard page | `page.dashboard` | `app.descendants(matching: .any)["page.dashboard"]` |
+| Transactions / Recurring / Management / Savings pages | `page.*` | same `descendants` pattern |
+| Shell tabs | `tab.*` (XAML) | `app.tabBars.buttons.element(boundBy: N)` — AutomationIds do not reach UITabBar on iOS |
+| Schnell FAB / sheet | `fab.schnell` / `sheet.quick-expense` | `descendants(matching: .any)` |
+| Settings toolbar / page | `toolbar.settings` / `page.settings` | nav bar button or `descendants` fallback |
 
 `app.otherElements["page.dashboard"]` did not match on iOS Simulator (iOS 27 beta); use `descendants(matching: .any)` instead.
 
-Shell tabs (`tab.dashboard`, etc.) — see Task 3 report / `ScreenshotAutomationIds.cs`. Verify types with Accessibility Inspector on simulator.
+Snapshot flow (`testScreenshots`): `01-dashboard` → `07-settings` — see `FinanzuebersichtUITests.swift`.
+
+## fastlane snapshot
+
+From repo root (after MAUI `.app` is built and installed on simulators):
+
+```bash
+export DEVELOPER_DIR="/Users/thomas/Downloads/Xcode-beta 2.app/Contents/Developer"
+bundle install
+bundle exec fastlane screenshots
+```
+
+`Snapfile` pins local simulator names (`iPhone 17`, `iPad Pro 13-inch (M5)`) and passes `--screenshot-demo`. PNGs land under `fastlane/screenshots/` (gitignored).
 
 ## SnapshotHelper updates
 

@@ -1,0 +1,20 @@
+default_platform(:ios)
+
+platform :ios do
+  desc "Capture App Store screenshots (2 devices × 2 locales)"
+  lane :screenshots do
+    uitests_dir = "Finanzuebersicht/Platforms/iOS/UITests"
+    xcodeproj = "#{uitests_dir}/FinanzuebersichtUITests.xcodeproj"
+
+    unless File.directory?(xcodeproj)
+      UI.message("Generating Xcode project via XcodeGen…")
+      sh("cd #{uitests_dir} && xcodegen generate")
+    end
+
+    UI.important("Prerequisite: build and install the MAUI simulator app before capture:")
+    UI.message("  dotnet build Finanzuebersicht/Finanzuebersicht.csproj -f net10.0-ios -c Debug -p:RuntimeIdentifier=iossimulator-arm64")
+    UI.message("  xcrun simctl install booted Finanzuebersicht/bin/Debug/net10.0-ios/iossimulator-arm64/Finanzuebersicht.app")
+
+    capture_screenshots(skip_open_summary: true)
+  end
+end
