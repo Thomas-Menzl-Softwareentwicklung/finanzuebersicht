@@ -2,6 +2,50 @@ default_platform(:ios)
 
 REPO_ROOT = File.expand_path("..", __dir__)
 
+ASC_API_KEY_PATH = File.expand_path("~/.appstoreconnect/api_key.json")
+SCREENSHOTS_PATH = File.join(REPO_ROOT, "fastlane/screenshots")
+METADATA_PATH = File.join(REPO_ROOT, "fastlane/metadata")
+ASC_APP_IDENTIFIER = "de.thomasmenzl.finanzuebersicht"
+ASC_APP_VERSION = "1.20"
+
+def require_asc_api_key!
+  unless File.exist?(ASC_API_KEY_PATH)
+    UI.user_error!(
+      "App Store Connect API key missing at #{ASC_API_KEY_PATH}. " \
+      "See docs/APP_STORE.md."
+    )
+  end
+end
+
+def require_screenshots!
+  pngs = Dir.glob(File.join(SCREENSHOTS_PATH, "*", "*.png"))
+  unless pngs.any?
+    UI.user_error!(
+      "No screenshots in #{SCREENSHOTS_PATH}. " \
+      "Run: bundle exec fastlane screenshots"
+    )
+  end
+end
+
+def listing_upload_options(platform:, skip_screenshots:)
+  {
+    api_key_path: ASC_API_KEY_PATH,
+    app_identifier: ASC_APP_IDENTIFIER,
+    platform: platform,
+    app_version: ASC_APP_VERSION,
+    metadata_path: METADATA_PATH,
+    screenshots_path: SCREENSHOTS_PATH,
+    skip_binary_upload: true,
+    skip_metadata: false,
+    skip_screenshots: skip_screenshots,
+    overwrite_screenshots: !skip_screenshots,
+    force: true,
+    submit_for_review: false,
+    run_precheck_before_submit: false,
+    precheck_include_in_app_purchases: false
+  }
+end
+
 # Must match device names in Snapfile.
 SNAPFILE_DEVICES = [
   "iPhone 17",
@@ -64,5 +108,24 @@ platform :ios do
       ),
       output_directory: File.join(REPO_ROOT, "fastlane/screenshots")
     )
+  end
+
+  desc "Upload listing texts and iOS screenshots to App Store Connect (no binary, no review)"
+  lane :upload_listing do
+    require_asc_api_key!
+    require_screenshots!
+    upload_to_app_store(listing_upload_options(platform: "ios", skip_screenshots: false))
+  end
+
+  desc "Upload listing texts to the Mac App Store listing (no screenshots, no binary, no review)"
+  lane :upload_listing_mac do
+    require_asc_api_key!
+    upload_to_app_store(listing_upload_options(platform: "osx", skip_screenshots: true))
+  end
+
+  desc "Upload iOS listing+screenshots then Mac listing texts"
+  lane :upload_listing_all do
+    upload_listing
+    upload_listing_mac
   end
 end
