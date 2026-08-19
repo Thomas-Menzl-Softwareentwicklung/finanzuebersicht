@@ -27,7 +27,32 @@ def require_screenshots!
   end
 end
 
+# First App Store version has no AppStoreReviewDetail yet. deliver still
+# fetches it in review_attachment_file and raises "No data" (fastlane#20538)
+# even when we never upload an attachment. Skip that step unless a file is set.
+def patch_deliver_missing_review_detail!
+  require "deliver"
+  return if Deliver::UploadMetadata.method_defined?(:_finanz_review_attachment_file)
+
+  Deliver::UploadMetadata.class_eval do
+    alias_method :_finanz_review_attachment_file, :review_attachment_file
+
+    def review_attachment_file(version)
+      unless options[:app_review_attachment_file]
+        UI.important(
+          "Skipping review attachments (none configured; avoids first-version " \
+          "No data crash, fastlane#20538)."
+        )
+        return
+      end
+
+      _finanz_review_attachment_file(version)
+    end
+  end
+end
+
 def listing_upload_options(platform:, skip_screenshots:)
+  patch_deliver_missing_review_detail!
   {
     api_key_path: ASC_API_KEY_PATH,
     app_identifier: ASC_APP_IDENTIFIER,

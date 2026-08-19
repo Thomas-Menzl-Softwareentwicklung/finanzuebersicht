@@ -23,6 +23,30 @@ For _fastlane_ installation instructions, see [Installing _fastlane_](https://do
 
 Capture App Store screenshots (2 devices × 2 locales)
 
+### ios upload_listing
+
+```sh
+[bundle exec] fastlane ios upload_listing
+```
+
+Upload listing texts and iOS screenshots to App Store Connect (no binary, no review)
+
+### ios upload_listing_mac
+
+```sh
+[bundle exec] fastlane ios upload_listing_mac
+```
+
+Upload listing texts to the Mac App Store listing (no screenshots, no binary, no review)
+
+### ios upload_listing_all
+
+```sh
+[bundle exec] fastlane ios upload_listing_all
+```
+
+Upload iOS listing+screenshots then Mac listing texts
+
 ----
 
 This README.md is auto-generated and will be re-generated every time [_fastlane_](https://fastlane.tools) is run.

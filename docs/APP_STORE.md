@@ -117,6 +117,8 @@ Vor dem iOS-Upload: PNGs unter `fastlane/screenshots/` (`bundle exec fastlane sc
 
 Review-Notes, Age Rating und Privacy Nutrition Labels bleiben manuell in ASC.
 
+Erstversion: `deliver` crasht sonst beim Laden eines noch nicht existierenden Review-Details (`No data`, [fastlane#20538](https://github.com/fastlane/fastlane/issues/20538)). Die Listing-Lanes überspringen den Attachment-Schritt, solange keine `app_review_attachment_file` gesetzt ist.
+
 ## 5. Technik-Hinweise StoreKit
 
 - Implementierung: StoreKit **1** (wie Microsoft MAUI BillingService-Sample; StoreKit 2 wartet auf bessere .NET-Swift-Interop).
