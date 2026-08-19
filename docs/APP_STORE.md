@@ -161,7 +161,7 @@ xcrun simctl install booted \
   Finanzuebersicht/bin/Debug/net10.0-ios/iossimulator-arm64/Finanzübersicht.app
 ```
 
-2. **Screenshots aufnehmen** (fastlane snapshot, 7 Screens × 2 Geräte × 2 Sprachen):
+2. **Screenshots aufnehmen** (fastlane snapshot, 7 Screens × 3 Geräte × 2 Sprachen — iPhone 17 Pro Max für ASC **6,9″** / skaliert **6,5″**, iPhone 17 für 6,3″, iPad Pro 13″):
 
 ```bash
 bundle exec fastlane screenshots

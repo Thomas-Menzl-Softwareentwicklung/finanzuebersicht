@@ -1,5 +1,8 @@
 # Device names from: xcrun simctl list devices available
+# iPhone 17 Pro Max → ASC 6.9" (required; Apple scales that to 6.5").
+# iPhone 17 → ASC 6.3". iPad Pro 13-inch (M5) → ASC 13".
 devices([
+  "iPhone 17 Pro Max",
   "iPhone 17",
   "iPad Pro 13-inch (M5)"
 ])

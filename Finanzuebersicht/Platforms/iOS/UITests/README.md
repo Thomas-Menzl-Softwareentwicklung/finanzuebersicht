@@ -127,7 +127,7 @@ bundle install
 bundle exec fastlane screenshots
 ```
 
-`Snapfile` pins local simulator names (`iPhone 17`, `iPad Pro 13-inch (M5)`) and passes `--screenshot-demo`. PNGs land under `fastlane/screenshots/` (gitignored).
+`Snapfile` pins local simulator names (`iPhone 17 Pro Max`, `iPhone 17`, `iPad Pro 13-inch (M5)`) and passes `--screenshot-demo`. PNGs land under `fastlane/screenshots/` (gitignored). iPhone 17 Pro Max maps to ASC **6.9″** (required; Apple scales to **6.5″**). iPhone 17 is **6.3″**.
 
 ## SnapshotHelper updates
 

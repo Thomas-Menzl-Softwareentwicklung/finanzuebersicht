@@ -86,6 +86,7 @@ end
 
 # Must match device names in Snapfile.
 SNAPFILE_DEVICES = [
+  "iPhone 17 Pro Max",
   "iPhone 17",
   "iPad Pro 13-inch (M5)"
 ].freeze
