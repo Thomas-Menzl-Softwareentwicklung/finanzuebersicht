@@ -47,6 +47,14 @@ Upload listing texts to the Mac App Store listing (no screenshots, no binary, no
 
 Upload iOS listing+screenshots then Mac listing texts
 
+### ios upload_ipa
+
+```sh
+[bundle exec] fastlane ios upload_ipa
+```
+
+Upload the Store IPA to App Store Connect / TestFlight (API key, no Transporter.app, no review)
+
 ----
 
 This README.md is auto-generated and will be re-generated every time [_fastlane_](https://fastlane.tools) is run.

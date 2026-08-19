@@ -75,9 +75,17 @@ dotnet publish Finanzuebersicht/Finanzuebersicht.csproj \
 
 Oder in Xcode: Archive öffnen → Distribute App → **App Store Connect** → Upload (TestFlight).
 
+Nach dem Publish (Working Tree muss sauber sein):
+
+```bash
+bundle exec fastlane upload_ipa
+```
+
+Das lädt die IPA per App-Store-Connect-API nach TestFlight (`upload_to_testflight`). Kein Transporter.app, kein Review. IPA-Pfad: `Finanzuebersicht/bin/Release/net10.0-ios/ios-arm64/publish/Finanzuebersicht.ipa`.
+
 ### TestFlight-Checkliste
 
-1. IPA/Archive hochladen (Transporter oder Xcode Organizer).
+1. IPA hochladen: `bundle exec fastlane upload_ipa` (oder Transporter / Xcode Organizer).
 2. In ASC → TestFlight: Export Compliance beantworten (`ITSAppUsesNonExemptEncryption=false` → in der Regel „Nein“).
 3. Interne Tester hinzufügen (oder externe Gruppe + Beta-Review).
 4. Auf Gerät mit **Sandbox Apple ID** Pro-Kauf testen (Einstellungen → Lizenz → Pro freischalten / Käufe wiederherstellen).
