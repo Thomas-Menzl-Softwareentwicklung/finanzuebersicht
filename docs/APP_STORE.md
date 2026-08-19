@@ -23,6 +23,7 @@ Monetarisierung: [`MONETIZATION.md`](MONETIZATION.md).
 | App Store Connect App + Zertifikate | **manuell** |
 | TestFlight IPA Upload | **manuell auf dem Mac** |
 | Store-Screenshots | Automatisierung lokal (`fastlane snapshot`) — siehe [Screenshot-Automatisierung](#screenshot-automatisierung) |
+| Listing-Texte DE/EN + Screenshot-Upload | API lokal (`bundle exec fastlane upload_listing`) — siehe [Listing hochladen](#listing-hochladen-app-store-connect) |
 
 ## Product IDs (App Store Connect)
 
@@ -82,11 +83,39 @@ Oder in Xcode: Archive öffnen → Distribute App → **App Store Connect** → 
 4. Auf Gerät mit **Sandbox Apple ID** Pro-Kauf testen (Einstellungen → Lizenz → Pro freischalten / Käufe wiederherstellen).
 5. Direct/GitHub-Builds bleiben ohne StoreKit-Limits (weiterhin voll lokal).
 
-## 4. Listing (vor öffentlichem Release)
+## 4. Listing hochladen (App Store Connect)
 
-- Beschreibung DE/EN, Keywords, Kategorie Finance
-- Screenshots iPhone + iPad
-- Review-Notes: lokal, kein Login; IAP Pro optional; Sync noch nicht aktiv
+Texte liegen im Repo unter `fastlane/metadata/` (`de-DE` + `en-US`). Dieselbe Dateien gelten für iOS und Mac. Display-Name in ASC nicht per Datei überschreiben (kein `name.txt`).
+
+API-Key (lokal, nicht im Repo) — derselbe wie SimpleTD:
+
+| Stück | Ort |
+|------|-----|
+| `.p8` | `~/.appstoreconnect/private_keys/AuthKey_<KEY_ID>.p8` |
+| Fastlane-JSON | `~/.appstoreconnect/api_key.json` |
+
+```bash
+python3 scripts/check-asc-metadata.py
+bundle exec fastlane upload_listing
+```
+
+`upload_listing` setzt Version **1.20** falls nötig, lädt DE/EN-Texte und überschreibt iOS-Screenshots. Kein Binary, kein Review.
+
+Mac-Listing (nur Texte, keine Mac-Screenshots in dieser Welle). Die macOS-App muss in ASC existieren, sonst schlägt die Lane fehl:
+
+```bash
+bundle exec fastlane upload_listing_mac
+```
+
+Beide hintereinander:
+
+```bash
+bundle exec fastlane upload_listing_all
+```
+
+Vor dem iOS-Upload: PNGs unter `fastlane/screenshots/` (`bundle exec fastlane screenshots`). Deliver mappt nach Pixelgröße, nicht nach Simulator-Namen.
+
+Review-Notes, Age Rating und Privacy Nutrition Labels bleiben manuell in ASC.
 
 ## 5. Technik-Hinweise StoreKit
 
@@ -140,6 +169,6 @@ git add docs/screenshots/
 
 Das Skript mappt sechs der sieben Aufnahmen (`03-quick-expense` hat noch keinen README-Slot). Legacy-README-Assets ohne Gegenstück (z. B. `dashboard-jahr.png`, Filter/Swipe/Detail) bleiben unverändert, bis passende Flows ergänzt werden.
 
-4. **App Store Connect:** passende Gerätegrößen aus `fastlane/screenshots/` manuell hochladen (kein `frameit` in Wave 1).
+4. **App Store Connect:** `bundle exec fastlane upload_listing` (siehe [Listing hochladen](#listing-hochladen-app-store-connect)). Kein `frameit`.
 
 Demo-Daten: Launch-Argument `--screenshot-demo` (nur Debug; isolierter Demo-Pfad). Release/Store-Builds sind nicht betroffen.
