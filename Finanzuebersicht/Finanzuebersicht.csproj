@@ -122,7 +122,8 @@
 	<!-- Embed QuickExpenseWidget.appex (built by BuildWidgetExtension / build-release.sh).
 	     Pattern: Redth Maui.Apple.PlatformFeature.Samples — Widgets.
 	     Skip rebuild: -p:SkipWidgetBuild=true (keeps previously staged .appex).
-	     Skip embed entirely: -p:EmbedQuickExpenseWidget=false -->
+	     Skip embed entirely: -p:EmbedQuickExpenseWidget=false.
+	     Skip Store codesign of the .appex: -p:SkipWidgetStoreResign=true (Xcode exportArchive re-signs with cloud-managed Distribution). -->
 	<PropertyGroup Condition="$(TargetFramework.Contains('-ios'))">
 		<EmbedQuickExpenseWidget Condition="'$(EmbedQuickExpenseWidget)' == ''">true</EmbedQuickExpenseWidget>
 	</PropertyGroup>
@@ -208,7 +209,7 @@
 	<Target Name="ResignWidgetExtensionForStore"
 	        AfterTargets="_CodesignAppBundle"
 	        DependsOnTargets="GetBuildVersion"
-	        Condition="$(TargetFramework.Contains('-ios')) AND '$(EmbedQuickExpenseWidget)' == 'true' AND '$(AppDistribution)' == 'Store' AND '$(ComputedPlatform)' == 'iPhone'">
+	        Condition="$(TargetFramework.Contains('-ios')) AND '$(EmbedQuickExpenseWidget)' == 'true' AND '$(AppDistribution)' == 'Store' AND '$(ComputedPlatform)' == 'iPhone' AND '$(SkipWidgetStoreResign)' != 'true'">
 		<PropertyGroup>
 			<_WidgetAppexInBundle Condition="'$(AppBundleDir)' != ''">$(AppBundleDir)/PlugIns/QuickExpenseWidget.appex</_WidgetAppexInBundle>
 			<_WidgetAppexInBundle Condition="'$(_WidgetAppexInBundle)' == ''">$(OutputPath)$(RuntimeIdentifier)/$(ApplicationTitle).app/PlugIns/QuickExpenseWidget.appex</_WidgetAppexInBundle>
