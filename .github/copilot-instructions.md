@@ -10,7 +10,7 @@ Personal finance app built with **.NET 10** and **.NET MAUI**, targeting **macOS
 Data is persisted locally as JSON. Architecture: **Clean Architecture + MVVM**.
 Languages: **German and English** (`AppResources.resx` / `AppResources.de.resx`).
 
-Current version baseline: `version.json` → `1.19` (patch = git height via Nerdbank.GitVersioning).
+Current version baseline: `version.json` → `1.20` (patch = git height via Nerdbank.GitVersioning).
 
 ## Build & Run
 
@@ -121,7 +121,7 @@ Layered clean architecture with MVVM (`CommunityToolkit.Mvvm` source generators)
 - Sparziele with transaction linking and completion forecast
 - Backup/restore (ZIP/JSON), configurable data path
 - CloudKit sync is a backlog idea (#243); no active CloudKit implementation in tree
-- Active architecture milestone: **v1.20** recommended sequence (#274–#300) is **done**. Next: Milestone 22 product backlog (`docs/ROADMAP.md`) before v2.0.
+- Architecture milestone **v1.20** (#274–#300) is **done**. Active focus: Milestone 22 product backlog (`docs/ROADMAP.md`) before v2.0.
 - Sync prep (#300 ✅): optional `ExternalId` / `Source` / `UpdatedAt` on Account, Transaction, Category, RecurringTransaction, SparZiel — no sync pipeline or UI yet. Known source constants: `EntitySources`. CloudKit (#243) remains backlog-only.
 
 ## Data Persistence
@@ -150,22 +150,17 @@ Layered clean architecture with MVVM (`CommunityToolkit.Mvvm` source generators)
 
 Native `Picker` controls freeze on **macOS 27 Beta** when scrolling inside picker dialogs in `ScrollView` forms. Workaround: **`SelectionField`** + **`SelectionPopup`** (`Finanzuebersicht/Controls/`, `Finanzuebersicht/Views/Popups/`). Used across detail pages, filters, and import preview. `DatePicker` remains native. Revert to native `Picker` when MAUI SR6 ([#33146](https://github.com/dotnet/maui/pull/33146)) is available. Details: `.cursor/rules/maccatalyst-picker-investigation.mdc`
 
-### Create UX (#265, v1.19)
+### Create UX (#265 / Mockup Soll)
 
-Unified **create** flows — no navigation push for new entries from list FAB/empty state:
+**Ist:** Context-sensitive FAB opens modal create sheets via `CreateFormModalService` (QuickExpense-style ContentPage, no Toolkit Popup) for Kategorie, Konto, Sparziel, Dauerauftrag, Transaktion, and Umbuchung. Schnell (Free) uses `QuickExpenseCaptureSheetService` from the Dashboard. Edit stays on `*DetailPage`.
 
-| Entity | Create | Edit |
-|--------|--------|------|
-| Konto | `CreateFormCard` inline top (`CategoriesPage`) | `AccountDetailPage` |
-| Sparziel | `CreateFormCard` inline top (`SparZielePage`) | `SparZielDetailPage` |
-| Kategorie | `FormSheetPopup` + `CategoryFormView` | `CategoryDetailPage` |
-| Dauerauftrag | `FormSheetPopup` + `RecurringTransactionFormView` | `RecurringTransactionDetailPage` |
+**Soll (Mockup):** same pattern; polish Schnell sheet UX; #266 for richer transaction create.
 
-Components: `CreateFormCard`, `FormSheetPopup`, `CategoryCreateSheetService`, `RecurringTransactionCreateSheetService`. Full reference: `docs/CREATE_UX.md`.
+Full reference: `docs/CREATE_UX.md`.
 
 ### Quick Expense Capture (Pro) + iOS Widget
 
-In-app **Schnell** sheet on Transaktionen (`CaptureQuickExpenseUseCase`, Unkategorisiert + default account, `AppFeature.QuickExpenseCapture`) ships on all targets. iOS Home Screen WidgetKit `.appex` is embedded (presets, App Group inbox, deep link). Rebuild/resign on Mac with Xcode when Swift sources change — do **not** recreate domain/UI.
+In-app **Schnell** sheet (`CaptureQuickExpenseUseCase`, Unkategorisiert + default account) is free on all targets. iOS Home Screen WidgetKit `.appex` (presets, App Group inbox, deep link) stays Pro (`AppFeature.QuickExpenseCapture`). Rebuild/resign on Mac with Xcode when Swift sources change — do **not** recreate domain/UI.
 
 - Agent rule: `.cursor/rules/ios-quick-expense-widget.mdc`
 - Steps: `Finanzuebersicht/Platforms/iOS/Widgets/README.md`
@@ -175,7 +170,7 @@ In-app **Schnell** sheet on Transaktionen (`CaptureQuickExpenseUseCase`, Unkateg
 
 Automatic **SemVer** via **Nerdbank.GitVersioning** (`version.json`):
 
-- Version = `<major>.<minor>.<git-height>` (e.g. `1.19.5`)
+- Version = `<major>.<minor>.<git-height>` (e.g. `1.20.5`)
 - Bump: edit `version.json` or `nbgv set-version <version>`
 - Current: `nbgv get-version`
 - Stable releases: `main` and `release/v*` branches

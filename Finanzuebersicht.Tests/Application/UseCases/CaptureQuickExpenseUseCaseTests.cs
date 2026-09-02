@@ -1,7 +1,6 @@
 using System.Globalization;
 using Finanzuebersicht.Application.UseCases.Transactions;
 using Finanzuebersicht.Constants;
-using Finanzuebersicht.Core.Licensing;
 using Finanzuebersicht.Core.Services;
 using Finanzuebersicht.Models;
 using NSubstitute;
@@ -14,7 +13,6 @@ public class CaptureQuickExpenseUseCaseTests
         ITransactionRepository? transactionRepository = null,
         IAccountRepository? accountRepository = null,
         IUncategorizedCategoryService? uncategorized = null,
-        ILicenseService? license = null,
         IClock? clock = null)
     {
         transactionRepository ??= Substitute.For<ITransactionRepository>();
@@ -30,7 +28,6 @@ public class CaptureQuickExpenseUseCaseTests
             uncategorized.EnsureAsync(Arg.Any<CancellationToken>()).Returns("cat-uncat");
         }
 
-        license ??= UnrestrictedLicenseService.Instance;
         clock ??= Substitute.For<IClock>();
         clock.Today.Returns(new DateTime(2026, 8, 5));
 
@@ -39,7 +36,6 @@ public class CaptureQuickExpenseUseCaseTests
             accountRepository,
             uncategorized,
             new TransactionValidationService(),
-            license,
             clock);
     }
 
@@ -74,19 +70,6 @@ public class CaptureQuickExpenseUseCaseTests
         Assert.False(result.Success);
         Assert.Equal(TransactionInputError.TitleRequired, result.ValidationError);
         await transactionRepository.DidNotReceive().SaveTransactionAsync(Arg.Any<Transaction>());
-    }
-
-    [Fact]
-    public async Task ExecuteAsync_ThrowsFeatureGate_WhenProMissing()
-    {
-        var license = Substitute.For<ILicenseService>();
-        license.When(l => l.EnsureFeature(AppFeature.QuickExpenseCapture))
-            .Do(_ => throw new FeatureGateException(AppFeature.QuickExpenseCapture, "Pro required"));
-
-        var sut = CreateSut(license: license);
-
-        await Assert.ThrowsAsync<FeatureGateException>(() =>
-            sut.ExecuteAsync("3", "Snack", CultureInfo.InvariantCulture));
     }
 
     [Fact]

@@ -11,6 +11,7 @@ using Finanzuebersicht.Models;
 using Finanzuebersicht.Navigation;
 using Finanzuebersicht.Presentation.Accessibility;
 using Finanzuebersicht.Presentation;
+using Finanzuebersicht.Presentation.Services;
 using Finanzuebersicht.Resources.Strings;
 using Microsoft.Extensions.Logging;
 
@@ -29,6 +30,9 @@ public partial class DashboardViewModel : MonthNavigationViewModel, ILocalizable
     private readonly ISettingsService _settingsService;
     private readonly ILocalizationService _loc;
     private readonly INavigationService _navigationService;
+    private readonly IDialogService _dialogService;
+    private readonly QuickExpenseCaptureViewModel _quickExpenseCaptureViewModel;
+    private readonly IQuickExpenseCaptureSheetService _quickExpenseCaptureSheetService;
     private readonly IClock _clock;
     private readonly ILogger<DashboardViewModel>? _logger;
 
@@ -381,6 +385,9 @@ public partial class DashboardViewModel : MonthNavigationViewModel, ILocalizable
         ILocalizationService localizationService,
         INavigationService navigationService,
         ISettingsService settingsService,
+        IDialogService dialogService,
+        QuickExpenseCaptureViewModel quickExpenseCaptureViewModel,
+        IQuickExpenseCaptureSheetService quickExpenseCaptureSheetService,
         IClock? clock = null,
         ILogger<DashboardViewModel>? logger = null) : base(clock)
     {
@@ -399,6 +406,9 @@ public partial class DashboardViewModel : MonthNavigationViewModel, ILocalizable
         _loc = localizationService;
         _navigationService = navigationService;
         _settingsService = settingsService;
+        _dialogService = dialogService;
+        _quickExpenseCaptureViewModel = quickExpenseCaptureViewModel;
+        _quickExpenseCaptureSheetService = quickExpenseCaptureSheetService;
         _logger = logger;
         IsBudgetSectionExpanded = _expandSettings.Read(DashboardExpandSettingsHelper.Keys.Budget);
         IsYearMonthTrendExpanded = _expandSettings.Read(DashboardExpandSettingsHelper.Keys.YearMonthTrend);
@@ -772,6 +782,25 @@ public partial class DashboardViewModel : MonthNavigationViewModel, ILocalizable
     private async Task NavigateToCashflow()
     {
         await _navigationService.GoToAsync(Routes.Cashflow);
+    }
+
+    [RelayCommand]
+    private async Task QuickCapture()
+    {
+        try
+        {
+            _quickExpenseCaptureViewModel.Reset();
+            if (await _quickExpenseCaptureSheetService.ShowAsync(_quickExpenseCaptureViewModel))
+                await LoadDashboardCommand.ExecuteAsync(null);
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogError(ex, "DashboardViewModel: {Context}", nameof(QuickCapture));
+            await _dialogService.ShowAlertAsync(
+                _loc.GetString(ResourceKeys.Err_Titel),
+                _loc.GetString(ResourceKeys.Err_SpeichernFehlgeschlagen, ex.Message),
+                _loc.GetString(ResourceKeys.Btn_OK));
+        }
     }
 
     public void RefreshLocalizedStrings()

@@ -6,6 +6,8 @@
     <!-- Primärfarben -->
     <Color x:Key="Primary">#007AFF</Color>
     <Color x:Key="PrimaryDark">#0A84FF</Color>
+    <Color x:Key="PrimaryTint">#26007AFF</Color>
+    <Color x:Key="PrimaryTintDark">#260A84FF</Color>
     <Color x:Key="Einnahme">#34C759</Color>
     <Color x:Key="EinnahmeDark">#30D158</Color>
     <Color x:Key="Ausgabe">#FF3B30</Color>

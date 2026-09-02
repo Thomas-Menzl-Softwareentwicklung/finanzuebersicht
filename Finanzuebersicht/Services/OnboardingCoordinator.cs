@@ -1,5 +1,6 @@
 using Finanzuebersicht.Application.UseCases.Transactions;
 using Finanzuebersicht.Core.Services;
+using Finanzuebersicht.Core.Services.ScreenshotDemo;
 using Finanzuebersicht.Presentation.Services;
 
 namespace Finanzuebersicht.Services;
@@ -10,6 +11,9 @@ public class OnboardingCoordinator(
 {
     public async Task<bool> ShouldShowOnboardingAsync(CancellationToken cancellationToken = default)
     {
+        if (ScreenshotDemoLaunchOptions.IsActive())
+            return false;
+
         if (settingsService.Get(SettingsKeys.OnboardingCompleted, "false") == "true")
             return false;
 

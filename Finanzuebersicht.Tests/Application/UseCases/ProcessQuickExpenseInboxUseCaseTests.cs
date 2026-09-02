@@ -11,9 +11,7 @@ namespace Finanzuebersicht.Tests.Application.UseCases;
 
 public class ProcessQuickExpenseInboxUseCaseTests
 {
-    private static CaptureQuickExpenseUseCase CreateCapture(
-        ITransactionRepository transactions,
-        ILicenseService? license = null)
+    private static CaptureQuickExpenseUseCase CreateCapture(ITransactionRepository transactions)
     {
         var accounts = Substitute.For<IAccountRepository>();
         accounts.GetAccountsAsync().Returns(
@@ -30,7 +28,6 @@ public class ProcessQuickExpenseInboxUseCaseTests
             accounts,
             uncategorized,
             new TransactionValidationService(),
-            license ?? UnrestrictedLicenseService.Instance,
             clock);
     }
 
@@ -101,35 +98,10 @@ public class ProcessQuickExpenseInboxUseCaseTests
         var transactions = Substitute.For<ITransactionRepository>();
         var sut = new ProcessQuickExpenseInboxUseCase(
             inbox,
-            CreateCapture(transactions, license),
+            CreateCapture(transactions),
             license);
 
         Assert.Equal(0, await sut.ExecuteAsync());
         await inbox.DidNotReceive().DrainPendingAsync(Arg.Any<CancellationToken>());
-    }
-
-    [Fact]
-    public async Task ExecuteAsync_WhenFeatureGateMidBatch_RestoresRemainingItems()
-    {
-        var license = Substitute.For<ILicenseService>();
-        license.HasFeature(AppFeature.QuickExpenseCapture).Returns(true);
-        license.When(l => l.EnsureFeature(AppFeature.QuickExpenseCapture))
-            .Do(_ => throw new FeatureGateException(AppFeature.QuickExpenseCapture, "Pro required"));
-
-        var item1 = new QuickExpenseInboxItem("1", "1.00", "A", DateTimeOffset.UtcNow);
-        var item2 = new QuickExpenseInboxItem("2", "2.00", "B", DateTimeOffset.UtcNow);
-        var inbox = Substitute.For<IQuickExpenseInboxStore>();
-        inbox.DrainPendingAsync(Arg.Any<CancellationToken>()).Returns([item1, item2]);
-
-        var sut = new ProcessQuickExpenseInboxUseCase(
-            inbox,
-            CreateCapture(Substitute.For<ITransactionRepository>(), license),
-            license);
-
-        Assert.Equal(0, await sut.ExecuteAsync());
-        await inbox.Received(1).WritePendingAsync(
-            NonNullArg.Is<IReadOnlyList<QuickExpenseInboxItem>>(list =>
-                list.Count == 2 && list[0].Id == "1" && list[1].Id == "2"),
-            Arg.Any<CancellationToken>());
     }
 }

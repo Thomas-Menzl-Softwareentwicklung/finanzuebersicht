@@ -102,6 +102,16 @@ public partial class CategoryDetailViewModel(
         "#00C7BE", "#32ADE6"
     ];
 
+    public IReadOnlyList<CategoryChoiceItem> IconChoices =>
+        VerfuegbareIcons.Select(value => new CategoryChoiceItem(value, value == Icon)).ToList();
+
+    public IReadOnlyList<CategoryChoiceItem> ColorChoices =>
+        VerfuegbareFarben.Select(value => new CategoryChoiceItem(value, string.Equals(value, Color, StringComparison.OrdinalIgnoreCase))).ToList();
+
+    partial void OnIconChanged(string value) => OnPropertyChanged(nameof(IconChoices));
+
+    partial void OnColorChanged(string value) => OnPropertyChanged(nameof(ColorChoices));
+
     public Category? Category
     {
         set
@@ -234,3 +244,5 @@ public partial class CategoryDetailViewModel(
 }
 
 public sealed record TransactionTypeOption(TransactionType Value, string DisplayName);
+
+public sealed record CategoryChoiceItem(string Value, bool IsSelected);

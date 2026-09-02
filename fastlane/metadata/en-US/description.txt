@@ -1,0 +1,15 @@
+Finanzübersicht keeps income, expenses, and recurring payments locally on your device. Data is stored as JSON on the device — no account, no ads, no tracking.
+
+DASHBOARD AND ACCOUNTS
+Month and year overview, accounts with balances, transfers, budgets, and a 30-day cash-flow preview. Categories with icon, color, and monthly budget.
+
+TRANSACTIONS
+Create, search, filter, duplicate, and save as templates. CSV import (DKB) with preview, auto-categorization, and duplicate detection. Quick capture in the app; on iPhone optionally as a Home Screen widget (Pro).
+
+RECURRING PAYMENTS AND SAVINGS GOALS
+Recurring transactions with reminders. Savings goals with progress and forecast. Backup and restore including schema migration.
+
+FREE AND PRO
+Free covers everyday use: unlimited transactions, a few accounts, recurring payments, and savings goals. Pro is a one-time purchase for unlimited accounts, CSV import, widget presets, and other power features. Core features do not require a subscription.
+
+iPhone, iPad, and Mac. German and English. Dark Mode. VoiceOver.

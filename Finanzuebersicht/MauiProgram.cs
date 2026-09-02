@@ -1,6 +1,8 @@
 ﻿using System.Reflection;
 using CommunityToolkit.Maui;
 using Finanzuebersicht.Application.DependencyInjection;
+using Finanzuebersicht.Core.Services;
+using Finanzuebersicht.Core.Services.ScreenshotDemo;
 using Finanzuebersicht.Infrastructure;
 using Finanzuebersicht.Presentation.DependencyInjection;
 using Finanzuebersicht.Presentation.Services;
@@ -8,6 +10,7 @@ using Finanzuebersicht.Services;
 using Finanzuebersicht.ViewModels;
 using Finanzuebersicht.Views;
 
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 #if MACCATALYST || IOS
@@ -21,6 +24,12 @@ public static class MauiProgram
 {
 	public static MauiApp CreateMauiApp()
 	{
+#if (IOS || MACCATALYST) && DEBUG
+		// Before DI / DataPathResolver — XCTest launchArguments live in NSProcessInfo, not Environment.
+		ScreenshotDemoLaunchOptions.PlatformArgsProvider = () =>
+			Foundation.NSProcessInfo.ProcessInfo.Arguments.Select(a => (string)a);
+#endif
+
 		var builder = MauiApp.CreateBuilder();
 		builder
 			.UseMauiApp<App>()
@@ -106,8 +115,13 @@ public static class MauiProgram
 		builder.Services.AddSingleton<Finanzuebersicht.Presentation.Services.IFilePicker, MauiFilePicker>();
 		builder.Services.AddSingleton<IAppEvents, AppEvents>();
 		builder.Services.AddSingleton<IWidgetTimelineReloader, MauiWidgetTimelineReloader>();
+		builder.Services.AddSingleton<ICreateFormModalService, CreateFormModalService>();
 		builder.Services.AddSingleton<ICategoryCreateSheetService, CategoryCreateSheetService>();
+		builder.Services.AddSingleton<IAccountCreateSheetService, AccountCreateSheetService>();
+		builder.Services.AddSingleton<ISparZielCreateSheetService, SparZielCreateSheetService>();
 		builder.Services.AddSingleton<IRecurringTransactionCreateSheetService, RecurringTransactionCreateSheetService>();
+		builder.Services.AddSingleton<ITransactionCreateSheetService, TransactionCreateSheetService>();
+		builder.Services.AddSingleton<ITransferCreateSheetService, TransferCreateSheetService>();
 		builder.Services.AddSingleton<IQuickExpenseCaptureSheetService, QuickExpenseCaptureSheetService>();
 		builder.Services.AddSingleton<IImportSessionStore, ImportSessionStore>();
 		builder.Services.AddSingleton<IFolderPicker, MauiFolderPicker>();
@@ -154,6 +168,11 @@ public static class MauiProgram
 #endif
 
 		var app = builder.Build();
+
+#if DEBUG
+		// Before App construction resolves data stores — isolated DataPath for --screenshot-demo.
+		ScreenshotDemoBootstrap.TryApplyAsync(app.Services.GetRequiredService<ISettingsService>());
+#endif
 
 		return app;
 	}

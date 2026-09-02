@@ -22,15 +22,15 @@ alwaysApply: true
 
 ## iOS Quick-Expense-Widget (Pro)
 
-- **Fertig:** In-App „Schnell“ (alle Targets) + iOS WidgetKit-`.appex` (Presets, Inbox, Deep Link)
+- **Fertig:** In-App „Schnell“ (Free, alle Targets) + iOS WidgetKit-`.appex` (Pro: Presets, Inbox, Deep Link)
 - Build/Resign: `.cursor/rules/ios-quick-expense-widget.mdc` + `Finanzuebersicht/Platforms/iOS/Widgets/README.md`
 - Nicht mit Anzeige-Widget #242 vermischen
 
-## Einheitliches Anlegen (#265 ✅ v1.19)
+## Anlegen / Create UX
 
-- **Inline:** `CreateFormCard` — Konten, Sparziele (Panel oben, Scroll-to-top)
-- **Sheet:** `FormSheetPopup` — Kategorien, Daueraufträge
-- **Bearbeiten:** weiter auf `*DetailPage`
+- **Ist:** FAB → Modal-Sheet (`CreateFormModalService`) für Kategorie/Konto/Sparziel/Dauerauftrag/Transaktion/Umbuchung; Schnell (Free) auf Dashboard
+- **Soll:** Mockup-Chrome (Schnell-Keypad etc.); kein Toolkit-Popup
+- **Bearbeiten:** weiter `*DetailPage`
 - Doku: `docs/CREATE_UX.md`
 
 ## Konten & Salden
@@ -43,11 +43,11 @@ alwaysApply: true
 
 ## Architektur-Backlog
 
-Aktiver thematischer Milestone: **v1.20 – Architektur-Fundament** (vor Feature-Backlog / v2.0). Details: `docs/ROADMAP.md`.
+**v1.20 – Architektur-Fundament** ✅ abgeschlossen. Aktiver Fokus: **Milestone 22** / Produkt-Backlog (vor v2.0). Details: `docs/ROADMAP.md`.
 
 - Welle 0: DataPath-Restart (#289 ✅), DataFileNames (#290 ✅), Doc-Drift (#291 ✅)
 - Welle 1: Legacy `IDataService` (#268 ✅), Budget Use Case (#270 ✅)
-- v1.20 empfohlene Reihenfolge (#274–#300) ✅ — als Nächstes Milestone 22 / Produkt-Backlog (`docs/ROADMAP.md`)
+- v1.20 empfohlene Reihenfolge (#274–#300) ✅
 - CloudKit nur als Idee (#243); Sync-Felder vorbereitet (#300 ✅); kein Sync-Code im Tree
 
 ## Nicht wiederholen

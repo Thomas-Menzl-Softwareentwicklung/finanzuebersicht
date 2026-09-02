@@ -5,6 +5,7 @@ using Finanzuebersicht.Application.UseCases.Transactions;
 using Finanzuebersicht.Core.Services;
 using Finanzuebersicht.Navigation;
 using Finanzuebersicht.Models;
+using Finanzuebersicht.Presentation.Services;
 using Finanzuebersicht.Tests.TestHelpers;
 using Finanzuebersicht.ViewModels;
 
@@ -289,6 +290,20 @@ public class DashboardViewModelTests
             localizationService,
             navigationService,
             settingsService,
+            dialogService,
+            new QuickExpenseCaptureViewModel(
+                new CaptureQuickExpenseUseCase(
+                    transactionRepository,
+                    accountRepository,
+                    Substitute.For<IUncategorizedCategoryService>(),
+                    new TransactionValidationService(),
+                    clock),
+                localizationService,
+                dialogService,
+                navigationService,
+                Substitute.For<IFeedbackService>(),
+                Substitute.For<IAppEvents>()),
+            Substitute.For<IQuickExpenseCaptureSheetService>(),
             clock);
     }
 }

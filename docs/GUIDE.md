@@ -198,8 +198,8 @@ Neue Migratoren als `IDataMigrator`-Implementierungen in DI registrieren.
 
 ## 11. Versionierung
 
-- **System:** Nerdbank.GitVersioning (`version.json`, aktuell Basis `1.19`)
-- **Format:** `<major>.<minor>.<git-height>` (z.B. `1.19.3`)
+- **System:** Nerdbank.GitVersioning (`version.json`, aktuell Basis `1.20`)
+- **Format:** `<major>.<minor>.<git-height>` (z.B. `1.20.3`)
 - **MAUI-Version:** Automatisch gesetzt via `ApplicationDisplayVersion` und `ApplicationVersion` zur Buildzeit
 
 ```bash
@@ -207,14 +207,35 @@ nbgv get-version          # aktuelle Version
 nbgv set-version <version> # Version bumpen
 ```
 
-## 12. CI/CD
+## 12. Screenshots
+
+App-Store- und README-Screenshots lokal per **fastlane snapshot** + XCUITest (`Finanzuebersicht/Platforms/iOS/UITests/`). Kurzanleitung:
+
+```bash
+# 1. Host-App auf Simulator installieren (siehe docs/APP_STORE.md)
+dotnet build Finanzuebersicht/Finanzuebersicht.csproj \
+  -f net10.0-ios -c Debug -p:RuntimeIdentifier=iossimulator-arm64
+xcrun simctl install booted \
+  Finanzuebersicht/bin/Debug/net10.0-ios/iossimulator-arm64/Finanzübersicht.app
+
+# 2. Aufnahmen (iPhone + iPad, de-DE + en-US)
+bundle install
+bundle exec fastlane screenshots
+
+# 3. Ausgewählte DE-iPhone-Shots ins README kopieren
+./scripts/copy-readme-screenshots.sh
+```
+
+Roh-PNGs: `fastlane/screenshots/` (gitignored). README-Ziele: `docs/screenshots/`. Vollständige Schritte und ASC-Hinweise: [APP_STORE.md — Screenshot-Automatisierung](APP_STORE.md#screenshot-automatisierung).
+
+## 13. CI/CD
 
 - **Quick Checks:** Unit Tests auf Ubuntu — bei jedem Push auf `develop`, `main`, `feature/*` und PRs
 - **Full MAUI Build:** PRs gegen `main` und `main`-Pushes (macOS-Runner); Label `run-maui` für expliziten Build
 - **Pre-Release:** Actions → "Pre-Release" → Tag z.B. `v1.2.0-beta.1`
 - **Release:** Tag-Push `v*` → Artifacts (macOS + Windows) am GitHub Release
 
-## 13. Weitere Dokumentation
+## 14. Weitere Dokumentation
 
 | Dokument | Inhalt |
 |----------|--------|

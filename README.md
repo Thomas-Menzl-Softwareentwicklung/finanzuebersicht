@@ -23,7 +23,7 @@ Kurz: .NET 10 + MAUI, Multi-Language UI (Deutsch & Englisch), MVVM-Architektur.
 - **30-Tage-Cashflow-Vorschau** inkl. geplanter Daueraufträge
 - **Mehrere Konten** mit Anfangssaldo, Saldo pro Konto und **Umbuchungen** zwischen Konten
 - Transaktionen anlegen, editieren, suchen, filtern, duplizieren und als Vorlage speichern
-- **Schnellerfassung** (Pro): In-App „Schnell“ auf allen Plattformen; auf iOS zusätzlich Home-Screen-Widget mit konfigurierbaren Shortcuts
+- **Schnellerfassung:** In-App „Schnell“ (Free) auf allen Plattformen; auf iOS zusätzlich Home-Screen-Widget mit konfigurierbaren Shortcuts (Pro)
 - CSV-Import (DKB-Format) mit Vorschau, Auto-Kategorisierung und Duplikat-Erkennung
 - Wiederkehrende Buchungen (Daueraufträge) mit Instanz-Verschieben und Ausnahmen
 - Kategorien mit Icon, Farbe und monatlichem Budget
@@ -37,7 +37,7 @@ Hinweis: Die Benutzeroberfläche unterstützt Deutsch und Englisch; weitere Spra
 
 ## Screenshots
 
-*Dark Mode auf macOS (Mac Catalyst), v1.19*
+*Stand **v1.20** — sechs Hauptansichten (Dashboard, Transaktionen, Daueraufträge, Verwaltung, Sparziele, Einstellungen) frisch vom iPhone-Simulator (`fastlane screenshots` → `./scripts/copy-readme-screenshots.sh`). Übrige Detail-/Filter-Aufnahmen noch älter.*
 
 ### Dashboard
 
@@ -53,7 +53,7 @@ Fällige Daueraufträge aufklappen und direkt buchen, überspringen oder verschi
 
 ### Transaktionen & Import
 
-Liste mit Vorlagen, Filter, Swipe-Aktionen, Umbuchung zwischen Konten und CSV-Import mit Duplikat-Erkennung.
+Liste mit Vorlagen, Filter, Swipe-Aktionen und CSV-Import mit Duplikat-Erkennung. (Aktuell zusätzlich Monats-Chips, Tageskarten und Anlegen per Modal-Sheet — noch ohne aktualisierte Screenshots.)
 
 | Transaktionsliste | Filter & Suche | Swipe-Aktionen |
 |:---:|:---:|:---:|
@@ -212,7 +212,7 @@ Finanzuebersicht.Tests/            ← xUnit Tests (net10.0)
 
 ## Versionierung & CI
 
-- Nerdbank.GitVersioning (`version.json`) steuert Versionsnummern (aktuell Basis `1.19`)
+- Nerdbank.GitVersioning (`version.json`) steuert Versionsnummern (aktuell Basis `1.20`)
 - CI / Pre-Release / Release Workflows in `.github/workflows/`
 
 ### Full MAUI build (macCatalyst)

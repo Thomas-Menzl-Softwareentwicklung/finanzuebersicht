@@ -78,6 +78,8 @@ public partial class TransactionDetailViewModel(
 
     public bool HasSparZiele => SparZiele.Count > 0;
 
+    public string PageTitle => _loc.GetString(ResourceKeys.Title_Transaktion);
+
     [ObservableProperty]
     private SparZiel? selectedSparZiel;
 
@@ -180,6 +182,30 @@ public partial class TransactionDetailViewModel(
     [RelayCommand]
     private async Task Save()
     {
+        if (await TrySaveAsync())
+            await _navigationService.GoBackAsync();
+    }
+
+    public async Task ResetForCreateAsync()
+    {
+        _existingTransaction = null;
+        _selectedKategorieId = null;
+        _selectedAccountId = null;
+        _selectedSparZielId = null;
+        BetragText = string.Empty;
+        Titel = string.Empty;
+        Verwendungszweck = string.Empty;
+        Datum = _clock.Today;
+        Typ = TransactionType.Ausgabe;
+        SelectedKategorie = null;
+        SelectedAccount = null;
+        SelectedSparZiel = null;
+        OnPropertyChanged(nameof(PageTitle));
+        await LoadKategorienCommand.ExecuteAsync(null);
+    }
+
+    public async Task<bool> TrySaveAsync()
+    {
         try
         {
             if (!_validationService.TryValidate(
@@ -203,7 +229,7 @@ public partial class TransactionDetailViewModel(
                     _loc.GetString(ResourceKeys.Err_Titel),
                     message,
                     _loc.GetString(ResourceKeys.Btn_OK));
-                return;
+                return false;
             }
 
             var result = await _saveTransactionDetailUseCase.ExecuteAsync(
@@ -220,12 +246,12 @@ public partial class TransactionDetailViewModel(
             if (!result.IsSuccess)
             {
                 await UseCaseErrorPresenter.ShowAsync(_dialogService, _loc, result.Error!);
-                return;
+                return false;
             }
 
             _appEvents.NotifyDataChanged();
-            await _navigationService.GoBackAsync();
             await _feedbackService.ShowSnackbarAsync(_loc.GetString(ResourceKeys.Msg_Gespeichert));
+            return true;
         }
         catch (Exception ex)
         {
@@ -234,6 +260,7 @@ public partial class TransactionDetailViewModel(
                 _loc.GetString(ResourceKeys.Err_Titel),
                 _loc.GetString(ResourceKeys.Err_SpeichernFehlgeschlagen, ex.Message),
                 _loc.GetString(ResourceKeys.Btn_OK));
+            return false;
         }
     }
 
