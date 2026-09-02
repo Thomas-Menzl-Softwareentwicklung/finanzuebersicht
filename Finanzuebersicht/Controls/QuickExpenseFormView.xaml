@@ -3,7 +3,9 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:Finanzuebersicht.ViewModels"
              xmlns:loc="clr-namespace:Finanzuebersicht.Extensions"
+             xmlns:screenshot="clr-namespace:Finanzuebersicht.Core.Constants;assembly=Finanzuebersicht.Core"
              x:Class="Finanzuebersicht.Controls.QuickExpenseFormView"
+             AutomationId="{x:Static screenshot:ScreenshotAutomationIds.SheetQuickExpense}"
              x:DataType="vm:QuickExpenseCaptureViewModel">
 
     <VerticalStackLayout Spacing="20">

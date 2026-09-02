@@ -1,0 +1,1 @@
+Create via modal sheets for transactions, transfers, categories, accounts, recurring payments, and savings goals. Redesigned transactions list with month chips and day cards. Quick capture in the app; on iPhone also as a widget (Pro). Amounts accept comma and period.

@@ -41,6 +41,10 @@ Finanzuebersicht/Platforms/iOS/Widgets/build-dev/
 Finanzuebersicht/Platforms/iOS/Widgets/XReleases/
 Finanzuebersicht/Platforms/iOS/Widgets/*.xcodeproj/xcuserdata/
 Finanzuebersicht/Platforms/iOS/Widgets/*.xcodeproj/project.xcworkspace/
+
+# Screenshot UITests / XcodeGen (Platforms/iOS/UITests)
+Finanzuebersicht/Platforms/iOS/UITests/DerivedData/
+Finanzuebersicht/Platforms/iOS/UITests/*.xcodeproj/
 *.appex
 
 # Stryker.NET
@@ -51,6 +55,13 @@ Finanzuebersicht.Tests/dotnet-tools.json
 coverage/
 
 /.github/skills/
+
+# fastlane snapshot outputs
+fastlane/screenshots/
+fastlane/report.xml
+fastlane/test_output/
+fastlane/Preview.html
+vendor/bundle/
 
 # Local Mac dev helpers (machine-specific)
 scripts/run-maccatalyst.sh

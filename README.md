@@ -37,7 +37,7 @@ Hinweis: Die Benutzeroberfläche unterstützt Deutsch und Englisch; weitere Spra
 
 ## Screenshots
 
-*Dark Mode auf macOS (Mac Catalyst), Stand **v1.17** — UI seither weiterentwickelt (u. a. Create-Sheets, Transaktionen-Mockup in v1.20); Screenshots folgen.*
+*Stand **v1.20** — sechs Hauptansichten (Dashboard, Transaktionen, Daueraufträge, Verwaltung, Sparziele, Einstellungen) frisch vom iPhone-Simulator (`fastlane screenshots` → `./scripts/copy-readme-screenshots.sh`). Übrige Detail-/Filter-Aufnahmen noch älter.*
 
 ### Dashboard
 
