@@ -1,5 +1,7 @@
+using Finanzuebersicht.Application.UseCases.Sync;
 using Finanzuebersicht.Constants;
 using Finanzuebersicht.Core.Services;
+using Finanzuebersicht.Core.Sync;
 using Finanzuebersicht.Models;
 
 namespace Finanzuebersicht.Application.UseCases.RecurringTransactions;
@@ -7,8 +9,11 @@ namespace Finanzuebersicht.Application.UseCases.RecurringTransactions;
 public class BookDueRecurringInstanceUseCase(
     IRecurringTransactionRepository recurringTransactionRepository,
     ITransactionRepository transactionRepository,
-    IAccountRepository accountRepository)
+    IAccountRepository accountRepository,
+    ICloudSyncOrchestrator? cloudSyncOrchestrator = null)
 {
+    private readonly ICloudSyncOrchestrator? _cloudSyncOrchestrator = cloudSyncOrchestrator;
+
     public async Task ExecuteAsync(
         string recurringTransactionId,
         DateTime instanceDate,
@@ -51,9 +56,22 @@ public class BookDueRecurringInstanceUseCase(
             Datum = effectiveDate,
             DauerauftragId = recurring.Id
         };
+        CloudSyncNotify.StampUpdatedAt(transaction);
 
         await transactionRepository.SaveTransactionAsync(transaction);
+        await CloudSyncNotify.NotifyUpsertAsync(
+            _cloudSyncOrchestrator,
+            SyncEntityType.Transaction,
+            transaction.Id,
+            cancellationToken);
+
         recurring.LetzteAusfuehrung = instanceDate.Date;
+        CloudSyncNotify.StampUpdatedAt(recurring);
         await recurringTransactionRepository.SaveRecurringTransactionAsync(recurring);
+        await CloudSyncNotify.NotifyUpsertAsync(
+            _cloudSyncOrchestrator,
+            SyncEntityType.RecurringTransaction,
+            recurring.Id,
+            cancellationToken);
     }
 }

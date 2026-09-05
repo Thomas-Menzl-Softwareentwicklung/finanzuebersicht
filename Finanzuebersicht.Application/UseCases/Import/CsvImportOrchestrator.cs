@@ -1,7 +1,9 @@
 using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
+using Finanzuebersicht.Application.UseCases.Sync;
 using Finanzuebersicht.Core.Services;
+using Finanzuebersicht.Core.Sync;
 using Finanzuebersicht.Models;
 using Microsoft.Extensions.Logging;
 
@@ -18,7 +20,8 @@ public class CsvImportOrchestrator(
     ICategoryRepository? categoryRepository = null,
     CategorizationService? categorizationService = null,
     IAccountRepository? accountRepository = null,
-    IUncategorizedCategoryService? uncategorizedCategoryService = null)
+    IUncategorizedCategoryService? uncategorizedCategoryService = null,
+    ICloudSyncOrchestrator? cloudSyncOrchestrator = null)
 {
     private const double HistoricalConfidenceThreshold = 0.5;
 
@@ -29,6 +32,7 @@ public class CsvImportOrchestrator(
     private readonly CategorizationService? _categorizationService = categorizationService;
     private readonly IAccountRepository? _accountRepository = accountRepository;
     private readonly IUncategorizedCategoryService? _uncategorizedCategoryService = uncategorizedCategoryService;
+    private readonly ICloudSyncOrchestrator? _cloudSyncOrchestrator = cloudSyncOrchestrator;
 
     public async Task<ImportResult> ImportFromCsvAsync(
         Stream csvStream,
@@ -209,7 +213,13 @@ public class CsvImportOrchestrator(
 
             try
             {
+                CloudSyncNotify.StampUpdatedAt(transaction);
                 await _transactionRepository.SaveTransactionAsync(transaction).ConfigureAwait(false);
+                await CloudSyncNotify.NotifyUpsertAsync(
+                    _cloudSyncOrchestrator,
+                    SyncEntityType.Transaction,
+                    transaction.Id,
+                    cancellationToken).ConfigureAwait(false);
                 imported.Add(transaction);
                 existingInRange.Add(transaction);
                 committedBatch.Add(transaction);
