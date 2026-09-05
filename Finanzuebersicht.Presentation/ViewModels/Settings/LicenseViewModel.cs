@@ -20,6 +20,7 @@ public partial class LicenseViewModel : ObservableObject
     private readonly ISyncMetadataStore _syncMetadataStore;
     private readonly ICloudSyncOrchestrator _cloudSyncOrchestrator;
     private bool _suppressCloudSyncToggle;
+    private bool _lastKnownCloudSyncEnabled;
 
     public LicenseViewModel(
         ILicenseService licenseService,
@@ -86,6 +87,8 @@ public partial class LicenseViewModel : ObservableObject
     public bool ShowCloudSyncControls =>
         _licenseService.CanUseCloudSync && _licenseService.IsCloudSyncImplemented;
 
+    public bool CanToggleCloudSync => ShowCloudSyncControls && !IsBusy;
+
     public bool ShowSyncPurchaseLaterHint =>
         ShowStorePurchaseControls && !ShowCloudSyncControls;
 
@@ -108,8 +111,14 @@ public partial class LicenseViewModel : ObservableObject
     [RelayCommand]
     private async Task CloudSyncToggled(bool enable)
     {
-        if (IsBusy || !ShowCloudSyncControls)
+        if (!ShowCloudSyncControls)
             return;
+
+        if (IsBusy)
+        {
+            SetCloudSyncEnabledSilently(_lastKnownCloudSyncEnabled);
+            return;
+        }
 
         IsBusy = true;
         try
@@ -271,10 +280,14 @@ public partial class LicenseViewModel : ObservableObject
 
     private void SetCloudSyncEnabledSilently(bool value)
     {
+        _lastKnownCloudSyncEnabled = value;
         _suppressCloudSyncToggle = true;
         CloudSyncEnabled = value;
         _suppressCloudSyncToggle = false;
     }
+
+    partial void OnIsBusyChanged(bool value) =>
+        OnPropertyChanged(nameof(CanToggleCloudSync));
 
     private async Task PersistOwnedAndRefreshAsync()
     {
@@ -352,6 +365,7 @@ public partial class LicenseViewModel : ObservableObject
         StubSyncEnabled = _licenseService.HasSyncSubscription;
 
         OnPropertyChanged(nameof(ShowCloudSyncControls));
+        OnPropertyChanged(nameof(CanToggleCloudSync));
         OnPropertyChanged(nameof(ShowSyncPurchaseLaterHint));
     }
 

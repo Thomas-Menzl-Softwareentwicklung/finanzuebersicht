@@ -305,7 +305,8 @@
                                    VerticalOptions="Center"
                                    TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
                             <Switch Grid.Column="1"
-                                    IsToggled="{Binding License.CloudSyncEnabled}" />
+                                    IsToggled="{Binding License.CloudSyncEnabled}"
+                                    IsEnabled="{Binding License.CanToggleCloudSync}" />
                         </Grid>
                         <Label Text="{Binding License.CloudSyncStatusLine}"
                                FontSize="12"

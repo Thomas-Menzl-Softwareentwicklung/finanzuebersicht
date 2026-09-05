@@ -69,6 +69,27 @@ public class LicenseViewModelTests
     }
 
     [Fact]
+    public async Task CloudSyncToggled_WhenBusy_RestoresSwitchAndDoesNotEnable()
+    {
+        var license = CreateLicenseService(canUseCloudSync: true, isImplemented: true);
+        var metadata = new SyncMetadata { SyncEnabled = false };
+        var metadataStore = Substitute.For<ISyncMetadataStore>();
+        metadataStore.GetAsync().Returns(metadata);
+
+        var transport = Substitute.For<ICloudSyncTransport>();
+        var enableUseCase = CreateEnableUseCaseWithTransport(transport, metadataStore, license);
+        var sut = CreateSut(license, enableUseCase, metadataStore);
+
+        await sut.InitializeAsync();
+
+        sut.IsBusy = true;
+        sut.CloudSyncEnabled = true;
+
+        Assert.False(sut.CloudSyncEnabled);
+        await transport.DidNotReceive().GetAccountStatusAsync(Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
     public async Task DisableCloudSync_SetsMetadataFalseAndStopsOrchestrator()
     {
         var license = CreateLicenseService(canUseCloudSync: true, isImplemented: true);
@@ -135,16 +156,11 @@ public class LicenseViewModelTests
         return localizationService;
     }
 
-    private static EnableCloudSyncUseCase CreateEnableUseCaseForSuccess(
+    private static EnableCloudSyncUseCase CreateEnableUseCaseWithTransport(
+        ICloudSyncTransport transport,
         ISyncMetadataStore metadataStore,
         ILicenseService license)
     {
-        var transport = Substitute.For<ICloudSyncTransport>();
-        transport.IsSupported.Returns(true);
-        transport.GetAccountStatusAsync(Arg.Any<CancellationToken>())
-            .Returns(CloudSyncAccountStatus.Available);
-        transport.IsZoneEmptyAsync(Arg.Any<CancellationToken>()).Returns(false);
-
         var accountRepository = Substitute.For<IAccountRepository>();
         accountRepository.GetAccountsAsync()
             .Returns([new Account { Id = "sys-1", Name = "Cash", SystemKey = "cash" }]);
@@ -171,6 +187,19 @@ public class LicenseViewModelTests
             recurringRepository,
             sparZielRepository,
             license);
+    }
+
+    private static EnableCloudSyncUseCase CreateEnableUseCaseForSuccess(
+        ISyncMetadataStore metadataStore,
+        ILicenseService license)
+    {
+        var transport = Substitute.For<ICloudSyncTransport>();
+        transport.IsSupported.Returns(true);
+        transport.GetAccountStatusAsync(Arg.Any<CancellationToken>())
+            .Returns(CloudSyncAccountStatus.Available);
+        transport.IsZoneEmptyAsync(Arg.Any<CancellationToken>()).Returns(false);
+
+        return CreateEnableUseCaseWithTransport(transport, metadataStore, license);
     }
 
     private static EnableCloudSyncUseCase CreateEnableUseCaseForBothHaveData(
