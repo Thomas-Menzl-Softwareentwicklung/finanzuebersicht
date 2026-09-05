@@ -36,7 +36,7 @@ Sync-Engine ist im Store-Apple-Binary (`IsCloudSyncImplemented = true` bei Store
 
 ## 1. Apple Developer + App Store Connect
 
-1. App ID `de.thomasmenzl.finanzuebersicht` (Capabilities: In-App Purchase; **App Groups** `group.de.thomasmenzl.finanzuebersicht` für Quick-Expense-Widget; **iCloud (CloudKit)** mit Container `iCloud.de.thomasmenzl.finanzuebersicht`; **Push Notifications** für CKSyncEngine — nur Haupt-App, nicht die Widget-Extension).
+1. App ID `de.thomasmenzl.finanzuebersicht` (Capabilities: In-App Purchase; **App Groups** `group.de.thomasmenzl.finanzuebersicht` für Quick-Expense-Widget; **iCloud (CloudKit)** mit Container `iCloud.de.thomasmenzl.finanzuebersicht`. Push Notifications für CKSyncEngine sind **nicht** verdrahtet und derzeit nicht in den Entitlements — nur Haupt-App, nicht die Widget-Extension).
 2. Zertifikate: **Apple Development** + **Apple Distribution**.
 3. Profiles: Development + **App Store**.
 4. ASC: iOS-App anlegen (gleiche Bundle-ID).

@@ -28,6 +28,7 @@ public static class CloudKitSyncBridgeCodec
         SyncEntityType.Transaction => "Transaction",
         SyncEntityType.RecurringTransaction => "RecurringTransaction",
         SyncEntityType.SparZiel => "SparZiel",
+        SyncEntityType.SyncMeta => "SyncMeta",
         _ => throw new ArgumentOutOfRangeException(nameof(type), type, "Unknown sync entity type.")
     };
 
@@ -40,6 +41,7 @@ public static class CloudKitSyncBridgeCodec
             case "Transaction": type = SyncEntityType.Transaction; return true;
             case "RecurringTransaction": type = SyncEntityType.RecurringTransaction; return true;
             case "SparZiel": type = SyncEntityType.SparZiel; return true;
+            case "SyncMeta": type = SyncEntityType.SyncMeta; return true;
             default: type = default; return false;
         }
     }
@@ -77,6 +79,7 @@ public static class CloudKitSyncBridgeCodec
         }
 
         var records = new List<CloudSyncRecordDto>(decoded.Length);
+        var seenTombstoneIds = new HashSet<string>(StringComparer.Ordinal);
         foreach (var native in decoded)
         {
             if (native is null || string.IsNullOrWhiteSpace(native.Id))
@@ -86,6 +89,12 @@ public static class CloudKitSyncBridgeCodec
 
             if (!Enum.IsDefined(typeof(SyncEntityType), native.EntityType))
             {
+                continue;
+            }
+
+            if (native.IsTombstone && !seenTombstoneIds.Add(native.Id))
+            {
+                // Prefer the Tombstone record's deletedAt over a later now-stamped hard-delete DTO.
                 continue;
             }
 

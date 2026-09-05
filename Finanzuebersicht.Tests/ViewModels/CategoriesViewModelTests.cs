@@ -341,6 +341,9 @@ public class CategoriesViewModelTests
         accountCreateSheet = Substitute.For<IAccountCreateSheetService>();
         accountCreateSheet.ShowAsync(Arg.Any<AccountDetailViewModel>()).Returns(false);
 
+        transactionRepository.GetAllTransactionsAsync(Arg.Any<CancellationToken>()).Returns([]);
+        recurringTransactionRepository.GetRecurringTransactionsAsync().Returns([]);
+
         var categoriesCoordinator = new CategoriesListCoordinator(
             new LoadCategoriesUseCase(categoryRepository),
             new DeleteCategoryUseCase(categoryRepository, transactionRepository, recurringTransactionRepository),

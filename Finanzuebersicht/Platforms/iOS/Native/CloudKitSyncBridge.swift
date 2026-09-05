@@ -13,6 +13,11 @@
 //    - updatedAt (Date)   — last local write, drives last-write-wins
 //    - recordName == entity Id
 //
+//  Record type SyncMeta — schema fence (stable recordName "sync-meta")
+//    - schemaVersion (Int) — first shipping format is 1
+//    - payload       (String) — {"schemaVersion":N}
+//    NOT in entityRecordTypes; ordinals 0–4 must stay aligned with C# SyncEntityType
+//
 //  Record type Tombstone — durable deletion marker
 //    - entityType (String) — one of the entity record types
 //    - deletedAt  (Date)
@@ -41,6 +46,9 @@ private enum CKBridgeConfig {
 
     static let tombstoneRecordType = "Tombstone"
     static let tombstoneRecordNamePrefix = "tombstone-"
+    static let syncMetaRecordType = "SyncMeta"
+    static let syncMetaEntityTypeOrdinal = 5
+    static let schemaVersionField = "schemaVersion"
 
     static let payloadField = "payload"
     static let updatedAtField = "updatedAt"
@@ -48,7 +56,7 @@ private enum CKBridgeConfig {
     static let deletedAtField = "deletedAt"
 
     /// The only fields the bridge owns — anything else on a server record stays untouched.
-    static let bridgeFields = [payloadField, updatedAtField, entityTypeField, deletedAtField]
+    static let bridgeFields = [payloadField, updatedAtField, entityTypeField, deletedAtField, schemaVersionField]
 
     static let stateDefaultsKey = "de.thomasmenzl.finanzuebersicht.cloudkit.syncEngineState"
     static let stagedRecordsDefaultsKey = "de.thomasmenzl.finanzuebersicht.cloudkit.stagedRecords"
@@ -62,6 +70,10 @@ private enum CKBridgeConfig {
 
     static func isKnownEntityRecordType(_ recordType: String) -> Bool {
         entityRecordTypes.contains(recordType)
+    }
+
+    static func isUpsertRecordType(_ recordType: String) -> Bool {
+        isKnownEntityRecordType(recordType) || recordType == syncMetaRecordType
     }
 }
 
@@ -412,6 +424,11 @@ private final class CKSyncEngineHost: NSObject, CKSyncEngineDelegate {
         let record = baseRecord(for: recordID, recordType: recordType)
         record[CKBridgeConfig.payloadField] = payloadJson as CKRecordValue
         record[CKBridgeConfig.updatedAtField] = updatedAt as CKRecordValue
+        if recordType == CKBridgeConfig.syncMetaRecordType,
+           let version = Self.schemaVersion(fromPayload: payloadJson)
+        {
+            record[CKBridgeConfig.schemaVersionField] = version as CKRecordValue
+        }
 
         stage(record)
         engine.state.add(pendingRecordZoneChanges: [.saveRecord(recordID)])
@@ -576,6 +593,16 @@ private final class CKSyncEngineHost: NSObject, CKSyncEngineDelegate {
 
         for deletion in changes.deletions {
             unstage(deletion.recordID)
+            // enqueueDelete always saves Tombstone (`tombstone-<id>`) plus `.deleteRecord(entityID)`.
+            // The hard-delete DTO stamps deletedAt = now and would beat a newer local edit;
+            // prefer the Tombstone's deletedAt when both arrive in the same batch.
+            let entityId = deletion.recordID.recordName
+            let batchAlreadyHasTombstone = batch.contains { dto in
+                (dto["isTombstone"] as? Bool) == true && (dto["id"] as? String) == entityId
+            }
+            if batchAlreadyHasTombstone {
+                continue
+            }
             if let dto = Self.dto(fromDeletionOf: deletion.recordID, recordType: deletion.recordType) {
                 batch.append(dto)
             }
@@ -674,6 +701,22 @@ private final class CKSyncEngineHost: NSObject, CKSyncEngineDelegate {
             ]
         }
 
+        if record.recordType == CKBridgeConfig.syncMetaRecordType {
+            let version = schemaVersion(from: record) ?? 1
+            let payload = record[CKBridgeConfig.payloadField] as? String
+                ?? "{\"schemaVersion\":\(version)}"
+            var dto: [String: Any] = [
+                "entityType": CKBridgeConfig.syncMetaEntityTypeOrdinal,
+                "id": record.recordID.recordName,
+                "isTombstone": false,
+                "payloadJson": payload
+            ]
+            if let updatedAt = record[CKBridgeConfig.updatedAtField] as? Date {
+                dto["updatedAt"] = CKBridgeDates.string(from: updatedAt)
+            }
+            return dto
+        }
+
         guard let ordinal = CKBridgeConfig.entityTypeOrdinal(forRecordType: record.recordType),
               let payload = record[CKBridgeConfig.payloadField] as? String
         else {
@@ -706,6 +749,34 @@ private final class CKSyncEngineHost: NSObject, CKSyncEngineDelegate {
             "updatedAt": now,
             "deletedAt": now
         ]
+    }
+
+    private static func schemaVersion(fromPayload payloadJson: String) -> Int? {
+        guard let data = payloadJson.data(using: .utf8),
+              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
+        else {
+            return nil
+        }
+        if let version = json["schemaVersion"] as? Int {
+            return version
+        }
+        if let number = json["schemaVersion"] as? NSNumber {
+            return number.intValue
+        }
+        return nil
+    }
+
+    private static func schemaVersion(from record: CKRecord) -> Int? {
+        if let stored = record[CKBridgeConfig.schemaVersionField] as? Int {
+            return stored
+        }
+        if let stored = record[CKBridgeConfig.schemaVersionField] as? Int64 {
+            return Int(stored)
+        }
+        if let payload = record[CKBridgeConfig.payloadField] as? String {
+            return schemaVersion(fromPayload: payload)
+        }
+        return nil
     }
 }
 
@@ -802,7 +873,7 @@ public func finanzuebersicht_ck_enqueue_upsert(
     let recordName = String(cString: id)
     let payload = String(cString: payloadJson)
 
-    guard CKBridgeConfig.isKnownEntityRecordType(recordType),
+    guard CKBridgeConfig.isUpsertRecordType(recordType),
           !recordName.isEmpty,
           let updatedAt = CKBridgeDates.date(from: String(cString: updatedAtIso))
     else {

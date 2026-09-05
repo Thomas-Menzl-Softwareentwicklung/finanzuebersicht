@@ -11,19 +11,72 @@ namespace Finanzuebersicht.Tests.ViewModels.Settings;
 public class LicenseViewModelTests
 {
     [Theory]
-    [InlineData(false, false, false)]
-    [InlineData(true, false, false)]
-    [InlineData(false, true, false)]
-    [InlineData(true, true, true)]
-    public void ShowCloudSyncControls_RequiresBothEntitlementAndImplementation(
+    [InlineData(false, false, false, false)]
+    [InlineData(true, false, false, false)]
+    [InlineData(false, true, false, false)]
+    [InlineData(true, true, false, true)]
+    [InlineData(false, true, true, true)]
+    public async Task ShowCloudSyncControls_VisibleWhenImplementedAndEntitledOrAlreadyEnabled(
         bool canUseCloudSync,
         bool isImplemented,
+        bool syncEnabled,
         bool expected)
     {
         var license = CreateLicenseService(canUseCloudSync, isImplemented);
-        var sut = CreateSut(license);
+        var metadataStore = Substitute.For<ISyncMetadataStore>();
+        metadataStore.GetAsync().Returns(new SyncMetadata { SyncEnabled = syncEnabled });
+        var sut = CreateSut(license, metadataStore: metadataStore);
+
+        await sut.InitializeAsync();
 
         Assert.Equal(expected, sut.ShowCloudSyncControls);
+    }
+
+    [Fact]
+    public async Task CanToggleCloudSync_IsFalseWhenEntitlementExpired()
+    {
+        var license = CreateLicenseService(canUseCloudSync: false, isImplemented: true);
+        var metadataStore = Substitute.For<ISyncMetadataStore>();
+        metadataStore.GetAsync().Returns(new SyncMetadata { SyncEnabled = true });
+        var sut = CreateSut(license, metadataStore: metadataStore);
+
+        await sut.InitializeAsync();
+
+        Assert.True(sut.ShowCloudSyncControls);
+        Assert.False(sut.CanToggleCloudSync);
+        Assert.Equal(ResourceKeys.Sync_PausedRenew, sut.CloudSyncStatusLine);
+    }
+
+    [Fact]
+    public async Task EnableCloudSync_WhenUseCaseThrows_RevertsSwitchShowsAlertAndPersistsLastError()
+    {
+        var license = CreateLicenseService(canUseCloudSync: true, isImplemented: true);
+        var metadata = new SyncMetadata { SyncEnabled = false };
+        var metadataStore = Substitute.For<ISyncMetadataStore>();
+        metadataStore.GetAsync().Returns(metadata);
+
+        var transport = Substitute.For<ICloudSyncTransport>();
+        transport.IsSupported.Returns(true);
+        transport.GetAccountStatusAsync(Arg.Any<CancellationToken>())
+            .Returns(CloudSyncAccountStatus.Available);
+        transport.IsZoneEmptyAsync(Arg.Any<CancellationToken>())
+            .Returns<bool>(_ => throw new InvalidOperationException("CloudKit unavailable"));
+
+        var enableUseCase = CreateEnableUseCaseWithTransport(transport, metadataStore, license);
+        var dialogService = CreateDialogService();
+        var localization = CreateLocalizationService();
+        var sut = CreateSut(license, enableUseCase, metadataStore, dialogService, localization);
+
+        var ex = await Record.ExceptionAsync(() => sut.CloudSyncToggledCommand.ExecuteAsync(true));
+
+        Assert.Null(ex);
+        Assert.False(sut.CloudSyncEnabled);
+        Assert.Equal("CloudKit unavailable", metadata.LastError);
+        await metadataStore.Received().SaveAsync(Arg.Is<SyncMetadata>(m => m.LastError == "CloudKit unavailable"));
+        await dialogService.Received(1).ShowAlertAsync(
+            ResourceKeys.Err_Titel,
+            ResourceKeys.Sync_Error,
+            ResourceKeys.Btn_OK);
     }
 
     [Fact]
@@ -36,7 +89,8 @@ public class LicenseViewModelTests
         var enableUseCase = CreateEnableUseCaseForSuccess(metadataStore, license);
 
         var dialogService = CreateDialogService();
-        var sut = CreateSut(license, enableUseCase, metadataStore, dialogService);
+        var orchestrator = Substitute.For<ICloudSyncOrchestrator>();
+        var sut = CreateSut(license, enableUseCase, metadataStore, dialogService, orchestrator: orchestrator);
 
         await sut.CloudSyncToggledCommand.ExecuteAsync(true);
 
@@ -45,6 +99,7 @@ public class LicenseViewModelTests
             Arg.Any<string>(),
             Arg.Any<string>(),
             Arg.Any<string>());
+        await orchestrator.Received(1).SyncNowAsync(Arg.Any<CancellationToken>());
     }
 
     [Fact]

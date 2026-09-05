@@ -44,7 +44,25 @@ public class DeleteAccountUseCase(
             createdFallback = true;
         }
 
+        var transactions = await _transactionRepository.GetAllTransactionsAsync(cancellationToken);
+        var remappedTransactionIds = transactions
+            .Where(t => t.AccountId == accountId)
+            .Select(t => t.Id)
+            .ToList();
+
         await _transactionRepository.RemapAccountIdAsync(accountId, fallback.Id, cancellationToken);
+
+        foreach (var transaction in transactions.Where(t => remappedTransactionIds.Contains(t.Id)))
+        {
+            transaction.AccountId = fallback.Id;
+            CloudSyncNotify.StampUpdatedAt(transaction);
+            await _transactionRepository.SaveTransactionAsync(transaction);
+            await CloudSyncNotify.NotifyUpsertAsync(
+                _cloudSyncOrchestrator,
+                SyncEntityType.Transaction,
+                transaction.Id,
+                cancellationToken);
+        }
 
         var templates = await _transactionTemplateRepository.GetTransactionTemplatesAsync();
         foreach (var template in templates.Where(t => t.AccountId == accountId))

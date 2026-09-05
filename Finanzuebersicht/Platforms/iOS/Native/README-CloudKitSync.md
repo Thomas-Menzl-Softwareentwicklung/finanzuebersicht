@@ -10,7 +10,7 @@ Native Swift bridge (`CloudKitSyncBridge.swift`) around **CKSyncEngine** for the
 | Database | private (current user) |
 | Custom zone | `finanzuebersicht-sync` |
 
-Entity record types: `Account`, `Category`, `Transaction`, `RecurringTransaction`, `SparZiel`. Tombstones use record name `tombstone-<entityId>`.
+Entity record types: `Account`, `Category`, `Transaction`, `RecurringTransaction`, `SparZiel`. Schema fence: `SyncMeta` (`schemaVersion`, record name `sync-meta`) — not part of the 0–4 entity ordinals. Tombstones use record name `tombstone-<entityId>`.
 
 ## Rebuild `libCloudKitSyncBridge.a`
 
@@ -56,8 +56,8 @@ On App ID **`de.thomasmenzl.finanzuebersicht`** (main app only — **not** the Q
 
 1. Enable **iCloud** → **CloudKit**.
 2. Create / assign container **`iCloud.de.thomasmenzl.finanzuebersicht`**.
-3. Enable **Push Notifications** (APS; entitlements use `development` in Debug, `production` in Release / Store).
-4. Regenerate Development and App Store provisioning profiles after capability changes.
+3. Enable **Push Notifications** only when CKSyncEngine push is implemented (deferred — do not regenerate profiles for unused APS).
+4. Regenerate Development and App Store provisioning profiles after **iCloud / CloudKit** capability changes.
 
 Entitlements live in:
 
@@ -68,9 +68,9 @@ Entitlements live in:
 
 The Quick Expense Widget `.appex` must **not** receive CloudKit entitlements.
 
-## Background modes
+## Background modes / push
 
-`UIBackgroundModes` → `remote-notification` is set in the iOS and Mac Catalyst `Info.plist` files for CKSyncEngine push handling.
+CKSyncEngine remote-notification push is **not** wired (`automaticallySync` is false; the app does not call `RegisterForRemoteNotifications`). `UIBackgroundModes` → `remote-notification` and `aps-environment` were removed so the Store build does not declare an unused push capability. Push remains a follow-up once send/fetch is proven on device.
 
 ## Privacy manifest
 
@@ -80,4 +80,4 @@ The Quick Expense Widget `.appex` must **not** receive CloudKit entitlements.
 
 Run the manual checklist before closing [#243](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/243): [`docs/CLOUDKIT_SYNC_QA.md`](../../../../docs/CLOUDKIT_SYNC_QA.md). Live CloudKit end-to-end has not been smoke-tested on this branch yet.
 
-Known gaps: `RecurringGenerationService` writes bypass orchestrator notify; account/category delete remaps are not synced row-by-row.
+Known gaps: `RecurringGenerationService` writes bypass orchestrator notify (do not sync generated instances until ids are stable across devices); Mac Catalyst Debug without iCloud entitlements; live CloudKit end-to-end has not been smoke-tested on this branch yet. Schema pause: a `SyncMeta` record with `schemaVersion` newer than the app stops apply/upload and surfaces `Sync_Error`.

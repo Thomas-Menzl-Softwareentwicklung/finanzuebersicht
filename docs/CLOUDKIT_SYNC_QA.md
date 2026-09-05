@@ -29,9 +29,12 @@
 
 ## Known gaps (not blockers for checklist design)
 
-- `RecurringGenerationService` writes bypass orchestrator notify.
-- Account/category delete remaps are not synced row-by-row.
+- `RecurringGenerationService` writes bypass orchestrator notify. Do **not** notify auto-generated transactions until instance ids are stable across devices (`DauerauftragId` + date); notifying two Guid copies would double-book.
 - Live CloudKit end-to-end has **not** been smoke-tested on this branch before device QA.
+- Mac Catalyst **Debug** has no iCloud entitlements — use Release/Store Mac build for Mac-side QA.
+- Schema pause is implemented: a cloud `SyncMeta.schemaVersion` newer than the app persists `LastError` and skips apply/upload (`Sync_Error` in Settings).
+
+#243 stays open.
 
 ## Sign-off
 

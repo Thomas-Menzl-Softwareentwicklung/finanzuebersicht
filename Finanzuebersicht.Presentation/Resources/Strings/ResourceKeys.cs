@@ -156,6 +156,7 @@ public static class ResourceKeys
     public const string Sync_LastSync = nameof(Sync_LastSync);
     public const string Sync_NeverSynced = nameof(Sync_NeverSynced);
     public const string Sync_Error = nameof(Sync_Error);
+    public const string Sync_PausedRenew = nameof(Sync_PausedRenew);
     public const string Sync_BlockedBothHaveData = nameof(Sync_BlockedBothHaveData);
     public const string Sync_BlockedNoEntitlement = nameof(Sync_BlockedNoEntitlement);
     public const string Sync_BlockedUnsupported = nameof(Sync_BlockedUnsupported);

@@ -21,6 +21,7 @@ public partial class LicenseViewModel : ObservableObject
     private readonly ICloudSyncOrchestrator _cloudSyncOrchestrator;
     private bool _suppressCloudSyncToggle;
     private bool _lastKnownCloudSyncEnabled;
+    private bool _metadataSyncEnabled;
 
     public LicenseViewModel(
         ILicenseService licenseService,
@@ -85,9 +86,11 @@ public partial class LicenseViewModel : ObservableObject
     private string cloudSyncStatusLine = string.Empty;
 
     public bool ShowCloudSyncControls =>
-        _licenseService.CanUseCloudSync && _licenseService.IsCloudSyncImplemented;
+        _licenseService.IsCloudSyncImplemented &&
+        (_licenseService.CanUseCloudSync || _metadataSyncEnabled);
 
-    public bool CanToggleCloudSync => ShowCloudSyncControls && !IsBusy;
+    public bool CanToggleCloudSync =>
+        ShowCloudSyncControls && _licenseService.CanUseCloudSync && !IsBusy;
 
     public bool ShowSyncPurchaseLaterHint =>
         ShowStorePurchaseControls && !ShowCloudSyncControls;
@@ -127,6 +130,18 @@ public partial class LicenseViewModel : ObservableObject
                 await EnableCloudSyncAsync();
             else
                 await DisableCloudSyncAsync();
+        }
+        catch (Exception ex)
+        {
+            SetCloudSyncEnabledSilently(_lastKnownCloudSyncEnabled);
+            var metadata = await _syncMetadataStore.GetAsync();
+            metadata.LastError = ex.Message;
+            await _syncMetadataStore.SaveAsync(metadata);
+            CloudSyncStatusLine = BuildCloudSyncStatusLine(metadata);
+            await _dialogService.ShowAlertAsync(
+                _loc.GetString(ResourceKeys.Err_Titel),
+                _loc.GetString(ResourceKeys.Sync_Error, ex.Message),
+                _loc.GetString(ResourceKeys.Btn_OK));
         }
         finally
         {
@@ -225,6 +240,7 @@ public partial class LicenseViewModel : ObservableObject
         {
             await RefreshCloudSyncFromMetadataAsync();
             RefreshFromService();
+            await _cloudSyncOrchestrator.SyncNowAsync();
             return;
         }
 
@@ -247,16 +263,22 @@ public partial class LicenseViewModel : ObservableObject
 
     private async Task RefreshCloudSyncFromMetadataAsync()
     {
-        if (!ShowCloudSyncControls)
+        if (!_licenseService.IsCloudSyncImplemented)
             return;
 
         var metadata = await _syncMetadataStore.GetAsync();
+        _metadataSyncEnabled = metadata.SyncEnabled;
         SetCloudSyncEnabledSilently(metadata.SyncEnabled);
         CloudSyncStatusLine = BuildCloudSyncStatusLine(metadata);
+        OnPropertyChanged(nameof(ShowCloudSyncControls));
+        OnPropertyChanged(nameof(CanToggleCloudSync));
     }
 
     private string BuildCloudSyncStatusLine(SyncMetadata metadata)
     {
+        if (metadata.SyncEnabled && !_licenseService.CanUseCloudSync)
+            return _loc.GetString(ResourceKeys.Sync_PausedRenew);
+
         if (!string.IsNullOrWhiteSpace(metadata.LastError))
             return _loc.GetString(ResourceKeys.Sync_Error, metadata.LastError);
 

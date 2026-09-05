@@ -10,6 +10,7 @@ public class CloudKitSyncBridgeCodecTests
     [InlineData(SyncEntityType.Transaction, "Transaction")]
     [InlineData(SyncEntityType.RecurringTransaction, "RecurringTransaction")]
     [InlineData(SyncEntityType.SparZiel, "SparZiel")]
+    [InlineData(SyncEntityType.SyncMeta, "SyncMeta")]
     public void ToRecordType_MapsEveryEntityType(SyncEntityType type, string expected)
     {
         Assert.Equal(expected, CloudKitSyncBridgeCodec.ToRecordType(type));
@@ -98,6 +99,44 @@ public class CloudKitSyncBridgeCodecTests
             new DateTime(2026, 3, 4, 10, 11, 12, 345, DateTimeKind.Utc),
             record.DeletedAt);
         Assert.Equal(DateTimeKind.Utc, record.DeletedAt!.Value.Kind);
+    }
+
+    [Fact]
+    public void DecodeRecords_ReadsSyncMetaRecord()
+    {
+        const string json = """
+        [
+          {
+            "entityType": 5,
+            "id": "sync-meta",
+            "updatedAt": "2026-01-01T00:00:00Z",
+            "payloadJson": "{\"schemaVersion\":1}",
+            "isTombstone": false
+          }
+        ]
+        """;
+
+        var record = Assert.Single(CloudKitSyncBridgeCodec.DecodeRecords(json));
+        Assert.Equal(SyncEntityType.SyncMeta, record.EntityType);
+        Assert.Equal(CloudSyncSchema.RecordName, record.Id);
+        Assert.Equal("{\"schemaVersion\":1}", record.PayloadJson);
+        Assert.False(record.IsTombstone);
+    }
+
+    [Fact]
+    public void DecodeRecords_WhenTombstoneAndNowStampDelete_KeepsTombstoneDeletedAt()
+    {
+        const string json = """
+        [
+          { "entityType": 0, "id": "acc-1", "isTombstone": true, "deletedAt": "2026-01-01T00:00:00Z" },
+          { "entityType": 0, "id": "acc-1", "isTombstone": true, "deletedAt": "2026-01-02T00:00:00Z" }
+        ]
+        """;
+
+        var record = Assert.Single(CloudKitSyncBridgeCodec.DecodeRecords(json));
+        Assert.True(record.IsTombstone);
+        Assert.Equal("acc-1", record.Id);
+        Assert.Equal(new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc), record.DeletedAt);
     }
 
     [Fact]

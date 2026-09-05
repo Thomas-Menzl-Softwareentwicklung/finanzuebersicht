@@ -49,12 +49,15 @@ public sealed class EnableCloudSyncUseCase(
 
         var metadata = await metadataStore.GetAsync();
         metadata.SyncEnabled = true;
+        metadata.SchemaVersionSeen = CloudSyncSchema.CurrentVersion;
         await metadataStore.SaveAsync(metadata);
         await transport.StartAsync(ct);
+        await transport.EnqueueUpsertAsync(CreateSyncMetaRecord(), ct);
 
         if (cloudEmpty && !localEmpty)
         {
             await SeedLocalEntitiesAsync(ct);
+            await transport.SendChangesAsync(ct);
         }
         else
         {
@@ -104,18 +107,21 @@ public sealed class EnableCloudSyncUseCase(
         var accounts = await accountRepository.GetAccountsAsync();
         foreach (var account in accounts)
         {
+            await StampAndSaveAccountAsync(account);
             await transport.EnqueueUpsertAsync(ToRecord(SyncEntityType.Account, account.Id, account, account.UpdatedAt), ct);
         }
 
         var categories = await categoryRepository.GetCategoriesAsync();
         foreach (var category in categories)
         {
+            await StampAndSaveCategoryAsync(category);
             await transport.EnqueueUpsertAsync(ToRecord(SyncEntityType.Category, category.Id, category, category.UpdatedAt), ct);
         }
 
         var transactions = await transactionRepository.GetAllTransactionsAsync(ct);
         foreach (var transaction in transactions)
         {
+            await StampAndSaveTransactionAsync(transaction);
             await transport.EnqueueUpsertAsync(
                 ToRecord(SyncEntityType.Transaction, transaction.Id, transaction, transaction.UpdatedAt),
                 ct);
@@ -124,6 +130,7 @@ public sealed class EnableCloudSyncUseCase(
         var recurring = await recurringTransactionRepository.GetRecurringTransactionsAsync();
         foreach (var item in recurring)
         {
+            await StampAndSaveRecurringAsync(item);
             await transport.EnqueueUpsertAsync(
                 ToRecord(SyncEntityType.RecurringTransaction, item.Id, item, item.UpdatedAt),
                 ct);
@@ -132,11 +139,79 @@ public sealed class EnableCloudSyncUseCase(
         var sparZiele = await sparZielRepository.GetSparZieleAsync();
         foreach (var sparZiel in sparZiele)
         {
+            await StampAndSaveSparZielAsync(sparZiel);
             await transport.EnqueueUpsertAsync(
                 ToRecord(SyncEntityType.SparZiel, sparZiel.Id, sparZiel, sparZiel.UpdatedAt),
                 ct);
         }
     }
+
+    private async Task StampAndSaveAccountAsync(Account account)
+    {
+        if (account.UpdatedAt is not null)
+        {
+            return;
+        }
+
+        account.UpdatedAt = DateTime.UtcNow;
+        await accountRepository.SaveAccountAsync(account);
+    }
+
+    private async Task StampAndSaveCategoryAsync(Category category)
+    {
+        if (category.UpdatedAt is not null)
+        {
+            return;
+        }
+
+        category.UpdatedAt = DateTime.UtcNow;
+        await categoryRepository.SaveCategoryAsync(category);
+    }
+
+    private async Task StampAndSaveTransactionAsync(Transaction transaction)
+    {
+        if (transaction.UpdatedAt is not null)
+        {
+            return;
+        }
+
+        transaction.UpdatedAt = DateTime.UtcNow;
+        await transactionRepository.SaveTransactionAsync(transaction);
+    }
+
+    private async Task StampAndSaveRecurringAsync(RecurringTransaction item)
+    {
+        if (item.UpdatedAt is not null)
+        {
+            return;
+        }
+
+        item.UpdatedAt = DateTime.UtcNow;
+        await recurringTransactionRepository.SaveRecurringTransactionAsync(item);
+    }
+
+    private async Task StampAndSaveSparZielAsync(SparZiel sparZiel)
+    {
+        if (sparZiel.UpdatedAt is not null)
+        {
+            return;
+        }
+
+        sparZiel.UpdatedAt = DateTime.UtcNow;
+        await sparZielRepository.SaveSparZielAsync(sparZiel);
+    }
+
+    private static CloudSyncRecordDto CreateSyncMetaRecord() =>
+        new()
+        {
+            EntityType = SyncEntityType.SyncMeta,
+            Id = CloudSyncSchema.RecordName,
+            UpdatedAt = DateTime.UtcNow,
+            PayloadJson = JsonSerializer.Serialize(
+                new Dictionary<string, int> { ["schemaVersion"] = CloudSyncSchema.CurrentVersion },
+                PayloadJsonOptions),
+            IsTombstone = false
+        };
 
     private static CloudSyncRecordDto ToRecord<T>(SyncEntityType entityType, string id, T entity, DateTime? updatedAt)
     {

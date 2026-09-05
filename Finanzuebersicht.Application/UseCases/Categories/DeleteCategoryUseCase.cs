@@ -41,13 +41,38 @@ public class DeleteCategoryUseCase(
             createdFallback = true;
         }
 
+        var transactions = await _transactionRepository.GetAllTransactionsAsync(cancellationToken);
+        var remappedTransactionIds = transactions
+            .Where(t => t.KategorieId == categoryId)
+            .Select(t => t.Id)
+            .ToList();
+
         await _transactionRepository.RemapCategoryIdAsync(categoryId, fallbackCategory.Id, cancellationToken);
 
+        foreach (var transaction in transactions.Where(t => remappedTransactionIds.Contains(t.Id)))
+        {
+            transaction.KategorieId = fallbackCategory.Id;
+            CloudSyncNotify.StampUpdatedAt(transaction);
+            await _transactionRepository.SaveTransactionAsync(transaction);
+            await CloudSyncNotify.NotifyUpsertAsync(
+                _cloudSyncOrchestrator,
+                SyncEntityType.Transaction,
+                transaction.Id,
+                cancellationToken);
+        }
+
         var recurringTransactions = await _recurringTransactionRepository.GetRecurringTransactionsAsync();
-        foreach (var recurring in recurringTransactions.Where(r => r.KategorieId == categoryId))
+        var remappedRecurring = recurringTransactions.Where(r => r.KategorieId == categoryId).ToList();
+        foreach (var recurring in remappedRecurring)
         {
             recurring.KategorieId = fallbackCategory.Id;
+            CloudSyncNotify.StampUpdatedAt(recurring);
             await _recurringTransactionRepository.SaveRecurringTransactionAsync(recurring);
+            await CloudSyncNotify.NotifyUpsertAsync(
+                _cloudSyncOrchestrator,
+                SyncEntityType.RecurringTransaction,
+                recurring.Id,
+                cancellationToken);
         }
 
         await _categoryRepository.DeleteCategoryAsync(categoryId);

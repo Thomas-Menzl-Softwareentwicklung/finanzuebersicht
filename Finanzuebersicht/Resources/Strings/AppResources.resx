@@ -165,6 +165,7 @@
   <data name="Sync_LastSync" xml:space="preserve"><value>Last sync: {0}</value></data>
   <data name="Sync_NeverSynced" xml:space="preserve"><value>Not synced yet</value></data>
   <data name="Sync_Error" xml:space="preserve"><value>Sync error: {0}</value></data>
+  <data name="Sync_PausedRenew" xml:space="preserve"><value>iCloud Sync is paused. Renew your subscription to continue.</value></data>
   <data name="Sync_BlockedBothHaveData" xml:space="preserve"><value>Cloud Sync cannot be enabled because both this device and iCloud contain data. Create a backup (Settings → Backup) and use either an empty device or empty iCloud data before enabling.</value></data>
   <data name="Sync_BlockedNoEntitlement" xml:space="preserve"><value>Cloud Sync requires an active Sync subscription.</value></data>
   <data name="Sync_BlockedUnsupported" xml:space="preserve"><value>Cloud Sync is not supported on this device or OS version.</value></data>

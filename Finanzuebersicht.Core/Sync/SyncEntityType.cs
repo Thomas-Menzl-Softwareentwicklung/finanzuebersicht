@@ -6,5 +6,6 @@ public enum SyncEntityType
     Category = 1,
     Transaction = 2,
     RecurringTransaction = 3,
-    SparZiel = 4
+    SparZiel = 4,
+    SyncMeta = 5
 }
