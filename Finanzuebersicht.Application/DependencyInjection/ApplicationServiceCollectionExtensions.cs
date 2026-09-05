@@ -6,6 +6,7 @@ using Finanzuebersicht.Application.UseCases.Import;
 using Finanzuebersicht.Application.UseCases.RecurringTransactions;
 using Finanzuebersicht.Application.UseCases.ScreenshotDemo;
 using Finanzuebersicht.Application.UseCases.SparZiele;
+using Finanzuebersicht.Application.UseCases.Sync;
 using Finanzuebersicht.Application.UseCases.Transactions;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -83,6 +84,8 @@ public static class ApplicationServiceCollectionExtensions
         services.AddTransient<DeleteSparZielUseCase>();
 
         services.AddTransient<SeedScreenshotDemoDataUseCase>();
+
+        services.AddTransient<EnableCloudSyncUseCase>();
 
         services.AddSingleton<InitializationService>();
 
