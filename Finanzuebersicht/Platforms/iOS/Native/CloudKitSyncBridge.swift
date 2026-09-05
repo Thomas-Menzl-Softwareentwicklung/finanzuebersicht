@@ -19,6 +19,9 @@
 //    - recordName == "tombstone-" + entity Id (a CloudKit recordName is unique per zone
 //      across record types, so the marker cannot reuse the deleted entity's name)
 //
+//  Staged records are mirrored into UserDefaults next to the CKSyncEngine state, so a
+//  pending change restored after a process restart can still be turned back into a CKRecord.
+//
 //  The bundle needs the iCloud container entitlement before any of this can succeed —
 //  that is wired up separately (Task 9). Without it CloudKit calls fail with
 //  CKError.missingEntitlement and the bridge reports a non-zero error code.
@@ -44,7 +47,11 @@ private enum CKBridgeConfig {
     static let entityTypeField = "entityType"
     static let deletedAtField = "deletedAt"
 
+    /// The only fields the bridge owns — anything else on a server record stays untouched.
+    static let bridgeFields = [payloadField, updatedAtField, entityTypeField, deletedAtField]
+
     static let stateDefaultsKey = "de.thomasmenzl.finanzuebersicht.cloudkit.syncEngineState"
+    static let stagedRecordsDefaultsKey = "de.thomasmenzl.finanzuebersicht.cloudkit.stagedRecords"
 
     /// Index == SyncEntityType ordinal in C# (Account = 0 … SparZiel = 4).
     static let entityRecordTypes = ["Account", "Category", "Transaction", "RecurringTransaction", "SparZiel"]
@@ -171,6 +178,52 @@ private func ckBridgeRunBlocking(_ work: @escaping () async throws -> Int32) -> 
     return box.value
 }
 
+// MARK: - Persisted staging
+
+/// Serialized form of a staged `CKRecord` — enough to rebuild it after a process restart.
+///
+/// `CKSyncEngine` persists `pendingRecordZoneChanges` in its `stateSerialization`, but not the
+/// records themselves. Without this mirror an offline edit would come back as a pending change
+/// with nothing staged, and `nextRecordZoneChangeBatch` would drop it (never uploaded).
+private struct CKStagedRecord: Codable {
+    let recordName: String
+    let recordType: String
+    var payload: String?
+    var updatedAt: Date?
+    var entityType: String?
+    var deletedAt: Date?
+
+    init(record: CKRecord) {
+        recordName = record.recordID.recordName
+        recordType = record.recordType
+        payload = record[CKBridgeConfig.payloadField] as? String
+        updatedAt = record[CKBridgeConfig.updatedAtField] as? Date
+        entityType = record[CKBridgeConfig.entityTypeField] as? String
+        deletedAt = record[CKBridgeConfig.deletedAtField] as? Date
+    }
+
+    /// Rebuilt without a change tag; the resulting `serverRecordChanged` is resolved by LWW.
+    func makeRecord(in zoneID: CKRecordZone.ID) -> CKRecord {
+        let record = CKRecord(
+            recordType: recordType,
+            recordID: CKRecord.ID(recordName: recordName, zoneID: zoneID)
+        )
+        if let payload {
+            record[CKBridgeConfig.payloadField] = payload as CKRecordValue
+        }
+        if let updatedAt {
+            record[CKBridgeConfig.updatedAtField] = updatedAt as CKRecordValue
+        }
+        if let entityType {
+            record[CKBridgeConfig.entityTypeField] = entityType as CKRecordValue
+        }
+        if let deletedAt {
+            record[CKBridgeConfig.deletedAtField] = deletedAt as CKRecordValue
+        }
+        return record
+    }
+}
+
 // MARK: - Container (usable below iOS 17 — plain CloudKit, no CKSyncEngine)
 
 private enum CKBridgeContainer {
@@ -185,14 +238,20 @@ private final class CKSyncEngineHost: NSObject, CKSyncEngineDelegate {
 
     private let container = CKBridgeContainer.shared
     private let lock = NSLock()
+    /// Serial, so a seeding burst collapses into a few UserDefaults writes.
+    private let stagingQueue = DispatchQueue(label: "de.thomasmenzl.finanzuebersicht.cloudkit.staging")
 
-    // All three are guarded by `lock`; CKSyncEngineDelegate is Sendable, so opt out explicitly.
+    // All of these are guarded by `lock`; CKSyncEngineDelegate is Sendable, so opt out explicitly.
     private nonisolated(unsafe) var engine: CKSyncEngine?
     /// Last known server copy per record, so staged saves keep their change tag and
     /// CloudKit does not reject them as conflicting.
     private nonisolated(unsafe) var knownRecords: [CKRecord.ID: CKRecord] = [:]
     /// Records staged by enqueue_* and handed to CKSyncEngine in nextRecordZoneChangeBatch.
     private nonisolated(unsafe) var stagedRecords: [CKRecord.ID: CKRecord] = [:]
+    /// Mirror of `stagedRecords` (keyed by recordName, unique per zone) that is persisted.
+    private nonisolated(unsafe) var stagedSnapshots: [String: CKStagedRecord] = [:]
+    private nonisolated(unsafe) var stagingNeedsPersist = false
+    private nonisolated(unsafe) var stagingReloaded = false
 
     private var database: CKDatabase { container.privateCloudDatabase }
 
@@ -207,6 +266,10 @@ private final class CKSyncEngineHost: NSObject, CKSyncEngineDelegate {
         let alreadyRunning = engine != nil
         lock.unlock()
         if alreadyRunning { return }
+
+        // The restored state brings back pendingRecordZoneChanges, so the staged records have
+        // to come back with them — otherwise nextRecordZoneChangeBatch drops offline edits.
+        reloadStagingIfNeeded()
 
         var configuration = CKSyncEngine.Configuration(
             database: database,
@@ -226,9 +289,13 @@ private final class CKSyncEngineHost: NSObject, CKSyncEngineDelegate {
     }
 
     func stop() {
+        // The staging mirror deliberately survives, matching the persisted engine state: its
+        // pendingRecordZoneChanges also outlive stop() and come back on the next start(), which
+        // rebuilds the CKRecords from the mirror.
         lock.lock()
         engine = nil
         stagedRecords.removeAll()
+        stagingReloaded = false
         lock.unlock()
     }
 
@@ -255,6 +322,70 @@ private final class CKSyncEngineHost: NSObject, CKSyncEngineDelegate {
     private static func store(state: CKSyncEngine.State.Serialization) {
         guard let data = try? JSONEncoder().encode(state) else { return }
         UserDefaults.standard.set(data, forKey: CKBridgeConfig.stateDefaultsKey)
+    }
+
+    private static func loadStaging() -> [CKStagedRecord] {
+        guard let data = UserDefaults.standard.data(forKey: CKBridgeConfig.stagedRecordsDefaultsKey) else {
+            return []
+        }
+        return (try? JSONDecoder().decode([CKStagedRecord].self, from: data)) ?? []
+    }
+
+    private static func store(staging: [CKStagedRecord]) {
+        guard !staging.isEmpty else {
+            UserDefaults.standard.removeObject(forKey: CKBridgeConfig.stagedRecordsDefaultsKey)
+            return
+        }
+        guard let data = try? JSONEncoder().encode(staging) else { return }
+        UserDefaults.standard.set(data, forKey: CKBridgeConfig.stagedRecordsDefaultsKey)
+    }
+
+    /// Rehydrates records staged by a previous process (or before the last `stop()`).
+    private func reloadStagingIfNeeded() {
+        lock.lock()
+        let alreadyReloaded = stagingReloaded
+        stagingReloaded = true
+        lock.unlock()
+        if alreadyReloaded { return }
+
+        let persisted = Self.loadStaging()
+        let zoneID = self.zoneID
+
+        lock.lock()
+        // Anything staged in this process wins over what is on disk.
+        for snapshot in persisted where stagedSnapshots[snapshot.recordName] == nil {
+            stagedSnapshots[snapshot.recordName] = snapshot
+        }
+        // Rebuild every CKRecord the mirror knows about but the cache lost (restart or stop).
+        for snapshot in stagedSnapshots.values {
+            let recordID = CKRecord.ID(recordName: snapshot.recordName, zoneID: zoneID)
+            if stagedRecords[recordID] == nil {
+                stagedRecords[recordID] = snapshot.makeRecord(in: zoneID)
+            }
+        }
+        lock.unlock()
+    }
+
+    /// Marks the staging mirror dirty. `stagingQueue` is serial and the block bails out when
+    /// another block already wrote the newer state, so a burst of enqueues costs few encodes
+    /// while the final state is always written.
+    private func persistStaging() {
+        lock.lock()
+        stagingNeedsPersist = true
+        lock.unlock()
+
+        stagingQueue.async { [self] in
+            lock.lock()
+            guard stagingNeedsPersist else {
+                lock.unlock()
+                return
+            }
+            stagingNeedsPersist = false
+            let snapshots = Array(stagedSnapshots.values)
+            lock.unlock()
+
+            Self.store(staging: snapshots)
+        }
     }
 
     // MARK: Queries
@@ -322,14 +453,22 @@ private final class CKSyncEngineHost: NSObject, CKSyncEngineDelegate {
     private func stage(_ record: CKRecord) {
         lock.lock()
         stagedRecords[record.recordID] = record
+        stagedSnapshots[record.recordID.recordName] = CKStagedRecord(record: record)
         lock.unlock()
+
+        persistStaging()
     }
 
     private func unstage(_ recordID: CKRecord.ID) {
         lock.lock()
         stagedRecords.removeValue(forKey: recordID)
         knownRecords.removeValue(forKey: recordID)
+        let wasPersisted = stagedSnapshots.removeValue(forKey: recordID.recordName) != nil
         lock.unlock()
+
+        if wasPersisted {
+            persistStaging()
+        }
     }
 
     private func stagedRecord(for recordID: CKRecord.ID) -> CKRecord? {
@@ -343,7 +482,27 @@ private final class CKSyncEngineHost: NSObject, CKSyncEngineDelegate {
         lock.lock()
         knownRecords[record.recordID] = record
         stagedRecords.removeValue(forKey: record.recordID)
+        let wasPersisted = stagedSnapshots.removeValue(forKey: record.recordID.recordName) != nil
         lock.unlock()
+
+        if wasPersisted {
+            persistStaging()
+        }
+    }
+
+    /// Mirrors `CloudKitSyncBridgeCodec.ShouldOverwriteServerRecord`: on a save conflict our
+    /// staged write only replaces the server copy when it is at least as new. Ties go to the
+    /// retrying local write, matching `LastWriteWins` on the managed side.
+    private static func shouldOverwriteServerRecord(localUpdatedAt: Date?, serverUpdatedAt: Date?) -> Bool {
+        guard let serverUpdatedAt else { return true }
+        guard let localUpdatedAt else { return false }
+        return localUpdatedAt >= serverUpdatedAt
+    }
+
+    /// Entities carry their timestamp in `updatedAt`, tombstones in `deletedAt`.
+    private static func timestamp(of record: CKRecord) -> Date? {
+        record[CKBridgeConfig.updatedAtField] as? Date
+            ?? record[CKBridgeConfig.deletedAtField] as? Date
     }
 
     // MARK: Sync
@@ -384,13 +543,21 @@ private final class CKSyncEngineHost: NSObject, CKSyncEngineDelegate {
         let pending = syncEngine.state.pendingRecordZoneChanges.filter { scope.contains($0) }
 
         return await CKSyncEngine.RecordZoneChangeBatch(pendingChanges: pending) { recordID in
-            guard let record = self.stagedRecord(for: recordID) else {
-                // Nothing staged (e.g. after stop) — drop the pending change instead of
-                // letting CKSyncEngine retry it forever.
-                syncEngine.state.remove(pendingRecordZoneChanges: [.saveRecord(recordID)])
-                return nil
+            if let record = self.stagedRecord(for: recordID) {
+                return record
             }
-            return record
+
+            // A pending change restored from the engine state has no staged record yet —
+            // rebuild it from the persisted mirror before giving up on it.
+            self.reloadStagingIfNeeded()
+            if let record = self.stagedRecord(for: recordID) {
+                return record
+            }
+
+            // Still nothing (already sent, or unstaged) — drop the pending change instead
+            // of letting CKSyncEngine retry it forever.
+            syncEngine.state.remove(pendingRecordZoneChanges: [.saveRecord(recordID)])
+            return nil
         }
     }
 
@@ -430,15 +597,36 @@ private final class CKSyncEngineHost: NSObject, CKSyncEngineDelegate {
             let recordID = failure.record.recordID
             switch failure.error.code {
             case .serverRecordChanged:
-                // Re-stage our payload on top of the server copy and retry next send.
-                if let serverRecord = failure.error.serverRecord {
-                    serverRecord[CKBridgeConfig.payloadField] = failure.record[CKBridgeConfig.payloadField]
-                    serverRecord[CKBridgeConfig.updatedAtField] = failure.record[CKBridgeConfig.updatedAtField]
-                    serverRecord[CKBridgeConfig.entityTypeField] = failure.record[CKBridgeConfig.entityTypeField]
-                    serverRecord[CKBridgeConfig.deletedAtField] = failure.record[CKBridgeConfig.deletedAtField]
-                    stage(serverRecord)
+                // A re-enqueue while the send was in flight makes the staged copy newer
+                // than what CloudKit rejected.
+                let local = stagedRecord(for: recordID) ?? failure.record
+
+                guard let serverRecord = failure.error.serverRecord else {
+                    // No server copy to merge onto — keep our record staged and retry
+                    // rather than dropping the write.
+                    stage(local)
                     syncEngine.state.add(pendingRecordZoneChanges: [.saveRecord(recordID)])
+                    break
                 }
+
+                guard Self.shouldOverwriteServerRecord(
+                    localUpdatedAt: Self.timestamp(of: local),
+                    serverUpdatedAt: Self.timestamp(of: serverRecord)
+                ) else {
+                    // The server write is strictly newer, so last-write-wins keeps it. Drop
+                    // our pending save; the next fetch hands the server record to C#.
+                    remember(serverRecord)
+                    syncEngine.state.remove(pendingRecordZoneChanges: [.saveRecord(recordID)])
+                    break
+                }
+
+                // Local is newer or equal — re-stage our fields on top of the server copy
+                // (which carries the current change tag) and retry on the next send.
+                for field in CKBridgeConfig.bridgeFields {
+                    serverRecord[field] = local[field]
+                }
+                stage(serverRecord)
+                syncEngine.state.add(pendingRecordZoneChanges: [.saveRecord(recordID)])
             case .zoneNotFound:
                 // Zone vanished (account reset) — recreate it and retry.
                 syncEngine.state.add(pendingDatabaseChanges: [.saveZone(CKRecordZone(zoneID: zoneID))])

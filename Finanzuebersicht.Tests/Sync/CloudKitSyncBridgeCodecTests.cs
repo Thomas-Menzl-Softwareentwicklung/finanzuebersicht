@@ -157,4 +157,58 @@ public class CloudKitSyncBridgeCodecTests
     {
         Assert.Empty(CloudKitSyncBridgeCodec.DecodeRecords(json));
     }
+
+    [Fact]
+    public void ShouldOverwriteServerRecord_LocalNewer_Retries()
+    {
+        var local = new DateTime(2026, 3, 4, 10, 0, 1, DateTimeKind.Utc);
+        var server = new DateTime(2026, 3, 4, 10, 0, 0, DateTimeKind.Utc);
+
+        Assert.True(CloudKitSyncBridgeCodec.ShouldOverwriteServerRecord(local, server));
+    }
+
+    [Fact]
+    public void ShouldOverwriteServerRecord_ServerNewer_DoesNotOverwrite()
+    {
+        var local = new DateTime(2026, 3, 4, 10, 0, 0, DateTimeKind.Utc);
+        var server = new DateTime(2026, 3, 4, 10, 0, 1, DateTimeKind.Utc);
+
+        Assert.False(CloudKitSyncBridgeCodec.ShouldOverwriteServerRecord(local, server));
+    }
+
+    [Fact]
+    public void ShouldOverwriteServerRecord_EqualTimestamps_Retries()
+    {
+        var stamp = new DateTime(2026, 3, 4, 10, 0, 0, DateTimeKind.Utc);
+
+        Assert.True(CloudKitSyncBridgeCodec.ShouldOverwriteServerRecord(stamp, stamp));
+    }
+
+    [Fact]
+    public void ShouldOverwriteServerRecord_ServerWithoutTimestamp_Retries()
+    {
+        var local = new DateTime(2026, 3, 4, 10, 0, 0, DateTimeKind.Utc);
+
+        Assert.True(CloudKitSyncBridgeCodec.ShouldOverwriteServerRecord(local, null));
+        Assert.True(CloudKitSyncBridgeCodec.ShouldOverwriteServerRecord(null, null));
+    }
+
+    [Fact]
+    public void ShouldOverwriteServerRecord_LocalWithoutTimestamp_DoesNotOverwriteStampedServerRecord()
+    {
+        var server = new DateTime(2026, 3, 4, 10, 0, 0, DateTimeKind.Utc);
+
+        Assert.False(CloudKitSyncBridgeCodec.ShouldOverwriteServerRecord(null, server));
+    }
+
+    [Fact]
+    public void ShouldOverwriteServerRecord_NormalisesTimestampsToUtc()
+    {
+        var server = new DateTime(2026, 3, 4, 10, 0, 0, DateTimeKind.Utc);
+        var localAsLocalTime = server.AddSeconds(1).ToLocalTime();
+
+        Assert.True(CloudKitSyncBridgeCodec.ShouldOverwriteServerRecord(localAsLocalTime, server));
+        Assert.False(
+            CloudKitSyncBridgeCodec.ShouldOverwriteServerRecord(server.AddSeconds(-1).ToLocalTime(), server));
+    }
 }

@@ -103,6 +103,25 @@ public static class CloudKitSyncBridgeCodec
         return records;
     }
 
+    /// <summary>
+    /// Conflict resolution for a CloudKit <c>serverRecordChanged</c> save failure: may our
+    /// staged write replace the server copy and be retried? Ties go to the local write that is
+    /// retrying, so this matches <see cref="LastWriteWins"/>. A strictly newer server record
+    /// stays put and reaches the managed side through the next fetch instead.
+    /// Mirrored in <c>CloudKitSyncBridge.swift</c>.
+    /// </summary>
+    public static bool ShouldOverwriteServerRecord(DateTime? localUpdatedAt, DateTime? serverUpdatedAt)
+    {
+        var server = ToUtc(serverUpdatedAt);
+        if (server is null)
+        {
+            return true;
+        }
+
+        var local = ToUtc(localUpdatedAt);
+        return local is not null && local.Value >= server.Value;
+    }
+
     private static DateTime? ToUtc(DateTime? value) => value switch
     {
         null => null,
