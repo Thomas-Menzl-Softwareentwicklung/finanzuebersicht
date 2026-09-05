@@ -152,6 +152,14 @@ public static class ResourceKeys
     public const string Lic_SyncComingSoon = nameof(Lic_SyncComingSoon);
     public const string Lic_SyncPurchaseLater = nameof(Lic_SyncPurchaseLater);
     public const string Lic_UseStoreKit = nameof(Lic_UseStoreKit);
+    public const string Sync_EnableLabel = nameof(Sync_EnableLabel);
+    public const string Sync_LastSync = nameof(Sync_LastSync);
+    public const string Sync_NeverSynced = nameof(Sync_NeverSynced);
+    public const string Sync_Error = nameof(Sync_Error);
+    public const string Sync_BlockedBothHaveData = nameof(Sync_BlockedBothHaveData);
+    public const string Sync_BlockedNoEntitlement = nameof(Sync_BlockedNoEntitlement);
+    public const string Sync_BlockedUnsupported = nameof(Sync_BlockedUnsupported);
+    public const string Sync_BlockedNoICloud = nameof(Sync_BlockedNoICloud);
 
     // Confirmation Dialogs
     public const string Dlg_KategorieLoeschen = nameof(Dlg_KategorieLoeschen);

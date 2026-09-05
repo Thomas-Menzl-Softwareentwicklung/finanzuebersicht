@@ -1,6 +1,8 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Finanzuebersicht.Application.UseCases.Sync;
 using Finanzuebersicht.Core.Licensing;
+using Finanzuebersicht.Core.Sync;
 using Finanzuebersicht.Presentation.Services;
 using Finanzuebersicht.Resources.Strings;
 
@@ -14,6 +16,10 @@ public partial class LicenseViewModel : ObservableObject
     private readonly ILocalizationService _loc;
     private readonly IDialogService _dialogService;
     private readonly IFeedbackService _feedbackService;
+    private readonly EnableCloudSyncUseCase _enableCloudSyncUseCase;
+    private readonly ISyncMetadataStore _syncMetadataStore;
+    private readonly ICloudSyncOrchestrator _cloudSyncOrchestrator;
+    private bool _suppressCloudSyncToggle;
 
     public LicenseViewModel(
         ILicenseService licenseService,
@@ -21,7 +27,10 @@ public partial class LicenseViewModel : ObservableObject
         IStoreBillingService billingService,
         ILocalizationService localizationService,
         IDialogService dialogService,
-        IFeedbackService feedbackService)
+        IFeedbackService feedbackService,
+        EnableCloudSyncUseCase enableCloudSyncUseCase,
+        ISyncMetadataStore syncMetadataStore,
+        ICloudSyncOrchestrator cloudSyncOrchestrator)
     {
         _licenseService = licenseService;
         _entitlementStore = entitlementStore;
@@ -29,6 +38,9 @@ public partial class LicenseViewModel : ObservableObject
         _loc = localizationService;
         _dialogService = dialogService;
         _feedbackService = feedbackService;
+        _enableCloudSyncUseCase = enableCloudSyncUseCase;
+        _syncMetadataStore = syncMetadataStore;
+        _cloudSyncOrchestrator = cloudSyncOrchestrator;
         RefreshFromService();
     }
 
@@ -65,11 +77,52 @@ public partial class LicenseViewModel : ObservableObject
     [ObservableProperty]
     private bool stubSyncEnabled;
 
+    [ObservableProperty]
+    private bool cloudSyncEnabled;
+
+    [ObservableProperty]
+    private string cloudSyncStatusLine = string.Empty;
+
+    public bool ShowCloudSyncControls =>
+        _licenseService.CanUseCloudSync && _licenseService.IsCloudSyncImplemented;
+
+    public bool ShowSyncPurchaseLaterHint =>
+        ShowStorePurchaseControls && !ShowCloudSyncControls;
+
     public async Task InitializeAsync()
     {
         await _licenseService.RefreshAsync();
         await LoadProductPriceAsync();
+        await RefreshCloudSyncFromMetadataAsync();
         RefreshFromService();
+    }
+
+    partial void OnCloudSyncEnabledChanged(bool value)
+    {
+        if (_suppressCloudSyncToggle)
+            return;
+
+        CloudSyncToggledCommand.Execute(value);
+    }
+
+    [RelayCommand]
+    private async Task CloudSyncToggled(bool enable)
+    {
+        if (IsBusy || !ShowCloudSyncControls)
+            return;
+
+        IsBusy = true;
+        try
+        {
+            if (enable)
+                await EnableCloudSyncAsync();
+            else
+                await DisableCloudSyncAsync();
+        }
+        finally
+        {
+            IsBusy = false;
+        }
     }
 
     [RelayCommand]
@@ -119,6 +172,7 @@ public partial class LicenseViewModel : ObservableObject
             if (owned.Count > 0)
                 await _entitlementStore.ApplyOwnedProductIdsAsync(owned);
             await _licenseService.RefreshAsync();
+            await RefreshCloudSyncFromMetadataAsync();
             RefreshFromService();
             await _feedbackService.ShowSnackbarAsync(ok || owned.Count > 0
                 ? _loc.GetString(ResourceKeys.Lic_RestoreSuccess)
@@ -138,6 +192,7 @@ public partial class LicenseViewModel : ObservableObject
 
         await _entitlementStore.SetStubEntitlementsAsync(StubProEnabled, StubSyncEnabled);
         await _licenseService.RefreshAsync();
+        await RefreshCloudSyncFromMetadataAsync();
         RefreshFromService();
     }
 
@@ -150,7 +205,75 @@ public partial class LicenseViewModel : ObservableObject
         await _entitlementStore.ClearStubPreferenceAsync();
         await _licenseService.RefreshAsync();
         await LoadProductPriceAsync();
+        await RefreshCloudSyncFromMetadataAsync();
         RefreshFromService();
+    }
+
+    private async Task EnableCloudSyncAsync()
+    {
+        var result = await _enableCloudSyncUseCase.ExecuteAsync();
+        if (result.Status == EnableCloudSyncStatus.Enabled)
+        {
+            await RefreshCloudSyncFromMetadataAsync();
+            RefreshFromService();
+            return;
+        }
+
+        SetCloudSyncEnabledSilently(false);
+        await _dialogService.ShowAlertAsync(
+            _loc.GetString(ResourceKeys.Err_Titel),
+            _loc.GetString(GetBlockedMessageKey(result.Status)),
+            _loc.GetString(ResourceKeys.Btn_OK));
+    }
+
+    private async Task DisableCloudSyncAsync()
+    {
+        var metadata = await _syncMetadataStore.GetAsync();
+        metadata.SyncEnabled = false;
+        await _syncMetadataStore.SaveAsync(metadata);
+        await _cloudSyncOrchestrator.StopAsync();
+        await RefreshCloudSyncFromMetadataAsync();
+        RefreshFromService();
+    }
+
+    private async Task RefreshCloudSyncFromMetadataAsync()
+    {
+        if (!ShowCloudSyncControls)
+            return;
+
+        var metadata = await _syncMetadataStore.GetAsync();
+        SetCloudSyncEnabledSilently(metadata.SyncEnabled);
+        CloudSyncStatusLine = BuildCloudSyncStatusLine(metadata);
+    }
+
+    private string BuildCloudSyncStatusLine(SyncMetadata metadata)
+    {
+        if (!string.IsNullOrWhiteSpace(metadata.LastError))
+            return _loc.GetString(ResourceKeys.Sync_Error, metadata.LastError);
+
+        if (metadata.LastSyncUtc.HasValue)
+        {
+            var formatted = metadata.LastSyncUtc.Value.ToLocalTime().ToString("g");
+            return _loc.GetString(ResourceKeys.Sync_LastSync, formatted);
+        }
+
+        return _loc.GetString(ResourceKeys.Sync_NeverSynced);
+    }
+
+    private static string GetBlockedMessageKey(EnableCloudSyncStatus status) => status switch
+    {
+        EnableCloudSyncStatus.BlockedBothHaveData => ResourceKeys.Sync_BlockedBothHaveData,
+        EnableCloudSyncStatus.BlockedNoEntitlement => ResourceKeys.Sync_BlockedNoEntitlement,
+        EnableCloudSyncStatus.BlockedUnsupported => ResourceKeys.Sync_BlockedUnsupported,
+        EnableCloudSyncStatus.BlockedNoICloud => ResourceKeys.Sync_BlockedNoICloud,
+        _ => ResourceKeys.Sync_BlockedUnsupported
+    };
+
+    private void SetCloudSyncEnabledSilently(bool value)
+    {
+        _suppressCloudSyncToggle = true;
+        CloudSyncEnabled = value;
+        _suppressCloudSyncToggle = false;
     }
 
     private async Task PersistOwnedAndRefreshAsync()
@@ -158,6 +281,7 @@ public partial class LicenseViewModel : ObservableObject
         var owned = await _billingService.GetOwnedProductIdsAsync();
         await _entitlementStore.ApplyOwnedProductIdsAsync(owned);
         await _licenseService.RefreshAsync();
+        await RefreshCloudSyncFromMetadataAsync();
         RefreshFromService();
     }
 
@@ -208,7 +332,9 @@ public partial class LicenseViewModel : ObservableObject
         else if (_licenseService.CanUseCloudSync)
         {
             SyncLabel = _licenseService.IsCloudSyncImplemented
-                ? _loc.GetString(ResourceKeys.Lic_SyncActive)
+                ? CloudSyncEnabled
+                    ? _loc.GetString(ResourceKeys.Lic_SyncActive)
+                    : _loc.GetString(ResourceKeys.Lic_SyncInactive)
                 : _loc.GetString(ResourceKeys.Lic_SyncEntitledComingSoon);
             LimitsHint = _licenseService.HasPro
                 ? string.Empty
@@ -224,6 +350,9 @@ public partial class LicenseViewModel : ObservableObject
 
         StubProEnabled = _licenseService.HasPro && isStore;
         StubSyncEnabled = _licenseService.HasSyncSubscription;
+
+        OnPropertyChanged(nameof(ShowCloudSyncControls));
+        OnPropertyChanged(nameof(ShowSyncPurchaseLaterHint));
     }
 
     /// <summary>Dev-only entitlement stubs must never appear in Release Store builds.</summary>

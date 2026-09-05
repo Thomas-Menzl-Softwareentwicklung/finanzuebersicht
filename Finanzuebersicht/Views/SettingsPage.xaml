@@ -299,6 +299,20 @@
                            TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray400}}" />
 
                     <VerticalStackLayout Spacing="8"
+                                         IsVisible="{Binding License.ShowCloudSyncControls}">
+                        <Grid ColumnDefinitions="*, Auto">
+                            <Label Text="{loc:Translate Sync_EnableLabel}"
+                                   VerticalOptions="Center"
+                                   TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
+                            <Switch Grid.Column="1"
+                                    IsToggled="{Binding License.CloudSyncEnabled}" />
+                        </Grid>
+                        <Label Text="{Binding License.CloudSyncStatusLine}"
+                               FontSize="12"
+                               TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray400}}" />
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Spacing="8"
                                          IsVisible="{Binding License.ShowStorePurchaseControls}">
                         <Label Text="{Binding License.ProPriceLabel}"
                                FontSize="14"
@@ -315,6 +329,7 @@
                                 FontSize="14"
                                 Padding="12,8" />
                         <Label Text="{loc:Translate Lic_SyncPurchaseLater}"
+                               IsVisible="{Binding License.ShowSyncPurchaseLaterHint}"
                                FontSize="12"
                                TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray400}}" />
                     </VerticalStackLayout>

@@ -161,6 +161,14 @@
   <data name="Lic_SyncComingSoon" xml:space="preserve"><value>Cloud-Sync: kommt später (noch nicht käuflich)</value></data>
   <data name="Lic_SyncPurchaseLater" xml:space="preserve"><value>Das Sync-Jahresabo erscheint, sobald CloudKit bereit ist.</value></data>
   <data name="Lic_UseStoreKit" xml:space="preserve"><value>App-Store-Käufe nutzen (Stub aus)</value></data>
+  <data name="Sync_EnableLabel" xml:space="preserve"><value>iCloud-Sync</value></data>
+  <data name="Sync_LastSync" xml:space="preserve"><value>Letzte Synchronisation: {0}</value></data>
+  <data name="Sync_NeverSynced" xml:space="preserve"><value>Noch nicht synchronisiert</value></data>
+  <data name="Sync_Error" xml:space="preserve"><value>Sync-Fehler: {0}</value></data>
+  <data name="Sync_BlockedBothHaveData" xml:space="preserve"><value>iCloud-Sync kann nicht aktiviert werden, weil sowohl dieses Gerät als auch iCloud Daten enthalten. Erstelle ein Backup (Einstellungen → Backup) und verwende ein leeres Gerät oder leere iCloud-Daten, bevor du Sync aktivierst.</value></data>
+  <data name="Sync_BlockedNoEntitlement" xml:space="preserve"><value>iCloud-Sync erfordert ein aktives Sync-Abo.</value></data>
+  <data name="Sync_BlockedUnsupported" xml:space="preserve"><value>iCloud-Sync wird auf diesem Gerät oder dieser OS-Version nicht unterstützt.</value></data>
+  <data name="Sync_BlockedNoICloud" xml:space="preserve"><value>Melde dich in den Systemeinstellungen bei iCloud an und aktiviere iCloud Drive für iCloud-Sync.</value></data>
 
   <!-- Confirmation Dialogs -->
   <data name="Dlg_KategorieLoeschen" xml:space="preserve"><value>Kategorie löschen</value></data>
