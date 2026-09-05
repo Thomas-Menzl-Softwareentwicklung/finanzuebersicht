@@ -19,7 +19,7 @@ Monetarisierung: [`MONETIZATION.md`](MONETIZATION.md).
 | License-Gates Free/Pro/Sync | vorhanden |
 | StoreKit (Pro kaufen / Restore) | vorhanden (Store-Build, iOS/Mac Catalyst) |
 | License-Stub-UI (Dev-Toggles) | nur Debug; Release ignoriert Stub-Entitlements |
-| Sync-IAP Verkauf | **später** (CloudKit #243; Entitlements vorbereitet, `IsCloudSyncImplemented` noch `false`) |
+| Sync-IAP Verkauf | **später** (ASC-Entscheidung; Engine im Store-Binary, `IsCloudSyncImplemented` = `true` auf unterstützten Store-Apple-Builds) |
 | App Store Connect App + Zertifikate | **manuell** |
 | TestFlight IPA Upload | **manuell auf dem Mac** |
 | Store-Screenshots | Automatisierung lokal (`fastlane snapshot`) — siehe [Screenshot-Automatisierung](#screenshot-automatisierung) |
@@ -32,7 +32,7 @@ Monetarisierung: [`MONETIZATION.md`](MONETIZATION.md).
 | Finanzübersicht Pro | Non-Consumable | `de.thomasmenzl.finanzuebersicht.pro` |
 | Finanzübersicht Sync | Auto-Renewable (1 Jahr) | `de.thomasmenzl.finanzuebersicht.sync.yearly` |
 
-Sync in der UI noch nicht verkaufen (`IsCloudSyncImplemented = false`). Product trotzdem in ASC anlegen, sobald Sync kommt — oder erst bei #243. **Privacy / Nutzerkommunikation (wenn Sync live geht):** Sync ist **opt-in**; Finanzdaten liegen in der **privaten iCloud** des Nutzers (kein eigener Sync-Server von Finanzübersicht). Technik: `Finanzuebersicht/Platforms/iOS/Native/README-CloudKitSync.md`.
+Sync-Engine ist im Store-Apple-Binary (`IsCloudSyncImplemented = true` bei Store + iOS 17 / Mac Catalyst 17). **Jahresabo-Verkauf** und öffentliche Privacy-/Support-Texte erst nach ASC-Freigabe — nicht als bereits käuflich kommunizieren. Manuelle Zwei-Geräte-QA vor Issue-Schließung: [`docs/CLOUDKIT_SYNC_QA.md`](CLOUDKIT_SYNC_QA.md). **Privacy / Nutzerkommunikation (wenn Sync verkauft wird):** Sync ist **opt-in**; Finanzdaten liegen in der **privaten iCloud** des Nutzers (kein eigener Sync-Server von Finanzübersicht). Technik: `Finanzuebersicht/Platforms/iOS/Native/README-CloudKitSync.md`.
 
 ## 1. Apple Developer + App Store Connect
 

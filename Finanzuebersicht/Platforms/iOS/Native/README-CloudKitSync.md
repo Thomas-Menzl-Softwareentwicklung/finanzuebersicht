@@ -1,6 +1,6 @@
 # CloudKit Sync bridge (MVP #243)
 
-Native Swift bridge (`CloudKitSyncBridge.swift`) around **CKSyncEngine** for the MAUI host (`CloudKitSyncTransport.cs`). Sync is **not** user-facing yet (`IsCloudSyncImplemented` remains `false`); this folder holds the static library and build tooling.
+Native Swift bridge (`CloudKitSyncBridge.swift`) around **CKSyncEngine** for the MAUI host (`CloudKitSyncTransport.cs`). On **Store** Apple builds with iOS 17 / Mac Catalyst 17+, sync is user-facing when the Sync IAP (or Debug stub) is active — Settings → iCloud-Sync. **#243 stays open** until two-device QA passes: [`docs/CLOUDKIT_SYNC_QA.md`](../../../../docs/CLOUDKIT_SYNC_QA.md).
 
 ## Container and zone
 
@@ -76,6 +76,8 @@ The Quick Expense Widget `.appex` must **not** receive CloudKit entitlements.
 
 `Platforms/iOS/Resources/PrivacyInfo.xcprivacy` declares `NSPrivacyAccessedAPICategoryUserDefaults` reason **CA92.1** — the bridge persists CKSyncEngine state and staged records in `UserDefaults`.
 
-## Device smoke test
+## Device QA
 
-End-to-end sync on a signed device with a provisioned iCloud account is **deferred** (orchestrator + Settings UI land in later tasks). After Portal setup, verify zone creation and fetch/send on hardware before enabling sync for users.
+Run the manual checklist before closing [#243](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/243): [`docs/CLOUDKIT_SYNC_QA.md`](../../../../docs/CLOUDKIT_SYNC_QA.md). Live CloudKit end-to-end has not been smoke-tested on this branch yet.
+
+Known gaps: `RecurringGenerationService` writes bypass orchestrator notify; account/category delete remaps are not synced row-by-row.

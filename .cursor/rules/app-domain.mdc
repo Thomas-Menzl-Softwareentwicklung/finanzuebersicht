@@ -48,7 +48,7 @@ alwaysApply: true
 - Welle 0: DataPath-Restart (#289 ✅), DataFileNames (#290 ✅), Doc-Drift (#291 ✅)
 - Welle 1: Legacy `IDataService` (#268 ✅), Budget Use Case (#270 ✅)
 - v1.20 empfohlene Reihenfolge (#274–#300) ✅
-- CloudKit nur als Idee (#243); Sync-Felder vorbereitet (#300 ✅); kein Sync-Code im Tree
+- CloudKit Sync MVP (#243) im Tree: private Zone `finanzuebersicht-sync`, LWW + Tombstones, Settings iCloud-Sync (Store + Sync-IAP + iOS 17 / Mac Catalyst 17); Direct/Windows: `NullCloudSyncTransport`. #243 offen bis Zwei-Geräte-QA (`docs/CLOUDKIT_SYNC_QA.md`). #300 ✅
 
 ## Nicht wiederholen
 
