@@ -1,5 +1,24 @@
 # Änderungsverlauf
 
+## [1.20] - 2026-08-12
+
+### Hinzugefügt
+
+- Create-UX: kontextsensitiver FAB öffnet Modal-Sheets (`CreateFormModalService`) für Kategorie, Konto, Sparziel, Dauerauftrag, Transaktion, Umbuchung und Schnell
+- Transaktionen-Liste: Monats-Chips, Tageskarten und durchsuchbare Gesamt-Ansicht
+- Architektur-Fundament (Milestone 24): `UseCaseResult`, Import-/Backup-Use-Cases, VM-Splits, `IAppEvents`, Shell-Tab-Routes, CollectionView-Virtualisierung, Sync-Prep (`ExternalId`/`Source`/`UpdatedAt`)
+- iOS Quick-Expense-Widget (Pro) + In-App Schnell (Free) auf allen Targets
+
+### Geändert
+
+- Versionsbasis `1.20` (Nerdbank.GitVersioning)
+- Betragseingaben akzeptieren Komma und Punkt unabhängig von App-Sprache vs. System-Tastatur (`FlexibleAmountParser`)
+- Legacy `FormSheetPopup` / `CreateFormCard` entfernt
+
+### Behoben
+
+- Schnell-Buchung: ungültiger Betrag bei englischer UI und Komma-Tastatur
+
 ## [1.19] - 2026-07-17
 
 ### Hinzugefügt
@@ -12,6 +31,7 @@
 
 - Recurring-Schedule-Logik konsolidiert; Repository-Zugriffe in Use Cases (#275)
 - Microsoft.Maui.Controls 10.0.80, Nerdbank.GitVersioning, Test-SDK
+- Create-UX: Anlegen nach UIScene-Stabilisierung wieder über Detail-Pages; Soll (kontextsensitiver FAB + Bottom-Sheet) in `docs/CREATE_UX.md`
 
 ### Behoben
 

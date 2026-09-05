@@ -11,6 +11,7 @@ public partial class DashboardPage : ContentPage
     private readonly DashboardViewModel _vm;
     private readonly IOnboardingCoordinator _onboardingCoordinator;
     private readonly INavigationService _navigationService;
+    private readonly IAppEvents _appEvents;
     private readonly DonutChartDrawable _monthDonut = new();
     private readonly BarChartDrawable _yearBar = new();
     private readonly DonutChartDrawable _yearDonut = new();
@@ -19,13 +20,15 @@ public partial class DashboardPage : ContentPage
     public DashboardPage(
         DashboardViewModel viewModel,
         IOnboardingCoordinator onboardingCoordinator,
-        INavigationService navigationService)
+        INavigationService navigationService,
+        IAppEvents appEvents)
     {
         InitializeComponent();
         BindingContext = viewModel;
         _vm = viewModel;
         _onboardingCoordinator = onboardingCoordinator;
         _navigationService = navigationService;
+        _appEvents = appEvents;
 
         MonthDonutChart.Drawable = _monthDonut;
         YearBarChart.Drawable = _yearBar;
@@ -62,15 +65,15 @@ public partial class DashboardPage : ContentPage
             YearBarChart.Invalidate();
         });
 
-        App.DataChanged += OnAppDataChanged;
-        App.LanguageChanged += OnLanguageChanged;
+        _appEvents.DataChanged += OnAppDataChanged;
+        _appEvents.LanguageChanged += OnLanguageChanged;
     }
 
     protected override void OnDisappearing()
     {
         base.OnDisappearing();
-        App.DataChanged -= OnAppDataChanged;
-        App.LanguageChanged -= OnLanguageChanged;
+        _appEvents.DataChanged -= OnAppDataChanged;
+        _appEvents.LanguageChanged -= OnLanguageChanged;
     }
 
     private void OnLanguageChanged()

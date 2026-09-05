@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Finanzuebersicht.Application.UseCases.Accounts;
 using Finanzuebersicht.Application.UseCases.Transactions;
+using Finanzuebersicht.Core.Services;
 using Finanzuebersicht.Models;
 using Finanzuebersicht.Navigation;
 using Finanzuebersicht.Presentation.Services;
@@ -55,6 +56,8 @@ public partial class TransferDetailViewModel(
     [ObservableProperty]
     private DateTime date;
 
+    public string PageTitle => _loc.GetString(ResourceKeys.Title_Umbuchung);
+
     [RelayCommand]
     private async Task LoadAccounts()
     {
@@ -70,16 +73,34 @@ public partial class TransferDetailViewModel(
         TargetAccount = accounts.FirstOrDefault(a => a.Id != SourceAccount?.Id);
     }
 
+    public async Task ResetForCreateAsync()
+    {
+        AmountText = string.Empty;
+        Title = string.Empty;
+        Note = string.Empty;
+        Date = _clock.Today;
+        SourceAccount = null;
+        TargetAccount = null;
+        OnPropertyChanged(nameof(PageTitle));
+        await LoadAccountsCommand.ExecuteAsync(null);
+    }
+
     [RelayCommand]
     private async Task Save()
     {
-        if (!decimal.TryParse(AmountText, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.CurrentCulture, out var amount) || amount <= 0)
+        if (await TrySaveAsync())
+            await _navigationService.GoBackAsync();
+    }
+
+    public async Task<bool> TrySaveAsync()
+    {
+        if (!FlexibleAmountParser.TryParse(AmountText, out var amount) || amount <= 0)
         {
             await _dialogService.ShowAlertAsync(
                 _loc.GetString(ResourceKeys.Err_Titel),
                 _loc.GetString(ResourceKeys.Err_BetragGroesserNull),
                 _loc.GetString(ResourceKeys.Btn_OK));
-            return;
+            return false;
         }
 
         if (SourceAccount == null || TargetAccount == null || SourceAccount.Id == TargetAccount.Id)
@@ -88,7 +109,7 @@ public partial class TransferDetailViewModel(
                 _loc.GetString(ResourceKeys.Err_Titel),
                 _loc.GetString(ResourceKeys.Err_TransferKontenUnterschiedlich),
                 _loc.GetString(ResourceKeys.Btn_OK));
-            return;
+            return false;
         }
 
         try
@@ -97,7 +118,7 @@ public partial class TransferDetailViewModel(
                 ? _loc.GetString(ResourceKeys.Title_Umbuchung)
                 : Title.Trim();
 
-            await _saveTransferUseCase.ExecuteAsync(
+            var result = await _saveTransferUseCase.ExecuteAsync(
                 SourceAccount.Id,
                 TargetAccount.Id,
                 amount,
@@ -105,9 +126,15 @@ public partial class TransferDetailViewModel(
                 title,
                 Note);
 
+            if (!result.IsSuccess)
+            {
+                await UseCaseErrorPresenter.ShowAsync(_dialogService, _loc, result.Error!);
+                return false;
+            }
+
             _appEvents.NotifyDataChanged();
-            await _navigationService.GoBackAsync();
             await _feedbackService.ShowSnackbarAsync(_loc.GetString(ResourceKeys.Msg_Gespeichert));
+            return true;
         }
         catch (Exception ex)
         {
@@ -116,6 +143,7 @@ public partial class TransferDetailViewModel(
                 _loc.GetString(ResourceKeys.Err_Titel),
                 _loc.GetString(ResourceKeys.Err_SpeichernFehlgeschlagen, ex.Message),
                 _loc.GetString(ResourceKeys.Btn_OK));
+            return false;
         }
     }
 }

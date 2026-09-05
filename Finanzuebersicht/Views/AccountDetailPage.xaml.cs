@@ -1,27 +1,31 @@
 using Finanzuebersicht.Navigation;
+using Finanzuebersicht.Presentation.Services;
 using Finanzuebersicht.ViewModels;
 
 namespace Finanzuebersicht.Views;
 
 public partial class AccountDetailPage : ContentPage, IQueryAttributable
 {
-    public AccountDetailPage(AccountDetailViewModel viewModel)
+    private readonly IAppEvents _appEvents;
+
+    public AccountDetailPage(AccountDetailViewModel viewModel, IAppEvents appEvents)
     {
         InitializeComponent();
         BindingContext = viewModel;
+        _appEvents = appEvents;
     }
 
     protected override void OnAppearing()
     {
         base.OnAppearing();
-        App.LanguageChanged += OnLocalizationChanged;
-        App.CurrencyChanged += OnLocalizationChanged;
+        _appEvents.LanguageChanged += OnLocalizationChanged;
+        _appEvents.CurrencyChanged += OnLocalizationChanged;
     }
 
     protected override void OnDisappearing()
     {
-        App.LanguageChanged -= OnLocalizationChanged;
-        App.CurrencyChanged -= OnLocalizationChanged;
+        _appEvents.LanguageChanged -= OnLocalizationChanged;
+        _appEvents.CurrencyChanged -= OnLocalizationChanged;
         base.OnDisappearing();
     }
 

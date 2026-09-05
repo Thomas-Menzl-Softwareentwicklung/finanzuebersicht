@@ -16,6 +16,8 @@ public partial class SparZieleViewModel : ObservableObject, IAutoLoadViewModel, 
     private readonly LoadSparZieleUseCase _loadUseCase;
     private readonly SaveSparZielUseCase _saveUseCase;
     private readonly DeleteSparZielUseCase _deleteUseCase;
+    private readonly SparZielDetailViewModel _createSparZielViewModel;
+    private readonly ISparZielCreateSheetService _sparZielCreateSheetService;
     private readonly INavigationService _navigationService;
     private readonly IDialogService _dialogService;
     private readonly ILocalizationService _loc;
@@ -41,6 +43,8 @@ public partial class SparZieleViewModel : ObservableObject, IAutoLoadViewModel, 
         LoadSparZieleUseCase loadUseCase,
         SaveSparZielUseCase saveUseCase,
         DeleteSparZielUseCase deleteUseCase,
+        SparZielDetailViewModel createSparZielViewModel,
+        ISparZielCreateSheetService sparZielCreateSheetService,
         INavigationService navigationService,
         IDialogService dialogService,
         ILocalizationService localizationService,
@@ -51,6 +55,8 @@ public partial class SparZieleViewModel : ObservableObject, IAutoLoadViewModel, 
         _loadUseCase = loadUseCase;
         _saveUseCase = saveUseCase;
         _deleteUseCase = deleteUseCase;
+        _createSparZielViewModel = createSparZielViewModel;
+        _sparZielCreateSheetService = sparZielCreateSheetService;
         _navigationService = navigationService;
         _dialogService = dialogService;
         _loc = localizationService;
@@ -76,7 +82,9 @@ public partial class SparZieleViewModel : ObservableObject, IAutoLoadViewModel, 
     [RelayCommand]
     private async Task OpenCreateForm()
     {
-        await _navigationService.GoToAsync(Routes.SparZielDetail);
+        _createSparZielViewModel.ResetForCreate();
+        if (await _sparZielCreateSheetService.ShowAsync(_createSparZielViewModel))
+            await LoadSparZieleCommand.ExecuteAsync(null);
     }
 
     [RelayCommand]

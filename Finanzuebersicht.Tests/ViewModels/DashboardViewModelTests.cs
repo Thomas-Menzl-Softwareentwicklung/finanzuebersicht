@@ -5,6 +5,7 @@ using Finanzuebersicht.Application.UseCases.Transactions;
 using Finanzuebersicht.Core.Services;
 using Finanzuebersicht.Navigation;
 using Finanzuebersicht.Models;
+using Finanzuebersicht.Presentation.Services;
 using Finanzuebersicht.Tests.TestHelpers;
 using Finanzuebersicht.ViewModels;
 
@@ -253,27 +254,56 @@ public class DashboardViewModelTests
 
         var localizationService = Substitute.For<ILocalizationService>();
         var navigationService = Substitute.For<INavigationService>();
+        var dialogService = Substitute.For<IDialogService>();
         var forecastService = Substitute.For<IForecastService>();
         forecastService.GetMovingAverageAsync(Arg.Any<int>(), Arg.Any<int>(), Arg.Any<int>(), Arg.Any<string?>())
             .Returns(Task.FromResult(new ForecastResult()));
         clock ??= new FixedClock(new DateTime(2026, 3, 15));
 
+        var accountsCoordinator = new DashboardAccountsCoordinator(
+            new GetAccountBalancesUseCase(accountRepository, transactionRepository),
+            new LoadActiveAccountsUseCase(accountRepository),
+            localizationService);
+        var cashflowCoordinator = new DashboardCashflowPreviewCoordinator(
+            new LoadCashflowOutlookUseCase(transactionRepository, recurringTransactionRepository, clock),
+            localizationService);
+        var dueRecurringCoordinator = new DashboardDueRecurringCoordinator(
+            new GetDueRecurringWithHintsUseCase(recurringTransactionRepository),
+            new BookDueRecurringInstanceUseCase(recurringTransactionRepository, transactionRepository, accountRepository),
+            new SkipDueRecurringInstanceUseCase(new AddRecurringExceptionUseCase(recurringTransactionRepository)),
+            dialogService,
+            navigationService,
+            localizationService,
+            clock);
+        var expandSettings = new DashboardExpandSettingsHelper(settingsService);
+
         return new DashboardViewModel(
             new LoadDashboardMonthUseCase(categoryRepository, transactionRepository, recurringTransactionRepository, budgetRepository),
             new LoadDashboardYearUseCase(transactionRepository, categoryRepository),
             new LoadForecastUseCase(forecastService),
-            new LoadCashflowOutlookUseCase(transactionRepository, recurringTransactionRepository, clock),
-            new GetDueRecurringWithHintsUseCase(recurringTransactionRepository),
-            new BookDueRecurringInstanceUseCase(recurringTransactionRepository, transactionRepository, accountRepository),
-            new SkipDueRecurringInstanceUseCase(new AddRecurringExceptionUseCase(recurringTransactionRepository)),
+            cashflowCoordinator,
+            dueRecurringCoordinator,
+            accountsCoordinator,
+            expandSettings,
             new GetDefaultBudgetTotalUseCase(budgetRepository),
-            new LoadActiveAccountsUseCase(accountRepository),
             new GetEarliestTransactionYearUseCase(transactionRepository),
             localizationService,
             navigationService,
-            Substitute.For<IDialogService>(),
-            new GetAccountBalancesUseCase(accountRepository, transactionRepository),
             settingsService,
+            dialogService,
+            new QuickExpenseCaptureViewModel(
+                new CaptureQuickExpenseUseCase(
+                    transactionRepository,
+                    accountRepository,
+                    Substitute.For<IUncategorizedCategoryService>(),
+                    new TransactionValidationService(),
+                    clock),
+                localizationService,
+                dialogService,
+                navigationService,
+                Substitute.For<IFeedbackService>(),
+                Substitute.For<IAppEvents>()),
+            Substitute.For<IQuickExpenseCaptureSheetService>(),
             clock);
     }
 }

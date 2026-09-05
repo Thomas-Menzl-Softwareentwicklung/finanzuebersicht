@@ -115,11 +115,17 @@ public static class ResourceKeys
     public const string Err_LoeschenFehlgeschlagen = nameof(Err_LoeschenFehlgeschlagen);
     public const string Err_LadenFehlgeschlagen = nameof(Err_LadenFehlgeschlagen);
     public const string Err_TransferKontenUnterschiedlich = nameof(Err_TransferKontenUnterschiedlich);
+    public const string Err_TransferKontenErforderlich = nameof(Err_TransferKontenErforderlich);
+    public const string Err_KontoNichtGefunden = nameof(Err_KontoNichtGefunden);
+    public const string Err_KontoArchiviert = nameof(Err_KontoArchiviert);
     public const string Err_UmbuchungNichtBearbeitbar = nameof(Err_UmbuchungNichtBearbeitbar);
     public const string Err_OrdnerNichtWaehlbar = nameof(Err_OrdnerNichtWaehlbar);
     public const string Err_SucheFehlgeschlagen = nameof(Err_SucheFehlgeschlagen);
     public const string Err_ProErforderlich = nameof(Err_ProErforderlich);
     public const string Err_LimitErreicht = nameof(Err_LimitErreicht);
+    public const string Err_BackupNichtGefunden = nameof(Err_BackupNichtGefunden);
+    public const string Err_BackupBeschaedigt = nameof(Err_BackupBeschaedigt);
+    public const string Err_BackupSchemaInkompatibel = nameof(Err_BackupSchemaInkompatibel);
 
     // Licensing
     public const string Lic_SectionTitle = nameof(Lic_SectionTitle);
@@ -349,6 +355,8 @@ public static class ResourceKeys
     public const string AccountType_Depot = nameof(AccountType_Depot);
     public const string AccountType_Sonstiges = nameof(AccountType_Sonstiges);
     public const string Lbl_AlleTypen = nameof(Lbl_AlleTypen);
+    public const string Lbl_Gesamt = nameof(Lbl_Gesamt);
+    public const string A11y_GesamtAnzeigen = nameof(A11y_GesamtAnzeigen);
     public const string Lbl_VonDatum = nameof(Lbl_VonDatum);
     public const string Lbl_BisDatum = nameof(Lbl_BisDatum);
     public const string Hint_SucheTransaktionen = nameof(Hint_SucheTransaktionen);
@@ -442,10 +450,15 @@ public static class ResourceKeys
     // Accessibility
     public const string A11y_VorherigerMonat = nameof(A11y_VorherigerMonat);
     public const string A11y_NaechsterMonat = nameof(A11y_NaechsterMonat);
+    public const string A11y_AktuellerMonat = nameof(A11y_AktuellerMonat);
     public const string A11y_VorherigesJahr = nameof(A11y_VorherigesJahr);
     public const string A11y_NaechstesJahr = nameof(A11y_NaechstesJahr);
     public const string A11y_TransaktionHinzufuegen = nameof(A11y_TransaktionHinzufuegen);
     public const string A11y_UmbuchungHinzufuegen = nameof(A11y_UmbuchungHinzufuegen);
+    public const string A11y_CsvImport = nameof(A11y_CsvImport);
+    public const string Fab_Umbuchen = nameof(Fab_Umbuchen);
+    public const string Fab_Import = nameof(Fab_Import);
+    public const string Fab_Schnell = nameof(Fab_Schnell);
     public const string A11y_KategorieHinzufuegen = nameof(A11y_KategorieHinzufuegen);
     public const string A11y_KontoHinzufuegen = nameof(A11y_KontoHinzufuegen);
     public const string A11y_SparZielHinzufuegen = nameof(A11y_SparZielHinzufuegen);

@@ -1,0 +1,1 @@
+Finanzen,Budget,Ausgaben,Sparziele,Dauerauftrag,Konto,CSV,Privat,offline

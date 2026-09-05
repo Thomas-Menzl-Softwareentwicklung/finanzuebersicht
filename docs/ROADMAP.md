@@ -4,7 +4,7 @@
 
 > **Hinweis:** Die Milestone-Bezeichnungen (v1.14, v1.2, v2.0) sind thematische GitHub-Planungslabels, keine sequenziellen Release-Versionen. Tatsächliche Releases (v1.0, v1.6, v1.12 …) werden durch Git-Commit-Höhe via Nerdbank.GitVersioning bestimmt.
 
-**Aktueller Stand:** Release **v1.19** (Latest). Als Nächstes thematisch: **[v1.20 – Architektur-Fundament](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/milestone/24)** (ein Meilenstein, kein Zwischen-Release nötig). Danach Feature-Ideen (**Milestone 22**), dann **v2.0** (Verschlüsselung, echte Mehrwährung).
+**Aktueller Stand:** Release **v1.20** (Latest). Architektur-Fundament ([Milestone 24](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/milestone/24)) und Create-UX-Modal-Sheets sind enthalten. Als Nächstes: Feature-Ideen (**[Milestone 22](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/milestone/22)**), dann **v2.0** (Verschlüsselung, echte Mehrwährung).
 
 ---
 
@@ -131,43 +131,49 @@ Weitere Umsetzungen in v1.17: Live-Währungsrefresh (`CurrencyRefreshRegistry`),
 
 ---
 
-## ✅ v1.19 — Einheitliches Anlegen *(Release abgeschlossen; Rest-Issue offen)* · [Milestone](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/milestone/23)
+## ✅ v1.19 — Einheitliches Anlegen *(Release)* · [Milestone](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/milestone/23)
 
-- Inline-Anlegen für Konten und Sparziele (`CreateFormCard`, Scroll-to-top)
-- Sheet-Anlegen für Kategorien und Daueraufträge (`FormSheetPopup`)
-- Bearbeiten bleibt auf den jeweiligen Detailseiten
+- #265: Create-UX-Doku und erste Sheet-/Inline-Versuche; nach UIScene/Widget-Stabilisierung zeitweise wieder Detail-Pages
 - Architektur: Recurring-Schedule konsolidiert, Repository-Reads in Use Cases (#275)
 - Fixes: Systemkonto-Löschen (#277), Shift-Ausnahmen, Test-Stabilität (#282)
 - Magic Strings zentralisiert (#272 / PR #285)
 
 | Issue | Thema | Status |
 |-------|-------|--------|
-| [#266](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/266) | Transaktionen & Umbuchen per Sheet + „Häufig verwendet“ | Offen (UX, getrennt von Architektur) |
+| [#266](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/266) | Transaktionen & Umbuchen per Sheet + „Häufig verwendet“ | Teilweise in v1.20 (Sheets); „Häufig verwendet“ noch offen |
 
 ---
 
-## 🏗️ v1.20 — Architektur-Fundament *(aktiv)* · [Milestone](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/milestone/24)
+## ✅ v1.20 — Architektur-Fundament & Create-UX *(Release)* · [Milestone](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/milestone/24)
 
-Ein großer thematischer Meilenstein **vor** Feature-Backlog und v2.0. Kein Zwischen-Release nötig — Reihenfolge unten abarbeiten. Architektur-Arbeit bewusst vor Mehrwährung/Verschlüsselung (v2.0).
+Release-Linie `1.20` (Nerdbank). Enthält das abgeschlossene Architektur-Fundament plus Create-UX-Modal-Sheets und Transaktionen-Mockup.
 
 Setup-Hilfe (Milestone/Labels): `scripts/setup-v120-architecture-milestone.sh` (einmalig mit Issue-Schreibrechten; #272 bereits geschlossen).
 
-### Empfohlene Reihenfolge
+### Empfohlene Reihenfolge (Architektur)
 
-| Welle | Issues | Fokus | Stand |
-|-------|--------|--------|-------|
-| 0 | [#289](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/289) ✅, [#290](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/290) ✅, [#291](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/291) ✅ | DataPath-Restart, DataFileNames, Doc-Drift | ✅ Welle 0 fertig |
-| 1 | [#268](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/268), [#270](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/270) | Legacy `IDataService` raus, Budget Use Case | offen |
-| 2 | [#269](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/269), [#292](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/292), [#273](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/273) | Import-/Backup-Use-Cases, Vollscan-Queries | offen |
-| 3 | [#267](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/267), [#293](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/293), [#294](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/294) | Dashboard-/Transactions-/Categories-VM-Splits | offen |
-| 4 | [#274](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/274) | Fehler- & i18n-Grenze | offen |
-| 5 | [#271](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/271), [#295](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/295) | IAppEvents, Navigation härten | offen |
-| 6 | [#296](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/296)–[#299](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/299) | MAUI-Readiness (Listen, Nested Scroll, Theme, Storage-UI) | offen |
-| 7 | [#300](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/300) | Sync-Persistenz-Prep (`ExternalId`/`Source`) für später #243/#245 | offen |
+Abgeschlossen: Welle 0 (#289–#291), Welle 1 (#268, #270), Vollscan (#273), MAUI #297–#299.
+
+Issues in Abarbeitungsreihenfolge (#274 vor Import/Backup, damit neue Use Cases die Fehlerkonvention gleich mitnehmen):
+
+| Nr. | Issue | Fokus | Stand |
+|-----|--------|--------|-------|
+| 1 | [#274](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/274) | Einheitliches Fehler- & Result-Modell | ✅ |
+| 2 | [#269](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/269) | Import in Application-Layer (Use Cases) | ✅ |
+| 3 | [#292](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/292) | Backup in Application-Layer (Use Cases) | ✅ |
+| 4 | [#293](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/293) | TransactionsViewModel aufteilen (nach #269) | ✅ |
+| 5 | [#267](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/267) | DashboardViewModel aufteilen | ✅ |
+| 6 | [#294](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/294) | CategoriesViewModel aufteilen | ✅ |
+| 7 | [#271](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/271) | App-Static-Events → `IAppEvents` | ✅ |
+| 8 | [#295](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/295) | Shell-Tab-Routes / ID-Navigation härten | ✅ |
+| 9 | [#296](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/296) | Listen auf CollectionView virtualisieren | ✅ |
+| 10 | [#300](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/300) | Sync-Persistenz-Prep (`ExternalId`/`Source`) | ✅ |
+
+**v1.20 empfohlene Reihenfolge:** abgeschlossen. Create-UX-Sheets und Transaktionen-Mockup: siehe `docs/CREATE_UX.md` / CHANGELOG.
 
 ---
 
-## 💡 Weiterer Backlog — Milestone 22 *(nach v1.20, vor v2)* · [Milestone](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/milestone/22)
+## 💡 Weiterer Backlog — Milestone 22 *(aktiv, vor v2)* · [Milestone](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/milestone/22)
 
 Größere Produkt-Features. Sync/Open Banking setzen idealerweise #300 (und stabile Import-Grenze #269) voraus.
 
@@ -175,7 +181,7 @@ Größere Produkt-Features. Sync/Open Banking setzen idealerweise #300 (und stab
 |-------|-------|---------|
 | [#241](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/241) | Kategorien-Hierarchie (Ober-/Unterkategorien) | L |
 | [#242](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/242) | Home-Screen-Widget Anzeige (iOS / macOS) | L |
-| — | Interaktives iOS-Widget + In-App Schnellerfassung Ausgaben (Pro) | ✅ (iOS-Widget + Inbox; Mac/Windows nur In-App „Schnell“) |
+| — | Interaktives iOS-Widget (Pro) + In-App Schnellerfassung (Free) | ✅ (iOS-Widget + Inbox; Mac/Windows nur In-App „Schnell“) |
 | [#244](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/244) | Daueraufträge mit variablem Betrag | M |
 | [#243](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/243) | CloudKit-Sync zwischen Geräten | XL |
 | [#245](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/245) | Open Banking / automatischer Bank-Import | XL |

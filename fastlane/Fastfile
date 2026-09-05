@@ -1,0 +1,183 @@
+default_platform(:ios)
+
+REPO_ROOT = File.expand_path("..", __dir__)
+
+ASC_API_KEY_PATH = File.expand_path("~/.appstoreconnect/api_key.json")
+SCREENSHOTS_PATH = File.join(REPO_ROOT, "fastlane/screenshots")
+METADATA_PATH = File.join(REPO_ROOT, "fastlane/metadata")
+ASC_APP_IDENTIFIER = "de.thomasmenzl.finanzuebersicht"
+ASC_APP_VERSION = "1.20"
+STORE_IPA_PATH = File.join(
+  REPO_ROOT,
+  "Finanzuebersicht/bin/Release/net10.0-ios/ios-arm64/publish/Finanzuebersicht.ipa"
+)
+
+def require_asc_api_key!
+  unless File.exist?(ASC_API_KEY_PATH)
+    UI.user_error!(
+      "App Store Connect API key missing at #{ASC_API_KEY_PATH}. " \
+      "See docs/APP_STORE.md."
+    )
+  end
+end
+
+def require_screenshots!
+  pngs = Dir.glob(File.join(SCREENSHOTS_PATH, "*", "*.png"))
+  unless pngs.any?
+    UI.user_error!(
+      "No screenshots in #{SCREENSHOTS_PATH}. " \
+      "Run: bundle exec fastlane screenshots"
+    )
+  end
+end
+
+def require_store_ipa!
+  unless File.exist?(STORE_IPA_PATH)
+    UI.user_error!(
+      "Store IPA missing at #{STORE_IPA_PATH}. " \
+      "Build first (see docs/APP_STORE.md)."
+    )
+  end
+end
+
+# First App Store version has no AppStoreReviewDetail yet. deliver still
+# fetches it in review_attachment_file and raises "No data" (fastlane#20538)
+# even when we never upload an attachment. Skip that step unless a file is set.
+def patch_deliver_missing_review_detail!
+  require "deliver"
+  return if Deliver::UploadMetadata.method_defined?(:_finanz_review_attachment_file)
+
+  Deliver::UploadMetadata.class_eval do
+    alias_method :_finanz_review_attachment_file, :review_attachment_file
+
+    def review_attachment_file(version)
+      unless options[:app_review_attachment_file]
+        UI.important(
+          "Skipping review attachments (none configured; avoids first-version " \
+          "No data crash, fastlane#20538)."
+        )
+        return
+      end
+
+      _finanz_review_attachment_file(version)
+    end
+  end
+end
+
+def listing_upload_options(platform:, skip_screenshots:)
+  patch_deliver_missing_review_detail!
+  {
+    api_key_path: ASC_API_KEY_PATH,
+    app_identifier: ASC_APP_IDENTIFIER,
+    platform: platform,
+    app_version: ASC_APP_VERSION,
+    metadata_path: METADATA_PATH,
+    screenshots_path: SCREENSHOTS_PATH,
+    skip_binary_upload: true,
+    skip_metadata: false,
+    skip_screenshots: skip_screenshots,
+    overwrite_screenshots: !skip_screenshots,
+    force: true,
+    submit_for_review: false,
+    run_precheck_before_submit: false,
+    precheck_include_in_app_purchases: false
+  }
+end
+
+# Must match device names in Snapfile.
+SNAPFILE_DEVICES = [
+  "iPhone 17 Pro Max",
+  "iPhone 17",
+  "iPad Pro 13-inch (M5)"
+].freeze
+
+# On-disk simulator bundle name from `dotnet build` (ASCII folder; ApplicationTitle may differ).
+MAUI_APP_NAME = "Finanzuebersicht.app"
+
+MAUI_BUILD_CMD = [
+  "dotnet build Finanzuebersicht/Finanzuebersicht.csproj",
+  "-f net10.0-ios",
+  "-c Debug",
+  "-p:RuntimeIdentifier=iossimulator-arm64"
+].join(" ")
+
+def maui_sim_app_path
+  File.join(
+    REPO_ROOT,
+    "Finanzuebersicht/bin/Debug/net10.0-ios/iossimulator-arm64/#{MAUI_APP_NAME}"
+  )
+end
+
+def install_maui_app_on_snapfile_simulators
+  app_path = maui_sim_app_path
+  unless File.directory?(app_path)
+    UI.user_error!(
+      "MAUI simulator app not found at:\n  #{app_path}\n\n" \
+      "Build and retry (from repo root):\n  #{MAUI_BUILD_CMD}"
+    )
+  end
+
+  SNAPFILE_DEVICES.each do |device|
+    UI.message("Installing #{MAUI_APP_NAME} on #{device}…")
+    sh("xcrun simctl boot \"#{device}\" 2>/dev/null || true")
+    sh("xcrun simctl install \"#{device}\" \"#{app_path}\"")
+  end
+end
+
+platform :ios do
+  desc "Capture App Store screenshots (2 devices × 2 locales)"
+  lane :screenshots do
+    uitests_dir = File.join(REPO_ROOT, "Finanzuebersicht/Platforms/iOS/UITests")
+    xcodeproj = File.join(uitests_dir, "FinanzuebersichtUITests.xcodeproj")
+
+    unless File.directory?(xcodeproj)
+      UI.message("Generating Xcode project via XcodeGen…")
+      sh("cd \"#{uitests_dir}\" && xcodegen generate")
+    end
+
+    install_maui_app_on_snapfile_simulators
+
+    # Pass absolute project path — Snapfile relative paths are unreliable when
+    # fastlane's CWD is the fastlane/ directory.
+    capture_screenshots(
+      skip_open_summary: true,
+      project: File.join(
+        REPO_ROOT,
+        "Finanzuebersicht/Platforms/iOS/UITests/FinanzuebersichtUITests.xcodeproj"
+      ),
+      output_directory: File.join(REPO_ROOT, "fastlane/screenshots")
+    )
+  end
+
+  desc "Upload listing texts and iOS screenshots to App Store Connect (no binary, no review)"
+  lane :upload_listing do
+    require_asc_api_key!
+    require_screenshots!
+    upload_to_app_store(listing_upload_options(platform: "ios", skip_screenshots: false))
+  end
+
+  desc "Upload listing texts to the Mac App Store listing (no screenshots, no binary, no review)"
+  lane :upload_listing_mac do
+    require_asc_api_key!
+    upload_to_app_store(listing_upload_options(platform: "osx", skip_screenshots: true))
+  end
+
+  desc "Upload iOS listing+screenshots then Mac listing texts"
+  lane :upload_listing_all do
+    upload_listing
+    upload_listing_mac
+  end
+
+  desc "Upload the Store IPA to App Store Connect / TestFlight (API key, no Transporter.app, no review)"
+  lane :upload_ipa do
+    require_asc_api_key!
+    require_store_ipa!
+    upload_to_testflight(
+      api_key_path: ASC_API_KEY_PATH,
+      ipa: STORE_IPA_PATH,
+      app_identifier: ASC_APP_IDENTIFIER,
+      skip_waiting_for_build_processing: true,
+      skip_submission: true
+    )
+  end
+end

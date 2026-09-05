@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:Finanzuebersicht.ViewModels"
+             xmlns:controls="clr-namespace:Finanzuebersicht.Controls"
+             xmlns:loc="clr-namespace:Finanzuebersicht.Extensions"
+             x:Class="Finanzuebersicht.Controls.TransferFormView"
+             x:DataType="vm:TransferDetailViewModel">
+
+    <VerticalStackLayout Spacing="20">
+        <VerticalStackLayout Spacing="4">
+            <Label Text="{loc:Translate Lbl_VonKonto}" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
+            <controls:SelectionField ItemsSource="{Binding Accounts}"
+                                     SelectedItem="{Binding SourceAccount, Mode=TwoWay}"
+                                     DisplayMemberPath="Name"
+                                     FieldLabel="{loc:Translate Lbl_VonKonto}"
+                                     Placeholder="{loc:Translate Hint_KontoWaehlen}" />
+        </VerticalStackLayout>
+
+        <VerticalStackLayout Spacing="4">
+            <Label Text="{loc:Translate Lbl_NachKonto}" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
+            <controls:SelectionField ItemsSource="{Binding Accounts}"
+                                     SelectedItem="{Binding TargetAccount, Mode=TwoWay}"
+                                     DisplayMemberPath="Name"
+                                     FieldLabel="{loc:Translate Lbl_NachKonto}"
+                                     Placeholder="{loc:Translate Hint_KontoWaehlen}" />
+        </VerticalStackLayout>
+
+        <VerticalStackLayout Spacing="4">
+            <Label Text="{loc:Translate Lbl_Betrag}" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
+            <Entry Text="{Binding AmountText}" Placeholder="{loc:Translate Hint_Betrag}"
+                   Keyboard="Numeric" FontSize="28" FontAttributes="Bold"
+                   HorizontalTextAlignment="Center" />
+        </VerticalStackLayout>
+
+        <VerticalStackLayout Spacing="4">
+            <Label Text="{loc:Translate Lbl_Titel}" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
+            <Entry Text="{Binding Title}" FontSize="16" />
+        </VerticalStackLayout>
+
+        <VerticalStackLayout Spacing="4">
+            <Label Text="{loc:Translate Lbl_Verwendungszweck}" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
+            <Editor Text="{Binding Note}" HeightRequest="100" AutoSize="TextChanges" />
+        </VerticalStackLayout>
+
+        <VerticalStackLayout Spacing="4">
+            <Label Text="{loc:Translate Lbl_Datum}" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
+            <DatePicker Date="{Binding Date}" FontSize="16"
+                        Format="dd. MMMM yyyy" />
+        </VerticalStackLayout>
+    </VerticalStackLayout>
+</ContentView>

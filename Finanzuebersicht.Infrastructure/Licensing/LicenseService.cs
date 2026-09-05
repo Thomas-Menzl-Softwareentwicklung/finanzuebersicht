@@ -49,7 +49,7 @@ public sealed class LicenseService : ILicenseService
         AppFeature.CsvImport => HasPro,
         AppFeature.Cashflow => HasPro,
         AppFeature.CloudSync => CanUseCloudSync,
-        AppFeature.QuickExpenseCapture => HasPro,
+        AppFeature.QuickExpenseCapture => HasPro, // iOS widget only; in-app Schnell is free
         _ => false
     };
 

@@ -5,6 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:views="clr-namespace:Finanzuebersicht.Views"
     xmlns:loc="clr-namespace:Finanzuebersicht.Extensions"
+    xmlns:screenshot="clr-namespace:Finanzuebersicht.Core.Constants;assembly=Finanzuebersicht.Core"
     Title="{loc:Translate Title_AppName}"
     Shell.TabBarBackgroundColor="{AppThemeBinding Light={StaticResource CardBackground}, Dark={StaticResource CardBackgroundDark}}"
     Shell.TabBarTitleColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
@@ -12,30 +13,35 @@
 
     <TabBar>
         <ShellContent
+            AutomationId="{x:Static screenshot:ScreenshotAutomationIds.TabDashboard}"
             Title="{loc:Translate Nav_Dashboard}"
             Icon="dashboard.png"
             ContentTemplate="{DataTemplate views:DashboardPage}"
             Route="DashboardPage" />
 
         <ShellContent
+            AutomationId="{x:Static screenshot:ScreenshotAutomationIds.TabTransactions}"
             Title="{loc:Translate Nav_Transaktionen}"
             Icon="transactions.png"
             ContentTemplate="{DataTemplate views:TransactionsPage}"
             Route="TransactionsPage" />
 
         <ShellContent
+            AutomationId="{x:Static screenshot:ScreenshotAutomationIds.TabRecurring}"
             Title="{loc:Translate Nav_Dauerauftraege}"
             Icon="recurring.png"
             ContentTemplate="{DataTemplate views:RecurringTransactionsPage}"
             Route="RecurringTransactionsPage" />
 
         <ShellContent
+            AutomationId="{x:Static screenshot:ScreenshotAutomationIds.TabManagement}"
             Title="{loc:Translate Nav_Verwaltung}"
             Icon="categories.png"
             ContentTemplate="{DataTemplate views:CategoriesPage}"
             Route="CategoriesPage" />
 
         <ShellContent
+            AutomationId="{x:Static screenshot:ScreenshotAutomationIds.TabSavings}"
             Title="{loc:Translate Nav_SparZiele}"
             Icon="savings.png"
             ContentTemplate="{DataTemplate views:SparZielePage}"
@@ -44,7 +50,8 @@
     </TabBar>
 
     <Shell.ToolbarItems>
-        <ToolbarItem IconImageSource="settings.png"
+        <ToolbarItem AutomationProperties.AutomationId="{x:Static screenshot:ScreenshotAutomationIds.ToolbarSettings}"
+                     IconImageSource="settings.png"
                      Text="{loc:Translate Nav_Einstellungen}"
                      Order="Primary"
                      Priority="0"

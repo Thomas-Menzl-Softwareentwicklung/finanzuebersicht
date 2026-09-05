@@ -1,7 +1,9 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Finanzuebersicht.Application.UseCases.Backup;
 using Finanzuebersicht.Core.Constants;
 using Finanzuebersicht.Navigation;
+using Finanzuebersicht.Presentation.Services;
 using Finanzuebersicht.Resources.Strings;
 using Microsoft.Extensions.Logging;
 
@@ -10,7 +12,9 @@ namespace Finanzuebersicht.ViewModels;
 public partial class BackupViewModel : ObservableObject
 {
     private readonly ISettingsService _settings;
-    private readonly IBackupService? _backupService;
+    private readonly CreateBackupUseCase _createBackupUseCase;
+    private readonly ListBackupsUseCase _listBackupsUseCase;
+    private readonly ExportCsvUseCase _exportCsvUseCase;
     private readonly IDialogService _dialogService;
     private readonly ILocalizationService _loc;
     private readonly INavigationService _navigationService;
@@ -23,7 +27,9 @@ public partial class BackupViewModel : ObservableObject
 
     public BackupViewModel(
         ISettingsService settings,
-        IBackupService? backupService,
+        CreateBackupUseCase createBackupUseCase,
+        ListBackupsUseCase listBackupsUseCase,
+        ExportCsvUseCase exportCsvUseCase,
         IDialogService dialogService,
         ILocalizationService localizationService,
         INavigationService navigationService,
@@ -32,7 +38,9 @@ public partial class BackupViewModel : ObservableObject
         ILogger<BackupViewModel>? logger = null)
     {
         _settings = settings;
-        _backupService = backupService;
+        _createBackupUseCase = createBackupUseCase;
+        _listBackupsUseCase = listBackupsUseCase;
+        _exportCsvUseCase = exportCsvUseCase;
         _dialogService = dialogService;
         _loc = localizationService;
         _navigationService = navigationService;
@@ -46,14 +54,16 @@ public partial class BackupViewModel : ObservableObject
     [RelayCommand]
     private async Task CreateBackup()
     {
-        if (!await EnsureBackupServiceAvailableAsync()) return;
-
-        var backupService = _backupService!;
-
         try
         {
-            var metadata = await backupService.CreateBackupAsync(_settings.GetBackupPath());
+            var result = await _createBackupUseCase.ExecuteAsync(_settings.GetBackupPath());
+            if (!result.IsSuccess)
+            {
+                await UseCaseErrorPresenter.ShowAsync(_dialogService, _loc, result.Error!);
+                return;
+            }
 
+            var metadata = result.Value!;
             UpdateLastBackupInfo();
 
             await _dialogService.ShowAlertAsync(
@@ -67,6 +77,7 @@ public partial class BackupViewModel : ObservableObject
         }
         catch (Exception ex)
         {
+            _logger?.LogError(ex, "CreateBackup failed");
             await _dialogService.ShowAlertAsync(
                 _loc.GetString(ResourceKeys.Msg_BackupFailedTitle),
                 string.Format(_loc.GetString(ResourceKeys.Err_SpeichernFehlgeschlagen), ex.Message),
@@ -77,14 +88,17 @@ public partial class BackupViewModel : ObservableObject
     [RelayCommand]
     private async Task BrowseBackups()
     {
-        if (!await EnsureBackupServiceAvailableAsync()) return;
-
-        var backupService = _backupService!;
-
         try
         {
-            var backups = (await backupService.ListBackupsAsync(_settings.GetBackupPath())).ToList();
-            if (!backups.Any())
+            var result = await _listBackupsUseCase.ExecuteAsync(_settings.GetBackupPath());
+            if (!result.IsSuccess)
+            {
+                await UseCaseErrorPresenter.ShowAsync(_dialogService, _loc, result.Error!);
+                return;
+            }
+
+            var backups = result.Value!;
+            if (backups.Count == 0)
             {
                 await _dialogService.ShowAlertAsync(
                     _loc.GetString(ResourceKeys.Msg_NoBackupsTitle),
@@ -106,6 +120,7 @@ public partial class BackupViewModel : ObservableObject
         }
         catch (Exception ex)
         {
+            _logger?.LogError(ex, "BrowseBackups failed");
             await _dialogService.ShowAlertAsync(
                 _loc.GetString(ResourceKeys.Err_Titel),
                 string.Format(_loc.GetString(ResourceKeys.Err_SpeichernFehlgeschlagen), ex.Message),
@@ -116,18 +131,12 @@ public partial class BackupViewModel : ObservableObject
     [RelayCommand]
     private async Task RestoreBackup()
     {
-        if (!await EnsureBackupServiceAvailableAsync()) return;
-
         await _navigationService.GoToAsync(Routes.BackupList);
     }
 
     [RelayCommand]
     private async Task ExportAsCSV()
     {
-        if (!await EnsureBackupServiceAvailableAsync()) return;
-
-        var backupService = _backupService!;
-
         try
         {
             if (_fileSaver == null)
@@ -135,25 +144,32 @@ public partial class BackupViewModel : ObservableObject
                 return;
             }
 
-            await using var csvStream = await backupService.ExportAsCSVAsync();
+            var result = await _exportCsvUseCase.ExecuteAsync();
+            if (!result.IsSuccess)
+            {
+                await UseCaseErrorPresenter.ShowAsync(_dialogService, _loc, result.Error!);
+                return;
+            }
+
+            await using var csvStream = result.Value!;
             csvStream.Seek(0, SeekOrigin.Begin);
 
             var fileName = $"Finanzuebersicht_Export_{_clock.Now:yyyy-MM-dd}.csv";
-            var result = await _fileSaver.SaveAsync(fileName, csvStream, CancellationToken.None);
+            var saveResult = await _fileSaver.SaveAsync(fileName, csvStream, CancellationToken.None);
 
-            if (result.IsSuccessful)
+            if (saveResult.IsSuccessful)
             {
                 await _dialogService.ShowAlertAsync(
                     _loc.GetString(ResourceKeys.Msg_CSVExportedTitle),
-                    string.Format(_loc.GetString(ResourceKeys.Msg_CSVExportedBody), result.FilePath),
+                    string.Format(_loc.GetString(ResourceKeys.Msg_CSVExportedBody), saveResult.FilePath),
                     _loc.GetString(ResourceKeys.Btn_OK));
             }
-            else if (result.Exception is not null and not OperationCanceledException)
+            else if (saveResult.Exception is not null and not OperationCanceledException)
             {
-                _logger?.LogError(result.Exception, "ExportAsCSV SaveAsync failed");
+                _logger?.LogError(saveResult.Exception, "ExportAsCSV SaveAsync failed");
                 await _dialogService.ShowAlertAsync(
                     _loc.GetString(ResourceKeys.Msg_CSVExportFailedTitle),
-                    string.Format(_loc.GetString(ResourceKeys.Err_SpeichernFehlgeschlagen), result.Exception.Message),
+                    string.Format(_loc.GetString(ResourceKeys.Err_SpeichernFehlgeschlagen), saveResult.Exception.Message),
                     _loc.GetString(ResourceKeys.Btn_OK));
             }
         }
@@ -165,17 +181,6 @@ public partial class BackupViewModel : ObservableObject
                 string.Format(_loc.GetString(ResourceKeys.Err_SpeichernFehlgeschlagen), ex.Message),
                 _loc.GetString(ResourceKeys.Btn_OK));
         }
-    }
-
-    private async Task<bool> EnsureBackupServiceAvailableAsync()
-    {
-        if (_backupService != null) return true;
-
-        await _dialogService.ShowAlertAsync(
-            _loc.GetString(ResourceKeys.Err_Titel),
-            _loc.GetString(ResourceKeys.Msg_BackupServiceNotAvailable),
-            _loc.GetString(ResourceKeys.Btn_OK));
-        return false;
     }
 
     private void UpdateLastBackupInfo()
@@ -209,5 +214,4 @@ public partial class BackupViewModel : ObservableObject
                 : string.Format(_loc.GetString(ResourceKeys.Stn_LastBackupDays), (int)diff.TotalDays);
         }
     }
-
 }

@@ -13,6 +13,7 @@ namespace Finanzuebersicht.ViewModels;
 
 public partial class AccountDetailViewModel(
     SaveAccountDetailUseCase saveAccountDetailUseCase,
+    GetAccountByIdUseCase getAccountByIdUseCase,
     GetAccountBalancesUseCase getAccountBalancesUseCase,
     ReconcileAccountBalanceUseCase reconcileAccountBalanceUseCase,
     INavigationService navigationService,
@@ -23,6 +24,7 @@ public partial class AccountDetailViewModel(
     ILogger<AccountDetailViewModel>? logger = null) : ObservableObject, IApplyQueryAttributes, ILocalizableViewModel
 {
     private readonly SaveAccountDetailUseCase _saveAccountDetailUseCase = saveAccountDetailUseCase;
+    private readonly GetAccountByIdUseCase _getAccountByIdUseCase = getAccountByIdUseCase;
     private readonly GetAccountBalancesUseCase _getAccountBalancesUseCase = getAccountBalancesUseCase;
     private readonly ReconcileAccountBalanceUseCase _reconcileAccountBalanceUseCase = reconcileAccountBalanceUseCase;
     private readonly INavigationService _navigationService = navigationService;
@@ -126,10 +128,33 @@ public partial class AccountDetailViewModel(
 
     public void ApplyQueryAttributes(IDictionary<string, object> query)
     {
+        if (query.TryGetValue(NavigationQueryKeys.AccountId, out var idVal) && idVal is string accountId && !string.IsNullOrWhiteSpace(accountId))
+        {
+            _ = LoadExistingByIdAsync(accountId);
+            return;
+        }
+
         if (query.TryGetValue(NavigationQueryKeys.Account, out var val) && val is Account a)
             Account = a;
         else
             ResetForCreate();
+    }
+
+    private async Task LoadExistingByIdAsync(string accountId)
+    {
+        try
+        {
+            var account = await _getAccountByIdUseCase.ExecuteAsync(accountId);
+            if (account is not null)
+                Account = account;
+            else
+                ResetForCreate();
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogError(ex, "AccountDetailViewModel: LoadExistingByIdAsync failed for {Id}", accountId);
+            ResetForCreate();
+        }
     }
 
     public void ResetForCreate()
@@ -155,7 +180,20 @@ public partial class AccountDetailViewModel(
     [RelayCommand]
     private async Task Save()
     {
-        if (string.IsNullOrWhiteSpace(Name)) return;
+        if (await TrySaveAsync())
+            await _navigationService.GoBackAsync();
+    }
+
+    public async Task<bool> TrySaveAsync()
+    {
+        if (string.IsNullOrWhiteSpace(Name))
+        {
+            await _dialogService.ShowAlertAsync(
+                _loc.GetString(ResourceKeys.Err_Titel),
+                _loc.GetString(ResourceKeys.Err_TitelErforderlich),
+                _loc.GetString(ResourceKeys.Btn_OK));
+            return false;
+        }
 
         if (!TryParseOpeningBalance(out var openingBalance))
         {
@@ -163,18 +201,25 @@ public partial class AccountDetailViewModel(
                 _loc.GetString(ResourceKeys.Err_Titel),
                 _loc.GetString(ResourceKeys.Err_UngueltigerBetrag),
                 _loc.GetString(ResourceKeys.Btn_OK));
-            return;
+            return false;
         }
 
         try
         {
             Type = SelectedTypeOption?.Value ?? Type;
             var openingBalanceDate = UseOpeningBalanceDate ? OpeningBalanceDate : (DateTime?)null;
-            await _saveAccountDetailUseCase.ExecuteAsync(
+            var result = await _saveAccountDetailUseCase.ExecuteAsync(
                 _existingAccount, Name, Type, IsArchived, openingBalance, openingBalanceDate);
+
+            if (!result.IsSuccess)
+            {
+                await UseCaseErrorPresenter.ShowAsync(_dialogService, _loc, result.Error!);
+                return false;
+            }
+
             _appEvents.NotifyDataChanged();
             await _feedbackService.ShowSnackbarAsync(_loc.GetString(ResourceKeys.Msg_Gespeichert));
-            await _navigationService.GoBackAsync();
+            return true;
         }
         catch (Exception ex)
         {
@@ -183,6 +228,7 @@ public partial class AccountDetailViewModel(
                 _loc.GetString(ResourceKeys.Err_Titel),
                 _loc.GetString(ResourceKeys.Err_SpeichernFehlgeschlagen, ex.Message),
                 _loc.GetString(ResourceKeys.Btn_OK));
+            return false;
         }
     }
 
@@ -191,7 +237,7 @@ public partial class AccountDetailViewModel(
     {
         if (_existingAccount == null) return;
 
-        if (!decimal.TryParse(ActualBalanceText, NumberStyles.Number, CultureInfo.CurrentCulture, out var actualBalance))
+        if (!FlexibleAmountParser.TryParse(ActualBalanceText, out var actualBalance))
         {
             await _dialogService.ShowAlertAsync(
                 _loc.GetString(ResourceKeys.Err_Titel),
@@ -240,11 +286,7 @@ public partial class AccountDetailViewModel(
             return true;
         }
 
-        return decimal.TryParse(
-            OpeningBalanceText,
-            NumberStyles.Number,
-            CultureInfo.CurrentCulture,
-            out openingBalance);
+        return FlexibleAmountParser.TryParse(OpeningBalanceText, out openingBalance);
     }
 }
 

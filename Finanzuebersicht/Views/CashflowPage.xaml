@@ -18,83 +18,89 @@
     </views:BaseContentPage.Resources>
 
     <RefreshView Command="{Binding LoadCashflowCommand}" IsRefreshing="{Binding IsLoading}">
-        <ScrollView Padding="16">
-            <VerticalStackLayout Spacing="16">
+        <CollectionView ItemsSource="{Binding Days}"
+                        SelectionMode="None"
+                        Margin="16,0">
+            <CollectionView.Header>
+                <VerticalStackLayout Spacing="16" Padding="0,0,0,8">
+                    <Grid ColumnDefinitions="70,*" ColumnSpacing="8">
+                        <Label Grid.Column="0" Text="{loc:Translate Lbl_Konto}" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" VerticalTextAlignment="Center" />
+                        <controls:SelectionField Grid.Column="1"
+                                                 ItemsSource="{Binding AvailableKonten}"
+                                                 SelectedItem="{Binding SelectedKontoFilterItem, Mode=TwoWay}"
+                                                 DisplayMemberPath="DisplayName"
+                                                 Placeholder="{loc:Translate Lbl_AlleKonten}" />
+                    </Grid>
 
-                <Grid ColumnDefinitions="70,*" ColumnSpacing="8">
-                    <Label Grid.Column="0" Text="{loc:Translate Lbl_Konto}" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" VerticalTextAlignment="Center" />
-                    <controls:SelectionField Grid.Column="1"
-                                             ItemsSource="{Binding AvailableKonten}"
-                                             SelectedItem="{Binding SelectedKontoFilterItem, Mode=TwoWay}"
-                                             DisplayMemberPath="DisplayName"
-                                             Placeholder="{loc:Translate Lbl_AlleKonten}" />
-                </Grid>
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="12" IsVisible="{Binding HasDays}">
+                        <VerticalStackLayout Grid.Column="0" Spacing="4">
+                            <Label Text="{loc:Translate Lbl_Einnahmen}" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
+                            <Label Text="{Binding ProjectedIncome, Converter={StaticResource Currency}}" FontSize="16" FontAttributes="Bold" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="1" Spacing="4">
+                            <Label Text="{loc:Translate Lbl_Ausgaben}" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
+                            <Label Text="{Binding ProjectedExpenses, Converter={StaticResource Currency}}" FontSize="16" FontAttributes="Bold" />
+                        </VerticalStackLayout>
+                    </Grid>
+                </VerticalStackLayout>
+            </CollectionView.Header>
 
-                <Grid ColumnDefinitions="*,*" ColumnSpacing="12" IsVisible="{Binding HasDays}">
-                    <VerticalStackLayout Grid.Column="0" Spacing="4">
-                        <Label Text="{loc:Translate Lbl_Einnahmen}" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
-                        <Label Text="{Binding ProjectedIncome, Converter={StaticResource Currency}}" FontSize="16" FontAttributes="Bold" />
-                    </VerticalStackLayout>
-                    <VerticalStackLayout Grid.Column="1" Spacing="4">
-                        <Label Text="{loc:Translate Lbl_Ausgaben}" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
-                        <Label Text="{Binding ProjectedExpenses, Converter={StaticResource Currency}}" FontSize="16" FontAttributes="Bold" />
-                    </VerticalStackLayout>
-                </Grid>
-
+            <CollectionView.EmptyView>
                 <controls:EmptyStateView IconImage="year.png"
                                          IconAccessibilityDescription="{loc:Translate Title_Cashflow}"
                                          Message="{loc:Translate Empty_KeinCashflow}"
-                                         Hint="{loc:Translate Empty_HintCashflow}"
-                                         IsVisible="{Binding HasDays, Converter={StaticResource InvertBool}}" />
+                                         Hint="{loc:Translate Empty_HintCashflow}" />
+            </CollectionView.EmptyView>
 
-                <VerticalStackLayout Spacing="12" BindableLayout.ItemsSource="{Binding Days}">
-                    <BindableLayout.ItemTemplate>
-                        <DataTemplate x:DataType="dash:CashflowDayGroup">
-                            <Border StrokeShape="RoundRectangle 10"
-                                    Padding="12">
-                                <Border.Triggers>
-                                    <DataTrigger TargetType="Border"
-                                                 Binding="{Binding IsNotable}"
-                                                 Value="True">
-                                        <Setter Property="Stroke" Value="{StaticResource ReminderBannerBorder}" />
-                                        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource ReminderBannerBackground}, Dark={StaticResource ReminderBannerBackgroundDark}}" />
-                                    </DataTrigger>
-                                    <DataTrigger TargetType="Border"
-                                                 Binding="{Binding IsNotable}"
-                                                 Value="False">
-                                        <Setter Property="Stroke" Value="{AppThemeBinding Light=#E5E5EA, Dark=#3A3A3C}" />
-                                        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light=#FFFFFF, Dark=#1C1C1E}" />
-                                    </DataTrigger>
-                                </Border.Triggers>
-                                <VerticalStackLayout Spacing="8">
-                                    <Grid ColumnDefinitions="*, Auto">
-                                        <Label Grid.Column="0"
-                                               Text="{Binding Date, StringFormat='{0:dddd, dd.MM.yyyy}'}"
-                                               FontSize="15" FontAttributes="Bold" />
-                                        <Label Grid.Column="1"
-                                               Text="{Binding NetAmount, Converter={StaticResource Currency}}"
-                                               FontAttributes="Bold"
-                                               TextColor="{Binding NetAmount, Converter={StaticResource BilanzColor}}" />
-                                    </Grid>
-                                    <VerticalStackLayout Spacing="4" BindableLayout.ItemsSource="{Binding Entries}">
-                                        <BindableLayout.ItemTemplate>
-                                            <DataTemplate x:DataType="dash:CashflowEntry">
-                                                <Grid ColumnDefinitions="*, Auto">
-                                                    <Label Grid.Column="0" Text="{Binding Title}" FontSize="13" />
-                                                    <Label Grid.Column="1"
-                                                           Text="{Binding Amount, Converter={StaticResource Currency}}"
-                                                           FontSize="13" />
-                                                </Grid>
-                                            </DataTemplate>
-                                        </BindableLayout.ItemTemplate>
-                                    </VerticalStackLayout>
-                                </VerticalStackLayout>
-                            </Border>
-                        </DataTemplate>
-                    </BindableLayout.ItemTemplate>
-                </VerticalStackLayout>
+            <CollectionView.ItemsLayout>
+                <LinearItemsLayout Orientation="Vertical" ItemSpacing="12" />
+            </CollectionView.ItemsLayout>
 
-            </VerticalStackLayout>
-        </ScrollView>
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="dash:CashflowDayGroup">
+                    <Border StrokeShape="RoundRectangle 10"
+                            Padding="12">
+                        <Border.Triggers>
+                            <DataTrigger TargetType="Border"
+                                         Binding="{Binding IsNotable}"
+                                         Value="True">
+                                <Setter Property="Stroke" Value="{StaticResource ReminderBannerBorder}" />
+                                <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource ReminderBannerBackground}, Dark={StaticResource ReminderBannerBackgroundDark}}" />
+                            </DataTrigger>
+                            <DataTrigger TargetType="Border"
+                                         Binding="{Binding IsNotable}"
+                                         Value="False">
+                                <Setter Property="Stroke" Value="{AppThemeBinding Light=#E5E5EA, Dark=#3A3A3C}" />
+                                <Setter Property="BackgroundColor" Value="{AppThemeBinding Light=#FFFFFF, Dark=#1C1C1E}" />
+                            </DataTrigger>
+                        </Border.Triggers>
+                        <VerticalStackLayout Spacing="8">
+                            <Grid ColumnDefinitions="*, Auto">
+                                <Label Grid.Column="0"
+                                       Text="{Binding Date, StringFormat='{0:dddd, dd.MM.yyyy}'}"
+                                       FontSize="15" FontAttributes="Bold" />
+                                <Label Grid.Column="1"
+                                       Text="{Binding NetAmount, Converter={StaticResource Currency}}"
+                                       FontAttributes="Bold"
+                                       TextColor="{Binding NetAmount, Converter={StaticResource BilanzColor}}" />
+                            </Grid>
+                            <!-- Per-day entry lists stay compact BindableLayouts (not page-level data lists). -->
+                            <VerticalStackLayout Spacing="4" BindableLayout.ItemsSource="{Binding Entries}">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="dash:CashflowEntry">
+                                        <Grid ColumnDefinitions="*, Auto">
+                                            <Label Grid.Column="0" Text="{Binding Title}" FontSize="13" />
+                                            <Label Grid.Column="1"
+                                                   Text="{Binding Amount, Converter={StaticResource Currency}}"
+                                                   FontSize="13" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </VerticalStackLayout>
+                        </VerticalStackLayout>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
     </RefreshView>
 </views:BaseContentPage>

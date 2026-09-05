@@ -1,0 +1,1 @@
+Anlegen über Modal-Sheets für Transaktionen, Umbuchungen, Kategorien, Konten, Daueraufträge und Sparziele. Überarbeitete Transaktionsliste mit Monats-Chips und Tageskarten. Schnellerfassung in der App; auf dem iPhone zusätzlich als Widget (Pro). Beträge akzeptieren Komma und Punkt.

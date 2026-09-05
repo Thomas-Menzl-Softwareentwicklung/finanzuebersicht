@@ -2,7 +2,6 @@ using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Finanzuebersicht.Application.UseCases.Transactions;
-using Finanzuebersicht.Core.Licensing;
 using Finanzuebersicht.Core.Services;
 using Finanzuebersicht.Navigation;
 using Finanzuebersicht.Presentation.Services;
@@ -16,8 +15,7 @@ public partial class QuickExpenseCaptureViewModel(
     IDialogService dialogService,
     INavigationService navigationService,
     IFeedbackService feedbackService,
-    IAppEvents appEvents,
-    ILicenseService? licenseService = null) : ObservableObject, IApplyQueryAttributes
+    IAppEvents appEvents) : ObservableObject, IApplyQueryAttributes
 {
     private readonly CaptureQuickExpenseUseCase _captureQuickExpenseUseCase = captureQuickExpenseUseCase;
     private readonly ILocalizationService _loc = localizationService;
@@ -25,8 +23,6 @@ public partial class QuickExpenseCaptureViewModel(
     private readonly INavigationService _navigationService = navigationService;
     private readonly IFeedbackService _feedbackService = feedbackService;
     private readonly IAppEvents _appEvents = appEvents;
-    private readonly ILicenseService _licenseService =
-        licenseService ?? UnrestrictedLicenseService.Instance;
 
     [ObservableProperty]
     private string betragText = string.Empty;
@@ -53,27 +49,8 @@ public partial class QuickExpenseCaptureViewModel(
             Titel = titleObj?.ToString() ?? string.Empty;
     }
 
-    public bool EnsureProAccess()
-    {
-        return _licenseService.HasFeature(AppFeature.QuickExpenseCapture);
-    }
-
-    public async Task ShowProRequiredAsync()
-    {
-        await _dialogService.ShowAlertAsync(
-            _loc.GetString(ResourceKeys.Err_Titel),
-            _loc.GetString(ResourceKeys.Err_ProErforderlich),
-            _loc.GetString(ResourceKeys.Btn_OK));
-    }
-
     public async Task<bool> TrySaveAsync()
     {
-        if (!EnsureProAccess())
-        {
-            await ShowProRequiredAsync();
-            return false;
-        }
-
         try
         {
             var result = await _captureQuickExpenseUseCase.ExecuteAsync(
@@ -98,11 +75,16 @@ public partial class QuickExpenseCaptureViewModel(
                 return false;
             }
 
+            _appEvents.NotifyDataChanged();
+            await _feedbackService.ShowSnackbarAsync(_loc.GetString(ResourceKeys.Msg_SchnellAusgabeGespeichert));
             return true;
         }
-        catch (FeatureGateException)
+        catch (Exception ex)
         {
-            await ShowProRequiredAsync();
+            await _dialogService.ShowAlertAsync(
+                _loc.GetString(ResourceKeys.Err_Titel),
+                _loc.GetString(ResourceKeys.Err_SpeichernFehlgeschlagen, ex.Message),
+                _loc.GetString(ResourceKeys.Btn_OK));
             return false;
         }
     }
@@ -113,8 +95,6 @@ public partial class QuickExpenseCaptureViewModel(
         if (!await TrySaveAsync())
             return;
 
-        _appEvents.NotifyDataChanged();
-        await _feedbackService.ShowSnackbarAsync(_loc.GetString(ResourceKeys.Msg_SchnellAusgabeGespeichert));
         await _navigationService.GoToAsync("..");
     }
 

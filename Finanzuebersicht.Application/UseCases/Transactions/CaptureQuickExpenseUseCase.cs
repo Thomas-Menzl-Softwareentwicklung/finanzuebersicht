@@ -1,6 +1,5 @@
 using System.Globalization;
 using Finanzuebersicht.Constants;
-using Finanzuebersicht.Core.Licensing;
 using Finanzuebersicht.Core.Services;
 using Finanzuebersicht.Models;
 
@@ -13,21 +12,19 @@ public sealed record CaptureQuickExpenseResult(
 
 /// <summary>
 /// Saves a quick expense as a real transaction: system Unkategorisiert + default account.
-/// Gated by <see cref="AppFeature.QuickExpenseCapture"/> (Pro).
+/// In-app Schnell is free; the iOS widget remains Pro-gated separately.
 /// </summary>
 public class CaptureQuickExpenseUseCase(
     ITransactionRepository transactionRepository,
     IAccountRepository accountRepository,
     IUncategorizedCategoryService uncategorizedCategoryService,
     ITransactionValidationService validationService,
-    ILicenseService licenseService,
     IClock clock)
 {
     private readonly ITransactionRepository _transactionRepository = transactionRepository;
     private readonly IAccountRepository _accountRepository = accountRepository;
     private readonly IUncategorizedCategoryService _uncategorizedCategoryService = uncategorizedCategoryService;
     private readonly ITransactionValidationService _validationService = validationService;
-    private readonly ILicenseService _licenseService = licenseService;
     private readonly IClock _clock = clock;
 
     public async Task<CaptureQuickExpenseResult> ExecuteAsync(
@@ -36,8 +33,6 @@ public class CaptureQuickExpenseUseCase(
         CultureInfo? culture = null,
         CancellationToken cancellationToken = default)
     {
-        _licenseService.EnsureFeature(AppFeature.QuickExpenseCapture);
-
         culture ??= CultureInfo.CurrentCulture;
         if (!_validationService.TryValidate(
                 amountText,

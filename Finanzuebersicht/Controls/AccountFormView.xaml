@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:Finanzuebersicht.ViewModels"
+             xmlns:loc="clr-namespace:Finanzuebersicht.Extensions"
+             xmlns:controls="clr-namespace:Finanzuebersicht.Controls"
+             x:Class="Finanzuebersicht.Controls.AccountFormView"
+             x:DataType="vm:AccountDetailViewModel">
+
+    <VerticalStackLayout Spacing="20">
+
+        <VerticalStackLayout Spacing="4">
+            <Label Text="{loc:Translate Lbl_Name}" FontSize="13"
+                   TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
+            <Entry Text="{Binding Name}" Placeholder="{loc:Translate Lbl_Konto}"
+                   FontSize="16" />
+        </VerticalStackLayout>
+
+        <VerticalStackLayout Spacing="4">
+            <Label Text="{loc:Translate Lbl_Typ}" FontSize="13"
+                   TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
+            <controls:SelectionField ItemsSource="{Binding VerfuegbareTypen}"
+                                     SelectedItem="{Binding SelectedTypeOption, Mode=TwoWay}"
+                                     DisplayMemberPath="DisplayName"
+                                     FieldLabel="{loc:Translate Lbl_Typ}" />
+        </VerticalStackLayout>
+
+        <VerticalStackLayout Spacing="4">
+            <Label Text="{loc:Translate Lbl_Anfangssaldo}" FontSize="13"
+                   TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
+            <Entry Text="{Binding OpeningBalanceText}"
+                   Placeholder="{loc:Translate Hint_Betrag}"
+                   Keyboard="Numeric"
+                   FontSize="16" />
+            <Label Text="{loc:Translate Hint_Anfangssaldo}"
+                   FontSize="12"
+                   TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
+        </VerticalStackLayout>
+
+        <VerticalStackLayout Spacing="4">
+            <Grid ColumnDefinitions="*, Auto" ColumnSpacing="8">
+                <Label Text="{loc:Translate Lbl_AnfangssaldoStichtag}"
+                       FontSize="13"
+                       TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}"
+                       VerticalTextAlignment="Center" />
+                <Switch Grid.Column="1"
+                        IsToggled="{Binding UseOpeningBalanceDate}" />
+            </Grid>
+            <DatePicker Date="{Binding OpeningBalanceDate}"
+                        IsVisible="{Binding HasOpeningBalanceDate}"
+                        FontSize="16" />
+        </VerticalStackLayout>
+
+    </VerticalStackLayout>
+</ContentView>

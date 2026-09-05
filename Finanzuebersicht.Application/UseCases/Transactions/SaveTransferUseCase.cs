@@ -1,3 +1,4 @@
+using Finanzuebersicht.Application.Results;
 using Finanzuebersicht.Models;
 
 namespace Finanzuebersicht.Application.UseCases.Transactions;
@@ -9,7 +10,7 @@ public class SaveTransferUseCase(
     private readonly ITransactionRepository _transactionRepository = transactionRepository;
     private readonly IAccountRepository _accountRepository = accountRepository;
 
-    public async Task ExecuteAsync(
+    public async Task<UseCaseResult> ExecuteAsync(
         string fromAccountId,
         string toAccountId,
         decimal amount,
@@ -21,19 +22,19 @@ public class SaveTransferUseCase(
         cancellationToken.ThrowIfCancellationRequested();
 
         if (string.IsNullOrWhiteSpace(fromAccountId) || string.IsNullOrWhiteSpace(toAccountId))
-            throw new InvalidOperationException("Source and target account are required.");
+            return UseCaseResult.Fail(UseCaseErrorCode.TransferAccountsRequired);
         if (fromAccountId == toAccountId)
-            throw new InvalidOperationException("Source and target account must be different.");
+            return UseCaseResult.Fail(UseCaseErrorCode.TransferAccountsMustDiffer);
         if (amount <= 0)
-            throw new InvalidOperationException("Transfer amount must be greater than zero.");
+            return UseCaseResult.Fail(UseCaseErrorCode.TransferAmountMustBePositive);
 
         var accounts = await _accountRepository.GetAccountsAsync();
         var source = accounts.FirstOrDefault(a => a.Id == fromAccountId);
         var target = accounts.FirstOrDefault(a => a.Id == toAccountId);
         if (source == null || target == null)
-            throw new InvalidOperationException("Source or target account not found.");
+            return UseCaseResult.Fail(UseCaseErrorCode.AccountNotFound);
         if (source.IsArchived || target.IsArchived)
-            throw new InvalidOperationException("Archived accounts cannot be used for new transfers.");
+            return UseCaseResult.Fail(UseCaseErrorCode.AccountArchived);
 
         var transferGroupId = Guid.NewGuid().ToString();
         var transferTitle = string.IsNullOrWhiteSpace(title) ? string.Empty : title.Trim();
@@ -66,5 +67,6 @@ public class SaveTransferUseCase(
         };
 
         await _transactionRepository.SaveTransactionsAsync([outgoing, incoming]);
+        return UseCaseResult.Ok();
     }
 }

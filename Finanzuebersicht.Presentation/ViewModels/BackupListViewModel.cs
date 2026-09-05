@@ -1,6 +1,10 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Finanzuebersicht.Application.Results;
+using Finanzuebersicht.Application.UseCases.Backup;
+using Finanzuebersicht.Core.Services;
+using Finanzuebersicht.Presentation.Services;
 using Finanzuebersicht.Resources.Strings;
 using Microsoft.Extensions.Logging;
 
@@ -8,7 +12,8 @@ namespace Finanzuebersicht.ViewModels;
 
 public partial class BackupListViewModel : ObservableObject, IAutoLoadViewModel
 {
-    private readonly IBackupService _backupService;
+    private readonly ListBackupsUseCase _listBackupsUseCase;
+    private readonly RestoreBackupUseCase _restoreBackupUseCase;
     private readonly ISettingsService _settings;
     private readonly IDialogService _dialogService;
     private readonly ILocalizationService _loc;
@@ -27,14 +32,16 @@ public partial class BackupListViewModel : ObservableObject, IAutoLoadViewModel
     private bool isEmpty;
 
     public BackupListViewModel(
-        IBackupService backupService,
+        ListBackupsUseCase listBackupsUseCase,
+        RestoreBackupUseCase restoreBackupUseCase,
         ISettingsService settings,
         IDialogService dialogService,
         ILocalizationService localizationService,
         INavigationService navigationService,
         ILogger<BackupListViewModel>? logger = null)
     {
-        _backupService = backupService;
+        _listBackupsUseCase = listBackupsUseCase;
+        _restoreBackupUseCase = restoreBackupUseCase;
         _settings = settings;
         _dialogService = dialogService;
         _loc = localizationService;
@@ -50,8 +57,16 @@ public partial class BackupListViewModel : ObservableObject, IAutoLoadViewModel
         try
         {
             var backupPath = _settings.GetBackupPath();
-            var list = (await _backupService.ListBackupsAsync(backupPath)).ToList();
-            Backups = new ObservableCollection<BackupMetadata>(list);
+            var result = await _listBackupsUseCase.ExecuteAsync(backupPath);
+            if (!result.IsSuccess)
+            {
+                _logger?.LogWarning("BackupListViewModel: list failed {Code}", result.Error?.Code);
+                Backups = [];
+                IsEmpty = true;
+                return;
+            }
+
+            Backups = new ObservableCollection<BackupMetadata>(result.Value!);
             IsEmpty = Backups.Count == 0;
         }
         catch (Exception ex)
@@ -81,29 +96,27 @@ public partial class BackupListViewModel : ObservableObject, IAutoLoadViewModel
         try
         {
             var backupPath = _settings.GetBackupPath();
-            var result = await _backupService.RestoreBackupAsync(backupPath, backup.Id);
-            if (result.Success)
+            var result = await _restoreBackupUseCase.ExecuteAsync(backupPath, backup.Id);
+            if (result.IsSuccess)
             {
                 await _dialogService.ShowAlertAsync(
                     _loc.GetString(ResourceKeys.Msg_RestoreSuccessTitle),
                     _loc.GetString(ResourceKeys.Msg_RestoreSuccessDesc),
                     _loc.GetString(ResourceKeys.Btn_OK));
                 await _navigationService.GoBackAsync();
+                return;
             }
-            else if (result.DataMayBeInconsistent)
+
+            if (result.Error!.Code == UseCaseErrorCode.BackupDataInconsistent)
             {
                 await _dialogService.ShowAlertAsync(
                     _loc.GetString(ResourceKeys.Msg_RestoreInconsistentTitle),
                     _loc.GetString(ResourceKeys.Msg_RestoreInconsistentDesc),
                     _loc.GetString(ResourceKeys.Btn_OK));
+                return;
             }
-            else
-            {
-                await _dialogService.ShowAlertAsync(
-                    _loc.GetString(ResourceKeys.Msg_RestoreFailedTitle),
-                    string.Format(_loc.GetString(ResourceKeys.Err_SpeichernFehlgeschlagen), result.ErrorMessage ?? string.Empty),
-                    _loc.GetString(ResourceKeys.Btn_OK));
-            }
+
+            await UseCaseErrorPresenter.ShowAsync(_dialogService, _loc, result.Error);
         }
         catch (Exception ex)
         {

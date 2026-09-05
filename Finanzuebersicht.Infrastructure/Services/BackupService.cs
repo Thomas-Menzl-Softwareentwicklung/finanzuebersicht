@@ -193,7 +193,8 @@ namespace Finanzuebersicht.Infrastructure.Services
                     return new RestoreResult
                     {
                         Success = false,
-                        ErrorMessage = $"Backup-Datei nicht gefunden: {fileName}"
+                        ErrorKind = BackupErrorKind.NotFound,
+                        ErrorMessage = $"Backup file missing: {fileName}"
                     };
                 }
 
@@ -208,7 +209,12 @@ namespace Finanzuebersicht.Infrastructure.Services
                 {
                     var metadata = ReadJsonFromZip<BackupMetadata>(zipArchive, DataFileNames.BackupMetadata);
                     if (metadata == null)
-                        return new RestoreResult { Success = false, ErrorMessage = "ZIP-Datei ist beschädigt oder unvollständig" };
+                        return new RestoreResult
+                        {
+                            Success = false,
+                            ErrorKind = BackupErrorKind.CorruptOrIncomplete,
+                            ErrorMessage = "ZIP metadata missing"
+                        };
 
                     archiveData = new BackupArchiveData { Metadata = metadata };
                     foreach (var entry in zipArchive.Entries)
@@ -237,13 +243,23 @@ namespace Finanzuebersicht.Infrastructure.Services
                 var transactionTemplates = DeserializeFile<List<TransactionTemplate>>(archiveData, DataFileNames.TransactionTemplates) ?? [];
 
                 if (categories == null || accounts == null || transactions == null || recurring == null || budgets == null || sparziele == null)
-                    return new RestoreResult { Success = false, ErrorMessage = "ZIP-Datei ist beschädigt oder unvollständig" };
+                    return new RestoreResult
+                    {
+                        Success = false,
+                        ErrorKind = BackupErrorKind.CorruptOrIncomplete,
+                        ErrorMessage = "ZIP payload incomplete after deserialize"
+                    };
 
                 // Atomare Restore mit Rollback-Capability
                 var restoreSuccess = await AtomicRestoreAsync(categories, accounts, transactions, recurring, budgets, sparziele, transactionTemplates);
 
                 if (!restoreSuccess)
-                    return new RestoreResult { Success = false, ErrorMessage = "Fehler beim Speichern der wiederhergestellten Daten" };
+                    return new RestoreResult
+                    {
+                        Success = false,
+                        ErrorKind = BackupErrorKind.SaveFailed,
+                        ErrorMessage = "Atomic restore save failed"
+                    };
 
                 _logger?.LogInformation("Restore aus Backup {BackupId} erfolgreich abgeschlossen", backupId);
 
@@ -251,10 +267,10 @@ namespace Finanzuebersicht.Infrastructure.Services
                 return new RestoreResult
                 {
                     Success = true,
-                    Details = $"Wiederhergestellt: {counts.GetValueOrDefault(BackupEntityKeys.Categories)} Kategorien, " +
-                              $"{counts.GetValueOrDefault(BackupEntityKeys.Transactions)} Transaktionen, " +
-                              $"{counts.GetValueOrDefault(BackupEntityKeys.Recurring)} Daueraufträge, " +
-                              $"{counts.GetValueOrDefault(BackupEntityKeys.TransactionTemplates)} Vorlagen",
+                    Details = $"Restored: {counts.GetValueOrDefault(BackupEntityKeys.Categories)} categories, " +
+                              $"{counts.GetValueOrDefault(BackupEntityKeys.Transactions)} transactions, " +
+                              $"{counts.GetValueOrDefault(BackupEntityKeys.Recurring)} recurring, " +
+                              $"{counts.GetValueOrDefault(BackupEntityKeys.TransactionTemplates)} templates",
                     RestoredMetadata = archiveData.Metadata
                 };
             }
@@ -265,7 +281,8 @@ namespace Finanzuebersicht.Infrastructure.Services
                 {
                     Success = false,
                     DataMayBeInconsistent = true,
-                    ErrorMessage = "Wiederherstellung und Rollback sind fehlgeschlagen. Die Daten könnten inkonsistent sein. Bitte starte die App neu und versuche es erneut."
+                    ErrorKind = BackupErrorKind.RestoreAndRollbackFailed,
+                    ErrorMessage = "Restore and rollback failed"
                 };
             }
             catch (Exception ex)
@@ -274,7 +291,8 @@ namespace Finanzuebersicht.Infrastructure.Services
                 return new RestoreResult
                 {
                     Success = false,
-                    ErrorMessage = $"Fehler beim Restore: {ex.Message}"
+                    ErrorKind = BackupErrorKind.RestoreFailed,
+                    ErrorMessage = ex.Message
                 };
             }
         }
@@ -470,7 +488,8 @@ namespace Finanzuebersicht.Infrastructure.Services
                         return new RestoreResult
                         {
                             Success = false,
-                            ErrorMessage = $"Schema-Version nicht kompatibel. Backup: v{metadata?.SchemaVersion}, App: v{CurrentSchemaVersion}"
+                            ErrorKind = BackupErrorKind.SchemaIncompatible,
+                            ErrorMessage = $"Schema incompatible. Backup: v{metadata?.SchemaVersion}, App: v{CurrentSchemaVersion}"
                         };
                     }
 
@@ -490,7 +509,8 @@ namespace Finanzuebersicht.Infrastructure.Services
                         return new RestoreResult
                         {
                             Success = false,
-                            ErrorMessage = $"Backup unvollständig. Fehlende Dateien: {string.Join(", ", missingFiles)}"
+                            ErrorKind = BackupErrorKind.CorruptOrIncomplete,
+                            ErrorMessage = $"Missing files: {string.Join(", ", missingFiles)}"
                         };
                     }
 
@@ -502,7 +522,8 @@ namespace Finanzuebersicht.Infrastructure.Services
                 return new RestoreResult
                 {
                     Success = false,
-                    ErrorMessage = $"ZIP-Datei beschädigt: {ex.Message}"
+                    ErrorKind = BackupErrorKind.CorruptOrIncomplete,
+                    ErrorMessage = $"ZIP damaged: {ex.Message}"
                 };
             }
         }

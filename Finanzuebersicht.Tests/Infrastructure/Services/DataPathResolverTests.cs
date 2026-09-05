@@ -1,8 +1,11 @@
+using Finanzuebersicht.Core.Services;
+using Finanzuebersicht.Core.Services.ScreenshotDemo;
 using Finanzuebersicht.Infrastructure.Services;
 using Finanzuebersicht.Tests.TestHelpers;
 
 namespace Finanzuebersicht.Tests.Infrastructure.Services;
 
+[Collection(nameof(ScreenshotDemoLaunchOptionsCollection))]
 public class DataPathResolverTests
 {
     [Fact]
@@ -60,4 +63,30 @@ public class DataPathResolverTests
         Assert.Equal("/Users/test/active", scope.Settings.Get(SettingsKeys.DataPath));
         Assert.False(scope.Settings.Contains(SettingsKeys.DataPathPending));
     }
+
+#if DEBUG
+    [Fact]
+    public void ResolveDataDir_ReturnsIsolatedPath_WhenScreenshotDemoRequested_WithoutMutatingSettings()
+    {
+        ScreenshotDemoLaunchOptions.CommandLineArgsOverride = () =>
+            ["Finanzuebersicht", ScreenshotDemoLaunchOptions.LaunchArgument];
+
+        try
+        {
+            using var scope = new SettingsScope(
+                nameof(DataPathResolverTests),
+                (SettingsKeys.DataPath, "/Users/test/active"));
+
+            var result = DataPathResolver.ResolveDataDir(scope.Settings);
+
+            Assert.Equal(ScreenshotDemoLaunchOptions.GetIsolatedDataPath(), result);
+            Assert.Equal("/Users/test/active", scope.Settings.Get(SettingsKeys.DataPath));
+            Assert.False(scope.Settings.Contains(SettingsKeys.DataPathPending));
+        }
+        finally
+        {
+            ScreenshotDemoLaunchOptions.CommandLineArgsOverride = null;
+        }
+    }
+#endif
 }

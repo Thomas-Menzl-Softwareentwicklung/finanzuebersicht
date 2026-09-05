@@ -1,7 +1,10 @@
 using Finanzuebersicht.Application.UseCases.Categories;
 using Finanzuebersicht.Application.UseCases.Accounts;
+using Finanzuebersicht.Application.UseCases.Backup;
 using Finanzuebersicht.Application.UseCases.Dashboard;
+using Finanzuebersicht.Application.UseCases.Import;
 using Finanzuebersicht.Application.UseCases.RecurringTransactions;
+using Finanzuebersicht.Application.UseCases.ScreenshotDemo;
 using Finanzuebersicht.Application.UseCases.SparZiele;
 using Finanzuebersicht.Application.UseCases.Transactions;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,11 +17,13 @@ public static class ApplicationServiceCollectionExtensions
     {
         services.AddTransient<DeleteCategoryUseCase>();
         services.AddTransient<LoadCategoriesUseCase>();
+        services.AddTransient<GetCategoryByIdUseCase>();
         services.AddTransient<SaveCategoryDetailUseCase>();
         services.AddTransient<SaveCategoryBudgetUseCase>();
         services.AddTransient<LoadCategoryBudgetUseCase>();
         services.AddTransient<LoadAccountsUseCase>();
         services.AddTransient<LoadActiveAccountsUseCase>();
+        services.AddTransient<GetAccountByIdUseCase>();
         services.AddTransient<SaveAccountDetailUseCase>();
         services.AddTransient<ToggleAccountArchiveUseCase>();
         services.AddTransient<DeleteAccountUseCase>();
@@ -43,6 +48,7 @@ public static class ApplicationServiceCollectionExtensions
         services.AddTransient<SkipDueRecurringInstanceUseCase>();
 
         services.AddTransient<LoadTransactionDetailDataUseCase>();
+        services.AddTransient<GetTransactionByIdUseCase>();
         services.AddTransient<DeleteTransactionUseCase>();
         services.AddTransient<RestoreTransactionUseCase>();
         services.AddTransient<HasAnyTransactionsUseCase>();
@@ -62,9 +68,21 @@ public static class ApplicationServiceCollectionExtensions
         services.AddTransient<DeleteTransactionTemplateUseCase>();
         services.AddTransient<UseTransactionTemplateUseCase>();
 
+        services.AddTransient<CsvImportOrchestrator>();
+        services.AddTransient<AnalyzeCsvImportUseCase>();
+        services.AddTransient<CommitCsvImportUseCase>();
+
+        services.AddTransient<CreateBackupUseCase>();
+        services.AddTransient<ListBackupsUseCase>();
+        services.AddTransient<RestoreBackupUseCase>();
+        services.AddTransient<DeleteBackupUseCase>();
+        services.AddTransient<ExportCsvUseCase>();
+
         services.AddTransient<LoadSparZieleUseCase>();
         services.AddTransient<SaveSparZielUseCase>();
         services.AddTransient<DeleteSparZielUseCase>();
+
+        services.AddTransient<SeedScreenshotDemoDataUseCase>();
 
         services.AddSingleton<InitializationService>();
 

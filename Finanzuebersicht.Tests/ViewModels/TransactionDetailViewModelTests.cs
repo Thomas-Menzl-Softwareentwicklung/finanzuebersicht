@@ -13,9 +13,8 @@ namespace Finanzuebersicht.Tests.ViewModels;
 public class TransactionDetailViewModelTests
 {
     [Fact]
-    public void ApplyQueryAttributes_LoadsExistingTransactionFields()
+    public async Task ApplyQueryAttributes_LoadsExistingTransactionById()
     {
-        var viewModel = CreateSut(out _);
         var transaction = new Transaction
         {
             Id = "tx-1",
@@ -27,8 +26,15 @@ public class TransactionDetailViewModelTests
             Datum = new DateTime(2026, 3, 10),
             Verwendungszweck = "Wocheneinkauf"
         };
+        var transactionRepository = Substitute.For<ITransactionRepository>();
+        transactionRepository.GetAllTransactionsAsync(Arg.Any<CancellationToken>())
+            .Returns([transaction]);
 
-        viewModel.ApplyQueryAttributes(new Dictionary<string, object> { [NavigationQueryKeys.Transaction] = transaction });
+        var viewModel = CreateSut(out _, transactionRepository);
+        viewModel.ApplyQueryAttributes(new Dictionary<string, object> { [NavigationQueryKeys.TransactionId] = "tx-1" });
+
+        for (var i = 0; i < 50 && viewModel.Titel != "Supermarkt"; i++)
+            await Task.Delay(10);
 
         Assert.Equal("Supermarkt", viewModel.Titel);
         Assert.Equal(42.50m.ToString("F2", CultureInfo.CurrentCulture), viewModel.BetragText);
@@ -123,6 +129,7 @@ public class TransactionDetailViewModelTests
         return new TransactionDetailViewModel(
             saveUseCase,
             new LoadTransactionDetailDataUseCase(categoryRepository, accountRepository),
+            new GetTransactionByIdUseCase(transactionRepository),
             new LoadSparZieleUseCase(sparZielRepository, transactionRepository),
             new TransactionValidationService(),
             localizationService,

@@ -81,4 +81,20 @@ public class TransactionValidationServiceTests
         Assert.Equal(12.50m, amount);
         Assert.Null(error);
     }
+
+    [Fact]
+    public void TryValidate_AcceptsCommaAmount_WhenCultureUsesDot()
+    {
+        var result = _service.TryValidate(
+            "12,50",
+            "Coffee",
+            hasCategory: true,
+            CultureInfo.GetCultureInfo("en-US"),
+            out var amount,
+            out var error);
+
+        Assert.True(result);
+        Assert.Equal(12.50m, amount);
+        Assert.Null(error);
+    }
 }

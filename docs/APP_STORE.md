@@ -14,7 +14,7 @@ Monetarisierung: [`MONETIZATION.md`](MONETIZATION.md).
 | iPhone + iPad | vorhanden |
 | Privacy Manifest + Export Compliance | gesetzt |
 | iOS Release-Entitlements (ohne `get-task-allow`) | gesetzt (inkl. App Group für Quick-Expense-Widget) |
-| Quick Expense Capture (Pro, In-App + iOS-Widget) | ✅ In-App alle Targets; WidgetKit-`.appex` eingebettet — `Platforms/iOS/Widgets/README.md` |
+| Quick Expense Widget (Pro); In-App Schnell Free | ✅ In-App alle Targets; WidgetKit-`.appex` eingebettet — `Platforms/iOS/Widgets/README.md` |
 | Support / Privacy Site | eigenes Repo `finanzuebersicht-site` |
 | License-Gates Free/Pro/Sync | vorhanden |
 | StoreKit (Pro kaufen / Restore) | vorhanden (Store-Build, iOS/Mac Catalyst) |
@@ -22,7 +22,8 @@ Monetarisierung: [`MONETIZATION.md`](MONETIZATION.md).
 | Sync-IAP Verkauf | **später** (CloudKit #243) |
 | App Store Connect App + Zertifikate | **manuell** |
 | TestFlight IPA Upload | **manuell auf dem Mac** |
-| Store-Screenshots | **noch offen** |
+| Store-Screenshots | Automatisierung lokal (`fastlane snapshot`) — siehe [Screenshot-Automatisierung](#screenshot-automatisierung) |
+| Listing-Texte DE/EN + Screenshot-Upload | API lokal (`bundle exec fastlane upload_listing`) — siehe [Listing hochladen](#listing-hochladen-app-store-connect) |
 
 ## Product IDs (App Store Connect)
 
@@ -74,19 +75,57 @@ dotnet publish Finanzuebersicht/Finanzuebersicht.csproj \
 
 Oder in Xcode: Archive öffnen → Distribute App → **App Store Connect** → Upload (TestFlight).
 
+Nach dem Publish (Working Tree muss sauber sein):
+
+```bash
+bundle exec fastlane upload_ipa
+```
+
+Das lädt die IPA per App-Store-Connect-API nach TestFlight (`upload_to_testflight`). Kein Transporter.app, kein Review. IPA-Pfad: `Finanzuebersicht/bin/Release/net10.0-ios/ios-arm64/publish/Finanzuebersicht.ipa`.
+
 ### TestFlight-Checkliste
 
-1. IPA/Archive hochladen (Transporter oder Xcode Organizer).
+1. IPA hochladen: `bundle exec fastlane upload_ipa` (oder Transporter / Xcode Organizer).
 2. In ASC → TestFlight: Export Compliance beantworten (`ITSAppUsesNonExemptEncryption=false` → in der Regel „Nein“).
 3. Interne Tester hinzufügen (oder externe Gruppe + Beta-Review).
 4. Auf Gerät mit **Sandbox Apple ID** Pro-Kauf testen (Einstellungen → Lizenz → Pro freischalten / Käufe wiederherstellen).
 5. Direct/GitHub-Builds bleiben ohne StoreKit-Limits (weiterhin voll lokal).
 
-## 4. Listing (vor öffentlichem Release)
+## 4. Listing hochladen (App Store Connect)
 
-- Beschreibung DE/EN, Keywords, Kategorie Finance
-- Screenshots iPhone + iPad
-- Review-Notes: lokal, kein Login; IAP Pro optional; Sync noch nicht aktiv
+Texte liegen im Repo unter `fastlane/metadata/` (`de-DE` + `en-US`). Dieselbe Dateien gelten für iOS und Mac. Display-Name in ASC nicht per Datei überschreiben (kein `name.txt`).
+
+API-Key (lokal, nicht im Repo) — derselbe wie SimpleTD:
+
+| Stück | Ort |
+|------|-----|
+| `.p8` | `~/.appstoreconnect/private_keys/AuthKey_<KEY_ID>.p8` |
+| Fastlane-JSON | `~/.appstoreconnect/api_key.json` |
+
+```bash
+python3 scripts/check-asc-metadata.py
+bundle exec fastlane upload_listing
+```
+
+`upload_listing` setzt Version **1.20** falls nötig, lädt DE/EN-Texte und überschreibt iOS-Screenshots. Kein Binary, kein Review.
+
+Mac-Listing (nur Texte, keine Mac-Screenshots in dieser Welle). Die macOS-App muss in ASC existieren, sonst schlägt die Lane fehl:
+
+```bash
+bundle exec fastlane upload_listing_mac
+```
+
+Beide hintereinander:
+
+```bash
+bundle exec fastlane upload_listing_all
+```
+
+Vor dem iOS-Upload: PNGs unter `fastlane/screenshots/` (`bundle exec fastlane screenshots`). Deliver mappt nach Pixelgröße, nicht nach Simulator-Namen.
+
+Review-Notes, Age Rating und Privacy Nutrition Labels bleiben manuell in ASC.
+
+Erstversion: `deliver` crasht sonst beim Laden eines noch nicht existierenden Review-Details (`No data`, [fastlane#20538](https://github.com/fastlane/fastlane/issues/20538)). Die Listing-Lanes überspringen den Attachment-Schritt, solange keine `app_review_attachment_file` gesetzt ist.
 
 ## 5. Technik-Hinweise StoreKit
 
@@ -100,3 +139,46 @@ Oder in Xcode: Archive öffnen → Distribute App → **App Store Connect** → 
 ## Feature-Gates
 
 Siehe `MONETIZATION.md`. Kurz: Direct = immer Pro, kein Sync. Store = Free-Limits + Pro-IAP; Sync-Abo später ohne Pro-Pflicht.
+
+## Screenshot-Automatisierung
+
+Lokal App-Store-Screenshots (iPhone + iPad, `de-DE` + `en-US`) und ausgewählte DE-iPhone-Frames fürs README erzeugen. Rohdaten unter `fastlane/screenshots/` sind **gitignored**; kuratierte README-PNGs liegen in `docs/screenshots/`.
+
+### Voraussetzungen
+
+- macOS mit **Xcode** (Simulator-Namen in `fastlane/Snapfile` ggf. anpassen — `xcrun simctl list devices available`)
+- **Ruby + Bundler:** `bundle install` (Repo-Root, `Gemfile`)
+- **.NET 10 + MAUI:** iOS-Simulator-Build der Host-App
+
+### Ablauf
+
+1. **MAUI-App bauen und auf Simulator installieren** (vor jedem Lauf, wenn sich die App geändert hat):
+
+```bash
+dotnet build Finanzuebersicht/Finanzuebersicht.csproj \
+  -f net10.0-ios -c Debug -p:RuntimeIdentifier=iossimulator-arm64
+xcrun simctl install booted \
+  Finanzuebersicht/bin/Debug/net10.0-ios/iossimulator-arm64/Finanzübersicht.app
+```
+
+2. **Screenshots aufnehmen** (fastlane snapshot, 7 Screens × 3 Geräte × 2 Sprachen — iPhone 17 Pro Max für ASC **6,9″** / skaliert **6,5″**, iPhone 17 für 6,3″, iPad Pro 13″):
+
+```bash
+bundle exec fastlane screenshots
+```
+
+PNG-Ausgabe: `fastlane/screenshots/<locale>/<Gerät>-<shot>.png` (flaches Layout, z. B. `de-DE/iPhone 17-01-dashboard.png` … `07-settings.png`).  
+Details zu UITest-Flow und Simulator-Pfaden: `Finanzuebersicht/Platforms/iOS/UITests/README.md`.
+
+3. **README-Bilder aktualisieren** (nur DE-iPhone → bestehende `docs/screenshots/`-Namen):
+
+```bash
+./scripts/copy-readme-screenshots.sh
+git add docs/screenshots/
+```
+
+Das Skript mappt sechs der sieben Aufnahmen (`03-quick-expense` hat noch keinen README-Slot). Legacy-README-Assets ohne Gegenstück (z. B. `dashboard-jahr.png`, Filter/Swipe/Detail) bleiben unverändert, bis passende Flows ergänzt werden.
+
+4. **App Store Connect:** `bundle exec fastlane upload_listing` (siehe [Listing hochladen](#listing-hochladen-app-store-connect)). Kein `frameit`.
+
+Demo-Daten: Launch-Argument `--screenshot-demo` (nur Debug; isolierter Demo-Pfad). Release/Store-Builds sind nicht betroffen.

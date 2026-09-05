@@ -18,6 +18,7 @@ public class SearchTransactionsResult
     public List<TransactionGroup> Gruppen { get; set; } = [];
     public Dictionary<string, string> IconMap { get; set; } = [];
     public Dictionary<string, string> CategoryNameMap { get; set; } = [];
+    public Dictionary<string, string> ColorMap { get; set; } = [];
     public Dictionary<string, string> AccountMap { get; set; } = [];
     public int TotalCount { get; set; }
 }
@@ -64,15 +65,18 @@ public class SearchTransactionsUseCase(
 
         var liste = gefiltert.OrderByDescending(t => t.Datum).ToList();
 
+        // Group by day (same as month list) so cards stay short and CollectionView can
+        // virtualize/scroll; month-sized BindableLayout cards rubber-band on iOS.
         var gruppen = liste
-            .GroupBy(t => new DateTime(t.Datum.Year, t.Datum.Month, 1))
+            .GroupBy(t => t.Datum.Date)
             .OrderByDescending(g => g.Key)
-            .Select(g => new TransactionGroup(g.Key, g.OrderByDescending(t => t.Datum), isMonthGroup: true))
+            .Select(g => new TransactionGroup(g.Key, g.OrderByDescending(t => t.Datum)))
             .ToList();
 
         var categories = await _categoryRepository.GetCategoriesAsync();
         var iconMap = categories.ToDictionary(c => c.Id, c => c.Icon ?? "📁");
         var categoryNameMap = categories.ToDictionary(c => c.Id, c => c.Name);
+        var colorMap = categories.ToDictionary(c => c.Id, c => string.IsNullOrWhiteSpace(c.Color) ? "#8E8E93" : c.Color);
         var accounts = await _accountRepository.GetAccountsAsync();
         var accountMap = accounts.ToDictionary(a => a.Id, a => a.Name);
 
@@ -81,6 +85,7 @@ public class SearchTransactionsUseCase(
             Gruppen = gruppen,
             IconMap = iconMap,
             CategoryNameMap = categoryNameMap,
+            ColorMap = colorMap,
             AccountMap = accountMap,
             TotalCount = liste.Count
         };

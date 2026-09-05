@@ -199,7 +199,7 @@ namespace Finanzuebersicht.Tests.Services
 
             // Assert
             Assert.False(result.Success);
-            Assert.Contains("nicht gefunden", result.ErrorMessage);
+            Assert.Equal(BackupErrorKind.NotFound, result.ErrorKind);
         }
 
         [Fact]
@@ -215,7 +215,7 @@ namespace Finanzuebersicht.Tests.Services
 
             // Assert
             Assert.False(result.Success);
-            Assert.Contains("beschädigt", result.ErrorMessage);
+            Assert.Equal(BackupErrorKind.CorruptOrIncomplete, result.ErrorKind);
         }
 
         [Fact]
@@ -249,7 +249,7 @@ namespace Finanzuebersicht.Tests.Services
 
             // Assert
             Assert.False(result.Success);
-            Assert.Contains("Fehlende Dateien", result.ErrorMessage);
+            Assert.Equal(BackupErrorKind.CorruptOrIncomplete, result.ErrorKind);
         }
 
         [Fact]
@@ -287,7 +287,7 @@ namespace Finanzuebersicht.Tests.Services
 
             // Assert
             Assert.False(result.Success);
-            Assert.Contains("Schema-Version", result.ErrorMessage);
+            Assert.Equal(BackupErrorKind.SchemaIncompatible, result.ErrorKind);
         }
 
         [Fact]

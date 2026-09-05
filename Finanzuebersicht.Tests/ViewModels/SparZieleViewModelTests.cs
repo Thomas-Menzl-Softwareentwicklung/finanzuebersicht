@@ -10,13 +10,21 @@ namespace Finanzuebersicht.Tests.ViewModels;
 public class SparZieleViewModelTests
 {
     [Fact]
-    public async Task OpenCreateForm_NavigatesToSparZielDetail()
+    public async Task OpenCreateForm_OpensSparZielCreateSheet()
     {
-        var viewModel = CreateSut(Substitute.For<ISparZielRepository>(), out _, out var navigationService);
+        var createSheet = Substitute.For<ISparZielCreateSheetService>();
+        createSheet.ShowAsync(Arg.Any<SparZielDetailViewModel>()).Returns(false);
+
+        var viewModel = CreateSut(
+            Substitute.For<ISparZielRepository>(),
+            createSheet,
+            out _,
+            out var navigationService);
 
         await viewModel.OpenCreateFormCommand.ExecuteAsync(null);
 
-        await navigationService.Received(1).GoToAsync(Routes.SparZielDetail);
+        await createSheet.Received(1).ShowAsync(Arg.Any<SparZielDetailViewModel>());
+        await navigationService.DidNotReceive().GoToAsync(Routes.SparZielDetail);
     }
 
     [Fact]
@@ -26,7 +34,7 @@ public class SparZieleViewModelTests
         repository.GetSparZieleAsync().Returns(Task.FromResult(new List<SparZiel>()));
         repository.DeleteSparZielAsync(Arg.Any<string>()).Returns(Task.CompletedTask);
 
-        var viewModel = CreateSut(repository, out var dialogService, out _);
+        var viewModel = CreateSut(repository, Substitute.For<ISparZielCreateSheetService>(), out var dialogService, out _);
         viewModel.SparZiele.Add(new SparZielSummary
         {
             SparZiel = new SparZiel { Id = "ziel-1", Titel = "Urlaub" }
@@ -43,6 +51,7 @@ public class SparZieleViewModelTests
 
     private static SparZieleViewModel CreateSut(
         ISparZielRepository repository,
+        ISparZielCreateSheetService createSheet,
         out IDialogService dialogService,
         out INavigationService navigationService)
     {
@@ -62,10 +71,22 @@ public class SparZieleViewModelTests
         transactionRepository.GetTransactionsAsync(Arg.Any<DateTime>(), Arg.Any<DateTime>())
             .Returns(Task.FromResult(new List<Transaction>()));
 
+        var createVm = new SparZielDetailViewModel(
+            new SaveSparZielUseCase(repository),
+            new DeleteSparZielUseCase(repository),
+            new LoadSparZieleUseCase(repository, transactionRepository),
+            navigationService,
+            localizationService,
+            dialogService,
+            Substitute.For<IFeedbackService>(),
+            Substitute.For<IAppEvents>());
+
         return new SparZieleViewModel(
             new LoadSparZieleUseCase(repository, transactionRepository),
             new SaveSparZielUseCase(repository),
             new DeleteSparZielUseCase(repository),
+            createVm,
+            createSheet,
             navigationService,
             dialogService,
             localizationService,

@@ -1,0 +1,30 @@
+# Device names from: xcrun simctl list devices available
+# iPhone 17 Pro Max → ASC 6.9" (required; Apple scales that to 6.5").
+# iPhone 17 → ASC 6.3". iPad Pro 13-inch (M5) → ASC 13".
+devices([
+  "iPhone 17 Pro Max",
+  "iPhone 17",
+  "iPad Pro 13-inch (M5)"
+])
+
+languages([
+  "de-DE",
+  "en-US"
+])
+
+scheme("FinanzuebersichtUITests")
+
+project("./Finanzuebersicht/Platforms/iOS/UITests/FinanzuebersichtUITests.xcodeproj")
+
+output_directory("./fastlane/screenshots")
+
+clear_previous_screenshots(true)
+
+override_status_bar(true)
+
+launch_arguments(["--screenshot-demo"])
+
+# One destination at a time — dual-destination xcodebuild hung on this machine (Xcode beta / iOS 27).
+concurrent_simulators(false)
+
+# MAUI host app is built separately (dotnet build) and installed via simctl before snapshot.

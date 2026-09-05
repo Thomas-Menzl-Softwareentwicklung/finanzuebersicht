@@ -68,4 +68,28 @@ public class LoadTransactionsMonthUseCaseTests
         Assert.Equal("📁", result.IconMap["c2"]);
         Assert.Empty(result.AccountMap);
     }
+
+    [Fact]
+    public async Task ExecuteAsync_BuildsColorMapFromCategories()
+    {
+        var transactionRepository = Substitute.For<ITransactionRepository>();
+        var categoryRepository = Substitute.For<ICategoryRepository>();
+        var accountRepository = Substitute.For<IAccountRepository>();
+
+        transactionRepository.GetTransactionsAsync(Arg.Any<DateTime>(), Arg.Any<DateTime>())
+            .Returns(new List<Transaction>());
+
+        categoryRepository.GetCategoriesAsync().Returns(new List<Category>
+        {
+            new() { Id = "c1", Icon = "🍔", Color = "#34C759" },
+            new() { Id = "c2", Icon = "🚗", Color = "#FF9500" }
+        });
+        accountRepository.GetAccountsAsync().Returns(new List<Account>());
+
+        var useCase = new LoadTransactionsMonthUseCase(transactionRepository, categoryRepository, accountRepository);
+        var result = await useCase.ExecuteAsync(new DateTime(2026, 3, 1));
+
+        Assert.Equal("#34C759", result.ColorMap["c1"]);
+        Assert.Equal("#FF9500", result.ColorMap["c2"]);
+    }
 }

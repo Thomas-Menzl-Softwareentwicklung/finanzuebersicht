@@ -25,7 +25,7 @@ public class ReconcileAccountBalanceUseCase(
         var delta = actualBalance - summary.Saldo;
         var newOpeningBalance = account.OpeningBalance + delta;
 
-        await saveAccountDetailUseCase.ExecuteAsync(
+        var saveResult = await saveAccountDetailUseCase.ExecuteAsync(
             account,
             account.Name,
             account.Type,
@@ -33,6 +33,8 @@ public class ReconcileAccountBalanceUseCase(
             newOpeningBalance,
             account.OpeningBalanceDate,
             cancellationToken);
+        if (!saveResult.IsSuccess)
+            throw new InvalidOperationException($"Account save failed: {saveResult.Error!.Code}");
 
         return new AccountBalanceReconciliationResult
         {

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:Finanzuebersicht.ViewModels"
+             xmlns:loc="clr-namespace:Finanzuebersicht.Extensions"
+             xmlns:controls="clr-namespace:Finanzuebersicht.Controls"
+             x:Class="Finanzuebersicht.Controls.SparZielFormView"
+             x:DataType="vm:SparZielDetailViewModel">
+
+    <VerticalStackLayout Spacing="20">
+
+        <VerticalStackLayout Spacing="4">
+            <Label Text="{loc:Translate Lbl_Titel}" FontSize="13"
+                   TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
+            <Entry Text="{Binding Titel}" Placeholder="{loc:Translate Hint_ZielTitel}" FontSize="16" />
+        </VerticalStackLayout>
+
+        <VerticalStackLayout Spacing="4">
+            <Label Text="{loc:Translate Lbl_Icon}" FontSize="13"
+                   TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
+            <Entry Text="{Binding Icon}" FontSize="24" MaxLength="2" />
+        </VerticalStackLayout>
+
+        <VerticalStackLayout Spacing="4">
+            <Label Text="{loc:Translate Lbl_ZielBetrag}" FontSize="13"
+                   TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
+            <Entry Text="{Binding ZielBetragText}" Keyboard="Numeric" FontSize="16" />
+        </VerticalStackLayout>
+
+        <VerticalStackLayout Spacing="4">
+            <Label Text="{loc:Translate Lbl_AktuellerBetrag}" FontSize="13"
+                   TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
+            <Entry Text="{Binding AktuellerBetragText}" Keyboard="Numeric" FontSize="16" />
+        </VerticalStackLayout>
+
+        <VerticalStackLayout Spacing="4">
+            <Label Text="{loc:Translate Lbl_MonatlicheSparrate}" FontSize="13"
+                   TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
+            <Entry Text="{Binding MonatlicheSparrateText}" Keyboard="Numeric" FontSize="16" />
+        </VerticalStackLayout>
+
+        <Grid ColumnDefinitions="*, Auto" ColumnSpacing="8">
+            <Label Text="{loc:Translate Lbl_Faelligkeit}"
+                   FontSize="16"
+                   VerticalTextAlignment="Center" />
+            <Switch Grid.Column="1" IsToggled="{Binding UseFaelligkeit}" />
+        </Grid>
+
+        <DatePicker Date="{Binding Faelligkeitsdatum}"
+                    IsVisible="{Binding UseFaelligkeit}"
+                    FontSize="16"
+                    controls:DatePickerProperties.ImmediateUpdate="True" />
+
+    </VerticalStackLayout>
+</ContentView>

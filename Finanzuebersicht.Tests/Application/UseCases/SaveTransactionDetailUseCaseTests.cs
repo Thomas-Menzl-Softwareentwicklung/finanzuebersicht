@@ -1,3 +1,4 @@
+using Finanzuebersicht.Application.Results;
 using Finanzuebersicht.Application.UseCases.Transactions;
 using Finanzuebersicht.Constants;
 using Finanzuebersicht.Models;
@@ -15,7 +16,7 @@ public class SaveTransactionDetailUseCaseTests
         accountRepository.GetAccountsAsync().Returns(new List<Account> { new() { Id = "acc-1", IsArchived = false } });
         var sut = new SaveTransactionDetailUseCase(transactionRepository, accountRepository);
 
-        await sut.ExecuteAsync(
+        var result = await sut.ExecuteAsync(
             existingTransaction: null,
             betrag: 120.50m,
             titel: "Einkauf",
@@ -25,6 +26,7 @@ public class SaveTransactionDetailUseCaseTests
             typ: TransactionType.Ausgabe,
             verwendungszweck: "Zweck A");
 
+        Assert.True(result.IsSuccess);
         await transactionRepository.Received(1).SaveTransactionAsync(
             NonNullArg.Is<Transaction>(t =>
                 t.Betrag == 120.50m &&
@@ -54,7 +56,7 @@ public class SaveTransactionDetailUseCaseTests
 
         var sut = new SaveTransactionDetailUseCase(transactionRepository, accountRepository);
 
-        await sut.ExecuteAsync(
+        var result = await sut.ExecuteAsync(
             existingTransaction: existing,
             betrag: 200m,
             titel: "Neu",
@@ -64,6 +66,7 @@ public class SaveTransactionDetailUseCaseTests
             typ: TransactionType.Einnahme,
             verwendungszweck: "Gehaltszahlung");
 
+        Assert.True(result.IsSuccess);
         await transactionRepository.Received(1).SaveTransactionAsync(existing);
         Assert.Equal("tx-1", existing.Id);
         Assert.Equal(200m, existing.Betrag);
@@ -85,7 +88,7 @@ public class SaveTransactionDetailUseCaseTests
 
         var sut = new SaveTransactionDetailUseCase(transactionRepository, accountRepository);
 
-        await sut.ExecuteAsync(
+        var result = await sut.ExecuteAsync(
             existingTransaction: null,
             betrag: 50m,
             titel: "Test",
@@ -95,12 +98,13 @@ public class SaveTransactionDetailUseCaseTests
             typ: TransactionType.Ausgabe,
             verwendungszweck: string.Empty);
 
+        Assert.True(result.IsSuccess);
         await transactionRepository.Received(1).SaveTransactionAsync(
             NonNullArg.Is<Transaction>(t => t.AccountId == "acc-default"));
     }
 
     [Fact]
-    public async Task ExecuteAsync_ThrowsForTransferTransactions()
+    public async Task ExecuteAsync_FailsForTransferTransactions()
     {
         var transactionRepository = Substitute.For<ITransactionRepository>();
         var accountRepository = Substitute.For<IAccountRepository>();
@@ -113,16 +117,18 @@ public class SaveTransactionDetailUseCaseTests
 
         var sut = new SaveTransactionDetailUseCase(transactionRepository, accountRepository);
 
-        await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            sut.ExecuteAsync(
-                existing,
-                120m,
-                "Edit",
-                new DateTime(2026, 3, 2),
-                "cat-2",
-                "acc-2",
-                TransactionType.Einnahme,
-                "Zweck"));
+        var result = await sut.ExecuteAsync(
+            existing,
+            120m,
+            "Edit",
+            new DateTime(2026, 3, 2),
+            "cat-2",
+            "acc-2",
+            TransactionType.Einnahme,
+            "Zweck");
+
+        Assert.False(result.IsSuccess);
+        Assert.Equal(UseCaseErrorCode.TransferMustUseTransferFlow, result.Error!.Code);
         await transactionRepository.DidNotReceive().SaveTransactionAsync(Arg.Any<Transaction>());
     }
 }

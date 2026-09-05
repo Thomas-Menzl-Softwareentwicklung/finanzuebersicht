@@ -1,26 +1,19 @@
 using Finanzuebersicht.Controls;
 using Finanzuebersicht.Presentation.Services;
 using Finanzuebersicht.Resources.Strings;
-using Finanzuebersicht.Services;
 using Finanzuebersicht.ViewModels;
-using Finanzuebersicht.Views.Popups;
 
 namespace Finanzuebersicht.Services;
 
-public sealed class CategoryCreateSheetService : ICategoryCreateSheetService
+public sealed class CategoryCreateSheetService(ICreateFormModalService createFormModalService) : ICategoryCreateSheetService
 {
-    public async Task<bool> ShowAsync(CategoryDetailViewModel viewModel)
+    public Task<bool> ShowAsync(CategoryDetailViewModel viewModel)
     {
-        var page = Shell.Current?.CurrentPage;
-        if (page is null)
-            return false;
-
-        var form = new CategoryFormView { BindingContext = viewModel };
-
-        return await page.ShowFormSheetAsync(
+        var loc = LocalizationResourceManager.Current;
+        return createFormModalService.ShowAsync(
             viewModel.PageTitle,
-            form,
+            () => new CategoryFormView { BindingContext = viewModel },
             viewModel.TrySaveAsync,
-            saveText: LocalizationResourceManager.Current[ResourceKeys.Btn_Speichern]);
+            saveText: loc[ResourceKeys.Btn_Speichern]);
     }
 }

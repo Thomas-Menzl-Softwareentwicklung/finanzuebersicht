@@ -24,12 +24,14 @@ public partial class TransactionsPage : BaseContentPage
     {
         base.OnAppearing();
         // Widget inbox / saves — only Transactions needs live reload (not all BaseContentPage tabs).
-        App.DataChanged += OnDataChanged;
+        AppEvents.DataChanged += OnDataChanged;
     }
 
     protected override void OnDisappearing()
     {
-        App.DataChanged -= OnDataChanged;
+        if (CachedAppEvents is not null)
+            CachedAppEvents.DataChanged -= OnDataChanged;
+
         base.OnDisappearing();
     }
 

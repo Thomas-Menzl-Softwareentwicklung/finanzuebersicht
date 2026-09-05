@@ -14,4 +14,13 @@ public class Category
     /// Null bei nutzerdefinierten Kategorien – diese verwenden immer Name direkt.
     /// </summary>
     public string? SystemKey { get; set; }
+
+    /// <summary>Optional id in an external system (CloudKit / bank). Null for local-only rows.</summary>
+    public string? ExternalId { get; set; }
+
+    /// <summary>Optional origin marker (see <c>EntitySources</c>). Null means local/unspecified.</summary>
+    public string? Source { get; set; }
+
+    /// <summary>Last content change for future sync. Null on legacy data.</summary>
+    public DateTime? UpdatedAt { get; set; }
 }
