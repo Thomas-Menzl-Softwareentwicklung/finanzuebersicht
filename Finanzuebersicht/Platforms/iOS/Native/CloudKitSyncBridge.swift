@@ -22,9 +22,9 @@
 //  Staged records are mirrored into UserDefaults next to the CKSyncEngine state, so a
 //  pending change restored after a process restart can still be turned back into a CKRecord.
 //
-//  The bundle needs the iCloud container entitlement before any of this can succeed —
-//  that is wired up separately (Task 9). Without it CloudKit calls fail with
-//  CKError.missingEntitlement and the bridge reports a non-zero error code.
+//  The bundle needs the iCloud container entitlement (see Entitlements.plist and
+//  README-CloudKitSync.md). Without it CloudKit calls fail with CKError.missingEntitlement
+//  and the bridge reports a non-zero error code.
 //
 //  Build: build-cloudkit-sync-bridge.sh (device / simulator / Mac Catalyst, min iOS 15.0).
 //  CKSyncEngine itself needs iOS 17 / macOS 14, hence the @available walls below.
