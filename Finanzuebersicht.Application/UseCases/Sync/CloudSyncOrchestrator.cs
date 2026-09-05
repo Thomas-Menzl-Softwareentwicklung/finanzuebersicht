@@ -56,6 +56,8 @@ public sealed class CloudSyncOrchestrator(
             _recordsChangedHandler = null;
         }
 
+        CancelPendingUpserts();
+
         await transport.StopAsync(ct);
     }
 
@@ -99,6 +101,8 @@ public sealed class CloudSyncOrchestrator(
             return;
         }
 
+        await FlushPendingUpsertsAsync();
+
         await transport.FetchChangesAsync(ct);
         await transport.SendChangesAsync(ct);
 
@@ -107,7 +111,9 @@ public sealed class CloudSyncOrchestrator(
         await metadataStore.SaveAsync(metadata);
     }
 
-    internal async Task FlushPendingForTestsAsync()
+    internal async Task FlushPendingForTestsAsync() => await FlushPendingUpsertsAsync();
+
+    private async Task FlushPendingUpsertsAsync()
     {
         var keys = _pendingUpserts.Keys.ToArray();
         foreach (var key in keys)
@@ -119,6 +125,18 @@ public sealed class CloudSyncOrchestrator(
 
             pending.Cancellation.Cancel();
             await transport.EnqueueUpsertAsync(pending.Record);
+        }
+    }
+
+    private void CancelPendingUpserts()
+    {
+        var keys = _pendingUpserts.Keys.ToArray();
+        foreach (var key in keys)
+        {
+            if (_pendingUpserts.TryRemove(key, out var pending))
+            {
+                pending.Cancellation.Cancel();
+            }
         }
     }
 
@@ -308,6 +326,11 @@ public sealed class CloudSyncOrchestrator(
             await Task.Delay(DebounceDelay, pending.Cancellation.Token);
             if (_pendingUpserts.TryRemove(key, out var current) && ReferenceEquals(current, pending))
             {
+                if (!await IsSyncEnabledAsync())
+                {
+                    return;
+                }
+
                 await transport.EnqueueUpsertAsync(current.Record);
             }
         }

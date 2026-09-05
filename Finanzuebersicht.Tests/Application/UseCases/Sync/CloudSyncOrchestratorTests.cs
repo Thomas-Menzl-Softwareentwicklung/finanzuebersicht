@@ -188,6 +188,64 @@ public class CloudSyncOrchestratorTests
     }
 
     [Fact]
+    public async Task NotifyLocalUpsert_ThenStop_DoesNotEnqueueAfterDebounce()
+    {
+        var transport = new FakeCloudSyncTransport();
+        var accountRepository = Substitute.For<IAccountRepository>();
+        accountRepository.GetAccountsAsync().Returns([new Account { Id = "acc-1", Name = "Local", UpdatedAt = DateTime.UtcNow }]);
+        var metadataStore = CreateEnabledMetadataStore();
+        var sut = CreateSut(transport, metadataStore, accountRepository);
+
+        await sut.NotifyLocalUpsertAsync(SyncEntityType.Account, "acc-1");
+        await sut.StopAsync();
+        await Task.Delay(1600);
+
+        Assert.Empty(transport.EnqueuedUpserts);
+    }
+
+    [Fact]
+    public async Task NotifyLocalUpsert_ThenDisableMetadata_DoesNotEnqueueAfterDebounce()
+    {
+        var transport = new FakeCloudSyncTransport();
+        var accountRepository = Substitute.For<IAccountRepository>();
+        accountRepository.GetAccountsAsync().Returns([new Account { Id = "acc-1", Name = "Local", UpdatedAt = DateTime.UtcNow }]);
+        var metadata = new SyncMetadata { SyncEnabled = true };
+        var metadataStore = Substitute.For<ISyncMetadataStore>();
+        metadataStore.GetAsync().Returns(_ => metadata);
+        var sut = CreateSut(transport, metadataStore, accountRepository);
+
+        await sut.NotifyLocalUpsertAsync(SyncEntityType.Account, "acc-1");
+        metadata.SyncEnabled = false;
+        await Task.Delay(1600);
+
+        Assert.Empty(transport.EnqueuedUpserts);
+    }
+
+    [Fact]
+    public async Task SyncNow_FlushesPendingUpsertsBeforeSend()
+    {
+        var transport = new FakeCloudSyncTransport();
+        var accountRepository = Substitute.For<IAccountRepository>();
+        var first = new Account { Id = "acc-1", Name = "First", UpdatedAt = DateTime.UtcNow };
+        var second = new Account { Id = "acc-1", Name = "Second", UpdatedAt = DateTime.UtcNow };
+        accountRepository.GetAccountsAsync().Returns([first], [second]);
+        var metadataStore = CreateEnabledMetadataStore();
+        var sut = CreateSut(transport, metadataStore, accountRepository);
+
+        await sut.NotifyLocalUpsertAsync(SyncEntityType.Account, "acc-1");
+        await sut.NotifyLocalUpsertAsync(SyncEntityType.Account, "acc-1");
+        await sut.SyncNowAsync();
+
+        Assert.Single(transport.EnqueuedUpserts);
+        Assert.Equal("Second", JsonSerializer.Deserialize<Account>(transport.EnqueuedUpserts[0].PayloadJson!, PayloadJsonOptions)!.Name);
+        Assert.True(transport.FetchChangesCalled);
+        Assert.True(transport.SendChangesCalled);
+        Assert.Equal("EnqueueUpsert", transport.CallOrder[0]);
+        Assert.Equal("FetchChanges", transport.CallOrder[1]);
+        Assert.Equal("SendChanges", transport.CallOrder[2]);
+    }
+
+    [Fact]
     public async Task NotifyLocalUpsert_WhenSyncDisabled_IsNoOp()
     {
         var transport = new FakeCloudSyncTransport();
@@ -285,6 +343,7 @@ public class CloudSyncOrchestratorTests
         public List<(SyncEntityType type, string id, DateTime deletedAt)> EnqueuedDeletes { get; } = [];
         public bool FetchChangesCalled { get; private set; }
         public bool SendChangesCalled { get; private set; }
+        public List<string> CallOrder { get; } = [];
 
         public void RaiseRecordsChanged(IReadOnlyList<CloudSyncRecordDto> records) =>
             RecordsChanged?.Invoke(this, records);
@@ -301,6 +360,7 @@ public class CloudSyncOrchestratorTests
 
         public Task EnqueueUpsertAsync(CloudSyncRecordDto record, CancellationToken ct = default)
         {
+            CallOrder.Add("EnqueueUpsert");
             EnqueuedUpserts.Add(record);
             return Task.CompletedTask;
         }
@@ -313,12 +373,14 @@ public class CloudSyncOrchestratorTests
 
         public Task FetchChangesAsync(CancellationToken ct = default)
         {
+            CallOrder.Add("FetchChanges");
             FetchChangesCalled = true;
             return Task.CompletedTask;
         }
 
         public Task SendChangesAsync(CancellationToken ct = default)
         {
+            CallOrder.Add("SendChanges");
             SendChangesCalled = true;
             return Task.CompletedTask;
         }
