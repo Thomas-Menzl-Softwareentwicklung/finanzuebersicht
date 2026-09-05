@@ -21,7 +21,11 @@ public interface ILicenseService
     /// </summary>
     bool CanUseCloudSync { get; }
 
-    /// <summary>CloudKit engine ready for use (false until #243).</summary>
+    /// <summary>
+    /// Whether the CloudKit sync engine is available in this build.
+    /// True for Store builds on supported Apple platforms (iOS / Mac Catalyst 17+); always false for Direct.
+    /// Independent of subscription entitlement (<see cref="CanUseCloudSync"/>).
+    /// </summary>
     bool IsCloudSyncImplemented { get; }
 
     bool HasFeature(AppFeature feature);
