@@ -164,6 +164,45 @@
 		</NativeReference>
 	</ItemGroup>
 
+	<!-- Swift @_cdecl bridge: CKSyncEngine (Swift-only CloudKit sync). Built by BuildCloudKitSyncBridge.
+	     Independent of the widget embed — Cloud Sync ships on iPhone and Mac Catalyst.
+	     Skip rebuild: -p:SkipCloudKitSyncBridgeBuild=true -->
+	<ItemGroup Condition="$(TargetFramework.Contains('-ios'))">
+		<NativeReference Include="Platforms/iOS/Native/lib/Release-iphoneos/libCloudKitSyncBridge.a"
+		                 Condition="!$(RuntimeIdentifier.Contains('simulator'))">
+			<Kind>Static</Kind>
+			<ForceLoad>true</ForceLoad>
+			<Frameworks>CloudKit</Frameworks>
+		</NativeReference>
+		<NativeReference Include="Platforms/iOS/Native/lib/Release-iphonesimulator/libCloudKitSyncBridge.a"
+		                 Condition="$(RuntimeIdentifier.Contains('simulator'))">
+			<Kind>Static</Kind>
+			<ForceLoad>true</ForceLoad>
+			<Frameworks>CloudKit</Frameworks>
+		</NativeReference>
+	</ItemGroup>
+
+	<!-- Mac Catalyst shares the Swift source (arm64-apple-ios*-macabi slice) and the C# transport. -->
+	<ItemGroup Condition="$(TargetFramework.Contains('-maccatalyst'))">
+		<NativeReference Include="Platforms/iOS/Native/lib/Release-maccatalyst/libCloudKitSyncBridge.a">
+			<Kind>Static</Kind>
+			<ForceLoad>true</ForceLoad>
+			<Frameworks>CloudKit</Frameworks>
+		</NativeReference>
+	</ItemGroup>
+
+	<!-- SingleProject drops Platforms/iOS/** from @(Compile) for the maccatalyst TFM, and it does
+	     so in a target — a plain ItemGroup Include here would be removed again afterwards.
+	     CloudKitSyncTransport.cs is guarded with #if IOS || MACCATALYST and serves both. -->
+	<Target Name="IncludeCloudKitSyncTransportForMacCatalyst"
+	        BeforeTargets="BeforeCompile;CoreCompile"
+	        Condition="$(TargetFramework.Contains('-maccatalyst'))">
+		<ItemGroup>
+			<Compile Remove="Platforms/iOS/CloudKitSyncTransport.cs" />
+			<Compile Include="Platforms/iOS/CloudKitSyncTransport.cs" />
+		</ItemGroup>
+	</Target>
+
 	<!-- Store: re-sign PlugIns/*.appex with Distribution + Store profile, then re-seal outer .app
 	     with the FULL Release entitlements (incl. application-identifier — do not strip). -->
 	<Target Name="ResignWidgetExtensionForStore"
@@ -204,6 +243,23 @@
 		      WorkingDirectory="$(MSBuildProjectDirectory)/Platforms/iOS/Native" />
 		<Error Text="Expected WidgetKit bridge at $(_BridgeLib)."
 		       Condition="!Exists('$(_BridgeLib)')" />
+	</Target>
+
+	<!-- Builds Swift CloudKitSyncBridge.a (device + simulator + Mac Catalyst slices in one run). -->
+	<Target Name="BuildCloudKitSyncBridge"
+	        BeforeTargets="ResolveNativeReferences;_AOTCompile;CoreCompile"
+	        Condition="($(TargetFramework.Contains('-ios')) OR $(TargetFramework.Contains('-maccatalyst'))) AND '$(SkipCloudKitSyncBridgeBuild)' != 'true'">
+		<PropertyGroup>
+			<_CloudKitBridgeSubdir Condition="$(TargetFramework.Contains('-maccatalyst'))">Release-maccatalyst</_CloudKitBridgeSubdir>
+			<_CloudKitBridgeSubdir Condition="'$(_CloudKitBridgeSubdir)' == '' AND $(RuntimeIdentifier.Contains('simulator'))">Release-iphonesimulator</_CloudKitBridgeSubdir>
+			<_CloudKitBridgeSubdir Condition="'$(_CloudKitBridgeSubdir)' == ''">Release-iphoneos</_CloudKitBridgeSubdir>
+			<_CloudKitBridgeLib>$(MSBuildProjectDirectory)/Platforms/iOS/Native/lib/$(_CloudKitBridgeSubdir)/libCloudKitSyncBridge.a</_CloudKitBridgeLib>
+		</PropertyGroup>
+		<Message Text="Building CloudKitSyncBridge.a via Platforms/iOS/Native/build-cloudkit-sync-bridge.sh..." Importance="high" />
+		<Exec Command="bash build-cloudkit-sync-bridge.sh"
+		      WorkingDirectory="$(MSBuildProjectDirectory)/Platforms/iOS/Native" />
+		<Error Text="Expected CloudKit sync bridge at $(_CloudKitBridgeLib)."
+		       Condition="!Exists('$(_CloudKitBridgeLib)')" />
 	</Target>
 
 	<!-- Builds Platforms/iOS/Widgets via build-release.sh (xcodegen + xcodebuild), stages .appex. -->
