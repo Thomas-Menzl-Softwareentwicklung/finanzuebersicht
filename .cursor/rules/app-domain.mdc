@@ -43,7 +43,7 @@ alwaysApply: true
 
 ## Architektur-Backlog
 
-**v1.20 – Architektur-Fundament** ✅ abgeschlossen. Aktiver Fokus: **Milestone 22** / Produkt-Backlog (vor v2.0). Details: `docs/ROADMAP.md`.
+**v1.20 – Architektur-Fundament** ✅ abgeschlossen. TestFlight-Linie **v1.21** (CloudKit #243). Aktiver Fokus: **Milestone 22** / Produkt-Backlog (vor v2.0). Details: `docs/ROADMAP.md`.
 
 - Welle 0: DataPath-Restart (#289 ✅), DataFileNames (#290 ✅), Doc-Drift (#291 ✅)
 - Welle 1: Legacy `IDataService` (#268 ✅), Budget Use Case (#270 ✅)

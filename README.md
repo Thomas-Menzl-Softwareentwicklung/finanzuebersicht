@@ -212,7 +212,7 @@ Finanzuebersicht.Tests/            ← xUnit Tests (net10.0)
 
 ## Versionierung & CI
 
-- Nerdbank.GitVersioning (`version.json`) steuert Versionsnummern (aktuell Basis `1.20`)
+- Nerdbank.GitVersioning (`version.json`) steuert Versionsnummern (aktuell Basis `1.21`)
 - CI / Pre-Release / Release Workflows in `.github/workflows/`
 
 ### Full MAUI build (macCatalyst)

@@ -4,7 +4,7 @@
 
 > **Hinweis:** Die Milestone-Bezeichnungen (v1.14, v1.2, v2.0) sind thematische GitHub-Planungslabels, keine sequenziellen Release-Versionen. Tatsächliche Releases (v1.0, v1.6, v1.12 …) werden durch Git-Commit-Höhe via Nerdbank.GitVersioning bestimmt.
 
-**Aktueller Stand:** Release **v1.20** (Latest). Architektur-Fundament ([Milestone 24](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/milestone/24)) und Create-UX-Modal-Sheets sind enthalten. Als Nächstes: Feature-Ideen (**[Milestone 22](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/milestone/22)**), dann **v2.0** (Verschlüsselung, echte Mehrwährung).
+**Aktueller Stand:** TestFlight-Linie **v1.21** (CloudKit-Sync #243). App-Store-Release **v1.20** bleibt Latest. Als Nächstes: Feature-Ideen (**[Milestone 22](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/milestone/22)**), dann **v2.0** (Verschlüsselung, echte Mehrwährung).
 
 ---
 
