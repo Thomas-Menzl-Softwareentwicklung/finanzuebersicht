@@ -2,7 +2,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Finanzuebersicht.Core.Licensing;
 using Finanzuebersicht.Core.Services;
+using Finanzuebersicht.Core.Sync;
 using Finanzuebersicht.Infrastructure.Licensing;
+using Finanzuebersicht.Infrastructure.Sync;
 
 namespace Finanzuebersicht.Infrastructure;
 
@@ -116,6 +118,20 @@ public static class InfrastructureServiceCollectionExtensions
             new FileQuickExpenseWidgetPresetStore(
                 GetDataDir(sp),
                 sp.GetService<ILogger<FileQuickExpenseWidgetPresetStore>>()));
+
+        services.AddSingleton<SyncTombstoneStore>(sp =>
+            new SyncTombstoneStore(
+                GetDataDir(sp),
+                sp.GetService<ILogger<SyncTombstoneStore>>()));
+        services.AddSingleton<ISyncTombstoneStore>(sp => sp.GetRequiredService<SyncTombstoneStore>());
+
+        services.AddSingleton<SyncMetadataStore>(sp =>
+            new SyncMetadataStore(
+                GetDataDir(sp),
+                sp.GetService<ILogger<SyncMetadataStore>>()));
+        services.AddSingleton<ISyncMetadataStore>(sp => sp.GetRequiredService<SyncMetadataStore>());
+
+        services.AddSingleton<ICloudSyncTransport, NullCloudSyncTransport>();
 
         return services;
     }

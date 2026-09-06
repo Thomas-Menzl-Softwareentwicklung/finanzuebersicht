@@ -153,14 +153,29 @@
   <data name="Lic_StubSync" xml:space="preserve"><value>Stub: Sync subscription</value></data>
   <data name="Lic_StubApply" xml:space="preserve"><value>Apply stub entitlements</value></data>
   <data name="Lic_BuyPro" xml:space="preserve"><value>Unlock Pro</value></data>
+  <data name="Lic_BuySync" xml:space="preserve"><value>Subscribe to Sync</value></data>
   <data name="Lic_RestorePurchases" xml:space="preserve"><value>Restore purchases</value></data>
   <data name="Lic_PurchaseSuccess" xml:space="preserve"><value>Pro unlocked</value></data>
+  <data name="Lic_SyncPurchaseSuccess" xml:space="preserve"><value>Sync subscription active</value></data>
   <data name="Lic_PurchaseFailed" xml:space="preserve"><value>Purchase could not be completed.</value></data>
   <data name="Lic_RestoreSuccess" xml:space="preserve"><value>Purchases restored</value></data>
   <data name="Lic_RestoreEmpty" xml:space="preserve"><value>No purchases found for this Apple ID</value></data>
   <data name="Lic_SyncComingSoon" xml:space="preserve"><value>Cloud Sync: coming later (not for sale yet)</value></data>
+  <data name="Lic_SyncAvailable" xml:space="preserve"><value>Cloud Sync: yearly subscription for iPhone, iPad, and Mac</value></data>
   <data name="Lic_SyncPurchaseLater" xml:space="preserve"><value>Cloud Sync yearly subscription will be offered once CloudKit is ready.</value></data>
   <data name="Lic_UseStoreKit" xml:space="preserve"><value>Use App Store purchases (clear stub)</value></data>
+  <data name="Sync_EnableLabel" xml:space="preserve"><value>iCloud Sync</value></data>
+  <data name="Sync_LastSync" xml:space="preserve"><value>Last sync: {0}</value></data>
+  <data name="Sync_NeverSynced" xml:space="preserve"><value>Not synced yet</value></data>
+  <data name="Sync_Error" xml:space="preserve"><value>Sync error: {0}</value></data>
+  <data name="Sync_PausedRenew" xml:space="preserve"><value>iCloud Sync is paused. Renew your subscription to continue.</value></data>
+  <data name="Sync_BlockedBothHaveData" xml:space="preserve"><value>Cloud Sync cannot be enabled because both this device and iCloud contain data. Create a backup (Settings → Backup) and use either an empty device or empty iCloud data before enabling.</value></data>
+  <data name="Sync_BlockedNoEntitlement" xml:space="preserve"><value>Cloud Sync requires an active Sync subscription.</value></data>
+  <data name="Sync_BlockedUnsupported" xml:space="preserve"><value>Cloud Sync is not supported on this device or OS version.</value></data>
+  <data name="Sync_BlockedNoICloud" xml:space="preserve"><value>Sign in to iCloud in System Settings and enable iCloud Drive to use Cloud Sync.</value></data>
+  <data name="Sync_ReplaceLocalWithCloudTitle" xml:space="preserve"><value>Replace data on this device?</value></data>
+  <data name="Sync_ReplaceLocalWithCloudMessage" xml:space="preserve"><value>This device and iCloud both contain data. A backup will be created, then the data on this device will be deleted and replaced with the iCloud copy. iCloud is not changed.</value></data>
+  <data name="Sync_ReplaceLocalWithCloudAccept" xml:space="preserve"><value>Use iCloud data</value></data>
 
   <!-- Confirmation Dialogs -->
   <data name="Dlg_KategorieLoeschen" xml:space="preserve"><value>Delete Category</value></data>

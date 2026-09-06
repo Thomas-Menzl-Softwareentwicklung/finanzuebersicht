@@ -1,4 +1,4 @@
-Finanzübersicht verwaltet Einnahmen, Ausgaben und Daueraufträge lokal auf dem Gerät. Daten liegen als JSON bei dir — ohne Account, ohne Werbung, ohne Tracking.
+Finanzübersicht verwaltet Einnahmen, Ausgaben und Daueraufträge lokal auf dem Gerät. Daten liegen als JSON bei dir — ohne eigenes Konto, ohne Werbung, ohne Tracking.
 
 DASHBOARD UND KONTEN
 Monats- und Jahresübersicht, Konten mit Salden, Umbuchungen, Budgets und eine 30-Tage-Cashflow-Vorschau. Kategorien mit Icon, Farbe und Monatsbudget.
@@ -8,6 +8,9 @@ Anlegen, suchen, filtern, duplizieren und als Vorlage speichern. CSV-Import (DKB
 
 DAUERAUFTRÄGE UND SPARZIELE
 Wiederkehrende Buchungen mit Erinnerung. Sparziele mit Fortschritt und Prognose. Backup und Restore inklusive Schema-Migration.
+
+ICLOUD-SYNC
+Optional zwischen iPhone, iPad und Mac über deine private iCloud. Kein eigener Server, kein Finanzübersicht-Account. Jahresabo, unabhängig von Pro. Lokal weiter ohne Abo nutzbar.
 
 FREE UND PRO
 Free reicht für den Alltag: Transaktionen unbegrenzt, wenige Konten, Daueraufträge und Sparziele. Pro ist ein Einmalkauf für unbegrenzt Konten, CSV-Import, Widget-Presets und weitere Power-Features. Die Kernfunktionen brauchen kein Abo.

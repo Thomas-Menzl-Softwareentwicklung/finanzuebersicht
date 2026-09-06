@@ -1,5 +1,6 @@
 ﻿using System.Globalization;
 using Finanzuebersicht.Application.UseCases.ScreenshotDemo;
+using Finanzuebersicht.Application.UseCases.Sync;
 using Finanzuebersicht.Application.UseCases.Transactions;
 using Finanzuebersicht.Core.Constants;
 using Finanzuebersicht.Core.Licensing;
@@ -23,6 +24,7 @@ public partial class App : global::Microsoft.Maui.Controls.Application
 	private readonly IAppEvents _appEvents;
 	private readonly IQuickExpenseWidgetPresetStore? _quickExpenseWidgetPresetStore;
 	private readonly SeedScreenshotDemoDataUseCase _seedScreenshotDemoDataUseCase;
+	private readonly ICloudSyncOrchestrator _cloudSyncOrchestrator;
 	private readonly ILogger<App>? _logger;
 	private readonly string _savedTheme;
 	private readonly bool _screenshotDemoMode;
@@ -50,6 +52,7 @@ public partial class App : global::Microsoft.Maui.Controls.Application
 		IDisplayCurrencyService displayCurrency,
 		ProcessQuickExpenseInboxUseCase processQuickExpenseInboxUseCase,
 		SeedScreenshotDemoDataUseCase seedScreenshotDemoDataUseCase,
+		ICloudSyncOrchestrator cloudSyncOrchestrator,
 		ILicenseService licenseService,
 		INavigationService navigationService,
 		IAppEvents appEvents,
@@ -82,6 +85,7 @@ public partial class App : global::Microsoft.Maui.Controls.Application
 		_navigationService = navigationService;
 		_quickExpenseWidgetPresetStore = quickExpenseWidgetPresetStore;
 		_seedScreenshotDemoDataUseCase = seedScreenshotDemoDataUseCase;
+		_cloudSyncOrchestrator = cloudSyncOrchestrator;
 		_logger = logger;
 
 		// Gespeichertes Theme anwenden (MAUI-Ebene); Screenshot-Demo erzwingt Light ohne Settings-Persistenz
@@ -122,8 +126,20 @@ public partial class App : global::Microsoft.Maui.Controls.Application
 	{
 		var window = new Window(new AppShell());
 
+#if MACCATALYST
+		if (_screenshotDemoMode)
+			ApplyMacScreenshotDemoWindowSize(window);
+#endif
+
 		// UIKit-Style nach Window-Erstellung setzen
-		window.Created += (_, _) => _themeService.Apply(_savedTheme);
+		window.Created += (_, _) =>
+		{
+			_themeService.Apply(_savedTheme);
+#if MACCATALYST
+			if (_screenshotDemoMode)
+				ApplyMacScreenshotDemoWindowSize(window);
+#endif
+		};
 
 		window.Resumed += async (_, _) =>
 		{
@@ -136,15 +152,42 @@ public partial class App : global::Microsoft.Maui.Controls.Application
 				PublishWidgetSharedState();
 				await _recurringGenerationService.GeneratePendingRecurringTransactionsAsync();
 				await ProcessQuickExpenseInboxAsync();
+				await RunCloudSyncIfEnabledAsync();
 			}
 			catch (Exception ex)
 			{
-				_logger?.LogError(ex, "Dauerauftrag-Generierung / Quick-Expense-Inbox bei Resume fehlgeschlagen");
+				_logger?.LogError(ex, "Dauerauftrag-Generierung / Quick-Expense-Inbox / Cloud-Sync bei Resume fehlgeschlagen");
 			}
 		};
 
 		return window;
 	}
+
+#if MACCATALYST
+	/// <summary>
+	/// App Store Mac shots are 16:10 (1280×800 or 2560×1600). Lock the demo window so
+	/// a Retina capture of 1280×800 points lands on 2560×1600 pixels.
+	/// </summary>
+	private static void ApplyMacScreenshotDemoWindowSize(Window window)
+	{
+		const double width = 1280;
+		const double height = 800;
+		window.Width = width;
+		window.Height = height;
+		window.MinimumWidth = width;
+		window.MinimumHeight = height;
+		window.MaximumWidth = width;
+		window.MaximumHeight = height;
+
+		if (window.Handler?.PlatformView is UIKit.UIWindow uiWindow &&
+		    uiWindow.WindowScene?.SizeRestrictions is { } restrictions)
+		{
+			var size = new CoreGraphics.CGSize(width, height);
+			restrictions.MinimumSize = size;
+			restrictions.MaximumSize = size;
+		}
+	}
+#endif
 
 	protected override async void OnStart()
 	{
@@ -171,6 +214,7 @@ public partial class App : global::Microsoft.Maui.Controls.Application
 				PublishWidgetSharedState();
 				await _recurringGenerationService.GeneratePendingRecurringTransactionsAsync();
 				await ProcessQuickExpenseInboxAsync();
+				await RunCloudSyncIfEnabledAsync();
 			}
 		}
 		catch (Exception ex)
@@ -252,6 +296,19 @@ public partial class App : global::Microsoft.Maui.Controls.Application
 			await _navigationService.GoToAsync(Routes.TransactionsTab);
 			await _navigationService.GoToAsync(Routes.QuickExpenseCapture, parameters);
 		});
+	}
+
+	private async Task RunCloudSyncIfEnabledAsync()
+	{
+		try
+		{
+			await _cloudSyncOrchestrator.StartIfEnabledAsync();
+			await _cloudSyncOrchestrator.SyncNowAsync();
+		}
+		catch (Exception ex)
+		{
+			_logger?.LogError(ex, "Cloud-Sync bei App-Start/Resume fehlgeschlagen");
+		}
 	}
 
 	private async Task ProcessQuickExpenseInboxAsync()

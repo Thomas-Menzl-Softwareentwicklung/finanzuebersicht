@@ -1,5 +1,15 @@
 # Änderungsverlauf
 
+## [1.21] - Unreleased
+
+### Hinzugefügt
+
+- CloudKit-Sync MVP zwischen Apple-Geräten (#243): private Zone, Last-Write-Wins, Tombstones, iCloud-Sync in den Einstellungen (Store + Sync-IAP); QA iPhone → iPad → iMac
+
+### Geändert
+
+- Versionsbasis `1.21` (Nerdbank.GitVersioning) — TestFlight/ASC, weil `1.20` im Store liegt
+
 ## [1.20] - 2026-08-12
 
 ### Hinzugefügt

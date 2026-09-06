@@ -11,10 +11,8 @@
 	</array>
 	<key>LSApplicationCategoryType</key>
 	<string>public.app-category.lifestyle</string>
-	<key>UIRequiredDeviceCapabilities</key>
-	<array>
-		<string>arm64</string>
-	</array>
+	<!-- Do not require arm64 here: that excludes Intel Macs from TestFlight / Mac App Store.
+	     iOS keeps UIRequiredDeviceCapabilities → arm64 in Platforms/iOS/Info.plist. -->
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>

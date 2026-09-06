@@ -1,4 +1,6 @@
+using Finanzuebersicht.Application.UseCases.Sync;
 using Finanzuebersicht.Core.Licensing;
+using Finanzuebersicht.Core.Sync;
 using Finanzuebersicht.Models;
 
 namespace Finanzuebersicht.Application.UseCases.RecurringTransactions;
@@ -7,12 +9,14 @@ public class SaveRecurringTransactionDetailUseCase(
     IRecurringTransactionRepository recurringTransactionRepository,
     IRecurringGenerationService recurringGenerationService,
     IAccountRepository accountRepository,
-    ILicenseService? licenseService = null)
+    ILicenseService? licenseService = null,
+    ICloudSyncOrchestrator? cloudSyncOrchestrator = null)
 {
     private readonly IRecurringTransactionRepository _recurringTransactionRepository = recurringTransactionRepository;
     private readonly IRecurringGenerationService _recurringGenerationService = recurringGenerationService;
     private readonly IAccountRepository _accountRepository = accountRepository;
     private readonly ILicenseService _licenseService = licenseService ?? UnrestrictedLicenseService.Instance;
+    private readonly ICloudSyncOrchestrator? _cloudSyncOrchestrator = cloudSyncOrchestrator;
 
     public async Task ExecuteAsync(
         RecurringTransaction? existing,
@@ -58,8 +62,14 @@ public class SaveRecurringTransactionDetailUseCase(
         recurring.ReminderDaysBefore = reminderDaysBefore;
         if (exceptions != null)
             recurring.Exceptions = exceptions;
+        CloudSyncNotify.StampUpdatedAt(recurring);
 
         await _recurringTransactionRepository.SaveRecurringTransactionAsync(recurring);
+        await CloudSyncNotify.NotifyUpsertAsync(
+            _cloudSyncOrchestrator,
+            SyncEntityType.RecurringTransaction,
+            recurring.Id,
+            cancellationToken);
         await _recurringGenerationService.GeneratePendingRecurringTransactionsAsync();
     }
 }

@@ -6,16 +6,19 @@ public sealed class LicenseService : ILicenseService
 {
     private readonly IDistributionChannelProvider _channelProvider;
     private readonly ILicenseEntitlementStore _entitlementStore;
+    private readonly Func<bool> _isCloudSyncFeatureAvailable;
     private bool _hasPro;
     private bool _hasSyncSubscription;
     private bool _loaded;
 
     public LicenseService(
         IDistributionChannelProvider channelProvider,
-        ILicenseEntitlementStore entitlementStore)
+        ILicenseEntitlementStore entitlementStore,
+        Func<bool>? isCloudSyncFeatureAvailable = null)
     {
         _channelProvider = channelProvider;
         _entitlementStore = entitlementStore;
+        _isCloudSyncFeatureAvailable = isCloudSyncFeatureAvailable ?? CloudSyncPlatform.IsFeatureAvailable;
         ApplyChannelDefaults();
     }
 
@@ -42,7 +45,8 @@ public sealed class LicenseService : ILicenseService
     public bool CanUseCloudSync => Channel == DistributionChannel.Store && HasSyncSubscription;
 
     /// <inheritdoc />
-    public bool IsCloudSyncImplemented => false;
+    public bool IsCloudSyncImplemented =>
+        Channel == DistributionChannel.Store && _isCloudSyncFeatureAvailable();
 
     public bool HasFeature(AppFeature feature) => feature switch
     {

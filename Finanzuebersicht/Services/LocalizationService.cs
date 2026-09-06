@@ -22,14 +22,23 @@ public class LocalizationService(ISettingsService settings) : ILocalizationServi
     {
         LocalizationResourceManager.Current.Init(AppResources.ResourceManager);
 
-        var saved = ScreenshotDemoLaunchOptions.IsActive()
-            ? null
-            : _settings.Get(SettingsKeys.LanguageCode);
-        var culture = string.IsNullOrEmpty(saved)
-            ? CultureInfo.CurrentUICulture
-            : new CultureInfo(saved);
+        string saved;
+        CultureInfo culture;
+        if (ScreenshotDemoLaunchOptions.IsActive())
+        {
+            saved = string.Empty;
+            culture = ScreenshotDemoLaunchOptions.TryGetRequestedCulture()
+                ?? CultureInfo.CurrentUICulture;
+        }
+        else
+        {
+            saved = _settings.Get(SettingsKeys.LanguageCode);
+            culture = string.IsNullOrEmpty(saved)
+                ? CultureInfo.CurrentUICulture
+                : new CultureInfo(saved);
+        }
 
-        ApplyCulture(culture, saved ?? string.Empty);
+        ApplyCulture(culture, saved);
     }
 
     public void SetLanguage(string? cultureCode)

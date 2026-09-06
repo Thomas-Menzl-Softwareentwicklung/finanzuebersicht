@@ -37,7 +37,7 @@ Upload listing texts and iOS screenshots to App Store Connect (no binary, no rev
 [bundle exec] fastlane ios upload_listing_mac
 ```
 
-Upload listing texts to the Mac App Store listing (no screenshots, no binary, no review)
+Upload listing texts and Mac screenshots to the Mac App Store listing (no binary, no review)
 
 ### ios upload_listing_all
 

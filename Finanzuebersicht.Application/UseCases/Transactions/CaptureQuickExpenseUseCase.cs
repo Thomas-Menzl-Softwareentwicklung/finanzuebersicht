@@ -1,6 +1,8 @@
 using System.Globalization;
+using Finanzuebersicht.Application.UseCases.Sync;
 using Finanzuebersicht.Constants;
 using Finanzuebersicht.Core.Services;
+using Finanzuebersicht.Core.Sync;
 using Finanzuebersicht.Models;
 
 namespace Finanzuebersicht.Application.UseCases.Transactions;
@@ -19,13 +21,15 @@ public class CaptureQuickExpenseUseCase(
     IAccountRepository accountRepository,
     IUncategorizedCategoryService uncategorizedCategoryService,
     ITransactionValidationService validationService,
-    IClock clock)
+    IClock clock,
+    ICloudSyncOrchestrator? cloudSyncOrchestrator = null)
 {
     private readonly ITransactionRepository _transactionRepository = transactionRepository;
     private readonly IAccountRepository _accountRepository = accountRepository;
     private readonly IUncategorizedCategoryService _uncategorizedCategoryService = uncategorizedCategoryService;
     private readonly ITransactionValidationService _validationService = validationService;
     private readonly IClock _clock = clock;
+    private readonly ICloudSyncOrchestrator? _cloudSyncOrchestrator = cloudSyncOrchestrator;
 
     public async Task<CaptureQuickExpenseResult> ExecuteAsync(
         string amountText,
@@ -59,9 +63,15 @@ public class CaptureQuickExpenseUseCase(
             Typ = TransactionType.Ausgabe,
             Verwendungszweck = string.Empty
         };
+        CloudSyncNotify.StampUpdatedAt(transaction);
 
         cancellationToken.ThrowIfCancellationRequested();
         await _transactionRepository.SaveTransactionAsync(transaction).ConfigureAwait(false);
+        await CloudSyncNotify.NotifyUpsertAsync(
+            _cloudSyncOrchestrator,
+            SyncEntityType.Transaction,
+            transaction.Id,
+            cancellationToken).ConfigureAwait(false);
         return new CaptureQuickExpenseResult(true, transaction);
     }
 

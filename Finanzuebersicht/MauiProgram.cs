@@ -11,6 +11,7 @@ using Finanzuebersicht.ViewModels;
 using Finanzuebersicht.Views;
 
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 
 #if MACCATALYST || IOS
@@ -85,6 +86,14 @@ public static class MauiProgram
 		builder.Services.AddSingleton<Finanzuebersicht.Core.Licensing.IStoreBillingService, Finanzuebersicht.Core.Licensing.UnavailableStoreBillingService>();
 #endif
 		builder.Services.AddInfrastructureServices();
+#if (IOS || MACCATALYST) && APP_DISTRIBUTION_STORE
+		// Cloud Sync is a Store-only feature; Direct builds keep Infrastructure's
+		// NullCloudSyncTransport and therefore never touch CloudKit.
+		builder.Services.Replace(
+			Microsoft.Extensions.DependencyInjection.ServiceDescriptor
+				.Singleton<Finanzuebersicht.Core.Sync.ICloudSyncTransport,
+					Finanzuebersicht.Platforms.iOS.CloudKitSyncTransport>());
+#endif
 		// App Group inbox/presets are iPhone-only (widget). Mac Catalyst has no App Group entitlement —
 		// keep File* stores from Infrastructure.
 #if IOS && !MACCATALYST

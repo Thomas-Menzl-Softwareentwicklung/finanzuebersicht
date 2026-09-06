@@ -1,3 +1,5 @@
+using System.Globalization;
+
 namespace Finanzuebersicht.Core.Services.ScreenshotDemo;
 
 /// <summary>
@@ -50,6 +52,33 @@ public static class ScreenshotDemoLaunchOptions
         return env.Concat(platform);
     }
 #endif
+
+    /// <summary>
+    /// Culture from <c>-AppleLanguages</c> (fastlane snapshot / Mac screenshot launches).
+    /// Null when the flag is absent — callers fall back to <see cref="CultureInfo.CurrentUICulture"/>.
+    /// </summary>
+    public static CultureInfo? TryGetRequestedCulture()
+    {
+#if !DEBUG
+        return null;
+#else
+        var args = GetEffectiveArgs().ToList();
+        for (var i = 0; i < args.Count - 1; i++)
+        {
+            if (!string.Equals(args[i], "-AppleLanguages", StringComparison.Ordinal))
+                continue;
+
+            var token = args[i + 1].Trim().Trim('"', '\'');
+            token = token.TrimStart('(').TrimEnd(')').Split(',')[0].Trim().Trim('"');
+            if (token.StartsWith("en", StringComparison.OrdinalIgnoreCase))
+                return new CultureInfo("en-US");
+            if (token.StartsWith("de", StringComparison.OrdinalIgnoreCase))
+                return new CultureInfo("de-DE");
+        }
+
+        return null;
+#endif
+    }
 
     public static string GetIsolatedDataPath()
     {

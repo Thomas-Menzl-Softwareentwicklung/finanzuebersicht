@@ -1,4 +1,6 @@
 using Finanzuebersicht.Application.UseCases.Accounts;
+using Finanzuebersicht.Application.UseCases.Sync;
+using Finanzuebersicht.Core.Sync;
 using Finanzuebersicht.Models;
 
 namespace Finanzuebersicht.Tests.Application.UseCases.Accounts;
@@ -35,6 +37,7 @@ public class AccountUseCaseTests
         accountRepository.DeleteAccountAsync(Arg.Any<string>()).Returns(Task.CompletedTask);
 
         var transactionRepository = Substitute.For<ITransactionRepository>();
+        transactionRepository.GetAllTransactionsAsync(Arg.Any<CancellationToken>()).Returns([]);
         transactionRepository.RemapAccountIdAsync("acc-old", "acc-default", Arg.Any<CancellationToken>())
             .Returns(1);
         transactionRepository.SaveTransactionAsync(Arg.Any<Transaction>()).Returns(Task.CompletedTask);
@@ -53,6 +56,42 @@ public class AccountUseCaseTests
         await transactionRepository.Received(1).RemapAccountIdAsync("acc-old", "acc-default", Arg.Any<CancellationToken>());
         await templateRepository.Received(1).SaveTransactionTemplateAsync(NonNullArg.Is<TransactionTemplate>(t => t.AccountId == "acc-default"));
         await accountRepository.Received(1).DeleteAccountAsync("acc-old");
+    }
+
+    [Fact]
+    public async Task DeleteAccountUseCase_NotifiesRemappedTransactions()
+    {
+        var defaultAccount = new Account { Id = "acc-default", Name = "Girokonto", SystemKey = Finanzuebersicht.Constants.SystemAccountKeys.Default };
+        var accountToDelete = new Account { Id = "acc-old", Name = "Alt" };
+
+        var accountRepository = Substitute.For<IAccountRepository>();
+        accountRepository.GetAccountsAsync().Returns(new List<Account> { defaultAccount, accountToDelete });
+
+        var transactionRepository = Substitute.For<ITransactionRepository>();
+        transactionRepository.GetAllTransactionsAsync(Arg.Any<CancellationToken>())
+            .Returns([
+                new Transaction { Id = "tx-1", AccountId = "acc-old" },
+                new Transaction { Id = "tx-2", AccountId = "acc-default" }
+            ]);
+        transactionRepository.RemapAccountIdAsync("acc-old", "acc-default", Arg.Any<CancellationToken>())
+            .Returns(1);
+
+        var templateRepository = Substitute.For<ITransactionTemplateRepository>();
+        templateRepository.GetTransactionTemplatesAsync().Returns(new List<TransactionTemplate>());
+
+        var orchestrator = Substitute.For<ICloudSyncOrchestrator>();
+        var sut = new DeleteAccountUseCase(accountRepository, transactionRepository, templateRepository, orchestrator);
+
+        await sut.ExecuteAsync("acc-old");
+
+        await orchestrator.Received(1).NotifyLocalUpsertAsync(
+            SyncEntityType.Transaction, "tx-1", Arg.Any<CancellationToken>());
+        await orchestrator.DidNotReceive().NotifyLocalUpsertAsync(
+            SyncEntityType.Transaction, "tx-2", Arg.Any<CancellationToken>());
+        await orchestrator.Received(1).NotifyLocalDeleteAsync(
+            SyncEntityType.Account, "acc-old", Arg.Any<CancellationToken>());
+        await transactionRepository.Received(1).SaveTransactionAsync(
+            NonNullArg.Is<Transaction>(t => t.Id == "tx-1" && t.UpdatedAt != null));
     }
 
     [Fact]
