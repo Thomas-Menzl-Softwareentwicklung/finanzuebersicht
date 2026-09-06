@@ -146,6 +146,7 @@ public class LicenseViewModelTests
             Arg.Any<string>(),
             Arg.Any<string>(),
             Arg.Any<string>());
+        await orchestrator.Received(1).StartIfEnabledAsync(Arg.Any<CancellationToken>());
         await orchestrator.Received(1).SyncNowAsync(Arg.Any<CancellationToken>());
     }
 

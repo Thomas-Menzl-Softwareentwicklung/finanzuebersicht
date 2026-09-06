@@ -95,10 +95,23 @@ private func ckBridgeStatus(for error: Error) -> Int32 {
     if let bridgeError = error as? CKBridgeError {
         return bridgeError.status
     }
-    if error is CKError {
-        return CKBridgeStatus.cloudKitFailure
+    if let ckError = error as? CKError {
+        // 100 + CKError.Code so C# can show the real CloudKit failure, not a generic 4.
+        return 100 + Int32(ckError.code.rawValue)
     }
     return CKBridgeStatus.unknownFailure
+}
+
+private func isAbsentZone(_ error: CKError) -> Bool {
+    switch error.code {
+    case .zoneNotFound, .userDeletedZone, .unknownItem:
+        return true
+    case .partialFailure:
+        let nested = error.partialErrorsByItemID?.values.compactMap { $0 as? CKError } ?? []
+        return !nested.isEmpty && nested.allSatisfy(isAbsentZone)
+    default:
+        return false
+    }
 }
 
 // MARK: - ISO-8601 helpers
@@ -311,6 +324,18 @@ private final class CKSyncEngineHost: NSObject, CKSyncEngineDelegate {
         lock.unlock()
     }
 
+    /// Clears persisted CKSyncEngine tokens so the next fetch downloads the whole zone.
+    func resetEngineState() {
+        stop()
+        UserDefaults.standard.removeObject(forKey: CKBridgeConfig.stateDefaultsKey)
+        UserDefaults.standard.removeObject(forKey: CKBridgeConfig.stagedRecordsDefaultsKey)
+        lock.lock()
+        knownRecords.removeAll()
+        stagedSnapshots.removeAll()
+        stagingNeedsPersist = false
+        lock.unlock()
+    }
+
     private func requireEngine() throws -> CKSyncEngine {
         lock.lock()
         let engine = self.engine
@@ -403,16 +428,27 @@ private final class CKSyncEngineHost: NSObject, CKSyncEngineDelegate {
     // MARK: Queries
 
     func isZoneEmpty() async throws -> Bool {
+        // First enable: the custom zone does not exist yet. Listing zones is reliable;
+        // recordZoneChanges on a missing Production zone is often CKError.partialFailure
+        // (not zoneNotFound), which used to abort enable with native status 4.
+        let zones: [CKRecordZone]
+        do {
+            zones = try await database.allRecordZones()
+        } catch let error as CKError {
+            if isAbsentZone(error) { return true }
+            throw error
+        }
+
+        guard zones.contains(where: { $0.zoneID.zoneName == CKBridgeConfig.zoneName }) else {
+            return true
+        }
+
         do {
             let changes = try await database.recordZoneChanges(inZoneWith: zoneID, since: nil, resultsLimit: 1)
             return changes.modificationResultsByID.isEmpty
         } catch let error as CKError {
-            switch error.code {
-            case .zoneNotFound, .userDeletedZone, .unknownItem:
-                return true
-            default:
-                throw error
-            }
+            if isAbsentZone(error) { return true }
+            throw error
         }
     }
 
@@ -529,7 +565,16 @@ private final class CKSyncEngineHost: NSObject, CKSyncEngineDelegate {
     }
 
     func sendChanges() async throws {
-        try await requireEngine().sendChanges()
+        let engine = try requireEngine()
+        // Records cannot land until the custom zone exists. Queue it every send so a
+        // first-enable Production write does not fail as a generic CloudKit status 4.
+        engine.state.add(pendingDatabaseChanges: [.saveZone(CKRecordZone(zoneID: zoneID))])
+        do {
+            try await engine.sendChanges()
+        } catch let error as CKError where isAbsentZone(error) {
+            engine.state.add(pendingDatabaseChanges: [.saveZone(CKRecordZone(zoneID: zoneID))])
+            try await engine.sendChanges()
+        }
     }
 
     // MARK: CKSyncEngineDelegate
@@ -849,6 +894,15 @@ public func finanzuebersicht_ck_start() -> Int32 {
 public func finanzuebersicht_ck_stop() -> Int32 {
     if #available(iOS 17.0, macOS 14.0, *) {
         CKSyncEngineHost.shared.stop()
+        return CKBridgeStatus.ok
+    }
+    return CKBridgeStatus.unsupportedOS
+}
+
+@_cdecl("finanzuebersicht_ck_reset_engine_state")
+public func finanzuebersicht_ck_reset_engine_state() -> Int32 {
+    if #available(iOS 17.0, macOS 14.0, *) {
+        CKSyncEngineHost.shared.resetEngineState()
         return CKBridgeStatus.ok
     }
     return CKBridgeStatus.unsupportedOS

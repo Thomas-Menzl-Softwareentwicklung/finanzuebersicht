@@ -676,5 +676,8 @@ public class CloudSyncOrchestratorTests
             SendChangesCalled = true;
             return Task.CompletedTask;
         }
+
+        public Task ResetEngineStateAsync(CancellationToken ct = default) =>
+            Task.CompletedTask;
     }
 }

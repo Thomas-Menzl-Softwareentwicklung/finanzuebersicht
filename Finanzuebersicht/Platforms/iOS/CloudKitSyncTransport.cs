@@ -129,6 +129,9 @@ public sealed class CloudKitSyncTransport : ICloudSyncTransport
     public Task FetchChangesAsync(CancellationToken ct = default) =>
         RunNativeAsync(NativeFetchChanges, "fetch_changes", ct);
 
+    public Task ResetEngineStateAsync(CancellationToken ct = default) =>
+        RunNativeAsync(NativeResetEngineState, "reset_engine_state", ct);
+
     public Task SendChangesAsync(CancellationToken ct = default) =>
         RunNativeAsync(NativeSendChanges, "send_changes", ct);
 
@@ -178,7 +181,7 @@ public sealed class CloudKitSyncTransport : ICloudSyncTransport
     }
 
     private static InvalidOperationException NativeFailure(string operation, int status) =>
-        new($"CloudKit bridge '{operation}' failed with native status {status}.");
+        new($"CloudKit bridge '{operation}' failed with native status {status} ({CloudKitSyncBridgeCodec.FormatNativeStatus(status)}).");
 
     private static string ToIsoUtc(DateTime value) =>
         (value.Kind == DateTimeKind.Utc ? value : value.ToUniversalTime())
@@ -267,6 +270,9 @@ public sealed class CloudKitSyncTransport : ICloudSyncTransport
 
     [DllImport(NativeLibrary, EntryPoint = "finanzuebersicht_ck_fetch_changes")]
     private static extern int NativeFetchChanges();
+
+    [DllImport(NativeLibrary, EntryPoint = "finanzuebersicht_ck_reset_engine_state")]
+    private static extern int NativeResetEngineState();
 
     [DllImport(NativeLibrary, EntryPoint = "finanzuebersicht_ck_send_changes")]
     private static extern int NativeSendChanges();

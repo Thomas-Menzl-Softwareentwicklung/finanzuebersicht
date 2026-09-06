@@ -236,6 +236,7 @@ public partial class LicenseViewModel : ObservableObject
         {
             await RefreshCloudSyncFromMetadataAsync();
             RefreshFromService();
+            await _cloudSyncOrchestrator.StartIfEnabledAsync();
             await _cloudSyncOrchestrator.SyncNowAsync();
             return;
         }

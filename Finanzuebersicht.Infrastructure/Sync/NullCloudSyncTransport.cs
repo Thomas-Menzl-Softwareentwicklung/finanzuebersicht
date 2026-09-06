@@ -35,4 +35,7 @@ public sealed class NullCloudSyncTransport : ICloudSyncTransport
 
     public Task SendChangesAsync(CancellationToken ct = default) =>
         Task.CompletedTask;
+
+    public Task ResetEngineStateAsync(CancellationToken ct = default) =>
+        Task.CompletedTask;
 }

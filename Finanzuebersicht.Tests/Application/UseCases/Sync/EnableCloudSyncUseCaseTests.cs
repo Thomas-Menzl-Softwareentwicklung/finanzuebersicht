@@ -57,6 +57,7 @@ public class EnableCloudSyncUseCaseTests
             Arg.Any<CancellationToken>());
         await transport.DidNotReceive().FetchChangesAsync(Arg.Any<CancellationToken>());
         await transport.Received(1).SendChangesAsync(Arg.Any<CancellationToken>());
+        await transport.DidNotReceive().ResetEngineStateAsync(Arg.Any<CancellationToken>());
         await accountRepository.Received().SaveAccountAsync(Arg.Is<Account>(a =>
             a.Id == userAccount.Id && a.UpdatedAt != null));
     }
@@ -134,7 +135,8 @@ public class EnableCloudSyncUseCaseTests
 
         Assert.Equal(EnableCloudSyncStatus.Enabled, result.Status);
         Assert.True(metadata.SyncEnabled);
-        await transport.Received(1).FetchChangesAsync(Arg.Any<CancellationToken>());
+        await transport.Received(1).ResetEngineStateAsync(Arg.Any<CancellationToken>());
+        await transport.DidNotReceive().FetchChangesAsync(Arg.Any<CancellationToken>());
         await transport.Received().EnqueueUpsertAsync(
             Arg.Is<CloudSyncRecordDto>(r => r.EntityType == SyncEntityType.SyncMeta && r.Id == CloudSyncSchema.RecordName),
             Arg.Any<CancellationToken>());

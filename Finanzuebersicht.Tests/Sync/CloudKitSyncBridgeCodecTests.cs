@@ -48,6 +48,21 @@ public class CloudKitSyncBridgeCodecTests
         Assert.Equal(CloudSyncAccountStatus.CouldNotDetermine, CloudKitSyncBridgeCodec.ToAccountStatus(native));
     }
 
+    [Theory]
+    [InlineData(1, "unsupported OS")]
+    [InlineData(2, "not started")]
+    [InlineData(3, "invalid argument")]
+    [InlineData(4, "CloudKit request failed")]
+    [InlineData(5, "unknown failure")]
+    [InlineData(108, "CloudKit error 8 (missingEntitlement)")]
+    [InlineData(105, "CloudKit error 5 (badContainer)")]
+    [InlineData(109, "CloudKit error 9 (notAuthenticated)")]
+    [InlineData(126, "CloudKit error 26 (zoneNotFound)")]
+    public void FormatNativeStatus_MapsBridgeAndCkErrorCodes(int status, string expected)
+    {
+        Assert.Equal(expected, CloudKitSyncBridgeCodec.FormatNativeStatus(status));
+    }
+
     [Fact]
     public void DecodeRecords_ReadsUpsertRecord()
     {

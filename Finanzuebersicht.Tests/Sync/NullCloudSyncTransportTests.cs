@@ -46,6 +46,12 @@ public class NullCloudSyncTransportTests
     }
 
     [Fact]
+    public async Task ResetEngineStateAsync_DoesNotThrow()
+    {
+        await _transport.ResetEngineStateAsync();
+    }
+
+    [Fact]
     public async Task SendChangesAsync_DoesNotThrow()
     {
         await _transport.SendChangesAsync();

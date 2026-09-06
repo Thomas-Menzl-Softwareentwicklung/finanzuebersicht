@@ -53,6 +53,32 @@ public static class CloudKitSyncBridgeCodec
             : CloudSyncAccountStatus.CouldNotDetermine;
 
     /// <summary>
+    /// Native bridge statuses: 1–5 are <c>CKBridgeStatus</c>. Values ≥ 100 are
+    /// <c>100 + CKError.Code.rawValue</c> so TestFlight errors stay diagnosable.
+    /// </summary>
+    public static string FormatNativeStatus(int status) => status switch
+    {
+        1 => "unsupported OS",
+        2 => "not started",
+        3 => "invalid argument",
+        4 => "CloudKit request failed",
+        5 => "unknown failure",
+        >= 100 => FormatCkError(status - 100),
+        _ => status.ToString()
+    };
+
+    private static string FormatCkError(int code) => code switch
+    {
+        2 => "CloudKit error 2 (partialFailure)",
+        4 => "CloudKit error 4 (networkFailure)",
+        5 => "CloudKit error 5 (badContainer)",
+        8 => "CloudKit error 8 (missingEntitlement)",
+        9 => "CloudKit error 9 (notAuthenticated)",
+        26 => "CloudKit error 26 (zoneNotFound)",
+        _ => $"CloudKit error {code}"
+    };
+
+    /// <summary>
     /// Decodes a batch handed over by the native records callback. Malformed input yields an
     /// empty batch — a callback from CloudKit must never throw back into Swift.
     /// </summary>

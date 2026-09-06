@@ -51,6 +51,13 @@ public sealed class EnableCloudSyncUseCase(
         metadata.SyncEnabled = true;
         metadata.SchemaVersionSeen = CloudSyncSchema.CurrentVersion;
         await metadataStore.SaveAsync(metadata);
+
+        // Pull onto an empty device must not fetch before the orchestrator subscribes —
+        // that advances the CloudKit change token and drops the records. Reset any
+        // leftover cursor (e.g. a previous failed enable) so the next fetch is complete.
+        if (localEmpty)
+            await transport.ResetEngineStateAsync(ct);
+
         await transport.StartAsync(ct);
         await transport.EnqueueUpsertAsync(CreateSyncMetaRecord(), ct);
 
@@ -58,10 +65,6 @@ public sealed class EnableCloudSyncUseCase(
         {
             await SeedLocalEntitiesAsync(ct);
             await transport.SendChangesAsync(ct);
-        }
-        else
-        {
-            await transport.FetchChangesAsync(ct);
         }
 
         return new EnableCloudSyncResult { Status = EnableCloudSyncStatus.Enabled };
