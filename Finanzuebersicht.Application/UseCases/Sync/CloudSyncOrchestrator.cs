@@ -551,19 +551,27 @@ public sealed class CloudSyncOrchestrator(
         _ = DebounceAndEnqueueAsync(key, pending);
     }
 
+    /// <summary>
+    /// Removes <paramref name="pending"/> only if it is still the dictionary value.
+    /// Unconditional <c>TryRemove(key)</c> can drop a newer upsert that replaced it
+    /// (empty enqueue in <c>FlushPendingForTestsAsync</c> under CI timing).
+    /// </summary>
+    private bool TryRemovePendingIfSame((SyncEntityType Type, string Id) key, PendingUpsert pending) =>
+        _pendingUpserts.TryRemove(new KeyValuePair<(SyncEntityType Type, string Id), PendingUpsert>(key, pending));
+
     private async Task DebounceAndEnqueueAsync((SyncEntityType Type, string Id) key, PendingUpsert pending)
     {
         try
         {
             await Task.Delay(DebounceDelay, pending.Cancellation.Token);
-            if (_pendingUpserts.TryRemove(key, out var current) && ReferenceEquals(current, pending))
+            if (TryRemovePendingIfSame(key, pending))
             {
                 if (!await IsSyncEnabledAsync())
                 {
                     return;
                 }
 
-                await transport.EnqueueUpsertAsync(current.Record);
+                await transport.EnqueueUpsertAsync(pending.Record);
                 await TrySendChangesAsync();
             }
         }
@@ -573,11 +581,7 @@ public sealed class CloudSyncOrchestrator(
         }
         finally
         {
-            if (_pendingUpserts.TryGetValue(key, out var current) && ReferenceEquals(current, pending))
-            {
-                _pendingUpserts.TryRemove(key, out _);
-            }
-
+            TryRemovePendingIfSame(key, pending);
             pending.Cancellation.Dispose();
         }
     }

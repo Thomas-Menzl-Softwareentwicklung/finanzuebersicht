@@ -242,23 +242,26 @@ public class CloudSyncOrchestratorTests
     [Fact]
     public async Task NotifyLocalUpsert_DebouncesRapidCalls_ToSingleEnqueue()
     {
-        var transport = new FakeCloudSyncTransport();
-        var accountRepository = Substitute.For<IAccountRepository>();
-        var first = new Account { Id = "acc-1", Name = "First", UpdatedAt = DateTime.UtcNow };
-        var second = new Account { Id = "acc-1", Name = "Second", UpdatedAt = DateTime.UtcNow };
-        accountRepository.GetAccountsAsync().Returns([first], [second]);
-        var metadataStore = CreateEnabledMetadataStore();
-        var sut = CreateSut(transport, metadataStore, accountRepository);
+        for (var i = 0; i < 50; i++)
+        {
+            var transport = new FakeCloudSyncTransport();
+            var accountRepository = Substitute.For<IAccountRepository>();
+            var first = new Account { Id = "acc-1", Name = "First", UpdatedAt = DateTime.UtcNow };
+            var second = new Account { Id = "acc-1", Name = "Second", UpdatedAt = DateTime.UtcNow };
+            accountRepository.GetAccountsAsync().Returns([first], [second]);
+            var metadataStore = CreateEnabledMetadataStore();
+            var sut = CreateSut(transport, metadataStore, accountRepository);
 
-        await sut.NotifyLocalUpsertAsync(SyncEntityType.Account, "acc-1");
-        await sut.NotifyLocalUpsertAsync(SyncEntityType.Account, "acc-1");
-        await sut.FlushPendingForTestsAsync();
+            await sut.NotifyLocalUpsertAsync(SyncEntityType.Account, "acc-1");
+            await sut.NotifyLocalUpsertAsync(SyncEntityType.Account, "acc-1");
+            await sut.FlushPendingForTestsAsync();
 
-        Assert.Single(transport.EnqueuedUpserts);
-        Assert.Equal("Second", JsonSerializer.Deserialize<Account>(transport.EnqueuedUpserts[0].PayloadJson!, PayloadJsonOptions)!.Name);
-        Assert.True(transport.SendChangesCalled);
-        Assert.Equal("EnqueueUpsert", transport.CallOrder[0]);
-        Assert.Equal("SendChanges", transport.CallOrder[1]);
+            Assert.True(transport.EnqueuedUpserts.Count == 1, $"iteration {i}: expected one enqueue, got {transport.EnqueuedUpserts.Count}");
+            Assert.Equal("Second", JsonSerializer.Deserialize<Account>(transport.EnqueuedUpserts[0].PayloadJson!, PayloadJsonOptions)!.Name);
+            Assert.True(transport.SendChangesCalled);
+            Assert.Equal("EnqueueUpsert", transport.CallOrder[0]);
+            Assert.Equal("SendChanges", transport.CallOrder[1]);
+        }
     }
 
     [Fact]
