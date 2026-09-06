@@ -58,4 +58,17 @@ public class SyncTombstoneStore : JsonDataStoreBase, ISyncTombstoneStore
             StoreLock.Release();
         }
     }
+
+    public async Task ClearAsync()
+    {
+        await StoreLock.WaitAsync();
+        try
+        {
+            await SaveAsync(TombstonesFile, new List<SyncTombstone>());
+        }
+        finally
+        {
+            StoreLock.Release();
+        }
+    }
 }

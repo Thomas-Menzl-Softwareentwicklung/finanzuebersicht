@@ -17,7 +17,7 @@
 | 1 | Device A: empty cloud, local data → enable Sync → data appears on B after enable/pull | ☐ |
 | 2 | Create / update / delete transaction on A → change appears on B | ☐ |
 | 3 | Offline edit on A, online on B, then A online → LWW by `UpdatedAt` | ☐ |
-| 4 | Both devices have local data → enable blocked (`BlockedBothHaveData`) | ☐ |
+| 4 | Both devices have local data → enable blocked; optional „iCloud übernehmen“ empties this device (backup first) and pulls | ☐ |
 | 5 | Direct build → no Sync enable UI / no Cloud Sync | ☐ |
 | 6 | OS below iOS 17 / Mac Catalyst 17 → unsupported message (if app still runs without Sync) | ☐ |
 

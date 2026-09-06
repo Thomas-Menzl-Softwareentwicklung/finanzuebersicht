@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Finanzuebersicht.Application.UseCases.Backup;
 using Finanzuebersicht.Application.UseCases.Sync;
 using Finanzuebersicht.Core.Licensing;
 using Finanzuebersicht.Core.Sync;
@@ -17,8 +18,11 @@ public partial class LicenseViewModel : ObservableObject
     private readonly IDialogService _dialogService;
     private readonly IFeedbackService _feedbackService;
     private readonly EnableCloudSyncUseCase _enableCloudSyncUseCase;
+    private readonly ClearLocalSyncedDataUseCase _clearLocalSyncedDataUseCase;
+    private readonly CreateBackupUseCase _createBackupUseCase;
     private readonly ISyncMetadataStore _syncMetadataStore;
     private readonly ICloudSyncOrchestrator _cloudSyncOrchestrator;
+    private readonly IAppEvents _appEvents;
     private bool _suppressCloudSyncToggle;
     private bool _lastKnownCloudSyncEnabled;
     private bool _metadataSyncEnabled;
@@ -31,8 +35,11 @@ public partial class LicenseViewModel : ObservableObject
         IDialogService dialogService,
         IFeedbackService feedbackService,
         EnableCloudSyncUseCase enableCloudSyncUseCase,
+        ClearLocalSyncedDataUseCase clearLocalSyncedDataUseCase,
+        CreateBackupUseCase createBackupUseCase,
         ISyncMetadataStore syncMetadataStore,
-        ICloudSyncOrchestrator cloudSyncOrchestrator)
+        ICloudSyncOrchestrator cloudSyncOrchestrator,
+        IAppEvents appEvents)
     {
         _licenseService = licenseService;
         _entitlementStore = entitlementStore;
@@ -41,8 +48,11 @@ public partial class LicenseViewModel : ObservableObject
         _dialogService = dialogService;
         _feedbackService = feedbackService;
         _enableCloudSyncUseCase = enableCloudSyncUseCase;
+        _clearLocalSyncedDataUseCase = clearLocalSyncedDataUseCase;
+        _createBackupUseCase = createBackupUseCase;
         _syncMetadataStore = syncMetadataStore;
         _cloudSyncOrchestrator = cloudSyncOrchestrator;
+        _appEvents = appEvents;
         RefreshFromService();
     }
 
@@ -234,18 +244,64 @@ public partial class LicenseViewModel : ObservableObject
         var result = await _enableCloudSyncUseCase.ExecuteAsync();
         if (result.Status == EnableCloudSyncStatus.Enabled)
         {
-            await RefreshCloudSyncFromMetadataAsync();
-            RefreshFromService();
-            await _cloudSyncOrchestrator.StartIfEnabledAsync();
-            await _cloudSyncOrchestrator.SyncNowAsync();
+            await FinishEnableCloudSyncAsync();
             return;
         }
 
         SetCloudSyncEnabledSilently(false);
+
+        if (result.Status == EnableCloudSyncStatus.BlockedBothHaveData)
+        {
+            await OfferReplaceLocalWithCloudAsync();
+            return;
+        }
+
         await _dialogService.ShowAlertAsync(
             _loc.GetString(ResourceKeys.Err_Titel),
             _loc.GetString(GetBlockedMessageKey(result.Status)),
             _loc.GetString(ResourceKeys.Btn_OK));
+    }
+
+    private async Task OfferReplaceLocalWithCloudAsync()
+    {
+        var replace = await _dialogService.ShowConfirmationAsync(
+            _loc.GetString(ResourceKeys.Sync_ReplaceLocalWithCloudTitle),
+            _loc.GetString(ResourceKeys.Sync_ReplaceLocalWithCloudMessage),
+            _loc.GetString(ResourceKeys.Sync_ReplaceLocalWithCloudAccept),
+            _loc.GetString(ResourceKeys.Btn_Abbrechen));
+        if (!replace)
+            return;
+
+        var backup = await _createBackupUseCase.ExecuteAsync();
+        if (!backup.IsSuccess)
+        {
+            await UseCaseErrorPresenter.ShowAsync(_dialogService, _loc, backup.Error!);
+            return;
+        }
+
+        await _clearLocalSyncedDataUseCase.ExecuteAsync();
+        _appEvents.NotifyDataChanged();
+
+        var result = await _enableCloudSyncUseCase.ExecuteAsync();
+        if (result.Status == EnableCloudSyncStatus.Enabled)
+        {
+            await FinishEnableCloudSyncAsync();
+            _appEvents.NotifyDataChanged();
+            return;
+        }
+
+        await _dialogService.ShowAlertAsync(
+            _loc.GetString(ResourceKeys.Err_Titel),
+            _loc.GetString(GetBlockedMessageKey(result.Status)),
+            _loc.GetString(ResourceKeys.Btn_OK));
+    }
+
+    private async Task FinishEnableCloudSyncAsync()
+    {
+        await RefreshCloudSyncFromMetadataAsync();
+        RefreshFromService();
+        await _cloudSyncOrchestrator.StartIfEnabledAsync();
+        await _cloudSyncOrchestrator.SyncNowAsync();
     }
 
     private async Task DisableCloudSyncAsync()

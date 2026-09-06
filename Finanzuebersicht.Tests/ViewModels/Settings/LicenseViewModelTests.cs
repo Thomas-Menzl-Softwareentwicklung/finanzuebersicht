@@ -1,3 +1,4 @@
+using Finanzuebersicht.Application.UseCases.Backup;
 using Finanzuebersicht.Application.UseCases.Sync;
 using Finanzuebersicht.Core.Licensing;
 using Finanzuebersicht.Core.Sync;
@@ -165,10 +166,168 @@ public class LicenseViewModelTests
         await sut.CloudSyncToggledCommand.ExecuteAsync(true);
 
         Assert.False(sut.CloudSyncEnabled);
-        await dialogService.Received(1).ShowAlertAsync(
+        await dialogService.Received(1).ShowConfirmationAsync(
+            ResourceKeys.Sync_ReplaceLocalWithCloudTitle,
+            ResourceKeys.Sync_ReplaceLocalWithCloudMessage,
+            ResourceKeys.Sync_ReplaceLocalWithCloudAccept,
+            ResourceKeys.Btn_Abbrechen);
+        await dialogService.DidNotReceive().ShowAlertAsync(
             ResourceKeys.Err_Titel,
             ResourceKeys.Sync_BlockedBothHaveData,
             ResourceKeys.Btn_OK);
+    }
+
+    [Fact]
+    public async Task EnableCloudSync_WhenBlockedBothHaveDataAndUserCancels_DoesNotClearOrBackup()
+    {
+        var license = CreateLicenseService(canUseCloudSync: true, isImplemented: true);
+        var metadataStore = Substitute.For<ISyncMetadataStore>();
+        metadataStore.GetAsync().Returns(new SyncMetadata { SyncEnabled = false });
+        var enableUseCase = CreateEnableUseCaseForBothHaveData(license, metadataStore);
+        var backupService = Substitute.For<IBackupService>();
+        var tombstoneStore = Substitute.For<ISyncTombstoneStore>();
+        var dialogService = CreateDialogService();
+        dialogService.ShowConfirmationAsync(
+            Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>())
+            .Returns(false);
+
+        var sut = CreateSut(
+            license,
+            enableUseCase,
+            metadataStore,
+            dialogService,
+            backupUseCase: new CreateBackupUseCase(backupService),
+            clearUseCase: CreateClearUseCase(tombstoneStore, metadataStore));
+
+        await sut.CloudSyncToggledCommand.ExecuteAsync(true);
+
+        await backupService.DidNotReceive().CreateBackupAsync(Arg.Any<string?>());
+        await tombstoneStore.DidNotReceive().ClearAsync();
+        Assert.False(sut.CloudSyncEnabled);
+    }
+
+    [Fact]
+    public async Task EnableCloudSync_WhenBlockedBothHaveDataAndBackupFails_DoesNotClear()
+    {
+        var license = CreateLicenseService(canUseCloudSync: true, isImplemented: true);
+        var metadataStore = Substitute.For<ISyncMetadataStore>();
+        metadataStore.GetAsync().Returns(new SyncMetadata { SyncEnabled = false });
+        var enableUseCase = CreateEnableUseCaseForBothHaveData(license, metadataStore);
+        var backupService = Substitute.For<IBackupService>();
+        backupService.CreateBackupAsync(Arg.Any<string?>())
+            .Returns<BackupMetadata>(_ => throw new InvalidOperationException("disk full"));
+        var tombstoneStore = Substitute.For<ISyncTombstoneStore>();
+        var dialogService = CreateDialogService();
+        dialogService.ShowConfirmationAsync(
+            Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>())
+            .Returns(true);
+
+        var sut = CreateSut(
+            license,
+            enableUseCase,
+            metadataStore,
+            dialogService,
+            backupUseCase: new CreateBackupUseCase(backupService),
+            clearUseCase: CreateClearUseCase(tombstoneStore, metadataStore));
+
+        await sut.CloudSyncToggledCommand.ExecuteAsync(true);
+
+        await tombstoneStore.DidNotReceive().ClearAsync();
+        Assert.False(sut.CloudSyncEnabled);
+        await dialogService.Received().ShowAlertAsync(
+            Arg.Any<string>(),
+            Arg.Any<string>(),
+            Arg.Any<string>());
+    }
+
+    [Fact]
+    public async Task EnableCloudSync_WhenBlockedBothHaveDataAndUserAccepts_BacksUpClearsAndEnables()
+    {
+        var license = CreateLicenseService(canUseCloudSync: true, isImplemented: true);
+        var metadata = new SyncMetadata { SyncEnabled = false };
+        var metadataStore = Substitute.For<ISyncMetadataStore>();
+        metadataStore.GetAsync().Returns(metadata);
+
+        var accounts = new List<Account> { new() { Id = "acc-1", Name = "Giro" } };
+        var accountRepository = Substitute.For<IAccountRepository>();
+        accountRepository.GetAccountsAsync().Returns(_ => accounts.ToList());
+        accountRepository
+            .When(r => r.ReplaceAllAccountsAsync(Arg.Any<IEnumerable<Account>>()))
+            .Do(call =>
+            {
+                accounts.Clear();
+                accounts.AddRange(call.Arg<IEnumerable<Account>>());
+            });
+
+        var transport = Substitute.For<ICloudSyncTransport>();
+        transport.IsSupported.Returns(true);
+        transport.GetAccountStatusAsync(Arg.Any<CancellationToken>())
+            .Returns(CloudSyncAccountStatus.Available);
+        transport.IsZoneEmptyAsync(Arg.Any<CancellationToken>()).Returns(false);
+
+        var categoryRepository = Substitute.For<ICategoryRepository>();
+        categoryRepository.GetCategoriesAsync().Returns([]);
+        var transactionRepository = Substitute.For<ITransactionRepository>();
+        transactionRepository.GetAllTransactionsAsync(Arg.Any<CancellationToken>()).Returns([]);
+        var recurringRepository = Substitute.For<IRecurringTransactionRepository>();
+        recurringRepository.GetRecurringTransactionsAsync().Returns([]);
+        var sparZielRepository = Substitute.For<ISparZielRepository>();
+        sparZielRepository.GetSparZieleAsync().Returns([]);
+        var budgetRepository = Substitute.For<IBudgetRepository>();
+        budgetRepository.GetBudgetsAsync().Returns([]);
+        var templateRepository = Substitute.For<ITransactionTemplateRepository>();
+        templateRepository.GetTransactionTemplatesAsync().Returns([]);
+        var tombstoneStore = Substitute.For<ISyncTombstoneStore>();
+
+        var enableUseCase = new EnableCloudSyncUseCase(
+            transport,
+            metadataStore,
+            accountRepository,
+            categoryRepository,
+            transactionRepository,
+            recurringRepository,
+            sparZielRepository,
+            license);
+        var clearUseCase = new ClearLocalSyncedDataUseCase(
+            accountRepository,
+            categoryRepository,
+            transactionRepository,
+            recurringRepository,
+            sparZielRepository,
+            budgetRepository,
+            templateRepository,
+            tombstoneStore,
+            metadataStore);
+
+        var backupService = Substitute.For<IBackupService>();
+        backupService.CreateBackupAsync(Arg.Any<string?>()).Returns(new BackupMetadata { Id = "b1" });
+        var dialogService = CreateDialogService();
+        dialogService.ShowConfirmationAsync(
+            Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>())
+            .Returns(true);
+        var orchestrator = Substitute.For<ICloudSyncOrchestrator>();
+        var appEvents = Substitute.For<IAppEvents>();
+
+        var sut = CreateSut(
+            license,
+            enableUseCase,
+            metadataStore,
+            dialogService,
+            orchestrator: orchestrator,
+            backupUseCase: new CreateBackupUseCase(backupService),
+            clearUseCase: clearUseCase,
+            appEvents: appEvents);
+
+        await sut.CloudSyncToggledCommand.ExecuteAsync(true);
+
+        await backupService.Received(1).CreateBackupAsync(Arg.Any<string?>());
+        await tombstoneStore.Received(1).ClearAsync();
+        Assert.True(metadata.SyncEnabled);
+        Assert.True(sut.CloudSyncEnabled);
+        await orchestrator.Received(1).StartIfEnabledAsync(Arg.Any<CancellationToken>());
+        await orchestrator.Received(1).SyncNowAsync(Arg.Any<CancellationToken>());
+        appEvents.Received().NotifyDataChanged();
+        await transport.Received().ResetEngineStateAsync(Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -219,8 +378,12 @@ public class LicenseViewModelTests
         ICloudSyncOrchestrator? orchestrator = null,
         IStoreBillingService? billing = null,
         ILicenseEntitlementStore? entitlementStore = null,
-        IFeedbackService? feedback = null)
+        IFeedbackService? feedback = null,
+        CreateBackupUseCase? backupUseCase = null,
+        ClearLocalSyncedDataUseCase? clearUseCase = null,
+        IAppEvents? appEvents = null)
     {
+        var metadata = metadataStore ?? Substitute.For<ISyncMetadataStore>();
         return new LicenseViewModel(
             license,
             entitlementStore ?? Substitute.For<ILicenseEntitlementStore>(),
@@ -231,8 +394,11 @@ public class LicenseViewModelTests
             enableUseCase ?? CreateEnableUseCaseForSuccess(
                 Substitute.For<ISyncMetadataStore>(),
                 license),
-            metadataStore ?? Substitute.For<ISyncMetadataStore>(),
-            orchestrator ?? Substitute.For<ICloudSyncOrchestrator>());
+            clearUseCase ?? CreateClearUseCase(Substitute.For<ISyncTombstoneStore>(), metadata),
+            backupUseCase ?? new CreateBackupUseCase(Substitute.For<IBackupService>()),
+            metadata,
+            orchestrator ?? Substitute.For<ICloudSyncOrchestrator>(),
+            appEvents ?? Substitute.For<IAppEvents>());
     }
 
     private static ILicenseService CreateLicenseService(bool canUseCloudSync, bool isImplemented)
@@ -251,7 +417,38 @@ public class LicenseViewModelTests
         var dialogService = Substitute.For<IDialogService>();
         dialogService.ShowAlertAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>())
             .Returns(Task.CompletedTask);
+        dialogService.ShowConfirmationAsync(
+            Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>())
+            .Returns(false);
         return dialogService;
+    }
+
+    private static ClearLocalSyncedDataUseCase CreateClearUseCase(
+        ISyncTombstoneStore tombstoneStore,
+        ISyncMetadataStore metadataStore)
+    {
+        var accounts = Substitute.For<IAccountRepository>();
+        accounts.GetAccountsAsync().Returns([]);
+        var categories = Substitute.For<ICategoryRepository>();
+        categories.GetCategoriesAsync().Returns([]);
+        var transactions = Substitute.For<ITransactionRepository>();
+        var recurring = Substitute.For<IRecurringTransactionRepository>();
+        var sparZiele = Substitute.For<ISparZielRepository>();
+        var budgets = Substitute.For<IBudgetRepository>();
+        budgets.GetBudgetsAsync().Returns([]);
+        var templates = Substitute.For<ITransactionTemplateRepository>();
+        templates.GetTransactionTemplatesAsync().Returns([]);
+
+        return new ClearLocalSyncedDataUseCase(
+            accounts,
+            categories,
+            transactions,
+            recurring,
+            sparZiele,
+            budgets,
+            templates,
+            tombstoneStore,
+            metadataStore);
     }
 
     private static ILocalizationService CreateLocalizationService()

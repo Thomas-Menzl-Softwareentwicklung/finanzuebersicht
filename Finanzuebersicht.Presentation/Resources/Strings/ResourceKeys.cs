@@ -164,6 +164,9 @@ public static class ResourceKeys
     public const string Sync_BlockedNoEntitlement = nameof(Sync_BlockedNoEntitlement);
     public const string Sync_BlockedUnsupported = nameof(Sync_BlockedUnsupported);
     public const string Sync_BlockedNoICloud = nameof(Sync_BlockedNoICloud);
+    public const string Sync_ReplaceLocalWithCloudTitle = nameof(Sync_ReplaceLocalWithCloudTitle);
+    public const string Sync_ReplaceLocalWithCloudMessage = nameof(Sync_ReplaceLocalWithCloudMessage);
+    public const string Sync_ReplaceLocalWithCloudAccept = nameof(Sync_ReplaceLocalWithCloudAccept);
 
     // Confirmation Dialogs
     public const string Dlg_KategorieLoeschen = nameof(Dlg_KategorieLoeschen);

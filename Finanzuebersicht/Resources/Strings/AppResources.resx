@@ -173,6 +173,9 @@
   <data name="Sync_BlockedNoEntitlement" xml:space="preserve"><value>Cloud Sync requires an active Sync subscription.</value></data>
   <data name="Sync_BlockedUnsupported" xml:space="preserve"><value>Cloud Sync is not supported on this device or OS version.</value></data>
   <data name="Sync_BlockedNoICloud" xml:space="preserve"><value>Sign in to iCloud in System Settings and enable iCloud Drive to use Cloud Sync.</value></data>
+  <data name="Sync_ReplaceLocalWithCloudTitle" xml:space="preserve"><value>Replace data on this device?</value></data>
+  <data name="Sync_ReplaceLocalWithCloudMessage" xml:space="preserve"><value>This device and iCloud both contain data. A backup will be created, then the data on this device will be deleted and replaced with the iCloud copy. iCloud is not changed.</value></data>
+  <data name="Sync_ReplaceLocalWithCloudAccept" xml:space="preserve"><value>Use iCloud data</value></data>
 
   <!-- Confirmation Dialogs -->
   <data name="Dlg_KategorieLoeschen" xml:space="preserve"><value>Delete Category</value></data>

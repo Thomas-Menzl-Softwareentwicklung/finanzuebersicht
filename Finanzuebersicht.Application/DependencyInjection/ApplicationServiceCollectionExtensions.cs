@@ -86,6 +86,7 @@ public static class ApplicationServiceCollectionExtensions
         services.AddTransient<SeedScreenshotDemoDataUseCase>();
 
         services.AddTransient<EnableCloudSyncUseCase>();
+        services.AddTransient<ClearLocalSyncedDataUseCase>();
         services.AddSingleton<ICloudSyncOrchestrator, CloudSyncOrchestrator>();
 
         services.AddSingleton<InitializationService>();

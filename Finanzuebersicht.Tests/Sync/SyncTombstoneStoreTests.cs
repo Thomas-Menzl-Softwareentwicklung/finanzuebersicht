@@ -79,4 +79,19 @@ public class SyncTombstoneStoreTests : IDisposable
         Assert.Single(all);
         Assert.Equal("cat-2", all[0].Id);
     }
+
+    [Fact]
+    public async Task ClearAsync_RemovesAllTombstones()
+    {
+        await _store.UpsertAsync(new SyncTombstone
+        {
+            EntityType = SyncEntityType.Transaction,
+            Id = "tx-1",
+            DeletedAt = DateTime.UtcNow
+        });
+
+        await _store.ClearAsync();
+
+        Assert.Empty(await _store.GetAllAsync());
+    }
 }
