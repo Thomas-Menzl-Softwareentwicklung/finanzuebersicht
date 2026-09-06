@@ -65,12 +65,24 @@ build_one() {
 build_one iphoneos arm64-apple-ios15.0 Release-iphoneos
 build_one iphonesimulator arm64-apple-ios15.0-simulator Release-iphonesimulator
 
-# Mac Catalyst: iOS triple with the -macabi environment, compiled against the macOS SDK's
+# Mac Catalyst: iOS triples with the -macabi environment, compiled against the macOS SDK's
 # iOSSupport overlay (that is where the Catalyst flavour of CloudKit lives).
+# Fat .a so Release Store packages and Intel Debug (maccatalyst-x64) can both link.
 MACOSX_SDK_PATH="$(xcrun --sdk macosx --show-sdk-path)"
-build_one macosx arm64-apple-ios15.0-macabi Release-maccatalyst \
-  -I "$MACOSX_SDK_PATH/System/iOSSupport/usr/lib/swift" \
-  -F "$MACOSX_SDK_PATH/System/iOSSupport/System/Library/Frameworks" \
+MACABI_SWIFT_ARGS=(
+  -I "$MACOSX_SDK_PATH/System/iOSSupport/usr/lib/swift"
+  -F "$MACOSX_SDK_PATH/System/iOSSupport/System/Library/Frameworks"
   -L "$MACOSX_SDK_PATH/System/iOSSupport/usr/lib/swift"
+)
+build_one macosx arm64-apple-ios15.0-macabi Release-maccatalyst-arm64 "${MACABI_SWIFT_ARGS[@]}"
+build_one macosx x86_64-apple-ios15.0-macabi Release-maccatalyst-x64 "${MACABI_SWIFT_ARGS[@]}"
+
+FAT_DIR="$OUT_ROOT/Release-maccatalyst"
+mkdir -p "$FAT_DIR"
+lipo -create \
+  "$OUT_ROOT/Release-maccatalyst-arm64/libCloudKitSyncBridge.a" \
+  "$OUT_ROOT/Release-maccatalyst-x64/libCloudKitSyncBridge.a" \
+  -output "$FAT_DIR/libCloudKitSyncBridge.a"
+echo "Staged fat $FAT_DIR/libCloudKitSyncBridge.a ($(lipo -info "$FAT_DIR/libCloudKitSyncBridge.a"))"
 
 echo "Done. MAUI links via NativeReference (ForceLoad) + P/Invoke __Internal."

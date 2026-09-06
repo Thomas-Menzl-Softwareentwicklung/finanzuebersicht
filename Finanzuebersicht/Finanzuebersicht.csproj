@@ -64,6 +64,10 @@
 
 		<!-- Disable ILLink completely to avoid MT2301/NETSDK1144 crash -->
 		<MtouchLink>SdkOnly</MtouchLink>
+		<!-- Mac App Store / TestFlight reject arm64-only. Release without a singular
+		     RuntimeIdentifier builds both Intel and Apple Silicon. Do not pass
+		     -p:RuntimeIdentifier=maccatalyst-arm64 for Store publish. -->
+		<RuntimeIdentifiers Condition="'$(Configuration)' == 'Release' AND $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst' AND '$(RuntimeIdentifier)' == ''">maccatalyst-x64;maccatalyst-arm64</RuntimeIdentifiers>
 		<UserDialogs>false</UserDialogs>
 		<!-- Ensure UseInterpreter is true if link is None, though usually implied for Debug -->
 		<UseInterpreter Condition="'$(Configuration)' == 'Debug'">true</UseInterpreter>
@@ -184,7 +188,7 @@
 		</NativeReference>
 	</ItemGroup>
 
-	<!-- Mac Catalyst shares the Swift source (arm64-apple-ios*-macabi slice) and the C# transport. -->
+	<!-- Mac Catalyst shares the Swift source (fat arm64+x86_64 macabi .a) and the C# transport. -->
 	<ItemGroup Condition="$(TargetFramework.Contains('-maccatalyst'))">
 		<NativeReference Include="Platforms/iOS/Native/lib/Release-maccatalyst/libCloudKitSyncBridge.a">
 			<Kind>Static</Kind>

@@ -24,7 +24,7 @@ Output (gitignored):
 
 - `lib/Release-iphoneos/libCloudKitSyncBridge.a`
 - `lib/Release-iphonesimulator/libCloudKitSyncBridge.a`
-- `lib/Release-maccatalyst/libCloudKitSyncBridge.a`
+- `lib/Release-maccatalyst/libCloudKitSyncBridge.a` (fat: `arm64` + `x86_64` macabi)
 
 MAUI runs this script automatically on iOS / Mac Catalyst builds. Skip when the `.a` slices are already present:
 
