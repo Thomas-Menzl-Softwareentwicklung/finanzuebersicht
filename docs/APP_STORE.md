@@ -19,7 +19,7 @@ Monetarisierung: [`MONETIZATION.md`](MONETIZATION.md).
 | License-Gates Free/Pro/Sync | vorhanden |
 | StoreKit (Pro kaufen / Restore) | vorhanden (Store-Build, iOS/Mac Catalyst) |
 | License-Stub-UI (Dev-Toggles) | nur Debug; Release ignoriert Stub-Entitlements |
-| Sync-IAP Verkauf | **später** (ASC-Entscheidung; Engine im Store-Binary, `IsCloudSyncImplemented` = `true` auf unterstützten Store-Apple-Builds) |
+| Sync-IAP Verkauf | **1.21:** Engine + Listing + Privacy-Site; Verkauf nach ASC-Freigabe (`IsCloudSyncImplemented` = `true` auf unterstützten Store-Apple-Builds) |
 | App Store Connect App + Zertifikate | **manuell** |
 | TestFlight IPA Upload | **manuell auf dem Mac** |
 | Store-Screenshots | Automatisierung lokal (`fastlane snapshot`) — siehe [Screenshot-Automatisierung](#screenshot-automatisierung) |
@@ -32,7 +32,7 @@ Monetarisierung: [`MONETIZATION.md`](MONETIZATION.md).
 | Finanzübersicht Pro | Non-Consumable | `de.thomasmenzl.finanzuebersicht.pro` |
 | Finanzübersicht Sync | Auto-Renewable (1 Jahr) | `de.thomasmenzl.finanzuebersicht.sync.yearly` |
 
-Sync-Engine ist im Store-Apple-Binary (`IsCloudSyncImplemented = true` bei Store + iOS 17 / Mac Catalyst 17). **Jahresabo-Verkauf** und öffentliche Privacy-/Support-Texte erst nach ASC-Freigabe — nicht als bereits käuflich kommunizieren. Manuelle Zwei-Geräte-QA vor Issue-Schließung: [`docs/CLOUDKIT_SYNC_QA.md`](CLOUDKIT_SYNC_QA.md). **Privacy / Nutzerkommunikation (wenn Sync verkauft wird):** Sync ist **opt-in**; Finanzdaten liegen in der **privaten iCloud** des Nutzers (kein eigener Sync-Server von Finanzübersicht). Technik: `Finanzuebersicht/Platforms/iOS/Native/README-CloudKitSync.md`.
+Sync-Engine ist im Store-Apple-Binary (`IsCloudSyncImplemented = true` bei Store + iOS 17 / Mac Catalyst 17). Listing (DE/EN) und öffentliche Privacy-/Support-Seiten beschreiben optionales iCloud-Sync; das Jahresabo ist erst nach ASC-Freigabe von **1.21** im Store käuflich. Manuelle Zwei-Geräte-QA vor Issue-Schließung: [`docs/CLOUDKIT_SYNC_QA.md`](CLOUDKIT_SYNC_QA.md). Sync ist **opt-in**; Finanzdaten liegen in der **privaten iCloud** des Nutzers (kein eigener Sync-Server von Finanzübersicht). Technik: `Finanzuebersicht/Platforms/iOS/Native/README-CloudKitSync.md`.
 
 ## 1. Apple Developer + App Store Connect
 
@@ -42,7 +42,7 @@ Sync-Engine ist im Store-Apple-Binary (`IsCloudSyncImplemented = true` bei Store
 4. ASC: iOS-App anlegen (gleiche Bundle-ID).
 5. ASC → Monetization → In-App Purchases:
    - Pro (Non-Consumable), Preis z. B. 5,99 €
-   - optional Sync (Auto-Renewable Yearly) für später
+   - Sync (Auto-Renewable Yearly), unabhängig von Pro
 6. Sandbox-Tester unter Users and Access → Sandbox.
 
 ## 2. Legal-URLs
@@ -138,7 +138,7 @@ Erstversion: `deliver` crasht sonst beim Laden eines noch nicht existierenden Re
 
 ## Feature-Gates
 
-Siehe `MONETIZATION.md`. Kurz: Direct = immer Pro, kein Sync. Store = Free-Limits + Pro-IAP; Sync-Abo später ohne Pro-Pflicht.
+Siehe `MONETIZATION.md`. Kurz: Direct = immer Pro, kein Sync. Store = Free-Limits + Pro-IAP; optionales Sync-Jahresabo ohne Pro-Pflicht.
 
 ## Screenshot-Automatisierung
 
