@@ -1,15 +1,17 @@
 using System.Linq;
 using System.Collections.Generic;
+using Finanzuebersicht.Application.UseCases.Sync;
+using Finanzuebersicht.Core.Sync;
 using Finanzuebersicht.Models;
 
 namespace Finanzuebersicht.Application.UseCases.RecurringTransactions;
 
-public class AddRecurringExceptionUseCase
-(
-    IRecurringTransactionRepository recurringTransactionRepository
-)
+public class AddRecurringExceptionUseCase(
+    IRecurringTransactionRepository recurringTransactionRepository,
+    ICloudSyncOrchestrator? cloudSyncOrchestrator = null)
 {
     private readonly IRecurringTransactionRepository _recurringTransactionRepository = recurringTransactionRepository;
+    private readonly ICloudSyncOrchestrator? _cloudSyncOrchestrator = cloudSyncOrchestrator;
 
     public async Task ExecuteAsync(string recurringTransactionId, RecurringException exception, CancellationToken cancellationToken = default)
     {
@@ -21,7 +23,6 @@ public class AddRecurringExceptionUseCase
         var existing = recurring.Exceptions.FirstOrDefault(e => e.InstanceDate.Date == exception.InstanceDate.Date);
         if (existing != null)
         {
-            // replace/merge existing exception for the same instance date
             existing.Type = exception.Type;
             existing.ShiftToDate = exception.ShiftToDate;
             existing.Note = exception.Note;
@@ -31,6 +32,13 @@ public class AddRecurringExceptionUseCase
         {
             recurring.Exceptions.Add(exception);
         }
+
+        CloudSyncNotify.StampUpdatedAt(recurring);
         await _recurringTransactionRepository.SaveRecurringTransactionAsync(recurring);
+        await CloudSyncNotify.NotifyUpsertAsync(
+            _cloudSyncOrchestrator,
+            SyncEntityType.RecurringTransaction,
+            recurring.Id,
+            cancellationToken);
     }
 }

@@ -4,7 +4,7 @@
 
 > **Hinweis:** Die Milestone-Bezeichnungen (v1.14, v1.2, v2.0) sind thematische GitHub-Planungslabels, keine sequenziellen Release-Versionen. Tatsächliche Releases (v1.0, v1.6, v1.12 …) werden durch Git-Commit-Höhe via Nerdbank.GitVersioning bestimmt.
 
-**Aktueller Stand:** Release **v1.20** (Latest). Architektur-Fundament ([Milestone 24](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/milestone/24)) und Create-UX-Modal-Sheets sind enthalten. Als Nächstes: Feature-Ideen (**[Milestone 22](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/milestone/22)**), dann **v2.0** (Verschlüsselung, echte Mehrwährung).
+**Aktueller Stand:** TestFlight-Linie **v1.21** (CloudKit-Sync #243). App-Store-Release **v1.20** bleibt Latest. Als Nächstes: Feature-Ideen (**[Milestone 22](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/milestone/22)**), dann **v2.0** (Verschlüsselung, echte Mehrwährung).
 
 ---
 
@@ -183,7 +183,7 @@ Größere Produkt-Features. Sync/Open Banking setzen idealerweise #300 (und stab
 | [#242](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/242) | Home-Screen-Widget Anzeige (iOS / macOS) | L |
 | — | Interaktives iOS-Widget (Pro) + In-App Schnellerfassung (Free) | ✅ (iOS-Widget + Inbox; Mac/Windows nur In-App „Schnell“) |
 | [#244](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/244) | Daueraufträge mit variablem Betrag | M |
-| [#243](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/243) | CloudKit-Sync zwischen Geräten | XL |
+| [#243](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/243) | CloudKit-Sync zwischen Geräten — MVP im Tree; Zwei-Geräte-QA offen ([`CLOUDKIT_SYNC_QA.md`](CLOUDKIT_SYNC_QA.md)) | XL |
 | [#245](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/245) | Open Banking / automatischer Bank-Import | XL |
 | [#258](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/258) | Dashboard-Kacheln individuell anordnen (Idee) | M |
 

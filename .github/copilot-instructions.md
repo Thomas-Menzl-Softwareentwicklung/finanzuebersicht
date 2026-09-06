@@ -10,7 +10,7 @@ Personal finance app built with **.NET 10** and **.NET MAUI**, targeting **macOS
 Data is persisted locally as JSON. Architecture: **Clean Architecture + MVVM**.
 Languages: **German and English** (`AppResources.resx` / `AppResources.de.resx`).
 
-Current version baseline: `version.json` → `1.20` (patch = git height via Nerdbank.GitVersioning).
+Current version baseline: `version.json` → `1.21` (patch = git height via Nerdbank.GitVersioning).
 
 ## Build & Run
 
@@ -120,9 +120,9 @@ Layered clean architecture with MVVM (`CommunityToolkit.Mvvm` source generators)
 ### Other
 - Sparziele with transaction linking and completion forecast
 - Backup/restore (ZIP/JSON), configurable data path
-- CloudKit sync is a backlog idea (#243); no active CloudKit implementation in tree
+- CloudKit Sync MVP (#243) is **in tree**: private CloudKit zone `finanzuebersicht-sync`, LWW + tombstones, Settings iCloud-Sync switch (Store + Sync IAP + iOS 17 / Mac Catalyst 17). Direct/Windows: `NullCloudSyncTransport`. Opt-in; user’s private iCloud; no first-party sync server. Native bridge: `Platforms/iOS/Native/README-CloudKitSync.md`. **#243 stays open** until two-device QA passes (`docs/CLOUDKIT_SYNC_QA.md`). Known gaps: `RecurringGenerationService` bypasses orchestrator notify (instance ids not stable across devices); Mac Catalyst Debug lacks iCloud entitlements; no live CloudKit smoke test on branch yet. Schema pause: newer cloud `schemaVersion` stops apply/upload and surfaces `Sync_Error`.
 - Architecture milestone **v1.20** (#274–#300) is **done**. Active focus: Milestone 22 product backlog (`docs/ROADMAP.md`) before v2.0.
-- Sync prep (#300 ✅): optional `ExternalId` / `Source` / `UpdatedAt` on Account, Transaction, Category, RecurringTransaction, SparZiel — no sync pipeline or UI yet. Known source constants: `EntitySources`. CloudKit (#243) remains backlog-only.
+- Sync prep (#300 ✅): `ExternalId` / `Source` / `UpdatedAt` on Account, Transaction, Category, RecurringTransaction, SparZiel. Known source constants: `EntitySources`.
 
 ## Data Persistence
 
@@ -170,7 +170,7 @@ In-app **Schnell** sheet (`CaptureQuickExpenseUseCase`, Unkategorisiert + defaul
 
 Automatic **SemVer** via **Nerdbank.GitVersioning** (`version.json`):
 
-- Version = `<major>.<minor>.<git-height>` (e.g. `1.20.5`)
+- Version = `<major>.<minor>.<git-height>` (e.g. `1.21.1`)
 - Bump: edit `version.json` or `nbgv set-version <version>`
 - Current: `nbgv get-version`
 - Stable releases: `main` and `release/v*` branches

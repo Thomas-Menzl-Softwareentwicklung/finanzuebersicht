@@ -13,13 +13,13 @@ Monetarisierung: [`MONETIZATION.md`](MONETIZATION.md).
 | Bundle ID `de.thomasmenzl.finanzuebersicht` | vorhanden |
 | iPhone + iPad | vorhanden |
 | Privacy Manifest + Export Compliance | gesetzt |
-| iOS Release-Entitlements (ohne `get-task-allow`) | gesetzt (inkl. App Group für Quick-Expense-Widget) |
+| iOS Release-Entitlements (ohne `get-task-allow`) | gesetzt (App Group für Quick-Expense-Widget; **iCloud CloudKit** + **Push** für Sync #243) |
 | Quick Expense Widget (Pro); In-App Schnell Free | ✅ In-App alle Targets; WidgetKit-`.appex` eingebettet — `Platforms/iOS/Widgets/README.md` |
 | Support / Privacy Site | eigenes Repo `finanzuebersicht-site` |
 | License-Gates Free/Pro/Sync | vorhanden |
 | StoreKit (Pro kaufen / Restore) | vorhanden (Store-Build, iOS/Mac Catalyst) |
 | License-Stub-UI (Dev-Toggles) | nur Debug; Release ignoriert Stub-Entitlements |
-| Sync-IAP Verkauf | **später** (CloudKit #243) |
+| Sync-IAP Verkauf | **später** (ASC-Entscheidung; Engine im Store-Binary, `IsCloudSyncImplemented` = `true` auf unterstützten Store-Apple-Builds) |
 | App Store Connect App + Zertifikate | **manuell** |
 | TestFlight IPA Upload | **manuell auf dem Mac** |
 | Store-Screenshots | Automatisierung lokal (`fastlane snapshot`) — siehe [Screenshot-Automatisierung](#screenshot-automatisierung) |
@@ -32,11 +32,11 @@ Monetarisierung: [`MONETIZATION.md`](MONETIZATION.md).
 | Finanzübersicht Pro | Non-Consumable | `de.thomasmenzl.finanzuebersicht.pro` |
 | Finanzübersicht Sync | Auto-Renewable (1 Jahr) | `de.thomasmenzl.finanzuebersicht.sync.yearly` |
 
-Sync in der UI noch nicht verkaufen (`IsCloudSyncImplemented = false`). Product trotzdem in ASC anlegen, sobald Sync kommt — oder erst bei #243.
+Sync-Engine ist im Store-Apple-Binary (`IsCloudSyncImplemented = true` bei Store + iOS 17 / Mac Catalyst 17). **Jahresabo-Verkauf** und öffentliche Privacy-/Support-Texte erst nach ASC-Freigabe — nicht als bereits käuflich kommunizieren. Manuelle Zwei-Geräte-QA vor Issue-Schließung: [`docs/CLOUDKIT_SYNC_QA.md`](CLOUDKIT_SYNC_QA.md). **Privacy / Nutzerkommunikation (wenn Sync verkauft wird):** Sync ist **opt-in**; Finanzdaten liegen in der **privaten iCloud** des Nutzers (kein eigener Sync-Server von Finanzübersicht). Technik: `Finanzuebersicht/Platforms/iOS/Native/README-CloudKitSync.md`.
 
 ## 1. Apple Developer + App Store Connect
 
-1. App ID `de.thomasmenzl.finanzuebersicht` (Capabilities: In-App Purchase; **App Groups** `group.de.thomasmenzl.finanzuebersicht` für Quick-Expense-Widget; iCloud erst für Sync).
+1. App ID `de.thomasmenzl.finanzuebersicht` (Capabilities: In-App Purchase; **App Groups** `group.de.thomasmenzl.finanzuebersicht` für Quick-Expense-Widget; **iCloud (CloudKit)** mit Container `iCloud.de.thomasmenzl.finanzuebersicht`. Push Notifications für CKSyncEngine sind **nicht** verdrahtet und derzeit nicht in den Entitlements — nur Haupt-App, nicht die Widget-Extension).
 2. Zertifikate: **Apple Development** + **Apple Distribution**.
 3. Profiles: Development + **App Store**.
 4. ASC: iOS-App anlegen (gleiche Bundle-ID).

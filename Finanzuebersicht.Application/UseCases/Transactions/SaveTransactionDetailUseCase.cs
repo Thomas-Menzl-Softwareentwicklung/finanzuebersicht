@@ -1,15 +1,19 @@
 using Finanzuebersicht.Application.Results;
+using Finanzuebersicht.Application.UseCases.Sync;
 using Finanzuebersicht.Constants;
+using Finanzuebersicht.Core.Sync;
 using Finanzuebersicht.Models;
 
 namespace Finanzuebersicht.Application.UseCases.Transactions;
 
 public class SaveTransactionDetailUseCase(
     ITransactionRepository transactionRepository,
-    IAccountRepository accountRepository)
+    IAccountRepository accountRepository,
+    ICloudSyncOrchestrator? cloudSyncOrchestrator = null)
 {
     private readonly ITransactionRepository _transactionRepository = transactionRepository;
     private readonly IAccountRepository _accountRepository = accountRepository;
+    private readonly ICloudSyncOrchestrator? _cloudSyncOrchestrator = cloudSyncOrchestrator;
 
     public async Task<UseCaseResult> ExecuteAsync(
         Transaction? existingTransaction,
@@ -46,8 +50,14 @@ public class SaveTransactionDetailUseCase(
         transaction.Typ = typ;
         transaction.Verwendungszweck = verwendungszweck ?? string.Empty;
         transaction.SparZielId = string.IsNullOrWhiteSpace(sparZielId) ? null : sparZielId;
+        CloudSyncNotify.StampUpdatedAt(transaction);
 
         await _transactionRepository.SaveTransactionAsync(transaction);
+        await CloudSyncNotify.NotifyUpsertAsync(
+            _cloudSyncOrchestrator,
+            SyncEntityType.Transaction,
+            transaction.Id,
+            cancellationToken);
         return UseCaseResult.Ok();
     }
 

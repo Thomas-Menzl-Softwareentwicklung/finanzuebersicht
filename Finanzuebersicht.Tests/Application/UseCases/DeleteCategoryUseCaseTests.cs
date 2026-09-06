@@ -1,4 +1,6 @@
 using Finanzuebersicht.Application.UseCases.Categories;
+using Finanzuebersicht.Application.UseCases.Sync;
+using Finanzuebersicht.Core.Sync;
 using Finanzuebersicht.Models;
 using NSubstitute;
 
@@ -6,6 +8,47 @@ namespace Finanzuebersicht.Tests.Application.UseCases;
 
 public class DeleteCategoryUseCaseTests
 {
+    [Fact]
+    public async Task ExecuteAsync_NotifiesRemappedTransactionsAndRecurring()
+    {
+        var categoryRepository = Substitute.For<ICategoryRepository>();
+        var transactionRepository = Substitute.For<ITransactionRepository>();
+        var recurringRepository = Substitute.For<IRecurringTransactionRepository>();
+        categoryRepository.GetCategoriesAsync().Returns(new List<Category>
+        {
+            new() { Id = "cat-delete", Name = "Zu löschen" },
+            new() { Id = "cat-default", Name = "Sonstiges", SystemKey = Finanzuebersicht.Constants.SystemCategoryKeys.Sonstiges }
+        });
+        transactionRepository.GetAllTransactionsAsync(Arg.Any<CancellationToken>())
+            .Returns([
+                new Transaction { Id = "tx-1", KategorieId = "cat-delete" },
+                new Transaction { Id = "tx-2", KategorieId = "cat-default" }
+            ]);
+        transactionRepository.RemapCategoryIdAsync("cat-delete", "cat-default", Arg.Any<CancellationToken>())
+            .Returns(1);
+        recurringRepository.GetRecurringTransactionsAsync().Returns(new List<RecurringTransaction>
+        {
+            new() { Id = "r-1", KategorieId = "cat-delete" },
+            new() { Id = "r-2", KategorieId = "cat-other" }
+        });
+
+        var orchestrator = Substitute.For<ICloudSyncOrchestrator>();
+        var sut = new DeleteCategoryUseCase(categoryRepository, transactionRepository, recurringRepository, orchestrator);
+
+        await sut.ExecuteAsync("cat-delete");
+
+        await orchestrator.Received(1).NotifyLocalUpsertAsync(
+            SyncEntityType.Transaction, "tx-1", Arg.Any<CancellationToken>());
+        await orchestrator.DidNotReceive().NotifyLocalUpsertAsync(
+            SyncEntityType.Transaction, "tx-2", Arg.Any<CancellationToken>());
+        await orchestrator.Received(1).NotifyLocalUpsertAsync(
+            SyncEntityType.RecurringTransaction, "r-1", Arg.Any<CancellationToken>());
+        await orchestrator.DidNotReceive().NotifyLocalUpsertAsync(
+            SyncEntityType.RecurringTransaction, "r-2", Arg.Any<CancellationToken>());
+        await orchestrator.Received(1).NotifyLocalDeleteAsync(
+            SyncEntityType.Category, "cat-delete", Arg.Any<CancellationToken>());
+    }
+
     [Fact]
     public async Task ExecuteAsync_RemapsTransactionsAndRecurringToFallbackBeforeDelete()
     {
@@ -19,6 +62,7 @@ public class DeleteCategoryUseCaseTests
         });
         transactionRepository.RemapCategoryIdAsync("cat-delete", "cat-default", Arg.Any<CancellationToken>())
             .Returns(1);
+        transactionRepository.GetAllTransactionsAsync(Arg.Any<CancellationToken>()).Returns([]);
         recurringRepository.GetRecurringTransactionsAsync().Returns(new List<RecurringTransaction>
         {
             new() { Id = "r-1", KategorieId = "cat-delete" },
@@ -47,6 +91,7 @@ public class DeleteCategoryUseCaseTests
         });
         transactionRepository.RemapCategoryIdAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns(1);
+        transactionRepository.GetAllTransactionsAsync(Arg.Any<CancellationToken>()).Returns([]);
         recurringRepository.GetRecurringTransactionsAsync().Returns(new List<RecurringTransaction>());
 
         var sut = new DeleteCategoryUseCase(categoryRepository, transactionRepository, recurringRepository);

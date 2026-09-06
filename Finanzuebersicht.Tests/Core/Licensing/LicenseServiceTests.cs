@@ -6,7 +6,8 @@ namespace Finanzuebersicht.Tests.Core.Licensing;
 
 public class LicenseServiceTests
 {
-    private static (LicenseService Sut, LicenseEntitlementStore Store) CreateStoreSut()
+    private static (LicenseService Sut, LicenseEntitlementStore Store) CreateStoreSut(
+        Func<bool>? isCloudSyncFeatureAvailable = null)
     {
         var bag = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         var settings = Substitute.For<ISettingsService>();
@@ -21,7 +22,8 @@ public class LicenseServiceTests
             allowEntitlementStubs: true);
         var sut = new LicenseService(
             new FixedDistributionChannelProvider(DistributionChannel.Store),
-            store);
+            store,
+            isCloudSyncFeatureAvailable);
         return (sut, store);
     }
 
@@ -34,17 +36,50 @@ public class LicenseServiceTests
             new LicenseEntitlementStore(
                 settings,
                 new UnavailableStoreBillingService(),
-                allowEntitlementStubs: false));
+                allowEntitlementStubs: false),
+            isCloudSyncFeatureAvailable: () => true);
 
         await sut.RefreshAsync();
 
         Assert.True(sut.HasPro);
         Assert.False(sut.CanUseCloudSync);
+        Assert.False(sut.IsCloudSyncImplemented);
         Assert.True(sut.HasFeature(AppFeature.CsvImport));
         Assert.True(sut.HasFeature(AppFeature.Cashflow));
         Assert.True(sut.HasFeature(AppFeature.QuickExpenseCapture));
         Assert.False(sut.HasFeature(AppFeature.CloudSync));
         Assert.True(sut.CheckCreateLimit(LimitedResource.Accounts, 99).Allowed);
+    }
+
+    [Fact]
+    public void Direct_IsCloudSyncImplemented_False_EvenWhenFeatureAvailable()
+    {
+        var settings = Substitute.For<ISettingsService>();
+        var sut = new LicenseService(
+            new FixedDistributionChannelProvider(DistributionChannel.Direct),
+            new LicenseEntitlementStore(
+                settings,
+                new UnavailableStoreBillingService(),
+                allowEntitlementStubs: false),
+            isCloudSyncFeatureAvailable: () => true);
+
+        Assert.False(sut.IsCloudSyncImplemented);
+    }
+
+    [Fact]
+    public void Store_IsCloudSyncImplemented_True_WhenFeatureAvailable()
+    {
+        var (sut, _) = CreateStoreSut(isCloudSyncFeatureAvailable: () => true);
+
+        Assert.True(sut.IsCloudSyncImplemented);
+    }
+
+    [Fact]
+    public void Store_IsCloudSyncImplemented_False_WhenFeatureUnavailable()
+    {
+        var (sut, _) = CreateStoreSut(isCloudSyncFeatureAvailable: () => false);
+
+        Assert.False(sut.IsCloudSyncImplemented);
     }
 
     [Fact]

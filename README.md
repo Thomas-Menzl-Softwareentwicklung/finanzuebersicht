@@ -13,7 +13,7 @@
 
 </div>
 
-Finanzübersicht ist eine Open‑Source App zur lokalen Verwaltung von Einnahmen, Ausgaben und wiederkehrenden Buchungen. Die App speichert Daten lokal als JSON. Cloud-Sync (z. B. CloudKit) ist eine Backlog-Idee ([#243](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/243)), derzeit nicht im Code enthalten.
+Finanzübersicht ist eine Open‑Source App zur lokalen Verwaltung von Einnahmen, Ausgaben und wiederkehrenden Buchungen. Die App speichert Daten lokal als JSON. CloudKit-Sync-MVP ist im Tree (opt-in, private iCloud, Store + Sync-IAP + iOS 17 / Mac Catalyst 17); das Sync-Abo ist noch nicht im Verkauf. [#243](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/243) bleibt offen, bis [`docs/CLOUDKIT_SYNC_QA.md`](docs/CLOUDKIT_SYNC_QA.md) auf zwei Geräten besteht.
 
 Kurz: .NET 10 + MAUI, Multi-Language UI (Deutsch & Englisch), MVVM-Architektur.
 
@@ -212,7 +212,7 @@ Finanzuebersicht.Tests/            ← xUnit Tests (net10.0)
 
 ## Versionierung & CI
 
-- Nerdbank.GitVersioning (`version.json`) steuert Versionsnummern (aktuell Basis `1.20`)
+- Nerdbank.GitVersioning (`version.json`) steuert Versionsnummern (aktuell Basis `1.21`)
 - CI / Pre-Release / Release Workflows in `.github/workflows/`
 
 ### Full MAUI build (macCatalyst)

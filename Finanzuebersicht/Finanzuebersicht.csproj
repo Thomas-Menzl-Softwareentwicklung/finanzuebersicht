@@ -10,6 +10,7 @@
 		<SingleProject>true</SingleProject>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
 		<MauiXamlInflator>SourceGen</MauiXamlInflator>
 
@@ -63,6 +64,10 @@
 
 		<!-- Disable ILLink completely to avoid MT2301/NETSDK1144 crash -->
 		<MtouchLink>SdkOnly</MtouchLink>
+		<!-- Mac App Store / TestFlight reject arm64-only. Release without a singular
+		     RuntimeIdentifier builds both Intel and Apple Silicon. Do not pass
+		     -p:RuntimeIdentifier=maccatalyst-arm64 for Store publish. -->
+		<RuntimeIdentifiers Condition="'$(Configuration)' == 'Release' AND $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst' AND '$(RuntimeIdentifier)' == ''">maccatalyst-x64;maccatalyst-arm64</RuntimeIdentifiers>
 		<UserDialogs>false</UserDialogs>
 		<!-- Ensure UseInterpreter is true if link is None, though usually implied for Debug -->
 		<UseInterpreter Condition="'$(Configuration)' == 'Debug'">true</UseInterpreter>
@@ -122,7 +127,8 @@
 	<!-- Embed QuickExpenseWidget.appex (built by BuildWidgetExtension / build-release.sh).
 	     Pattern: Redth Maui.Apple.PlatformFeature.Samples — Widgets.
 	     Skip rebuild: -p:SkipWidgetBuild=true (keeps previously staged .appex).
-	     Skip embed entirely: -p:EmbedQuickExpenseWidget=false -->
+	     Skip embed entirely: -p:EmbedQuickExpenseWidget=false.
+	     Skip Store codesign of the .appex: -p:SkipWidgetStoreResign=true (Xcode exportArchive re-signs with cloud-managed Distribution). -->
 	<PropertyGroup Condition="$(TargetFramework.Contains('-ios'))">
 		<EmbedQuickExpenseWidget Condition="'$(EmbedQuickExpenseWidget)' == ''">true</EmbedQuickExpenseWidget>
 	</PropertyGroup>
@@ -164,12 +170,51 @@
 		</NativeReference>
 	</ItemGroup>
 
+	<!-- Swift @_cdecl bridge: CKSyncEngine (Swift-only CloudKit sync). Built by BuildCloudKitSyncBridge.
+	     Independent of the widget embed — Cloud Sync ships on iPhone and Mac Catalyst.
+	     Skip rebuild: -p:SkipCloudKitSyncBridgeBuild=true -->
+	<ItemGroup Condition="$(TargetFramework.Contains('-ios'))">
+		<NativeReference Include="Platforms/iOS/Native/lib/Release-iphoneos/libCloudKitSyncBridge.a"
+		                 Condition="!$(RuntimeIdentifier.Contains('simulator'))">
+			<Kind>Static</Kind>
+			<ForceLoad>true</ForceLoad>
+			<Frameworks>CloudKit</Frameworks>
+		</NativeReference>
+		<NativeReference Include="Platforms/iOS/Native/lib/Release-iphonesimulator/libCloudKitSyncBridge.a"
+		                 Condition="$(RuntimeIdentifier.Contains('simulator'))">
+			<Kind>Static</Kind>
+			<ForceLoad>true</ForceLoad>
+			<Frameworks>CloudKit</Frameworks>
+		</NativeReference>
+	</ItemGroup>
+
+	<!-- Mac Catalyst shares the Swift source (fat arm64+x86_64 macabi .a) and the C# transport. -->
+	<ItemGroup Condition="$(TargetFramework.Contains('-maccatalyst'))">
+		<NativeReference Include="Platforms/iOS/Native/lib/Release-maccatalyst/libCloudKitSyncBridge.a">
+			<Kind>Static</Kind>
+			<ForceLoad>true</ForceLoad>
+			<Frameworks>CloudKit</Frameworks>
+		</NativeReference>
+	</ItemGroup>
+
+	<!-- SingleProject drops Platforms/iOS/** from @(Compile) for the maccatalyst TFM, and it does
+	     so in a target — a plain ItemGroup Include here would be removed again afterwards.
+	     CloudKitSyncTransport.cs is guarded with #if IOS || MACCATALYST and serves both. -->
+	<Target Name="IncludeCloudKitSyncTransportForMacCatalyst"
+	        BeforeTargets="BeforeCompile;CoreCompile"
+	        Condition="$(TargetFramework.Contains('-maccatalyst'))">
+		<ItemGroup>
+			<Compile Remove="Platforms/iOS/CloudKitSyncTransport.cs" />
+			<Compile Include="Platforms/iOS/CloudKitSyncTransport.cs" />
+		</ItemGroup>
+	</Target>
+
 	<!-- Store: re-sign PlugIns/*.appex with Distribution + Store profile, then re-seal outer .app
 	     with the FULL Release entitlements (incl. application-identifier — do not strip). -->
 	<Target Name="ResignWidgetExtensionForStore"
 	        AfterTargets="_CodesignAppBundle"
 	        DependsOnTargets="GetBuildVersion"
-	        Condition="$(TargetFramework.Contains('-ios')) AND '$(EmbedQuickExpenseWidget)' == 'true' AND '$(AppDistribution)' == 'Store' AND '$(ComputedPlatform)' == 'iPhone'">
+	        Condition="$(TargetFramework.Contains('-ios')) AND '$(EmbedQuickExpenseWidget)' == 'true' AND '$(AppDistribution)' == 'Store' AND '$(ComputedPlatform)' == 'iPhone' AND '$(SkipWidgetStoreResign)' != 'true'">
 		<PropertyGroup>
 			<_WidgetAppexInBundle Condition="'$(AppBundleDir)' != ''">$(AppBundleDir)/PlugIns/QuickExpenseWidget.appex</_WidgetAppexInBundle>
 			<_WidgetAppexInBundle Condition="'$(_WidgetAppexInBundle)' == ''">$(OutputPath)$(RuntimeIdentifier)/$(ApplicationTitle).app/PlugIns/QuickExpenseWidget.appex</_WidgetAppexInBundle>
@@ -204,6 +249,23 @@
 		      WorkingDirectory="$(MSBuildProjectDirectory)/Platforms/iOS/Native" />
 		<Error Text="Expected WidgetKit bridge at $(_BridgeLib)."
 		       Condition="!Exists('$(_BridgeLib)')" />
+	</Target>
+
+	<!-- Builds Swift CloudKitSyncBridge.a (device + simulator + Mac Catalyst slices in one run). -->
+	<Target Name="BuildCloudKitSyncBridge"
+	        BeforeTargets="ResolveNativeReferences;_AOTCompile;CoreCompile"
+	        Condition="($(TargetFramework.Contains('-ios')) OR $(TargetFramework.Contains('-maccatalyst'))) AND '$(SkipCloudKitSyncBridgeBuild)' != 'true'">
+		<PropertyGroup>
+			<_CloudKitBridgeSubdir Condition="$(TargetFramework.Contains('-maccatalyst'))">Release-maccatalyst</_CloudKitBridgeSubdir>
+			<_CloudKitBridgeSubdir Condition="'$(_CloudKitBridgeSubdir)' == '' AND $(RuntimeIdentifier.Contains('simulator'))">Release-iphonesimulator</_CloudKitBridgeSubdir>
+			<_CloudKitBridgeSubdir Condition="'$(_CloudKitBridgeSubdir)' == ''">Release-iphoneos</_CloudKitBridgeSubdir>
+			<_CloudKitBridgeLib>$(MSBuildProjectDirectory)/Platforms/iOS/Native/lib/$(_CloudKitBridgeSubdir)/libCloudKitSyncBridge.a</_CloudKitBridgeLib>
+		</PropertyGroup>
+		<Message Text="Building CloudKitSyncBridge.a via Platforms/iOS/Native/build-cloudkit-sync-bridge.sh..." Importance="high" />
+		<Exec Command="bash build-cloudkit-sync-bridge.sh"
+		      WorkingDirectory="$(MSBuildProjectDirectory)/Platforms/iOS/Native" />
+		<Error Text="Expected CloudKit sync bridge at $(_CloudKitBridgeLib)."
+		       Condition="!Exists('$(_CloudKitBridgeLib)')" />
 	</Target>
 
 	<!-- Builds Platforms/iOS/Widgets via build-release.sh (xcodegen + xcodebuild), stages .appex. -->

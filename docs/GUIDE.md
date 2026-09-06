@@ -174,7 +174,7 @@ main      → v1.x-Tag (löst release.yml aus)
 - **Repos:** Features arbeiten gegen spezifische `I*Repository`-Interfaces (`LocalDataService` als Composite)
 - **Pfad:** Standardmäßig `~/Library/Application Support/Finanzuebersicht`, konfigurierbar über Einstellungen
 - **Konten & Salden:** `GetAccountBalancesUseCase` — Saldo = Anfangssaldo + Σ Buchungen (Umbuchungen auf beiden Konten)
-- **CloudKit:** nur noch als Produktidee im Backlog ([#243](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/243)); kein aktiver CloudKit-Code im Repo. Sync-Vorbereitung [#300](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/300): optionale `ExternalId` / `Source` / `UpdatedAt` an Account, Transaction, Category, RecurringTransaction, SparZiel (keine Sync-UI).
+- **CloudKit Sync (MVP #243):** im Tree — private CloudKit, Zone `finanzuebersicht-sync`, LWW + Tombstones. Settings-Schalter „iCloud-Sync“ bei Store-Build + Sync-IAP + iOS 17 / Mac Catalyst 17. Opt-in; Daten in der **privaten iCloud** des Nutzers; kein eigener Sync-Server. Direct / Windows: kein Cloud Sync (`NullCloudSyncTransport`). Native-Rebuild: [`Platforms/iOS/Native/README-CloudKitSync.md`](../Finanzuebersicht/Platforms/iOS/Native/README-CloudKitSync.md). Persistenz-Prep [#300](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/300) ✅. [#243](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/243) bleibt offen bis Zwei-Geräte-QA grün — Checkliste: [`CLOUDKIT_SYNC_QA.md`](CLOUDKIT_SYNC_QA.md). Bekannte Lücken: `RecurringGenerationService` ohne Orchestrator-Notify (Instanz-IDs noch nicht geräteübergreifend stabil); Mac Catalyst Debug ohne iCloud-Entitlements; noch kein Live-CloudKit-Smoke-Test auf diesem Branch. Schema-Pause: neueres Cloud-`schemaVersion` stoppt Apply/Upload und zeigt `Sync_Error`.
 - **Daueraufträge:** Automatische Generierung auf `App.OnStart()` und `Window.Resumed`
 
 ## 10. Backup & Restore
@@ -198,8 +198,8 @@ Neue Migratoren als `IDataMigrator`-Implementierungen in DI registrieren.
 
 ## 11. Versionierung
 
-- **System:** Nerdbank.GitVersioning (`version.json`, aktuell Basis `1.20`)
-- **Format:** `<major>.<minor>.<git-height>` (z.B. `1.20.3`)
+- **System:** Nerdbank.GitVersioning (`version.json`, aktuell Basis `1.21`)
+- **Format:** `<major>.<minor>.<git-height>` (z.B. `1.21.1`)
 - **MAUI-Version:** Automatisch gesetzt via `ApplicationDisplayVersion` und `ApplicationVersion` zur Buildzeit
 
 ```bash

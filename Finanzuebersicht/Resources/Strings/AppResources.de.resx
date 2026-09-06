@@ -153,14 +153,29 @@
   <data name="Lic_StubSync" xml:space="preserve"><value>Stub: Sync-Abo</value></data>
   <data name="Lic_StubApply" xml:space="preserve"><value>Stub-Entitlements übernehmen</value></data>
   <data name="Lic_BuyPro" xml:space="preserve"><value>Pro freischalten</value></data>
+  <data name="Lic_BuySync" xml:space="preserve"><value>Sync-Abo kaufen</value></data>
   <data name="Lic_RestorePurchases" xml:space="preserve"><value>Käufe wiederherstellen</value></data>
   <data name="Lic_PurchaseSuccess" xml:space="preserve"><value>Pro freigeschaltet</value></data>
+  <data name="Lic_SyncPurchaseSuccess" xml:space="preserve"><value>Sync-Abo aktiv</value></data>
   <data name="Lic_PurchaseFailed" xml:space="preserve"><value>Kauf konnte nicht abgeschlossen werden.</value></data>
   <data name="Lic_RestoreSuccess" xml:space="preserve"><value>Käufe wiederhergestellt</value></data>
   <data name="Lic_RestoreEmpty" xml:space="preserve"><value>Keine Käufe für diese Apple-ID gefunden</value></data>
   <data name="Lic_SyncComingSoon" xml:space="preserve"><value>Cloud-Sync: kommt später (noch nicht käuflich)</value></data>
+  <data name="Lic_SyncAvailable" xml:space="preserve"><value>Cloud-Sync: Jahresabo für iPhone, iPad und Mac</value></data>
   <data name="Lic_SyncPurchaseLater" xml:space="preserve"><value>Das Sync-Jahresabo erscheint, sobald CloudKit bereit ist.</value></data>
   <data name="Lic_UseStoreKit" xml:space="preserve"><value>App-Store-Käufe nutzen (Stub aus)</value></data>
+  <data name="Sync_EnableLabel" xml:space="preserve"><value>iCloud-Sync</value></data>
+  <data name="Sync_LastSync" xml:space="preserve"><value>Letzte Synchronisation: {0}</value></data>
+  <data name="Sync_NeverSynced" xml:space="preserve"><value>Noch nicht synchronisiert</value></data>
+  <data name="Sync_Error" xml:space="preserve"><value>Sync-Fehler: {0}</value></data>
+  <data name="Sync_PausedRenew" xml:space="preserve"><value>iCloud-Sync ist pausiert. Abo erneuern, um fortzufahren.</value></data>
+  <data name="Sync_BlockedBothHaveData" xml:space="preserve"><value>iCloud-Sync kann nicht aktiviert werden, weil sowohl dieses Gerät als auch iCloud Daten enthalten. Erstelle ein Backup (Einstellungen → Backup) und verwende ein leeres Gerät oder leere iCloud-Daten, bevor du Sync aktivierst.</value></data>
+  <data name="Sync_BlockedNoEntitlement" xml:space="preserve"><value>iCloud-Sync erfordert ein aktives Sync-Abo.</value></data>
+  <data name="Sync_BlockedUnsupported" xml:space="preserve"><value>iCloud-Sync wird auf diesem Gerät oder dieser OS-Version nicht unterstützt.</value></data>
+  <data name="Sync_BlockedNoICloud" xml:space="preserve"><value>Melde dich in den Systemeinstellungen bei iCloud an und aktiviere iCloud Drive für iCloud-Sync.</value></data>
+  <data name="Sync_ReplaceLocalWithCloudTitle" xml:space="preserve"><value>Daten auf diesem Gerät ersetzen?</value></data>
+  <data name="Sync_ReplaceLocalWithCloudMessage" xml:space="preserve"><value>Dieses Gerät und iCloud enthalten beide Daten. Es wird ein Backup erstellt, danach werden die Daten auf diesem Gerät gelöscht und durch die iCloud-Daten ersetzt. iCloud bleibt unverändert.</value></data>
+  <data name="Sync_ReplaceLocalWithCloudAccept" xml:space="preserve"><value>iCloud übernehmen</value></data>
 
   <!-- Confirmation Dialogs -->
   <data name="Dlg_KategorieLoeschen" xml:space="preserve"><value>Kategorie löschen</value></data>
