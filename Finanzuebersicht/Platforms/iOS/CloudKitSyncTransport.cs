@@ -1,5 +1,6 @@
 #if IOS || MACCATALYST
 using System.Globalization;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Finanzuebersicht.Core.Sync;
 using Finanzuebersicht.Services;
@@ -18,13 +19,6 @@ public sealed class CloudKitSyncTransport : ICloudSyncTransport
     /// <summary>Swift formats and parses UTC ISO-8601 with millisecond precision.</summary>
     private const string IsoUtcFormat = "yyyy-MM-dd'T'HH:mm:ss.fff'Z'";
 
-    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    private delegate void RecordsCallback(IntPtr recordsJsonUtf8);
-
-    // Rooted for the process lifetime: native holds the raw function pointer, so the GC
-    // must never collect the delegate behind it.
-    private static readonly RecordsCallback RootedRecordsCallback = HandleNativeRecords;
-
     private static readonly object InstanceGate = new();
     private static CloudKitSyncTransport? _active;
 
@@ -39,9 +33,16 @@ public sealed class CloudKitSyncTransport : ICloudSyncTransport
 
         if (IsSupported)
         {
-            TryInvokeNative(() => NativeSetRecordsCallback(RootedRecordsCallback), "set records callback");
+            TryInvokeNative(RegisterRecordsCallback, "set records callback");
         }
     }
+
+    /// <summary>
+    /// Must not sit inside a lambda: taking <c>&amp;HandleNativeRecords</c> is only legal
+    /// from a method that can form a function pointer (iOS AOT reverse P/Invoke).
+    /// </summary>
+    private static unsafe void RegisterRecordsCallback() =>
+        NativeSetRecordsCallback(&HandleNativeRecords);
 
     public event EventHandler<IReadOnlyList<CloudSyncRecordDto>>? RecordsChanged;
 
@@ -186,7 +187,9 @@ public sealed class CloudKitSyncTransport : ICloudSyncTransport
     /// <summary>
     /// Called from a CloudKit background thread. The C string is only valid for the
     /// duration of the call, so copy first and never let an exception escape into Swift.
+    /// UnmanagedCallersOnly is required for iOS AOT reverse P/Invoke (TestFlight abort otherwise).
     /// </summary>
+    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
     private static void HandleNativeRecords(IntPtr recordsJsonUtf8)
     {
         try
@@ -269,6 +272,6 @@ public sealed class CloudKitSyncTransport : ICloudSyncTransport
     private static extern int NativeSendChanges();
 
     [DllImport(NativeLibrary, EntryPoint = "finanzuebersicht_ck_set_records_callback")]
-    private static extern void NativeSetRecordsCallback(RecordsCallback callback);
+    private static extern unsafe void NativeSetRecordsCallback(delegate* unmanaged[Cdecl]<IntPtr, void> callback);
 }
 #endif
