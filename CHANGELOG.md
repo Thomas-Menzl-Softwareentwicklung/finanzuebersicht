@@ -4,7 +4,7 @@
 
 ### Hinzugefügt
 
-- CloudKit-Sync MVP zwischen Apple-Geräten (#243): private Zone, Last-Write-Wins, Tombstones, iCloud-Sync in den Einstellungen (Store + Sync-IAP)
+- CloudKit-Sync MVP zwischen Apple-Geräten (#243): private Zone, Last-Write-Wins, Tombstones, iCloud-Sync in den Einstellungen (Store + Sync-IAP); QA iPhone → iPad → iMac
 
 ### Geändert
 

@@ -13,7 +13,7 @@
 
 </div>
 
-Finanzübersicht ist eine Open‑Source App zur lokalen Verwaltung von Einnahmen, Ausgaben und wiederkehrenden Buchungen. Die App speichert Daten lokal als JSON. Optionaler CloudKit-Sync (Store-Build, iOS 17+ / Mac Catalyst 17+, Jahresabo unabhängig von Pro) hält Daten in der **privaten iCloud** — opt-in, kein eigener Server. Direct- und Windows-Builds ohne Sync. [#243](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/243) bleibt offen, bis [`docs/CLOUDKIT_SYNC_QA.md`](docs/CLOUDKIT_SYNC_QA.md) auf zwei Geräten besteht.
+Finanzübersicht ist eine Open‑Source App zur lokalen Verwaltung von Einnahmen, Ausgaben und wiederkehrenden Buchungen. Die App speichert Daten lokal als JSON. Optionaler CloudKit-Sync (Store-Build, iOS 17+ / Mac Catalyst 17+, Jahresabo unabhängig von Pro) hält Daten in der **privaten iCloud** — opt-in, kein eigener Server. Direct- und Windows-Builds ohne Sync. Drei-Geräte-QA (iPhone → iPad → iMac): [`docs/CLOUDKIT_SYNC_QA.md`](docs/CLOUDKIT_SYNC_QA.md) ([#243](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/243)).
 
 Kurz: .NET 10 + MAUI, Multi-Language UI (Deutsch & Englisch), MVVM-Architektur.
 

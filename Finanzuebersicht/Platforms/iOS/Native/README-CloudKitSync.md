@@ -1,6 +1,6 @@
 # CloudKit Sync bridge (MVP #243)
 
-Native Swift bridge (`CloudKitSyncBridge.swift`) around **CKSyncEngine** for the MAUI host (`CloudKitSyncTransport.cs`). On **Store** Apple builds with iOS 17 / Mac Catalyst 17+, sync is user-facing when the Sync IAP (or Debug stub) is active — Settings → iCloud-Sync. **#243 stays open** until two-device QA passes: [`docs/CLOUDKIT_SYNC_QA.md`](../../../../docs/CLOUDKIT_SYNC_QA.md).
+Native Swift bridge (`CloudKitSyncBridge.swift`) around **CKSyncEngine** for the MAUI host (`CloudKitSyncTransport.cs`). On **Store** Apple builds with iOS 17 / Mac Catalyst 17+, sync is user-facing when the Sync IAP (or Debug stub) is active — Settings → iCloud-Sync. **#243 QA passed** (iPhone → iPad → iMac): [`docs/CLOUDKIT_SYNC_QA.md`](../../../../docs/CLOUDKIT_SYNC_QA.md).
 
 ## Container and zone
 
@@ -78,6 +78,6 @@ CKSyncEngine remote-notification push is **not** wired (`automaticallySync` is f
 
 ## Device QA
 
-Run the manual checklist before closing [#243](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/243): [`docs/CLOUDKIT_SYNC_QA.md`](../../../../docs/CLOUDKIT_SYNC_QA.md). Live CloudKit end-to-end has not been smoke-tested on this branch yet.
+Checklist and three-device sign-off: [`docs/CLOUDKIT_SYNC_QA.md`](../../../../docs/CLOUDKIT_SYNC_QA.md) ([#243](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/243)).
 
-Known gaps: `RecurringGenerationService` writes bypass orchestrator notify (do not sync generated instances until ids are stable across devices); Mac Catalyst Debug without iCloud entitlements; live CloudKit end-to-end has not been smoke-tested on this branch yet. Schema pause: a `SyncMeta` record with `schemaVersion` newer than the app stops apply/upload and surfaces `Sync_Error`.
+Known gaps: `RecurringGenerationService` writes bypass orchestrator notify (do not sync generated instances until ids are stable across devices); Mac Catalyst Debug without iCloud entitlements. Schema pause: a `SyncMeta` record with `schemaVersion` newer than the app stops apply/upload and surfaces `Sync_Error`.

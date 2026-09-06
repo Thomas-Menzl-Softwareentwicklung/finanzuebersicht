@@ -32,7 +32,7 @@ Monetarisierung: [`MONETIZATION.md`](MONETIZATION.md).
 | Finanzübersicht Pro | Non-Consumable | `de.thomasmenzl.finanzuebersicht.pro` |
 | Finanzübersicht Sync | Auto-Renewable (1 Jahr) | `de.thomasmenzl.finanzuebersicht.sync.yearly` |
 
-Sync-Engine ist im Store-Apple-Binary (`IsCloudSyncImplemented = true` bei Store + iOS 17 / Mac Catalyst 17). Listing (DE/EN) und öffentliche Privacy-/Support-Seiten beschreiben optionales iCloud-Sync; das Jahresabo ist erst nach ASC-Freigabe von **1.21** im Store käuflich. Manuelle Zwei-Geräte-QA vor Issue-Schließung: [`docs/CLOUDKIT_SYNC_QA.md`](CLOUDKIT_SYNC_QA.md). Sync ist **opt-in**; Finanzdaten liegen in der **privaten iCloud** des Nutzers (kein eigener Sync-Server von Finanzübersicht). Technik: `Finanzuebersicht/Platforms/iOS/Native/README-CloudKitSync.md`.
+Sync-Engine ist im Store-Apple-Binary (`IsCloudSyncImplemented = true` bei Store + iOS 17 / Mac Catalyst 17). Listing (DE/EN) und öffentliche Privacy-/Support-Seiten beschreiben optionales iCloud-Sync; das Jahresabo ist erst nach ASC-Freigabe von **1.21** im Store käuflich. Drei-Geräte-QA (iPhone → iPad → iMac) ist in [`docs/CLOUDKIT_SYNC_QA.md`](CLOUDKIT_SYNC_QA.md) dokumentiert ([#243](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/243)). Sync ist **opt-in**; Finanzdaten liegen in der **privaten iCloud** des Nutzers (kein eigener Sync-Server von Finanzübersicht). Technik: `Finanzuebersicht/Platforms/iOS/Native/README-CloudKitSync.md`.
 
 ## 1. Apple Developer + App Store Connect
 

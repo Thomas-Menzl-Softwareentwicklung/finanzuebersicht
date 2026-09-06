@@ -122,7 +122,7 @@ Das Abo gegenfinanziert laufende Kosten (Developer Program, Support, Weiterentwi
 | Phase | Was im Store |
 |-------|----------------|
 | **1 — Launch** | Free + Pro (IAP, StoreKit). Soft-Limits + Pro-Gates aktiv. Sync-Verkauf war in dieser Phase noch nicht vorgesehen. |
-| **2 — Sync (1.21)** | Sync-Engine im Store-Apple-Binary (#243 MVP; Persistenz-Prep #300 ✅). Listing, Review-Notes und Privacy-/Support-Seiten (`finanzuebersicht-site`) beschreiben optionales iCloud-Sync. Jahresabo unabhängig von Pro; im Store käuflich nach ASC-Freigabe von 1.21. QA: [`CLOUDKIT_SYNC_QA.md`](CLOUDKIT_SYNC_QA.md). |
+| **2 — Sync (1.21)** | Sync-Engine im Store-Apple-Binary (#243; Persistenz-Prep #300 ✅). Listing, Review-Notes und Privacy-/Support-Seiten (`finanzuebersicht-site`) beschreiben optionales iCloud-Sync. Jahresabo unabhängig von Pro; im Store käuflich nach ASC-Freigabe von 1.21. Drei-Geräte-QA: [`CLOUDKIT_SYNC_QA.md`](CLOUDKIT_SYNC_QA.md). |
 | **3 — Feinschliff** | Intro-Offer (z. B. 1. Jahr Sync 2,99 €), optional Tip-Jar nur wenn gewünscht. |
 
 StoreKit-Client (Pro kaufen / Restore) ist im Store-Build verdrahtet; siehe `docs/APP_STORE.md`.
