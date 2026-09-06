@@ -48,6 +48,53 @@ public class LicenseViewModelTests
     }
 
     [Fact]
+    public async Task ShowSyncPurchaseLaterHint_HiddenWhenEngineIsImplemented()
+    {
+        var license = CreateLicenseService(canUseCloudSync: false, isImplemented: true);
+        var billing = Substitute.For<IStoreBillingService>();
+        billing.IsAvailable.Returns(true);
+        var metadataStore = Substitute.For<ISyncMetadataStore>();
+        metadataStore.GetAsync().Returns(new SyncMetadata());
+        var sut = CreateSut(license, metadataStore: metadataStore, billing: billing);
+
+        await sut.InitializeAsync();
+
+        Assert.False(sut.ShowSyncPurchaseLaterHint);
+        Assert.True(sut.CanBuySync);
+        Assert.Equal(ResourceKeys.Lic_SyncAvailable, sut.SyncLabel);
+    }
+
+    [Fact]
+    public async Task BuySync_PurchasesYearlySyncProduct()
+    {
+        var license = CreateLicenseService(canUseCloudSync: false, isImplemented: true);
+        var billing = Substitute.For<IStoreBillingService>();
+        billing.IsAvailable.Returns(true);
+        billing.InitializeAsync(Arg.Any<CancellationToken>()).Returns(true);
+        billing.PurchaseAsync(LicenseProductIds.SyncYearly, Arg.Any<CancellationToken>())
+            .Returns(StorePurchaseResult.Success(LicenseProductIds.SyncYearly));
+        billing.GetOwnedProductIdsAsync(Arg.Any<CancellationToken>())
+            .Returns([LicenseProductIds.SyncYearly]);
+        var entitlements = Substitute.For<ILicenseEntitlementStore>();
+        var feedback = Substitute.For<IFeedbackService>();
+        var metadataStore = Substitute.For<ISyncMetadataStore>();
+        metadataStore.GetAsync().Returns(new SyncMetadata());
+        var sut = CreateSut(
+            license,
+            metadataStore: metadataStore,
+            billing: billing,
+            entitlementStore: entitlements,
+            feedback: feedback);
+
+        await sut.BuySyncCommand.ExecuteAsync(null);
+
+        await billing.Received(1).PurchaseAsync(LicenseProductIds.SyncYearly, Arg.Any<CancellationToken>());
+        await entitlements.Received(1).ApplyOwnedProductIdsAsync(
+            Arg.Is<IReadOnlyList<string>>(ids => ids.Contains(LicenseProductIds.SyncYearly)));
+        await feedback.Received(1).ShowSnackbarAsync(ResourceKeys.Lic_SyncPurchaseSuccess);
+    }
+
+    [Fact]
     public async Task EnableCloudSync_WhenUseCaseThrows_RevertsSwitchShowsAlertAndPersistsLastError()
     {
         var license = CreateLicenseService(canUseCloudSync: true, isImplemented: true);
@@ -168,15 +215,18 @@ public class LicenseViewModelTests
         ISyncMetadataStore? metadataStore = null,
         IDialogService? dialogService = null,
         ILocalizationService? localization = null,
-        ICloudSyncOrchestrator? orchestrator = null)
+        ICloudSyncOrchestrator? orchestrator = null,
+        IStoreBillingService? billing = null,
+        ILicenseEntitlementStore? entitlementStore = null,
+        IFeedbackService? feedback = null)
     {
         return new LicenseViewModel(
             license,
-            Substitute.For<ILicenseEntitlementStore>(),
-            Substitute.For<IStoreBillingService>(),
+            entitlementStore ?? Substitute.For<ILicenseEntitlementStore>(),
+            billing ?? Substitute.For<IStoreBillingService>(),
             localization ?? CreateLocalizationService(),
             dialogService ?? CreateDialogService(),
-            Substitute.For<IFeedbackService>(),
+            feedback ?? Substitute.For<IFeedbackService>(),
             enableUseCase ?? CreateEnableUseCaseForSuccess(
                 Substitute.For<ISyncMetadataStore>(),
                 license),

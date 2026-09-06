@@ -325,6 +325,18 @@
                                 Padding="12,8"
                                 BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
                                 TextColor="White" />
+                        <Label Text="{Binding License.SyncPriceLabel}"
+                               FontSize="14"
+                               IsVisible="{Binding License.CanBuySync}"
+                               TextColor="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}" />
+                        <Button Text="{loc:Translate Lic_BuySync}"
+                                Command="{Binding License.BuySyncCommand}"
+                                IsVisible="{Binding License.CanBuySync}"
+                                IsEnabled="{Binding License.CanBuySync}"
+                                FontSize="14"
+                                Padding="12,8"
+                                BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                TextColor="White" />
                         <Button Text="{loc:Translate Lic_RestorePurchases}"
                                 Command="{Binding License.RestorePurchasesCommand}"
                                 FontSize="14"

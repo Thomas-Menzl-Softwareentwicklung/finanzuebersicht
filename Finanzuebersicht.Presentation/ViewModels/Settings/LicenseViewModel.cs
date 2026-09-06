@@ -62,6 +62,9 @@ public partial class LicenseViewModel : ObservableObject
     private string proPriceLabel = string.Empty;
 
     [ObservableProperty]
+    private string syncPriceLabel = string.Empty;
+
+    [ObservableProperty]
     private bool showStorePurchaseControls;
 
     [ObservableProperty]
@@ -93,7 +96,13 @@ public partial class LicenseViewModel : ObservableObject
         ShowCloudSyncControls && _licenseService.CanUseCloudSync && !IsBusy;
 
     public bool ShowSyncPurchaseLaterHint =>
-        ShowStorePurchaseControls && !ShowCloudSyncControls;
+        ShowStorePurchaseControls && !_licenseService.IsCloudSyncImplemented;
+
+    public bool CanBuySync =>
+        ShowStorePurchaseControls &&
+        _licenseService.IsCloudSyncImplemented &&
+        !_licenseService.CanUseCloudSync &&
+        !IsBusy;
 
     public async Task InitializeAsync()
     {
@@ -152,32 +161,19 @@ public partial class LicenseViewModel : ObservableObject
     [RelayCommand]
     private async Task BuyPro()
     {
-        if (IsBusy || !_billingService.IsAvailable || _licenseService.HasPro)
+        if (_licenseService.HasPro)
             return;
 
-        IsBusy = true;
-        try
-        {
-            var result = await _billingService.PurchaseAsync(LicenseProductIds.Pro);
-            if (result.WasCancelled)
-                return;
+        await PurchaseProductAsync(LicenseProductIds.Pro, ResourceKeys.Lic_PurchaseSuccess);
+    }
 
-            if (!result.IsSuccess)
-            {
-                await _dialogService.ShowAlertAsync(
-                    _loc.GetString(ResourceKeys.Err_Titel),
-                    result.ErrorMessage ?? _loc.GetString(ResourceKeys.Lic_PurchaseFailed),
-                    _loc.GetString(ResourceKeys.Btn_OK));
-                return;
-            }
+    [RelayCommand]
+    private async Task BuySync()
+    {
+        if (_licenseService.CanUseCloudSync)
+            return;
 
-            await PersistOwnedAndRefreshAsync();
-            await _feedbackService.ShowSnackbarAsync(_loc.GetString(ResourceKeys.Lic_PurchaseSuccess));
-        }
-        finally
-        {
-            IsBusy = false;
-        }
+        await PurchaseProductAsync(LicenseProductIds.SyncYearly, ResourceKeys.Lic_SyncPurchaseSuccess);
     }
 
     [RelayCommand]
@@ -308,8 +304,41 @@ public partial class LicenseViewModel : ObservableObject
         _suppressCloudSyncToggle = false;
     }
 
-    partial void OnIsBusyChanged(bool value) =>
+    partial void OnIsBusyChanged(bool value)
+    {
         OnPropertyChanged(nameof(CanToggleCloudSync));
+        OnPropertyChanged(nameof(CanBuySync));
+    }
+
+    private async Task PurchaseProductAsync(string productId, string successKey)
+    {
+        if (IsBusy || !_billingService.IsAvailable)
+            return;
+
+        IsBusy = true;
+        try
+        {
+            var result = await _billingService.PurchaseAsync(productId);
+            if (result.WasCancelled)
+                return;
+
+            if (!result.IsSuccess)
+            {
+                await _dialogService.ShowAlertAsync(
+                    _loc.GetString(ResourceKeys.Err_Titel),
+                    result.ErrorMessage ?? _loc.GetString(ResourceKeys.Lic_PurchaseFailed),
+                    _loc.GetString(ResourceKeys.Btn_OK));
+                return;
+            }
+
+            await PersistOwnedAndRefreshAsync();
+            await _feedbackService.ShowSnackbarAsync(_loc.GetString(successKey));
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
 
     private async Task PersistOwnedAndRefreshAsync()
     {
@@ -323,6 +352,7 @@ public partial class LicenseViewModel : ObservableObject
     private async Task LoadProductPriceAsync()
     {
         ProPriceLabel = string.Empty;
+        SyncPriceLabel = string.Empty;
         if (!_billingService.IsAvailable)
             return;
 
@@ -335,6 +365,10 @@ public partial class LicenseViewModel : ObservableObject
             var pro = products.FirstOrDefault(p => p.Id == LicenseProductIds.Pro);
             if (pro != null && !string.IsNullOrWhiteSpace(pro.LocalizedPrice))
                 ProPriceLabel = pro.LocalizedPrice;
+
+            var sync = products.FirstOrDefault(p => p.Id == LicenseProductIds.SyncYearly);
+            if (sync != null && !string.IsNullOrWhiteSpace(sync.LocalizedPrice))
+                SyncPriceLabel = sync.LocalizedPrice;
         }
         catch
         {
@@ -364,20 +398,27 @@ public partial class LicenseViewModel : ObservableObject
             SyncLabel = _loc.GetString(ResourceKeys.Lic_SyncUnavailableDirect);
             LimitsHint = _loc.GetString(ResourceKeys.Lic_DirectFullLocal);
         }
+        else if (!_licenseService.IsCloudSyncImplemented)
+        {
+            SyncLabel = _licenseService.CanUseCloudSync
+                ? _loc.GetString(ResourceKeys.Lic_SyncEntitledComingSoon)
+                : _loc.GetString(ResourceKeys.Lic_SyncComingSoon);
+            LimitsHint = _licenseService.HasPro
+                ? string.Empty
+                : _loc.GetString(ResourceKeys.Lic_FreeLimitsHint);
+        }
         else if (_licenseService.CanUseCloudSync)
         {
-            SyncLabel = _licenseService.IsCloudSyncImplemented
-                ? CloudSyncEnabled
-                    ? _loc.GetString(ResourceKeys.Lic_SyncActive)
-                    : _loc.GetString(ResourceKeys.Lic_SyncInactive)
-                : _loc.GetString(ResourceKeys.Lic_SyncEntitledComingSoon);
+            SyncLabel = CloudSyncEnabled
+                ? _loc.GetString(ResourceKeys.Lic_SyncActive)
+                : _loc.GetString(ResourceKeys.Lic_SyncInactive);
             LimitsHint = _licenseService.HasPro
                 ? string.Empty
                 : _loc.GetString(ResourceKeys.Lic_FreeLimitsHint);
         }
         else
         {
-            SyncLabel = _loc.GetString(ResourceKeys.Lic_SyncComingSoon);
+            SyncLabel = _loc.GetString(ResourceKeys.Lic_SyncAvailable);
             LimitsHint = _licenseService.HasPro
                 ? string.Empty
                 : _loc.GetString(ResourceKeys.Lic_FreeLimitsHint);
@@ -389,6 +430,7 @@ public partial class LicenseViewModel : ObservableObject
         OnPropertyChanged(nameof(ShowCloudSyncControls));
         OnPropertyChanged(nameof(CanToggleCloudSync));
         OnPropertyChanged(nameof(ShowSyncPurchaseLaterHint));
+        OnPropertyChanged(nameof(CanBuySync));
     }
 
     /// <summary>Dev-only entitlement stubs must never appear in Release Store builds.</summary>

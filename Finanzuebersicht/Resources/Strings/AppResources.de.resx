@@ -153,12 +153,15 @@
   <data name="Lic_StubSync" xml:space="preserve"><value>Stub: Sync-Abo</value></data>
   <data name="Lic_StubApply" xml:space="preserve"><value>Stub-Entitlements übernehmen</value></data>
   <data name="Lic_BuyPro" xml:space="preserve"><value>Pro freischalten</value></data>
+  <data name="Lic_BuySync" xml:space="preserve"><value>Sync-Abo kaufen</value></data>
   <data name="Lic_RestorePurchases" xml:space="preserve"><value>Käufe wiederherstellen</value></data>
   <data name="Lic_PurchaseSuccess" xml:space="preserve"><value>Pro freigeschaltet</value></data>
+  <data name="Lic_SyncPurchaseSuccess" xml:space="preserve"><value>Sync-Abo aktiv</value></data>
   <data name="Lic_PurchaseFailed" xml:space="preserve"><value>Kauf konnte nicht abgeschlossen werden.</value></data>
   <data name="Lic_RestoreSuccess" xml:space="preserve"><value>Käufe wiederhergestellt</value></data>
   <data name="Lic_RestoreEmpty" xml:space="preserve"><value>Keine Käufe für diese Apple-ID gefunden</value></data>
   <data name="Lic_SyncComingSoon" xml:space="preserve"><value>Cloud-Sync: kommt später (noch nicht käuflich)</value></data>
+  <data name="Lic_SyncAvailable" xml:space="preserve"><value>Cloud-Sync: Jahresabo für iPhone, iPad und Mac</value></data>
   <data name="Lic_SyncPurchaseLater" xml:space="preserve"><value>Das Sync-Jahresabo erscheint, sobald CloudKit bereit ist.</value></data>
   <data name="Lic_UseStoreKit" xml:space="preserve"><value>App-Store-Käufe nutzen (Stub aus)</value></data>
   <data name="Sync_EnableLabel" xml:space="preserve"><value>iCloud-Sync</value></data>
