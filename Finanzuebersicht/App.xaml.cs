@@ -126,8 +126,20 @@ public partial class App : global::Microsoft.Maui.Controls.Application
 	{
 		var window = new Window(new AppShell());
 
+#if MACCATALYST
+		if (_screenshotDemoMode)
+			ApplyMacScreenshotDemoWindowSize(window);
+#endif
+
 		// UIKit-Style nach Window-Erstellung setzen
-		window.Created += (_, _) => _themeService.Apply(_savedTheme);
+		window.Created += (_, _) =>
+		{
+			_themeService.Apply(_savedTheme);
+#if MACCATALYST
+			if (_screenshotDemoMode)
+				ApplyMacScreenshotDemoWindowSize(window);
+#endif
+		};
 
 		window.Resumed += async (_, _) =>
 		{
@@ -150,6 +162,32 @@ public partial class App : global::Microsoft.Maui.Controls.Application
 
 		return window;
 	}
+
+#if MACCATALYST
+	/// <summary>
+	/// App Store Mac shots are 16:10 (1280×800 or 2560×1600). Lock the demo window so
+	/// a Retina capture of 1280×800 points lands on 2560×1600 pixels.
+	/// </summary>
+	private static void ApplyMacScreenshotDemoWindowSize(Window window)
+	{
+		const double width = 1280;
+		const double height = 800;
+		window.Width = width;
+		window.Height = height;
+		window.MinimumWidth = width;
+		window.MinimumHeight = height;
+		window.MaximumWidth = width;
+		window.MaximumHeight = height;
+
+		if (window.Handler?.PlatformView is UIKit.UIWindow uiWindow &&
+		    uiWindow.WindowScene?.SizeRestrictions is { } restrictions)
+		{
+			var size = new CoreGraphics.CGSize(width, height);
+			restrictions.MinimumSize = size;
+			restrictions.MaximumSize = size;
+		}
+	}
+#endif
 
 	protected override async void OnStart()
 	{

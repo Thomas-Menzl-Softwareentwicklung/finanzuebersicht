@@ -107,9 +107,9 @@ python3 scripts/check-asc-metadata.py
 bundle exec fastlane upload_listing
 ```
 
-`upload_listing` setzt Version **1.20** falls nötig, lädt DE/EN-Texte und überschreibt iOS-Screenshots. Kein Binary, kein Review.
+`upload_listing` setzt Version **1.21** falls nötig, lädt DE/EN-Texte und überschreibt iOS-Screenshots. Kein Binary, kein Review.
 
-Mac-Listing (nur Texte, keine Mac-Screenshots in dieser Welle). Die macOS-App muss in ASC existieren, sonst schlägt die Lane fehl:
+Mac-Listing (Texte + Screenshots aus `fastlane/screenshots-mac/`, 1280×800). Die macOS-App muss in ASC existieren, sonst schlägt die Lane fehl:
 
 ```bash
 bundle exec fastlane upload_listing_mac
@@ -123,7 +123,7 @@ bundle exec fastlane upload_listing_all
 
 Vor dem iOS-Upload: PNGs unter `fastlane/screenshots/` (`bundle exec fastlane screenshots`). Deliver mappt nach Pixelgröße, nicht nach Simulator-Namen.
 
-Review-Notes, Age Rating und Privacy Nutrition Labels bleiben manuell in ASC.
+Review-Notes liegen unter `fastlane/metadata/review_information/notes.txt` und gehen mit den Listing-Lanes mit (Kontaktfelder in ASC nicht überschreiben). Age Rating und Privacy Nutrition Labels bleiben manuell in ASC.
 
 Erstversion: `deliver` crasht sonst beim Laden eines noch nicht existierenden Review-Details (`No data`, [fastlane#20538](https://github.com/fastlane/fastlane/issues/20538)). Die Listing-Lanes überspringen den Attachment-Schritt, solange keine `app_review_attachment_file` gesetzt ist.
 

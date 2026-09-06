@@ -58,6 +58,7 @@ coverage/
 
 # fastlane snapshot outputs
 fastlane/screenshots/
+fastlane/screenshots-mac/
 fastlane/report.xml
 fastlane/test_output/
 fastlane/Preview.html

@@ -82,5 +82,57 @@ public class ScreenshotDemoLaunchOptionsTests
             ScreenshotDemoLaunchOptions.CommandLineArgsOverride = null;
         }
     }
+
+    [Fact]
+    public void TryGetRequestedCulture_ReturnsEnUs_WhenAppleLanguagesEn()
+    {
+        ScreenshotDemoLaunchOptions.CommandLineArgsOverride = () =>
+            ["Finanzuebersicht", ScreenshotDemoLaunchOptions.LaunchArgument, "-AppleLanguages", "(en-US)"];
+
+        try
+        {
+            var culture = ScreenshotDemoLaunchOptions.TryGetRequestedCulture();
+            Assert.NotNull(culture);
+            Assert.Equal("en-US", culture.Name);
+        }
+        finally
+        {
+            ScreenshotDemoLaunchOptions.CommandLineArgsOverride = null;
+        }
+    }
+
+    [Fact]
+    public void TryGetRequestedCulture_ReturnsDeDe_WhenAppleLanguagesDe()
+    {
+        ScreenshotDemoLaunchOptions.CommandLineArgsOverride = () =>
+            ["Finanzuebersicht", "-AppleLanguages", "(de-DE)"];
+
+        try
+        {
+            var culture = ScreenshotDemoLaunchOptions.TryGetRequestedCulture();
+            Assert.NotNull(culture);
+            Assert.Equal("de-DE", culture.Name);
+        }
+        finally
+        {
+            ScreenshotDemoLaunchOptions.CommandLineArgsOverride = null;
+        }
+    }
+
+    [Fact]
+    public void TryGetRequestedCulture_ReturnsNull_WhenAppleLanguagesMissing()
+    {
+        ScreenshotDemoLaunchOptions.CommandLineArgsOverride = () =>
+            ["Finanzuebersicht", ScreenshotDemoLaunchOptions.LaunchArgument];
+
+        try
+        {
+            Assert.Null(ScreenshotDemoLaunchOptions.TryGetRequestedCulture());
+        }
+        finally
+        {
+            ScreenshotDemoLaunchOptions.CommandLineArgsOverride = null;
+        }
+    }
 #endif
 }

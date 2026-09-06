@@ -1,0 +1,12 @@
+No in-app account or login. Data is stored locally as JSON on the device.
+
+In-app purchases:
+- Pro (non-consumable, one-time): optional. Unlocks extra accounts, CSV import, widget presets, and other power features. The iPhone Home Screen quick-expense widget is Pro.
+- Sync (auto-renewable yearly): optional. Not required for core features and independent of Pro.
+
+iCloud Sync (this version):
+- Opt-in under Settings → iCloud Sync after the Sync subscription is active and the device is signed into iCloud (iOS 17+ / Mac Catalyst 17+).
+- Data stays in the reviewer’s private iCloud (CloudKit private database). There is no Finanzübersicht server.
+- No demo Apple ID. Two-device sync is not required to review the rest of the app; it works fully offline without Sync.
+
+No ads. No tracking.
