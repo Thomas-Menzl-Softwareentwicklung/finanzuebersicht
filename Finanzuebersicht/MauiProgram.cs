@@ -118,6 +118,7 @@ public static class MauiProgram
 		builder.Services.AddSingleton<ILocalizationService, LocalizationService>();
 		builder.Services.AddSingleton<INavigationService, ShellNavigationService>();
 		builder.Services.AddSingleton<IDialogService, ShellDialogService>();
+		builder.Services.AddSingleton<IExternalBrowser, MauiExternalBrowser>();
 		builder.Services.AddSingleton<IFeedbackService, MauiFeedbackService>();
 		builder.Services.AddSingleton<IOnboardingCoordinator, OnboardingCoordinator>();
 		builder.Services.AddSingleton<IMainThreadDispatcher, MauiMainThreadDispatcher>();

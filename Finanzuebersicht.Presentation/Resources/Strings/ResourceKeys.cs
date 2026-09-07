@@ -155,6 +155,8 @@ public static class ResourceKeys
     public const string Lic_SyncAvailable = nameof(Lic_SyncAvailable);
     public const string Lic_SyncPurchaseLater = nameof(Lic_SyncPurchaseLater);
     public const string Lic_UseStoreKit = nameof(Lic_UseStoreKit);
+    public const string Lic_PrivacyPolicy = nameof(Lic_PrivacyPolicy);
+    public const string Lic_TermsOfUse = nameof(Lic_TermsOfUse);
     public const string Sync_EnableLabel = nameof(Sync_EnableLabel);
     public const string Sync_LastSync = nameof(Sync_LastSync);
     public const string Sync_NeverSynced = nameof(Sync_NeverSynced);

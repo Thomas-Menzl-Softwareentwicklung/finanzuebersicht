@@ -375,6 +375,18 @@
                                 FontSize="14"
                                 Padding="12,8" />
                     </VerticalStackLayout>
+
+                    <VerticalStackLayout Spacing="8"
+                                         IsVisible="{Binding License.ShowLegalLinks}">
+                        <Button Text="{loc:Translate Lic_PrivacyPolicy}"
+                                Command="{Binding License.OpenPrivacyPolicyCommand}"
+                                FontSize="14"
+                                Padding="12,8" />
+                        <Button Text="{loc:Translate Lic_TermsOfUse}"
+                                Command="{Binding License.OpenTermsOfUseCommand}"
+                                FontSize="14"
+                                Padding="12,8" />
+                    </VerticalStackLayout>
                 </VerticalStackLayout>
             </Border>
 
