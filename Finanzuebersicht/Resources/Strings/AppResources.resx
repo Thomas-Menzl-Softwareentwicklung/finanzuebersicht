@@ -164,6 +164,8 @@
   <data name="Lic_SyncAvailable" xml:space="preserve"><value>Cloud Sync: yearly subscription for iPhone, iPad, and Mac</value></data>
   <data name="Lic_SyncPurchaseLater" xml:space="preserve"><value>Cloud Sync yearly subscription will be offered once CloudKit is ready.</value></data>
   <data name="Lic_UseStoreKit" xml:space="preserve"><value>Use App Store purchases (clear stub)</value></data>
+  <data name="Lic_PrivacyPolicy" xml:space="preserve"><value>Privacy Policy</value></data>
+  <data name="Lic_TermsOfUse" xml:space="preserve"><value>Terms of Use (EULA)</value></data>
   <data name="Sync_EnableLabel" xml:space="preserve"><value>iCloud Sync</value></data>
   <data name="Sync_LastSync" xml:space="preserve"><value>Last sync: {0}</value></data>
   <data name="Sync_NeverSynced" xml:space="preserve"><value>Not synced yet</value></data>

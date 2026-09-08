@@ -30,6 +30,8 @@ def main() -> int:
             text = path.read_text(encoding="utf-8").strip()
             if len(text) > limit:
                 errors.append(f"{path}: {len(text)} chars > {limit}")
+            if filename == "description.txt" and "itunes/dev/stdeula" not in text:
+                errors.append(f"{path}: missing Apple Standard EULA URL (Guideline 3.1.2)")
     if errors:
         print("\n".join(errors), file=sys.stderr)
         return 1

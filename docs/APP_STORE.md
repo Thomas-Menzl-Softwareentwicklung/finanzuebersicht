@@ -53,6 +53,9 @@ In App Store Connect:
 
 - **Support URL** → `https://finanzuebersicht.thomasmenzl.de/`
 - **Privacy Policy URL** → `https://finanzuebersicht.thomasmenzl.de/privacy.html`
+- **Terms of Use (EULA)** → Apple-Standard-EULA in der **App-Beschreibung** (kein Custom-EULA in App Information): `https://www.apple.com/legal/internet-services/itunes/dev/stdeula/`
+
+Bei Auto-Renew-Abos prüft Apple die Produktseite auf einen klickbaren EULA-Link (Guideline 3.1.2). Der Standard-EULA erscheint nicht von selbst als Link — deshalb steht die URL in `fastlane/metadata/*/description.txt`. In der App: Einstellungen → Lizenz.
 
 Fallback: `https://thomas-menzl-softwareentwicklung.github.io/finanzuebersicht-site/`
 

@@ -66,6 +66,48 @@ public class LicenseViewModelTests
     }
 
     [Fact]
+    public void ShowLegalLinks_TrueForStore_FalseForDirect()
+    {
+        var store = CreateSut(CreateLicenseService(canUseCloudSync: false, isImplemented: true));
+        Assert.True(store.ShowLegalLinks);
+
+        var directLicense = CreateLicenseService(canUseCloudSync: false, isImplemented: false);
+        directLicense.Channel.Returns(DistributionChannel.Direct);
+        var direct = CreateSut(directLicense);
+        Assert.False(direct.ShowLegalLinks);
+    }
+
+    [Fact]
+    public async Task OpenTermsOfUse_OpensAppleStandardEula()
+    {
+        var browser = Substitute.For<IExternalBrowser>();
+        var sut = CreateSut(CreateLicenseService(canUseCloudSync: false, isImplemented: true), browser: browser);
+
+        await sut.OpenTermsOfUseCommand.ExecuteAsync(null);
+
+        await browser.Received(1).OpenAsync(new Uri(StoreLegalUrls.AppleStandardEula));
+    }
+
+    [Theory]
+    [InlineData("de", StoreLegalUrls.PrivacyPolicyDe)]
+    [InlineData("en", StoreLegalUrls.PrivacyPolicyEn)]
+    [InlineData("en-US", StoreLegalUrls.PrivacyPolicyEn)]
+    public async Task OpenPrivacyPolicy_UsesLocalizedSite(string languageCode, string expectedUrl)
+    {
+        var browser = Substitute.For<IExternalBrowser>();
+        var localization = CreateLocalizationService();
+        localization.CurrentLanguageCode.Returns(languageCode);
+        var sut = CreateSut(
+            CreateLicenseService(canUseCloudSync: false, isImplemented: true),
+            localization: localization,
+            browser: browser);
+
+        await sut.OpenPrivacyPolicyCommand.ExecuteAsync(null);
+
+        await browser.Received(1).OpenAsync(new Uri(expectedUrl));
+    }
+
+    [Fact]
     public async Task BuySync_PurchasesYearlySyncProduct()
     {
         var license = CreateLicenseService(canUseCloudSync: false, isImplemented: true);
@@ -381,7 +423,8 @@ public class LicenseViewModelTests
         IFeedbackService? feedback = null,
         CreateBackupUseCase? backupUseCase = null,
         ClearLocalSyncedDataUseCase? clearUseCase = null,
-        IAppEvents? appEvents = null)
+        IAppEvents? appEvents = null,
+        IExternalBrowser? browser = null)
     {
         var metadata = metadataStore ?? Substitute.For<ISyncMetadataStore>();
         return new LicenseViewModel(
@@ -398,7 +441,8 @@ public class LicenseViewModelTests
             backupUseCase ?? new CreateBackupUseCase(Substitute.For<IBackupService>()),
             metadata,
             orchestrator ?? Substitute.For<ICloudSyncOrchestrator>(),
-            appEvents ?? Substitute.For<IAppEvents>());
+            appEvents ?? Substitute.For<IAppEvents>(),
+            browser ?? Substitute.For<IExternalBrowser>());
     }
 
     private static ILicenseService CreateLicenseService(bool canUseCloudSync, bool isImplemented)

@@ -9,6 +9,7 @@
 ### Geändert
 
 - Versionsbasis `1.21` (Nerdbank.GitVersioning) — TestFlight/ASC, weil `1.20` im Store liegt
+- Store-Beschreibung: Link auf Apple-Standard-EULA (Guideline 3.1.2); Einstellungen → Lizenz öffnet Datenschutz und Nutzungsbedingungen
 
 ## [1.20] - 2026-08-12
 

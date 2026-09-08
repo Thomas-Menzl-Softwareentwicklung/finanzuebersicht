@@ -1,3 +1,4 @@
+using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Finanzuebersicht.Application.UseCases.Backup;
@@ -23,6 +24,7 @@ public partial class LicenseViewModel : ObservableObject
     private readonly ISyncMetadataStore _syncMetadataStore;
     private readonly ICloudSyncOrchestrator _cloudSyncOrchestrator;
     private readonly IAppEvents _appEvents;
+    private readonly IExternalBrowser _externalBrowser;
     private bool _suppressCloudSyncToggle;
     private bool _lastKnownCloudSyncEnabled;
     private bool _metadataSyncEnabled;
@@ -39,7 +41,8 @@ public partial class LicenseViewModel : ObservableObject
         CreateBackupUseCase createBackupUseCase,
         ISyncMetadataStore syncMetadataStore,
         ICloudSyncOrchestrator cloudSyncOrchestrator,
-        IAppEvents appEvents)
+        IAppEvents appEvents,
+        IExternalBrowser externalBrowser)
     {
         _licenseService = licenseService;
         _entitlementStore = entitlementStore;
@@ -53,6 +56,7 @@ public partial class LicenseViewModel : ObservableObject
         _syncMetadataStore = syncMetadataStore;
         _cloudSyncOrchestrator = cloudSyncOrchestrator;
         _appEvents = appEvents;
+        _externalBrowser = externalBrowser;
         RefreshFromService();
     }
 
@@ -114,6 +118,8 @@ public partial class LicenseViewModel : ObservableObject
         !_licenseService.CanUseCloudSync &&
         !IsBusy;
 
+    public bool ShowLegalLinks => _licenseService.Channel == DistributionChannel.Store;
+
     public async Task InitializeAsync()
     {
         await _licenseService.RefreshAsync();
@@ -167,6 +173,14 @@ public partial class LicenseViewModel : ObservableObject
             IsBusy = false;
         }
     }
+
+    [RelayCommand]
+    private async Task OpenPrivacyPolicy() =>
+        await OpenLegalUrlAsync(ResolvePrivacyPolicyUrl());
+
+    [RelayCommand]
+    private async Task OpenTermsOfUse() =>
+        await OpenLegalUrlAsync(StoreLegalUrls.AppleStandardEula);
 
     [RelayCommand]
     private async Task BuyPro()
@@ -488,6 +502,35 @@ public partial class LicenseViewModel : ObservableObject
         OnPropertyChanged(nameof(CanToggleCloudSync));
         OnPropertyChanged(nameof(ShowSyncPurchaseLaterHint));
         OnPropertyChanged(nameof(CanBuySync));
+        OnPropertyChanged(nameof(ShowLegalLinks));
+    }
+
+    private string ResolvePrivacyPolicyUrl()
+    {
+        var code = _loc.CurrentLanguageCode ?? string.Empty;
+        if (code.StartsWith("en", StringComparison.OrdinalIgnoreCase))
+            return StoreLegalUrls.PrivacyPolicyEn;
+
+        if (string.IsNullOrEmpty(code) &&
+            CultureInfo.CurrentUICulture.TwoLetterISOLanguageName.Equals("en", StringComparison.OrdinalIgnoreCase))
+            return StoreLegalUrls.PrivacyPolicyEn;
+
+        return StoreLegalUrls.PrivacyPolicyDe;
+    }
+
+    private async Task OpenLegalUrlAsync(string url)
+    {
+        try
+        {
+            await _externalBrowser.OpenAsync(new Uri(url));
+        }
+        catch (Exception ex)
+        {
+            await _dialogService.ShowAlertAsync(
+                _loc.GetString(ResourceKeys.Err_Titel),
+                ex.Message,
+                _loc.GetString(ResourceKeys.Btn_OK));
+        }
     }
 
     /// <summary>Dev-only entitlement stubs must never appear in Release Store builds.</summary>

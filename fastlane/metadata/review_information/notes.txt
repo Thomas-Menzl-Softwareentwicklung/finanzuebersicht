@@ -9,4 +9,8 @@ iCloud Sync (this version):
 - Data stays in the reviewer’s private iCloud (CloudKit private database). There is no Finanzübersicht server.
 - No demo Apple ID. Two-device sync is not required to review the rest of the app; it works fully offline without Sync.
 
+Terms of Use: Apple Standard EULA is linked in the App Store description and in Settings → License:
+https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
+Privacy Policy: https://finanzuebersicht.thomasmenzl.de/privacy.html
+
 No ads. No tracking.

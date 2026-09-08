@@ -16,3 +16,7 @@ FREE AND PRO
 Free covers everyday use: unlimited transactions, a few accounts, recurring payments, and savings goals. Pro is a one-time purchase for unlimited accounts, CSV import, widget presets, and other power features. Core features do not require a subscription.
 
 iPhone, iPad, and Mac. German and English. Dark Mode. VoiceOver.
+
+LEGAL
+Privacy Policy: https://finanzuebersicht.thomasmenzl.de/en/privacy.html
+Terms of Use (Apple Standard EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
