@@ -86,7 +86,7 @@ public static class MauiProgram
 		builder.Services.AddSingleton<Finanzuebersicht.Core.Licensing.IStoreBillingService, Finanzuebersicht.Core.Licensing.UnavailableStoreBillingService>();
 #endif
 		builder.Services.AddInfrastructureServices();
-#if (IOS || MACCATALYST) && APP_DISTRIBUTION_STORE
+#if ((IOS || MACCATALYST) || (__IOS__ || __MACCATALYST__)) && APP_DISTRIBUTION_STORE
 		// Cloud Sync is a Store-only feature; Direct builds keep Infrastructure's
 		// NullCloudSyncTransport and therefore never touch CloudKit.
 		builder.Services.Replace(

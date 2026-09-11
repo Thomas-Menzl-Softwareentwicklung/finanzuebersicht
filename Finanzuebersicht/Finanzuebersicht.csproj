@@ -200,18 +200,6 @@
 		</NativeReference>
 	</ItemGroup>
 
-	<!-- SingleProject drops Platforms/iOS/** from @(Compile) for the maccatalyst TFM, and it does
-	     so in a target — a plain ItemGroup Include here would be removed again afterwards.
-	     CloudKitSyncTransport.cs is guarded with #if IOS || MACCATALYST and serves both. -->
-	<Target Name="IncludeCloudKitSyncTransportForMacCatalyst"
-	        BeforeTargets="BeforeCompile;CoreCompile"
-	        Condition="$(TargetFramework.Contains('-maccatalyst'))">
-		<ItemGroup>
-			<Compile Remove="Platforms/iOS/CloudKitSyncTransport.cs" />
-			<Compile Include="Platforms/iOS/CloudKitSyncTransport.cs" />
-		</ItemGroup>
-	</Target>
-
 	<!-- Store: re-sign PlugIns/*.appex with Distribution + Store profile, then re-seal outer .app
 	     with the FULL Release entitlements (incl. application-identifier — do not strip). -->
 	<Target Name="ResignWidgetExtensionForStore"

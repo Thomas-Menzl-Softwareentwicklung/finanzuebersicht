@@ -2,6 +2,8 @@
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <!-- MAUI 10.0.101 XAML SourceGen: MAUIG2045 false positive on RelativeSource AncestorType (dotnet/maui#36818). -->
+    <WarningsNotAsErrors>$(WarningsNotAsErrors);MAUIG2045</WarningsNotAsErrors>
     <AnalysisLevel>latest</AnalysisLevel>
   </PropertyGroup>
 
