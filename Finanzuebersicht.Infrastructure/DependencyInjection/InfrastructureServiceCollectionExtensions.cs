@@ -109,6 +109,11 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddSingleton<ITransactionTemplateRepository>(sp => sp.GetRequiredService<LocalDataService>());
 
         // Default inbox (tests / non-iOS). MAUI host may replace with App Group store.
+        services.AddSingleton<ICsvImportProfileStore>(sp =>
+            new FileCsvImportProfileStore(
+                GetDataDir(sp),
+                sp.GetService<ILogger<FileCsvImportProfileStore>>()));
+
         services.AddSingleton<IQuickExpenseInboxStore>(sp =>
             new FileQuickExpenseInboxStore(
                 GetDataDir(sp),
