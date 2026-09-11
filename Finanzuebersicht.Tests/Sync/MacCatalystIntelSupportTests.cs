@@ -54,6 +54,10 @@ public class MacCatalystIntelSupportTests
             "<MtouchInterpreter>-all,Finanzuebersicht</MtouchInterpreter>",
             csproj,
             StringComparison.Ordinal);
+        Assert.Contains(
+            "AlignMacCatalystRuntimeConfigForUniversalMerge",
+            csproj,
+            StringComparison.Ordinal);
     }
 
     [Fact]

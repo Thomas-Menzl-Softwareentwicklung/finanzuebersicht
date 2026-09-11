@@ -204,6 +204,22 @@
 		</NativeReference>
 	</ItemGroup>
 
+	<!-- Universal Mac Catalyst merge requires byte-identical runtimeconfig.bin. x64 JIT sets
+	     IsDynamicCodeSupported=true; arm64 AOT omits it. Copy the Intel file onto arm64 so
+	     merge succeeds without compiling the interpreter into the x64 slice. -->
+	<Target Name="AlignMacCatalystRuntimeConfigForUniversalMerge"
+	        BeforeTargets="_CreateMergedAppBundle"
+	        Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst' AND '$(RuntimeIdentifier)' == ''">
+		<ItemGroup>
+			<_X64RuntimeConfig Include="$(OutputPath)maccatalyst-x64/**/Contents/MonoBundle/runtimeconfig.bin" />
+			<_Arm64RuntimeConfig Include="$(OutputPath)maccatalyst-arm64/**/Contents/MonoBundle/runtimeconfig.bin" />
+		</ItemGroup>
+		<Copy Condition="'@(_X64RuntimeConfig)' != '' AND '@(_Arm64RuntimeConfig)' != ''"
+		      SourceFiles="@(_X64RuntimeConfig)"
+		      DestinationFiles="@(_Arm64RuntimeConfig)"
+		      OverwriteReadOnlyFiles="true" />
+	</Target>
+
 	<!-- Store: re-sign PlugIns/*.appex with Distribution + Store profile, then re-seal outer .app
 	     with the FULL Release entitlements (incl. application-identifier — do not strip). -->
 	<Target Name="ResignWidgetExtensionForStore"
