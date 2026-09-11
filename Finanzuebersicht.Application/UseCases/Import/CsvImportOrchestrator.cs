@@ -54,7 +54,7 @@ public class CsvImportOrchestrator(
             cancellationToken.ThrowIfCancellationRequested();
             var dto = dtos[index];
 
-            if (dto is null || dto.Buchungsdatum == default)
+            if (dto is null || dto.Buchungsdatum == default || dto.HasUnparsableAmount)
             {
                 var placeholderTransaction = new Transaction
                 {
@@ -73,7 +73,9 @@ public class CsvImportOrchestrator(
                     SourceIndex = index,
                     IsIncluded = false,
                     Status = ImportPreviewRowStatus.Invalid,
-                    StatusMessage = ImportMessageKeys.MissingBookingDate,
+                    StatusMessage = dto is not null && dto.HasUnparsableAmount && dto.Buchungsdatum != default
+                        ? ImportMessageKeys.UnparsableAmount
+                        : ImportMessageKeys.MissingBookingDate,
                     Transaction = placeholderTransaction
                 });
                 continue;

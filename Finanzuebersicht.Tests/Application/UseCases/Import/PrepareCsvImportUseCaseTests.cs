@@ -1,5 +1,6 @@
 using Finanzuebersicht.Application.UseCases.Import;
 using Finanzuebersicht.Core.Services;
+using Finanzuebersicht.Models;
 using Microsoft.Extensions.Logging;
 
 namespace Finanzuebersicht.Tests.Application.UseCases.Import;
@@ -127,5 +128,58 @@ public class PrepareCsvImportUseCaseTests
 
         await Assert.ThrowsAsync<OperationCanceledException>(
             () => useCase.ExecuteAsync(stream, accountId: null, cts.Token));
+    }
+
+    [Fact]
+    public async Task Prepare_SavedHeaderRowIndex_ReturnsPreviewNotNeedsMapping()
+    {
+        var store = new InMemoryCsvImportProfileStore();
+        await store.UpsertAsync(new CsvImportProfile
+        {
+            Id = "user-header-override",
+            Name = "Override",
+            Delimiter = ';',
+            Headers = ["Datum", "Betrag", "Text"],
+            HeaderRowIndex = 1,
+            DateFormat = "dd.MM.yy",
+            DecimalStyle = CsvDecimalStyle.Comma,
+            Columns = new CsvColumnMapping
+            {
+                Date = "Datum",
+                Amount = "Betrag",
+                Title = "Text"
+            }
+        });
+        var useCase = BuildPrepare(store, EmptyRepo());
+        using var stream = new MemoryStream("skip-me;x;y\nDatum;Betrag;Text\n01.03.26;1,00;A\n"u8.ToArray());
+
+        var result = await useCase.ExecuteAsync(stream, accountId: null, CancellationToken.None);
+
+        Assert.False(result.NeedsMapping);
+        Assert.NotNull(result.Preview);
+        Assert.Equal(1, result.Table!.HeaderRowIndex);
+        Assert.Equal(["Datum", "Betrag", "Text"], result.Table.Headers);
+        var row = Assert.Single(result.Preview.Rows);
+        Assert.Equal("A", row.Transaction.Titel);
+    }
+
+    [Fact]
+    public async Task Prepare_UnparsableAmount_MarksPreviewRowInvalid()
+    {
+        var store = new InMemoryCsvImportProfileStore();
+        await store.UpsertAsync(CommaProfile());
+        var useCase = BuildPrepare(store, EmptyRepo());
+        using var stream = new MemoryStream("Date,Amount,Text\n2026-03-01,not-a-number,A\n2026-03-02,1.00,B\n"u8.ToArray());
+
+        var result = await useCase.ExecuteAsync(stream, accountId: null, CancellationToken.None);
+
+        Assert.False(result.NeedsMapping);
+        Assert.NotNull(result.Preview);
+        Assert.Equal(2, result.Preview.Rows.Count);
+        Assert.Equal(ImportPreviewRowStatus.Invalid, result.Preview.Rows[0].Status);
+        Assert.False(result.Preview.Rows[0].IsIncluded);
+        Assert.Equal(ImportMessageKeys.UnparsableAmount, result.Preview.Rows[0].StatusMessage);
+        Assert.NotEqual(ImportPreviewRowStatus.Invalid, result.Preview.Rows[1].Status);
+        Assert.Equal("B", result.Preview.Rows[1].Transaction.Titel);
     }
 }

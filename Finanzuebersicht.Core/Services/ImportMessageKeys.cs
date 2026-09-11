@@ -6,6 +6,7 @@ namespace Finanzuebersicht.Core.Services;
 public static class ImportMessageKeys
 {
     public const string MissingBookingDate = "Msg_ImportStatusMissingDate";
+    public const string UnparsableAmount = "Msg_ImportStatusUnparsableAmount";
     public const string PossibleDuplicate = "Msg_ImportStatusPossibleDuplicate";
     public const string CategoryUnresolved = "Msg_ImportStatusCategoryUnresolved";
     public const string FileReadFailed = "Msg_ImportFileReadFailed";

@@ -35,6 +35,20 @@ public class PrepareCsvImportUseCase(
         var userProfiles = await profileStore.GetUserProfilesAsync().ConfigureAwait(false);
         var profile = CsvImportProfileMatcher.Find(table!, userProfiles);
         if (profile is null)
+        {
+            foreach (var candidate in userProfiles)
+            {
+                var rebuilt = table!.WithHeaderRow(candidate.HeaderRowIndex);
+                if (!CsvImportFingerprint.Matches(rebuilt, candidate))
+                    continue;
+
+                profile = candidate;
+                table = rebuilt;
+                break;
+            }
+        }
+
+        if (profile is null)
             return new CsvImportPrepareResult { Table = table };
 
         cancellationToken.ThrowIfCancellationRequested();

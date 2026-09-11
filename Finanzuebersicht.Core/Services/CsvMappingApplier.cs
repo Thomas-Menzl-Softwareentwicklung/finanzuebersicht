@@ -38,22 +38,21 @@ public static class CsvMappingApplier
         var result = new List<TransactionDto>();
         foreach (var row in table.DataRows)
         {
-            if (!TryParseDate(GetCell(row, dateIdx), profile.DateFormat, out var date))
-                continue;
-            if (!TryParseAmount(GetCell(row, amountIdx), culture, out var amount))
-                continue;
+            var dateOk = TryParseDate(GetCell(row, dateIdx), profile.DateFormat, out var date);
+            var amountOk = TryParseAmount(GetCell(row, amountIdx), culture, out var amount);
 
-            if (amountSignIdx >= 0)
+            if (amountOk && amountSignIdx >= 0)
                 amount = ApplySign(amount, GetCell(row, amountSignIdx));
 
             result.Add(new TransactionDto
             {
-                Buchungsdatum = date,
-                Wertstellung = date,
+                Buchungsdatum = dateOk ? date : default,
+                Wertstellung = dateOk ? date : default,
                 Zahlungsempfaenger = titleIdx >= 0 ? GetCell(row, titleIdx) : string.Empty,
                 Verwendungszweck = purposeIdx >= 0 ? GetCell(row, purposeIdx) : string.Empty,
                 IBAN = ibanIdx >= 0 ? GetCell(row, ibanIdx) : string.Empty,
-                Betrag = amount
+                Betrag = amount,
+                HasUnparsableAmount = !amountOk
             });
         }
 

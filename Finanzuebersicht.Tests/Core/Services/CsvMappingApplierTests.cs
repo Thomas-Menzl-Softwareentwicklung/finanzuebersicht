@@ -112,7 +112,7 @@ public class CsvMappingApplierTests
     }
 
     [Fact]
-    public void Apply_SkipsUnparsableDate()
+    public void Apply_IncludesUnparsableDate_WithDefaultBookingDate()
     {
         var table = new CsvTable
         {
@@ -137,6 +137,48 @@ public class CsvMappingApplierTests
             DecimalStyle = CsvDecimalStyle.Comma,
             Columns = new CsvColumnMapping { Date = "Datum", Amount = "Betrag", Title = "Text" }
         };
-        Assert.Equal("B", Assert.Single(CsvMappingApplier.Apply(table, profile)).Zahlungsempfaenger);
+        var dtos = CsvMappingApplier.Apply(table, profile);
+        Assert.Equal(2, dtos.Count);
+        Assert.Equal(default, dtos[0].Buchungsdatum);
+        Assert.Equal("A", dtos[0].Zahlungsempfaenger);
+        Assert.Equal(1.00m, dtos[0].Betrag);
+        Assert.Equal(new DateTime(2026, 3, 1), dtos[1].Buchungsdatum.Date);
+        Assert.Equal("B", dtos[1].Zahlungsempfaenger);
+    }
+
+    [Fact]
+    public void Apply_IncludesUnparsableAmount()
+    {
+        var table = new CsvTable
+        {
+            Delimiter = ';',
+            EncodingName = "utf-8",
+            HeaderRowIndex = 0,
+            Headers = ["Datum", "Betrag", "Text"],
+            DataRows =
+            [
+                ["01.03.26", "nope", "A"],
+                ["02.03.26", "2,00", "B"]
+            ],
+            AllRows = []
+        };
+        var profile = new CsvImportProfile
+        {
+            Id = "t",
+            Name = "t",
+            Delimiter = ';',
+            Headers = table.Headers,
+            DateFormat = "dd.MM.yy",
+            DecimalStyle = CsvDecimalStyle.Comma,
+            Columns = new CsvColumnMapping { Date = "Datum", Amount = "Betrag", Title = "Text" }
+        };
+        var dtos = CsvMappingApplier.Apply(table, profile);
+        Assert.Equal(2, dtos.Count);
+        Assert.True(dtos[0].HasUnparsableAmount);
+        Assert.Equal(new DateTime(2026, 3, 1), dtos[0].Buchungsdatum.Date);
+        Assert.Equal("A", dtos[0].Zahlungsempfaenger);
+        Assert.False(dtos[1].HasUnparsableAmount);
+        Assert.Equal(2.00m, dtos[1].Betrag);
+        Assert.Equal("B", dtos[1].Zahlungsempfaenger);
     }
 }

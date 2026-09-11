@@ -46,7 +46,7 @@ namespace Finanzuebersicht.Tests.Services
         }
 
         [Fact]
-        public void Parse_ShouldSkipMalformedRows()
+        public void Parse_IncludesMalformedRows()
         {
             var repoRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", ".."));
             var relative = Path.Combine(repoRoot, "Finanzuebersicht.Tests", "Services", "test_dkb_malformed.csv");
@@ -55,10 +55,10 @@ namespace Finanzuebersicht.Tests.Services
             Assert.True(CsvTableReader.TryRead(File.ReadAllBytes(relative), out var table, out _));
             var txs = CsvMappingApplier.Apply(table!, DkbCsvImportProfile.Instance).ToList();
 
-            // one malformed line should be skipped, expect 2 valid transactions
-            Assert.Equal(2, txs.Count);
+            Assert.Equal(3, txs.Count);
             Assert.Contains(txs, t => t.Betrag == -120.00m);
             Assert.Contains(txs, t => t.Betrag == 300.00m);
+            Assert.Contains(txs, t => t.Buchungsdatum == default);
         }
     }
 }
