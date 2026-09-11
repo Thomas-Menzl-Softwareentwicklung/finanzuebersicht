@@ -412,6 +412,24 @@ Please restart the app.</value></data>
   <data name="Hint_BudgetOptional" xml:space="preserve"><value>0.00 (no budget)</value></data>
   <data name="Empty_ImportVorschauLeer" xml:space="preserve"><value>No rows for current filter.</value></data>
   <data name="Ttl_ImportVorschau" xml:space="preserve"><value>Import Preview</value></data>
+  <data name="Ttl_ImportZuordnung" xml:space="preserve"><value>Map columns</value></data>
+  <data name="Lbl_ImportKopfzeile" xml:space="preserve"><value>Header row</value></data>
+  <data name="Lbl_ImportSpalteDatum" xml:space="preserve"><value>Date</value></data>
+  <data name="Lbl_ImportSpalteBetrag" xml:space="preserve"><value>Amount</value></data>
+  <data name="Lbl_ImportSpalteTitel" xml:space="preserve"><value>Title / payee</value></data>
+  <data name="Lbl_ImportSpalteZweck" xml:space="preserve"><value>Payment reference</value></data>
+  <data name="Lbl_ImportSpalteTyp" xml:space="preserve"><value>Type / sign</value></data>
+  <data name="Lbl_ImportSpalteIban" xml:space="preserve"><value>IBAN</value></data>
+  <data name="Lbl_ImportDatumsformat" xml:space="preserve"><value>Date format</value></data>
+  <data name="Lbl_ImportDezimalstil" xml:space="preserve"><value>Decimal numbers</value></data>
+  <data name="Lbl_ImportDezimalKomma" xml:space="preserve"><value>1.234,56</value></data>
+  <data name="Lbl_ImportDezimalPunkt" xml:space="preserve"><value>1,234.56</value></data>
+  <data name="Lbl_ImportSpalteKeine" xml:space="preserve"><value>— not used —</value></data>
+  <data name="Btn_ImportWeiter" xml:space="preserve"><value>Continue</value></data>
+  <data name="Btn_ImportSpaltenNeu" xml:space="preserve"><value>Remap columns</value></data>
+  <data name="Msg_ImportCsvNotTabular" xml:space="preserve"><value>The file is empty or not a valid CSV.</value></data>
+  <data name="Msg_ImportCsvNeedsMapping" xml:space="preserve"><value>This file’s columns need to be mapped.</value></data>
+  <data name="Msg_ImportProfilSpeichernFehlgeschlagen" xml:space="preserve"><value>The import profile could not be saved.</value></data>
   <data name="Hint_BudgetNull" xml:space="preserve"><value>Set to 0 to remove budget</value></data>
   <data name="Hint_ZielTitel" xml:space="preserve"><value>e.g. Vacation, New Laptop</value></data>
   <data name="Empty_KeineSparZiele" xml:space="preserve"><value>No savings goals yet</value></data>

@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<views:BaseContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+              xmlns:views="clr-namespace:Finanzuebersicht.Views"
+              xmlns:vm="clr-namespace:Finanzuebersicht.ViewModels"
+              xmlns:loc="clr-namespace:Finanzuebersicht.Extensions"
+              xmlns:controls="clr-namespace:Finanzuebersicht.Controls"
+              x:Class="Finanzuebersicht.Views.ImportMappingPage"
+              x:DataType="vm:ImportMappingViewModel"
+              Title="{loc:Translate Ttl_ImportZuordnung}">
+
+    <Grid RowDefinitions="*, Auto" Padding="16" RowSpacing="12">
+        <ScrollView Grid.Row="0">
+            <VerticalStackLayout Spacing="16">
+                <VerticalStackLayout Spacing="4"
+                                     BindableLayout.ItemsSource="{Binding PreviewRows}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="x:String">
+                            <Label Text="{Binding .}"
+                                   FontSize="12"
+                                   LineBreakMode="TailTruncation"
+                                   TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="{loc:Translate Lbl_ImportKopfzeile}"
+                           FontSize="13"
+                           TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
+                    <controls:SelectionField ItemsSource="{Binding HeaderRowOptions}"
+                                             SelectedItem="{Binding SelectedHeaderRow, Mode=TwoWay}"
+                                             DisplayMemberPath="DisplayName"
+                                             FieldLabel="{loc:Translate Lbl_ImportKopfzeile}" />
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="{loc:Translate Lbl_ImportSpalteDatum}"
+                           FontSize="13"
+                           TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
+                    <controls:SelectionField ItemsSource="{Binding ColumnOptions}"
+                                             SelectedItem="{Binding SelectedDate, Mode=TwoWay}"
+                                             DisplayMemberPath="DisplayName"
+                                             FieldLabel="{loc:Translate Lbl_ImportSpalteDatum}" />
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="{loc:Translate Lbl_ImportSpalteBetrag}"
+                           FontSize="13"
+                           TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
+                    <controls:SelectionField ItemsSource="{Binding ColumnOptions}"
+                                             SelectedItem="{Binding SelectedAmount, Mode=TwoWay}"
+                                             DisplayMemberPath="DisplayName"
+                                             FieldLabel="{loc:Translate Lbl_ImportSpalteBetrag}" />
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="{loc:Translate Lbl_ImportSpalteTitel}"
+                           FontSize="13"
+                           TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
+                    <controls:SelectionField ItemsSource="{Binding ColumnOptions}"
+                                             SelectedItem="{Binding SelectedTitle, Mode=TwoWay}"
+                                             DisplayMemberPath="DisplayName"
+                                             FieldLabel="{loc:Translate Lbl_ImportSpalteTitel}" />
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="{loc:Translate Lbl_ImportSpalteZweck}"
+                           FontSize="13"
+                           TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
+                    <controls:SelectionField ItemsSource="{Binding ColumnOptions}"
+                                             SelectedItem="{Binding SelectedPurpose, Mode=TwoWay}"
+                                             DisplayMemberPath="DisplayName"
+                                             FieldLabel="{loc:Translate Lbl_ImportSpalteZweck}" />
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="{loc:Translate Lbl_ImportSpalteTyp}"
+                           FontSize="13"
+                           TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
+                    <controls:SelectionField ItemsSource="{Binding ColumnOptions}"
+                                             SelectedItem="{Binding SelectedAmountSign, Mode=TwoWay}"
+                                             DisplayMemberPath="DisplayName"
+                                             FieldLabel="{loc:Translate Lbl_ImportSpalteTyp}" />
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="{loc:Translate Lbl_ImportSpalteIban}"
+                           FontSize="13"
+                           TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
+                    <controls:SelectionField ItemsSource="{Binding ColumnOptions}"
+                                             SelectedItem="{Binding SelectedIban, Mode=TwoWay}"
+                                             DisplayMemberPath="DisplayName"
+                                             FieldLabel="{loc:Translate Lbl_ImportSpalteIban}" />
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="{loc:Translate Lbl_ImportDatumsformat}"
+                           FontSize="13"
+                           TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
+                    <controls:SelectionField ItemsSource="{Binding DateFormatOptions}"
+                                             SelectedItem="{Binding SelectedDateFormat, Mode=TwoWay}"
+                                             DisplayMemberPath="DisplayName"
+                                             FieldLabel="{loc:Translate Lbl_ImportDatumsformat}" />
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="{loc:Translate Lbl_ImportDezimalstil}"
+                           FontSize="13"
+                           TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
+                    <controls:SelectionField ItemsSource="{Binding DecimalStyleOptions}"
+                                             SelectedItem="{Binding SelectedDecimalStyle, Mode=TwoWay}"
+                                             DisplayMemberPath="DisplayName"
+                                             FieldLabel="{loc:Translate Lbl_ImportDezimalstil}" />
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <Grid Grid.Row="1" ColumnDefinitions="*, *" ColumnSpacing="12">
+            <Button Grid.Column="0"
+                    Text="{loc:Translate Btn_Abbrechen}"
+                    Command="{Binding CancelCommand}"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray900}}"
+                    TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource Gray100}}" />
+            <Button Grid.Column="1"
+                    Text="{loc:Translate Btn_ImportWeiter}"
+                    Command="{Binding ContinueCommand}"
+                    IsEnabled="{Binding CanContinue}"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                    TextColor="White" />
+        </Grid>
+    </Grid>
+</views:BaseContentPage>

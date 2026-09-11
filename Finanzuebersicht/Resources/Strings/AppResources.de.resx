@@ -412,6 +412,24 @@ Bitte starte die App neu.</value></data>
   <data name="Hint_BudgetOptional" xml:space="preserve"><value>0,00 (kein Budget)</value></data>
   <data name="Empty_ImportVorschauLeer" xml:space="preserve"><value>Keine Zeilen für den aktuellen Filter.</value></data>
   <data name="Ttl_ImportVorschau" xml:space="preserve"><value>Import-Vorschau</value></data>
+  <data name="Ttl_ImportZuordnung" xml:space="preserve"><value>Spalten zuordnen</value></data>
+  <data name="Lbl_ImportKopfzeile" xml:space="preserve"><value>Kopfzeile</value></data>
+  <data name="Lbl_ImportSpalteDatum" xml:space="preserve"><value>Datum</value></data>
+  <data name="Lbl_ImportSpalteBetrag" xml:space="preserve"><value>Betrag</value></data>
+  <data name="Lbl_ImportSpalteTitel" xml:space="preserve"><value>Titel / Gegenpartei</value></data>
+  <data name="Lbl_ImportSpalteZweck" xml:space="preserve"><value>Verwendungszweck</value></data>
+  <data name="Lbl_ImportSpalteTyp" xml:space="preserve"><value>Typ / Vorzeichen</value></data>
+  <data name="Lbl_ImportSpalteIban" xml:space="preserve"><value>IBAN</value></data>
+  <data name="Lbl_ImportDatumsformat" xml:space="preserve"><value>Datumsformat</value></data>
+  <data name="Lbl_ImportDezimalstil" xml:space="preserve"><value>Dezimalzahlen</value></data>
+  <data name="Lbl_ImportDezimalKomma" xml:space="preserve"><value>1.234,56</value></data>
+  <data name="Lbl_ImportDezimalPunkt" xml:space="preserve"><value>1,234.56</value></data>
+  <data name="Lbl_ImportSpalteKeine" xml:space="preserve"><value>— nicht verwendet —</value></data>
+  <data name="Btn_ImportWeiter" xml:space="preserve"><value>Weiter</value></data>
+  <data name="Btn_ImportSpaltenNeu" xml:space="preserve"><value>Spalten neu zuordnen</value></data>
+  <data name="Msg_ImportCsvNotTabular" xml:space="preserve"><value>Die Datei ist leer oder kein gültiges CSV.</value></data>
+  <data name="Msg_ImportCsvNeedsMapping" xml:space="preserve"><value>Die Spalten dieser Datei müssen zugeordnet werden.</value></data>
+  <data name="Msg_ImportProfilSpeichernFehlgeschlagen" xml:space="preserve"><value>Das Import-Profil konnte nicht gespeichert werden.</value></data>
   <data name="Hint_BudgetNull" xml:space="preserve"><value>Auf 0 setzen um Budget zu entfernen</value></data>
   <data name="Hint_ZielTitel" xml:space="preserve"><value>z.B. Urlaub, Neuer Laptop</value></data>
   <data name="Empty_KeineSparZiele" xml:space="preserve"><value>Noch keine Sparziele angelegt</value></data>

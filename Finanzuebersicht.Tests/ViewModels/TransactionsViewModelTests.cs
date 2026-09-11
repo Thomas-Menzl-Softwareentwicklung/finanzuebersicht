@@ -573,9 +573,7 @@ public class TransactionsViewModelTests
             importAccountRepository,
             new UncategorizedCategoryService(importCategoryRepository));
         var profileStore = new InMemoryCsvImportProfileStore();
-        var analyzeUseCase = new AnalyzeCsvImportUseCase(
-            orchestrator,
-            new PrepareCsvImportUseCase(profileStore, orchestrator));
+        var prepareUseCase = new PrepareCsvImportUseCase(profileStore, orchestrator);
 
         var dkbBytes = File.ReadAllBytes(Path.Combine(
             Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..")),
@@ -600,13 +598,71 @@ public class TransactionsViewModelTests
             out _,
             out _,
             filePicker: filePicker,
-            analyzeCsvImportUseCase: analyzeUseCase,
+            prepareCsvImportUseCase: prepareUseCase,
             importSessionStore: importSessionStore);
 
         await viewModel.ImportCsvCommand.ExecuteAsync(null);
 
         Assert.NotNull(importSessionStore.GetActiveSession());
+        Assert.NotNull(importSessionStore.GetTable());
         await navigationService.Received(1).GoToAsync(Routes.ImportPreview, Arg.Any<IDictionary<string, object>>());
+        await navigationService.DidNotReceive().GoToAsync(Routes.ImportMapping, Arg.Any<IDictionary<string, object>>());
+    }
+
+    [Fact]
+    public async Task ImportCsv_NavigatesToMappingRoute_WhenUnknownCsv()
+    {
+        var importRepository = Substitute.For<ITransactionRepository>();
+        importRepository.GetTransactionsAsync(Arg.Any<DateTime>(), Arg.Any<DateTime>())
+            .Returns(Task.FromResult(new List<Transaction>()));
+
+        var importCategoryRepository = Substitute.For<ICategoryRepository>();
+        importCategoryRepository.GetCategoriesAsync()
+            .Returns(Task.FromResult(new List<Category>()));
+
+        var importAccountRepository = Substitute.For<IAccountRepository>();
+        importAccountRepository.GetAccountsAsync()
+            .Returns(Task.FromResult(new List<Account>()));
+
+        var orchestrator = new CsvImportOrchestrator(
+            importRepository,
+            Substitute.For<ILogger<CsvImportOrchestrator>>(),
+            importCategoryRepository,
+            null,
+            importAccountRepository,
+            new UncategorizedCategoryService(importCategoryRepository));
+        var prepareUseCase = new PrepareCsvImportUseCase(new InMemoryCsvImportProfileStore(), orchestrator);
+
+        var csvBytes = "Date,Amount,Text\n2026-03-01,1.00,A\n"u8.ToArray();
+        var pickedFile = new PickFileResult("unknown.csv", () => Task.FromResult<Stream>(new MemoryStream(csvBytes)));
+        var filePicker = Substitute.For<IFilePicker>();
+        filePicker.PickAsync().Returns(Task.FromResult<PickFileResult?>(pickedFile));
+
+        var importSessionStore = new ImportSessionStore();
+
+        var viewModel = CreateSut(
+            Substitute.For<ITransactionRepository>(),
+            Substitute.For<ICategoryRepository>(),
+            Substitute.For<ITransactionRepository>(),
+            Substitute.For<ICategoryRepository>(),
+            Substitute.For<IAccountRepository>(),
+            Substitute.For<IAccountRepository>(),
+            out _,
+            out _,
+            out _,
+            out var navigationService,
+            out _,
+            out _,
+            filePicker: filePicker,
+            prepareCsvImportUseCase: prepareUseCase,
+            importSessionStore: importSessionStore);
+
+        await viewModel.ImportCsvCommand.ExecuteAsync(null);
+
+        Assert.Null(importSessionStore.GetActiveSession());
+        Assert.NotNull(importSessionStore.GetTable());
+        await navigationService.Received(1).GoToAsync(Routes.ImportMapping, Arg.Any<IDictionary<string, object>>());
+        await navigationService.DidNotReceive().GoToAsync(Routes.ImportPreview, Arg.Any<IDictionary<string, object>>());
     }
 
     [Fact]
@@ -683,7 +739,7 @@ public class TransactionsViewModelTests
         out ITransferCreateSheetService transferCreateSheet,
         ITransactionRepository? deleteTransactionRepository = null,
         IFilePicker? filePicker = null,
-        AnalyzeCsvImportUseCase? analyzeCsvImportUseCase = null,
+        PrepareCsvImportUseCase? prepareCsvImportUseCase = null,
         IImportSessionStore? importSessionStore = null)
     {
         dialogService = Substitute.For<IDialogService>();
@@ -713,9 +769,8 @@ public class TransactionsViewModelTests
             Substitute.For<ICategoryRepository>(),
             null,
             Substitute.For<IAccountRepository>());
-        analyzeCsvImportUseCase ??= new AnalyzeCsvImportUseCase(
-            defaultOrchestrator,
-            new PrepareCsvImportUseCase(new InMemoryCsvImportProfileStore(), defaultOrchestrator));
+        prepareCsvImportUseCase ??= new PrepareCsvImportUseCase(
+            new InMemoryCsvImportProfileStore(), defaultOrchestrator);
 
         deleteTransactionRepository ??= Substitute.For<ITransactionRepository>();
         deleteTransactionRepository.DeleteTransactionAsync(Arg.Any<string>()).Returns(Task.CompletedTask);
@@ -730,7 +785,7 @@ public class TransactionsViewModelTests
             .Returns(Task.CompletedTask);
 
         var importCoordinator = new TransactionImportCoordinator(
-            analyzeCsvImportUseCase,
+            prepareCsvImportUseCase,
             filePicker,
             navigationService,
             dialogService,

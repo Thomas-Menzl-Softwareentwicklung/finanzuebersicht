@@ -18,6 +18,7 @@ public partial class AppShell : Shell
 		Routing.RegisterRoute(Routes.Settings, typeof(SettingsPage));
 		Routing.RegisterRoute(Routes.BackupList, typeof(BackupListPage));
 		Routing.RegisterRoute(Routes.ImportPreview, typeof(ImportPreviewPage));
+		Routing.RegisterRoute(Routes.ImportMapping, typeof(ImportMappingPage));
 		Routing.RegisterRoute(Routes.Cashflow, typeof(CashflowPage));
 		Routing.RegisterRoute(Routes.SparZielDetail, typeof(SparZielDetailPage));
 		Routing.RegisterRoute(Routes.Onboarding, typeof(OnboardingPage));

@@ -8,10 +8,10 @@ using Microsoft.Extensions.Logging;
 namespace Finanzuebersicht.ViewModels;
 
 /// <summary>
-/// CSV import entry flow for the transactions list (license → pick → analyze → preview).
+/// CSV import entry flow for the transactions list (license → pick → prepare → mapping or preview).
 /// </summary>
 public sealed class TransactionImportCoordinator(
-    AnalyzeCsvImportUseCase analyzeCsvImportUseCase,
+    PrepareCsvImportUseCase prepareCsvImportUseCase,
     IFilePicker filePicker,
     INavigationService navigationService,
     IDialogService dialogService,
@@ -20,7 +20,7 @@ public sealed class TransactionImportCoordinator(
     IImportSessionStore? importSessionStore = null,
     ILogger<TransactionImportCoordinator>? logger = null)
 {
-    private readonly AnalyzeCsvImportUseCase _analyzeCsvImportUseCase = analyzeCsvImportUseCase;
+    private readonly PrepareCsvImportUseCase _prepareCsvImportUseCase = prepareCsvImportUseCase;
     private readonly IFilePicker _filePicker = filePicker;
     private readonly INavigationService _navigationService = navigationService;
     private readonly IDialogService _dialogService = dialogService;
@@ -46,15 +46,15 @@ public sealed class TransactionImportCoordinator(
             if (picked == null) return;
 
             using var stream = await picked.OpenReadAsync();
-            var preview = await _analyzeCsvImportUseCase.ExecuteAsync(stream, selectedAccountId);
+            var prepared = await _prepareCsvImportUseCase.ExecuteAsync(stream, selectedAccountId);
 
-            if (!preview.Success)
+            if (prepared.ErrorMessage is not null)
             {
-                var errorDetail = string.IsNullOrWhiteSpace(preview.ErrorMessage)
+                var errorDetail = string.IsNullOrWhiteSpace(prepared.ErrorMessage)
                     ? "Unbekannter Fehler beim Import."
-                    : _loc.GetString(preview.ErrorMessage);
-                if (string.IsNullOrWhiteSpace(errorDetail) || errorDetail == preview.ErrorMessage)
-                    errorDetail = preview.ErrorMessage ?? errorDetail;
+                    : _loc.GetString(prepared.ErrorMessage);
+                if (string.IsNullOrWhiteSpace(errorDetail) || errorDetail == prepared.ErrorMessage)
+                    errorDetail = prepared.ErrorMessage ?? errorDetail;
 
                 await _dialogService.ShowAlertAsync(
                     _loc.GetString(ResourceKeys.Msg_ImportFehlgeschlagen_Title),
@@ -73,7 +73,16 @@ public sealed class TransactionImportCoordinator(
             }
 
             _importSessionStore.Clear();
-            _importSessionStore.SetActiveSession(preview);
+            if (prepared.Table is not null)
+                _importSessionStore.SetTable(prepared.Table, selectedAccountId);
+
+            if (prepared.NeedsMapping)
+            {
+                await _navigationService.GoToAsync(Routes.ImportMapping);
+                return;
+            }
+
+            _importSessionStore.SetActiveSession(prepared.Preview!, prepared.Profile);
             await _navigationService.GoToAsync(Routes.ImportPreview);
         }
         catch (Exception ex)
