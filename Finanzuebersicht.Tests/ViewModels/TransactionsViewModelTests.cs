@@ -5,6 +5,7 @@ using Finanzuebersicht.Application.UseCases.Accounts;
 using Finanzuebersicht.Application.UseCases.Categories;
 using Finanzuebersicht.Application.UseCases.Import;
 using Finanzuebersicht.Application.UseCases.Transactions;
+using Finanzuebersicht.Tests.Application.UseCases.Import;
 using Finanzuebersicht.Application.UseCases.SparZiele;
 using Finanzuebersicht.Core.Services;
 using Finanzuebersicht.Models;
@@ -551,11 +552,6 @@ public class TransactionsViewModelTests
     [Fact]
     public async Task ImportCsv_NavigatesToPreviewRoute()
     {
-        var parser = Substitute.For<IStatementParser>();
-        parser.Parse(Arg.Any<Stream>()).Returns([
-            new TransactionDto { Buchungsdatum = DateTime.Today, Betrag = 10m, Zahlungsempfaenger = "Import" }
-        ]);
-
         var importRepository = Substitute.For<ITransactionRepository>();
         importRepository.GetTransactionsAsync(Arg.Any<DateTime>(), Arg.Any<DateTime>())
             .Returns(Task.FromResult(new List<Transaction>()));
@@ -569,17 +565,22 @@ public class TransactionsViewModelTests
             .Returns(Task.FromResult(new List<Account>()));
 
         var importLogger = Substitute.For<ILogger<CsvImportOrchestrator>>();
+        var orchestrator = new CsvImportOrchestrator(
+            importRepository,
+            importLogger,
+            importCategoryRepository,
+            null,
+            importAccountRepository,
+            new UncategorizedCategoryService(importCategoryRepository));
+        var profileStore = new InMemoryCsvImportProfileStore();
         var analyzeUseCase = new AnalyzeCsvImportUseCase(
-            new CsvImportOrchestrator(
-                [parser],
-                importRepository,
-                importLogger,
-                importCategoryRepository,
-                null,
-                importAccountRepository,
-                new UncategorizedCategoryService(importCategoryRepository)));
+            orchestrator,
+            new PrepareCsvImportUseCase(profileStore, orchestrator));
 
-        var pickedFile = new PickFileResult("test.csv", () => Task.FromResult<Stream>(new MemoryStream()));
+        var dkbBytes = File.ReadAllBytes(Path.Combine(
+            Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..")),
+            "Finanzuebersicht.Tests", "Services", "test_dkb_sample.csv"));
+        var pickedFile = new PickFileResult("test.csv", () => Task.FromResult<Stream>(new MemoryStream(dkbBytes)));
         var filePicker = Substitute.For<IFilePicker>();
         filePicker.PickAsync().Returns(Task.FromResult<PickFileResult?>(pickedFile));
 
@@ -706,14 +707,15 @@ public class TransactionsViewModelTests
         filePicker ??= Substitute.For<IFilePicker>();
         var appEvents = Substitute.For<IAppEvents>();
         var logger = Substitute.For<ILogger<TransactionsViewModel>>();
+        var defaultOrchestrator = new CsvImportOrchestrator(
+            Substitute.For<ITransactionRepository>(),
+            Substitute.For<ILogger<CsvImportOrchestrator>>(),
+            Substitute.For<ICategoryRepository>(),
+            null,
+            Substitute.For<IAccountRepository>());
         analyzeCsvImportUseCase ??= new AnalyzeCsvImportUseCase(
-            new CsvImportOrchestrator(
-                [],
-                Substitute.For<ITransactionRepository>(),
-                Substitute.For<ILogger<CsvImportOrchestrator>>(),
-                Substitute.For<ICategoryRepository>(),
-                null,
-                Substitute.For<IAccountRepository>()));
+            defaultOrchestrator,
+            new PrepareCsvImportUseCase(new InMemoryCsvImportProfileStore(), defaultOrchestrator));
 
         deleteTransactionRepository ??= Substitute.For<ITransactionRepository>();
         deleteTransactionRepository.DeleteTransactionAsync(Arg.Any<string>()).Returns(Task.CompletedTask);

@@ -11,7 +11,6 @@ public class ImportPreviewViewModelTests
 {
     private static CommitCsvImportUseCase CreateCommitUseCase(ICategoryRepository categoryRepository)
         => new(new CsvImportOrchestrator(
-            [],
             Substitute.For<ITransactionRepository>(),
             Substitute.For<ILogger<CsvImportOrchestrator>>(),
             categoryRepository,

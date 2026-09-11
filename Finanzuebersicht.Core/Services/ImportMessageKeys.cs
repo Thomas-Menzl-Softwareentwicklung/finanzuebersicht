@@ -11,4 +11,5 @@ public static class ImportMessageKeys
     public const string FileReadFailed = "Msg_ImportFileReadFailed";
     public const string NoParserMatched = "Msg_ImportNoParserMatched";
     public const string CsvNotTabular = "Msg_ImportCsvNotTabular";
+    public const string CsvNeedsMapping = "Msg_ImportCsvNeedsMapping";
 }
