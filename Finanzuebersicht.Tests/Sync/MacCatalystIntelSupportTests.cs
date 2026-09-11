@@ -4,9 +4,8 @@ namespace Finanzuebersicht.Tests.Sync;
 /// Mac App Store / TestFlight reject arm64-only Mac Catalyst packages, and
 /// <c>UIRequiredDeviceCapabilities → arm64</c> hides Intel Macs even when the
 /// binary is universal. iOS still requires arm64.
-/// Apple Silicon Release is AOT-only; the entry assembly is interpreted on
-/// maccatalyst-arm64 so a missing AOT image does not SIGABRT. Intel (x64) stays
-/// on JIT — enabling the interpreter for all Catalyst RIDs crashes at startup.
+/// Universal Release AOTs all assemblies except the entry assembly (interpreted)
+/// so Apple Silicon can start and Intel is not forced onto a full interpreter.
 /// </summary>
 public class MacCatalystIntelSupportTests
 {
@@ -27,7 +26,7 @@ public class MacCatalystIntelSupportTests
     }
 
     [Fact]
-    public void MacCatalyst_InterpretsEntryAssemblyOnArm64ReleaseOnly()
+    public void MacCatalyst_InterpretsEntryAssemblyOnRelease()
     {
         var csproj = File.ReadAllText(FindRepoFile("Finanzuebersicht/Finanzuebersicht.csproj"));
         Assert.Contains(
@@ -39,7 +38,7 @@ public class MacCatalystIntelSupportTests
             csproj,
             StringComparison.Ordinal);
         Assert.Contains(
-            "Condition=\"'$(RuntimeIdentifier)' == 'maccatalyst-arm64' AND '$(Configuration)' == 'Release'\"",
+            "Condition=\"$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst' AND '$(Configuration)' == 'Release'\"",
             csproj,
             StringComparison.Ordinal);
         Assert.Contains(

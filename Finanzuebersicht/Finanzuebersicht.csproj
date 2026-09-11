@@ -73,10 +73,11 @@
 		<UseInterpreter Condition="'$(Configuration)' == 'Debug'">true</UseInterpreter>
 	</PropertyGroup>
 
-	<!-- Apple Silicon Mac Catalyst Release is AOT-only. Interpreting the entry assembly
-	     avoids load_aot_module SIGABRT without putting Intel (JIT) on the interpreter
-	     path, which aborts in UIApplication.Main (marshalling / registrar). -->
-	<PropertyGroup Condition="'$(RuntimeIdentifier)' == 'maccatalyst-arm64' AND '$(Configuration)' == 'Release'">
+	<!-- Universal Mac Catalyst Release: runtimeconfig.bin must be identical across
+	     x64 and arm64 or lipo fails. AOT everything except the entry assembly so
+	     Apple Silicon can start without putting UIKit on the full interpreter
+	     (that aborted in UIApplication.Main on 1.21.16). Intel still JITs the rest. -->
+	<PropertyGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst' AND '$(Configuration)' == 'Release'">
 		<MtouchInterpreter>-all,Finanzuebersicht</MtouchInterpreter>
 	</PropertyGroup>
 
