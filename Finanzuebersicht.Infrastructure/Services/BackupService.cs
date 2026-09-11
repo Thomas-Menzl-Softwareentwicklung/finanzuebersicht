@@ -23,6 +23,7 @@ namespace Finanzuebersicht.Infrastructure.Services
         private readonly IBudgetRepository _budgetRepository;
         private readonly ISparZielRepository _sparZielRepository;
         private readonly ITransactionTemplateRepository? _transactionTemplateRepository;
+        private readonly ICsvImportProfileStore? _csvImportProfileStore;
         private readonly ISettingsService _settingsService;
         private readonly ILogger<BackupService>? _logger;
         private readonly Finanzuebersicht.Core.Services.IClock _clock;
@@ -46,6 +47,7 @@ namespace Finanzuebersicht.Infrastructure.Services
             ISettingsService settingsService,
             DataMigrationService migrationService,
             ITransactionTemplateRepository? transactionTemplateRepository = null,
+            ICsvImportProfileStore? csvImportProfileStore = null,
             ILogger<BackupService>? logger = null,
             Finanzuebersicht.Core.Services.IClock? clock = null)
         {
@@ -56,6 +58,7 @@ namespace Finanzuebersicht.Infrastructure.Services
             _budgetRepository = budgetRepository ?? throw new ArgumentNullException(nameof(budgetRepository));
             _sparZielRepository = sparZielRepository ?? throw new ArgumentNullException(nameof(sparZielRepository));
             _transactionTemplateRepository = transactionTemplateRepository;
+            _csvImportProfileStore = csvImportProfileStore;
             _settingsService = settingsService ?? throw new ArgumentNullException(nameof(settingsService));
             _migrationService = migrationService ?? throw new ArgumentNullException(nameof(migrationService));
             _logger = logger;
@@ -87,6 +90,9 @@ namespace Finanzuebersicht.Infrastructure.Services
                 List<TransactionTemplate> transactionTemplates = _transactionTemplateRepository is null
                     ? []
                     : await _transactionTemplateRepository.GetTransactionTemplatesAsync();
+                List<CsvImportProfile> csvImportProfiles = _csvImportProfileStore is null
+                    ? []
+                    : [.. await _csvImportProfileStore.GetUserProfilesAsync()];
 
                 // Erstelle Metadaten
                 var metadata = new BackupMetadata
@@ -103,7 +109,8 @@ namespace Finanzuebersicht.Infrastructure.Services
                         { BackupEntityKeys.Recurring, recurring.Count() },
                         { BackupEntityKeys.Budgets, budgets.Count },
                         { BackupEntityKeys.Sparziele, sparziele.Count },
-                        { BackupEntityKeys.TransactionTemplates, transactionTemplates.Count }
+                        { BackupEntityKeys.TransactionTemplates, transactionTemplates.Count },
+                        { BackupEntityKeys.CsvImportProfiles, csvImportProfiles.Count }
                     }
                 };
 
@@ -118,6 +125,7 @@ namespace Finanzuebersicht.Infrastructure.Services
                     WriteJsonToZip(zipArchive, DataFileNames.Budgets, budgets);
                     WriteJsonToZip(zipArchive, DataFileNames.Sparziele, sparziele);
                     WriteJsonToZip(zipArchive, DataFileNames.TransactionTemplates, transactionTemplates);
+                    WriteJsonToZip(zipArchive, DataFileNames.CsvImportProfiles, csvImportProfiles);
                     WriteJsonToZip(zipArchive, DataFileNames.BackupMetadata, metadata);
                 }
 
@@ -241,6 +249,7 @@ namespace Finanzuebersicht.Infrastructure.Services
                 var budgets = DeserializeFile<List<CategoryBudget>>(archiveData, DataFileNames.Budgets);
                 var sparziele = DeserializeFile<List<SparZiel>>(archiveData, DataFileNames.Sparziele);
                 var transactionTemplates = DeserializeFile<List<TransactionTemplate>>(archiveData, DataFileNames.TransactionTemplates) ?? [];
+                var csvImportProfiles = DeserializeFile<List<CsvImportProfile>>(archiveData, DataFileNames.CsvImportProfiles) ?? [];
 
                 if (categories == null || accounts == null || transactions == null || recurring == null || budgets == null || sparziele == null)
                     return new RestoreResult
@@ -251,7 +260,7 @@ namespace Finanzuebersicht.Infrastructure.Services
                     };
 
                 // Atomare Restore mit Rollback-Capability
-                var restoreSuccess = await AtomicRestoreAsync(categories, accounts, transactions, recurring, budgets, sparziele, transactionTemplates);
+                var restoreSuccess = await AtomicRestoreAsync(categories, accounts, transactions, recurring, budgets, sparziele, transactionTemplates, csvImportProfiles);
 
                 if (!restoreSuccess)
                     return new RestoreResult
@@ -309,7 +318,8 @@ namespace Finanzuebersicht.Infrastructure.Services
             List<RecurringTransaction> recurring,
             List<CategoryBudget> budgets,
             List<SparZiel> sparziele,
-            List<TransactionTemplate> transactionTemplates)
+            List<TransactionTemplate> transactionTemplates,
+            List<CsvImportProfile> csvImportProfiles)
         {
             // Snapshot des aktuellen Zustands laden (für Rollback).
             // Wenn dieser Schritt fehlschlägt (z.B. DataCorruptionException), bricht der Restore
@@ -323,11 +333,14 @@ namespace Finanzuebersicht.Infrastructure.Services
             List<TransactionTemplate> snapshotTransactionTemplates = _transactionTemplateRepository is null
                 ? []
                 : await _transactionTemplateRepository.GetTransactionTemplatesAsync();
+            List<CsvImportProfile> snapshotCsvImportProfiles = _csvImportProfileStore is null
+                ? []
+                : [.. await _csvImportProfileStore.GetUserProfilesAsync()];
 
             try
             {
-                _logger?.LogInformation("Starte Wiederherstellung: {CatCount} Kategorien, {TxnCount} Transaktionen, {RecCount} Daueraufträge, {BudCount} Budgets, {SparCount} Sparziele, {TemplateCount} Vorlagen",
-                    categories.Count, transactions.Count, recurring.Count, budgets.Count, sparziele.Count, transactionTemplates.Count);
+                _logger?.LogInformation("Starte Wiederherstellung: {CatCount} Kategorien, {TxnCount} Transaktionen, {RecCount} Daueraufträge, {BudCount} Budgets, {SparCount} Sparziele, {TemplateCount} Vorlagen, {ProfileCount} CSV-Profile",
+                    categories.Count, transactions.Count, recurring.Count, budgets.Count, sparziele.Count, transactionTemplates.Count, csvImportProfiles.Count);
 
                 await _categoryRepository.ReplaceAllCategoriesAsync(categories);
                 await _accountRepository.ReplaceAllAccountsAsync(accounts);
@@ -337,13 +350,15 @@ namespace Finanzuebersicht.Infrastructure.Services
                 await _sparZielRepository.ReplaceAllSparZieleAsync(sparziele);
                 if (_transactionTemplateRepository is not null)
                     await _transactionTemplateRepository.ReplaceAllTransactionTemplatesAsync(transactionTemplates);
+                if (_csvImportProfileStore is not null)
+                    await _csvImportProfileStore.ReplaceAllAsync(csvImportProfiles);
 
                 return true;
             }
             catch (Exception ex)
             {
                 _logger?.LogError(ex, "Fehler bei der Wiederherstellung – starte Rollback");
-                await RollbackAsync(snapshotCategories, snapshotAccounts, snapshotTransactions, snapshotRecurring, snapshotBudgets, snapshotSparziele, snapshotTransactionTemplates);
+                await RollbackAsync(snapshotCategories, snapshotAccounts, snapshotTransactions, snapshotRecurring, snapshotBudgets, snapshotSparziele, snapshotTransactionTemplates, snapshotCsvImportProfiles);
                 return false;
             }
         }
@@ -355,7 +370,8 @@ namespace Finanzuebersicht.Infrastructure.Services
             List<RecurringTransaction> recurring,
             List<CategoryBudget> budgets,
             List<SparZiel> sparziele,
-            List<TransactionTemplate> transactionTemplates)
+            List<TransactionTemplate> transactionTemplates,
+            List<CsvImportProfile> csvImportProfiles)
         {
             try
             {
@@ -367,6 +383,8 @@ namespace Finanzuebersicht.Infrastructure.Services
                 await _sparZielRepository.ReplaceAllSparZieleAsync(sparziele);
                 if (_transactionTemplateRepository is not null)
                     await _transactionTemplateRepository.ReplaceAllTransactionTemplatesAsync(transactionTemplates);
+                if (_csvImportProfileStore is not null)
+                    await _csvImportProfileStore.ReplaceAllAsync(csvImportProfiles);
 
                 _logger?.LogInformation("Rollback erfolgreich abgeschlossen");
             }
