@@ -69,11 +69,15 @@
 		     -p:RuntimeIdentifier=maccatalyst-arm64 for Store publish. -->
 		<RuntimeIdentifiers Condition="'$(Configuration)' == 'Release' AND $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst' AND '$(RuntimeIdentifier)' == ''">maccatalyst-x64;maccatalyst-arm64</RuntimeIdentifiers>
 		<UserDialogs>false</UserDialogs>
-		<!-- Debug (all Apple targets): interpreter.
-		     Mac Catalyst Release too: arm64 is AOT-only without this and SIGABRTs in
-		     universal packages; x64+arm64 must match or fat-merge fails on runtimeconfig.bin. -->
+		<!-- Debug (all Apple targets): interpreter. -->
 		<UseInterpreter Condition="'$(Configuration)' == 'Debug'">true</UseInterpreter>
-		<UseInterpreter Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">true</UseInterpreter>
+	</PropertyGroup>
+
+	<!-- Apple Silicon Mac Catalyst Release is AOT-only. Interpreting the entry assembly
+	     avoids load_aot_module SIGABRT without putting Intel (JIT) on the interpreter
+	     path, which aborts in UIApplication.Main (marshalling / registrar). -->
+	<PropertyGroup Condition="'$(RuntimeIdentifier)' == 'maccatalyst-arm64' AND '$(Configuration)' == 'Release'">
+		<MtouchInterpreter>-all,Finanzuebersicht</MtouchInterpreter>
 	</PropertyGroup>
 
 	<ItemGroup>
