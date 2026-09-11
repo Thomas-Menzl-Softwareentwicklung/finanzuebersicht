@@ -4,9 +4,9 @@ namespace Finanzuebersicht.Tests.Sync;
 /// Mac App Store / TestFlight reject arm64-only Mac Catalyst packages, and
 /// <c>UIRequiredDeviceCapabilities → arm64</c> hides Intel Macs even when the
 /// binary is universal. iOS still requires arm64.
-/// Universal Release AOTs all assemblies (<c>MtouchInterpreter=-all</c>) so
-/// AppDelegate registrar trampolines stay valid. Interpreting Finanzuebersicht.dll
-/// SIGSEGVs in UIApplication setDelegate on Intel.
+/// Intel Release stays on JIT (no interpreter). Enabling the interpreter on x64
+/// SIGSEGVs in UIApplication.Main / AppDelegate init. Apple Silicon Release may
+/// use <c>MtouchInterpreter=-all</c> on maccatalyst-arm64 only.
 /// </summary>
 public class MacCatalystIntelSupportTests
 {
@@ -27,7 +27,7 @@ public class MacCatalystIntelSupportTests
     }
 
     [Fact]
-    public void MacCatalyst_AotAllAssembliesOnRelease()
+    public void MacCatalyst_InterpreterOnlyOnArm64Release()
     {
         var csproj = File.ReadAllText(FindRepoFile("Finanzuebersicht/Finanzuebersicht.csproj"));
         Assert.Contains(
@@ -39,11 +39,19 @@ public class MacCatalystIntelSupportTests
             csproj,
             StringComparison.Ordinal);
         Assert.DoesNotContain(
-            "<MtouchInterpreter>-all,Finanzuebersicht</MtouchInterpreter>",
+            "Condition=\"$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst' AND '$(Configuration)' == 'Release'\"",
+            csproj,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "Condition=\"'$(RuntimeIdentifier)' == 'maccatalyst-arm64' AND '$(Configuration)' == 'Release'\"",
             csproj,
             StringComparison.Ordinal);
         Assert.Contains(
             "<MtouchInterpreter>-all</MtouchInterpreter>",
+            csproj,
+            StringComparison.Ordinal);
+        Assert.DoesNotContain(
+            "<MtouchInterpreter>-all,Finanzuebersicht</MtouchInterpreter>",
             csproj,
             StringComparison.Ordinal);
     }

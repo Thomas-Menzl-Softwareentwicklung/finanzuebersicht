@@ -73,12 +73,10 @@
 		<UseInterpreter Condition="'$(Configuration)' == 'Debug'">true</UseInterpreter>
 	</PropertyGroup>
 
-	<!-- Universal Mac Catalyst Release: runtimeconfig.bin must match across x64/arm64.
-	     AOT every assembly (including AppDelegate in Finanzuebersicht.dll). Interpreting
-	     the entry assembly made 1.21.18 SIGSEGV in [UIApplication setDelegate:]
-	     (registrar respondsToSelector: → null IMP). Interpreter stays available for
-	     dynamic codegen so Apple Silicon is not AOT-only. -->
-	<PropertyGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst' AND '$(Configuration)' == 'Release'">
+	<!-- Intel Mac Catalyst Release must not link the interpreter: 1.21.16/18/19 all
+	     SIGSEGV/SIGABRT in UIApplication.Main / [AppDelegate init] (null registrar IMP).
+	     Apple Silicon cannot JIT; keep the interpreter on arm64 only (MAUI docs). -->
+	<PropertyGroup Condition="'$(RuntimeIdentifier)' == 'maccatalyst-arm64' AND '$(Configuration)' == 'Release'">
 		<MtouchInterpreter>-all</MtouchInterpreter>
 	</PropertyGroup>
 
