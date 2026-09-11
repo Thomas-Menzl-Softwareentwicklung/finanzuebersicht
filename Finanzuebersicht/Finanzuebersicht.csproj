@@ -69,8 +69,11 @@
 		     -p:RuntimeIdentifier=maccatalyst-arm64 for Store publish. -->
 		<RuntimeIdentifiers Condition="'$(Configuration)' == 'Release' AND $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst' AND '$(RuntimeIdentifier)' == ''">maccatalyst-x64;maccatalyst-arm64</RuntimeIdentifiers>
 		<UserDialogs>false</UserDialogs>
-		<!-- Ensure UseInterpreter is true if link is None, though usually implied for Debug -->
+		<!-- Debug (all Apple targets): interpreter.
+		     Mac Catalyst Release too: arm64 is AOT-only without this and SIGABRTs in
+		     universal packages; x64+arm64 must match or fat-merge fails on runtimeconfig.bin. -->
 		<UseInterpreter Condition="'$(Configuration)' == 'Debug'">true</UseInterpreter>
+		<UseInterpreter Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">true</UseInterpreter>
 	</PropertyGroup>
 
 	<ItemGroup>
