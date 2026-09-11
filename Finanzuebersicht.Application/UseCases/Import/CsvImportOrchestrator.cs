@@ -10,11 +10,10 @@ using Microsoft.Extensions.Logging;
 namespace Finanzuebersicht.Application.UseCases.Import;
 
 /// <summary>
-/// CSV import orchestration (parse, analyze, commit). Prefer <see cref="AnalyzeCsvImportUseCase"/> /
-/// <see cref="CommitCsvImportUseCase"/> from Presentation.
+/// CSV import orchestration (analyze DTOs, commit). Prefer <see cref="PrepareCsvImportUseCase"/> /
+/// <see cref="AnalyzeCsvImportUseCase"/> / <see cref="CommitCsvImportUseCase"/> from Presentation.
 /// </summary>
 public class CsvImportOrchestrator(
-    IEnumerable<IStatementParser> parsers,
     ITransactionRepository transactionRepository,
     ILogger<CsvImportOrchestrator> logger,
     ICategoryRepository? categoryRepository = null,
@@ -25,7 +24,6 @@ public class CsvImportOrchestrator(
 {
     private const double HistoricalConfidenceThreshold = 0.5;
 
-    private readonly IEnumerable<IStatementParser> _parsers = parsers;
     private readonly ITransactionRepository _transactionRepository = transactionRepository;
     private readonly ILogger<CsvImportOrchestrator> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     private readonly ICategoryRepository? _categoryRepository = categoryRepository;
@@ -34,50 +32,15 @@ public class CsvImportOrchestrator(
     private readonly IUncategorizedCategoryService? _uncategorizedCategoryService = uncategorizedCategoryService;
     private readonly ICloudSyncOrchestrator? _cloudSyncOrchestrator = cloudSyncOrchestrator;
 
-    public async Task<ImportResult> ImportFromCsvAsync(
-        Stream csvStream,
+    public async Task<ImportPreviewResult> AnalyzeDtosAsync(
+        IReadOnlyList<TransactionDto> dtos,
         string? accountId = null,
         CancellationToken cancellationToken = default)
     {
-        var preview = await AnalyzeCsvAsync(csvStream, accountId, cancellationToken).ConfigureAwait(false);
-        if (!preview.Success)
-        {
-            return new ImportResult { ErrorMessage = preview.ErrorMessage };
-        }
-
-        var previewDuplicates = preview.Rows
-            .Where(r => r.Status == ImportPreviewRowStatus.Duplicate)
-            .Select(r => CloneTransaction(r.Transaction))
-            .ToList();
-
-        var commitResult = await CommitImportAsync(preview, cancellationToken: cancellationToken).ConfigureAwait(false);
-        var allDuplicates = previewDuplicates.Concat(commitResult.Duplicates).ToList();
-
-        return new ImportResult
-        {
-            Imported = commitResult.Imported,
-            Duplicates = allDuplicates,
-            SkippedMalformed = preview.InvalidCount,
-            SaveErrors = commitResult.SaveErrors,
-            ErrorMessage = commitResult.ErrorMessage
-        };
-    }
-
-    public async Task<ImportPreviewResult> AnalyzeCsvAsync(
-        Stream csvStream,
-        string? accountId = null,
-        CancellationToken cancellationToken = default)
-    {
+        ArgumentNullException.ThrowIfNull(dtos);
         cancellationToken.ThrowIfCancellationRequested();
         _logger.LogInformation("CsvImport: starting analysis (accountId={AccountId})", accountId ?? "(none)");
 
-        var parseResult = await ParseDtosAsync(csvStream, cancellationToken).ConfigureAwait(false);
-        if (parseResult.ErrorMessage is not null)
-        {
-            return new ImportPreviewResult { ErrorMessage = parseResult.ErrorMessage };
-        }
-
-        var dtos = parseResult.Dtos!;
         var categories = await LoadCategoriesAsync().ConfigureAwait(false);
         var defaultAccountId = await ResolveDefaultAccountIdAsync(cancellationToken).ConfigureAwait(false);
         var existingInRange = await LoadExistingTransactionsForDtosAsync(dtos).ConfigureAwait(false);
@@ -91,7 +54,7 @@ public class CsvImportOrchestrator(
             cancellationToken.ThrowIfCancellationRequested();
             var dto = dtos[index];
 
-            if (dto is null || dto.Buchungsdatum == default)
+            if (dto is null || dto.Buchungsdatum == default || dto.HasUnparsableAmount)
             {
                 var placeholderTransaction = new Transaction
                 {
@@ -110,7 +73,9 @@ public class CsvImportOrchestrator(
                     SourceIndex = index,
                     IsIncluded = false,
                     Status = ImportPreviewRowStatus.Invalid,
-                    StatusMessage = ImportMessageKeys.MissingBookingDate,
+                    StatusMessage = dto is not null && dto.HasUnparsableAmount && dto.Buchungsdatum != default
+                        ? ImportMessageKeys.UnparsableAmount
+                        : ImportMessageKeys.MissingBookingDate,
                     Transaction = placeholderTransaction
                 });
                 continue;
@@ -238,58 +203,6 @@ public class CsvImportOrchestrator(
             Duplicates = duplicates,
             SaveErrors = saveErrors
         };
-    }
-
-    private async Task<(List<TransactionDto>? Dtos, string? ErrorMessage)> ParseDtosAsync(
-        Stream csvStream,
-        CancellationToken cancellationToken)
-    {
-        byte[] buffer;
-        try
-        {
-            using var ms = new MemoryStream();
-            await csvStream.CopyToAsync(ms, cancellationToken).ConfigureAwait(false);
-            buffer = ms.ToArray();
-        }
-        catch (OperationCanceledException)
-        {
-            throw;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "CsvImport: failed to read input stream");
-            return (null, ImportMessageKeys.FileReadFailed);
-        }
-
-        var parserList = _parsers?.ToList() ?? [];
-        List<TransactionDto>? dtosList = null;
-        foreach (var parser in parserList)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            using var parserStream = new MemoryStream(buffer, writable: false);
-            try
-            {
-                dtosList = parser.Parse(parserStream)?.ToList();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "CsvImport: parser {Parser} threw during Parse", parser.GetType().Name);
-                dtosList = null;
-                continue;
-            }
-
-            if (dtosList is { Count: > 0 })
-            {
-                _logger.LogInformation("CsvImport: parser {Parser} matched with {Count} records",
-                    parser.GetType().Name, dtosList.Count);
-                return (dtosList, null);
-            }
-
-            dtosList = null;
-        }
-
-        _logger.LogInformation("CsvImport: no parser matched or no records found");
-        return (null, ImportMessageKeys.NoParserMatched);
     }
 
     private async Task<List<Category>> LoadCategoriesAsync()

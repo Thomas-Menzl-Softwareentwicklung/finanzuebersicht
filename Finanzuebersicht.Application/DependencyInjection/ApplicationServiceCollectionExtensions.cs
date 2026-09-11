@@ -70,6 +70,7 @@ public static class ApplicationServiceCollectionExtensions
         services.AddTransient<UseTransactionTemplateUseCase>();
 
         services.AddTransient<CsvImportOrchestrator>();
+        services.AddTransient<PrepareCsvImportUseCase>();
         services.AddTransient<AnalyzeCsvImportUseCase>();
         services.AddTransient<CommitCsvImportUseCase>();
 

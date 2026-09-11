@@ -12,4 +12,5 @@ public static class BackupEntityKeys
     public const string Budgets = "budgets";
     public const string Sparziele = "sparziele";
     public const string TransactionTemplates = "transactionTemplates";
+    public const string CsvImportProfiles = "csvImportProfiles";
 }

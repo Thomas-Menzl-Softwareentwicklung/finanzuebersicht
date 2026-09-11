@@ -35,10 +35,13 @@ public partial class ImportPreviewViewModel(
 
     private ImportPreviewResult? _activeSession;
     private bool _loadedPreview;
+    private string? _loadedSessionId;
+    private bool _keepSessionOnDisappear;
     private List<ImportPreviewCategoryOption> _categoryOptions = [];
 
     public System.Windows.Input.ICommand AutoLoadCommand => LoadPreviewCommand;
-    public bool ShouldAutoLoad => !_loadedPreview;
+    public bool ShouldAutoLoad =>
+        !_loadedPreview || _importSessionStore.GetActiveSession()?.SessionId != _loadedSessionId;
 
     [ObservableProperty]
     private ObservableCollection<ImportPreviewRowItemViewModel> rows = [];
@@ -61,6 +64,9 @@ public partial class ImportPreviewViewModel(
     [ObservableProperty]
     private string summaryText = string.Empty;
 
+    [ObservableProperty]
+    private bool canRemap;
+
     partial void OnSelectedFilterChanged(ImportPreviewFilterOption? value) => ApplyFilter();
 
     [RelayCommand]
@@ -82,6 +88,9 @@ public partial class ImportPreviewViewModel(
                 return;
             }
 
+            if (_loadedPreview && _activeSession.SessionId == _loadedSessionId)
+                return;
+
             var categories = await _categoryRepository.GetCategoriesAsync();
             _categoryOptions =
             [
@@ -96,6 +105,8 @@ public partial class ImportPreviewViewModel(
                     new ImportPreviewRowItemViewModel(row, _categoryOptions, _loc, OnRowsChanged)));
 
             _loadedPreview = true;
+            _loadedSessionId = _activeSession.SessionId;
+            CanRemap = _importSessionStore.CanRemap;
             RefreshState();
         }
         catch (Exception ex)
@@ -151,6 +162,7 @@ public partial class ImportPreviewViewModel(
 
             _importSessionStore.Clear();
             _loadedPreview = false;
+            _loadedSessionId = null;
             await _navigationService.GoBackAsync();
         }
         catch (Exception ex)
@@ -168,13 +180,28 @@ public partial class ImportPreviewViewModel(
     {
         _importSessionStore.Clear();
         _loadedPreview = false;
+        _loadedSessionId = null;
         await _navigationService.GoBackAsync();
+    }
+
+    [RelayCommand]
+    private async Task RemapColumns()
+    {
+        _keepSessionOnDisappear = true;
+        await _navigationService.GoToAsync(Routes.ImportMapping);
     }
 
     public void HandlePageDisappearing()
     {
+        if (_keepSessionOnDisappear)
+        {
+            _keepSessionOnDisappear = false;
+            return;
+        }
+
         _importSessionStore.Clear();
         _loadedPreview = false;
+        _loadedSessionId = null;
     }
 
     private void OnRowsChanged() => RefreshState();

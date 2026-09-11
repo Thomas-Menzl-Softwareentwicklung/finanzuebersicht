@@ -437,6 +437,24 @@ public static class ResourceKeys
     public const string Hint_EinrichtungWiederholen = nameof(Hint_EinrichtungWiederholen);
     public const string Btn_EinrichtungWiederholen = nameof(Btn_EinrichtungWiederholen);
     public const string Ttl_ImportVorschau = nameof(Ttl_ImportVorschau);
+    public const string Ttl_ImportZuordnung = nameof(Ttl_ImportZuordnung);
+    public const string Lbl_ImportKopfzeile = nameof(Lbl_ImportKopfzeile);
+    public const string Lbl_ImportSpalteDatum = nameof(Lbl_ImportSpalteDatum);
+    public const string Lbl_ImportSpalteBetrag = nameof(Lbl_ImportSpalteBetrag);
+    public const string Lbl_ImportSpalteTitel = nameof(Lbl_ImportSpalteTitel);
+    public const string Lbl_ImportSpalteZweck = nameof(Lbl_ImportSpalteZweck);
+    public const string Lbl_ImportSpalteTyp = nameof(Lbl_ImportSpalteTyp);
+    public const string Lbl_ImportSpalteIban = nameof(Lbl_ImportSpalteIban);
+    public const string Lbl_ImportDatumsformat = nameof(Lbl_ImportDatumsformat);
+    public const string Lbl_ImportDezimalstil = nameof(Lbl_ImportDezimalstil);
+    public const string Lbl_ImportDezimalKomma = nameof(Lbl_ImportDezimalKomma);
+    public const string Lbl_ImportDezimalPunkt = nameof(Lbl_ImportDezimalPunkt);
+    public const string Lbl_ImportSpalteKeine = nameof(Lbl_ImportSpalteKeine);
+    public const string Btn_ImportWeiter = nameof(Btn_ImportWeiter);
+    public const string Btn_ImportSpaltenNeu = nameof(Btn_ImportSpaltenNeu);
+    public const string Msg_ImportCsvNotTabular = nameof(Msg_ImportCsvNotTabular);
+    public const string Msg_ImportCsvNeedsMapping = nameof(Msg_ImportCsvNeedsMapping);
+    public const string Msg_ImportProfilSpeichernFehlgeschlagen = nameof(Msg_ImportProfilSpeichernFehlgeschlagen);
     public const string Msg_BackupRestoreConfirmTitle = nameof(Msg_BackupRestoreConfirmTitle);
     public const string Msg_BackupRestoreConfirmBody = nameof(Msg_BackupRestoreConfirmBody);
 
