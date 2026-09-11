@@ -4,8 +4,9 @@ namespace Finanzuebersicht.Tests.Sync;
 /// Mac App Store / TestFlight reject arm64-only Mac Catalyst packages, and
 /// <c>UIRequiredDeviceCapabilities → arm64</c> hides Intel Macs even when the
 /// binary is universal. iOS still requires arm64.
-/// Universal Release AOTs all assemblies except the entry assembly (interpreted)
-/// so Apple Silicon can start and Intel is not forced onto a full interpreter.
+/// Universal Release AOTs all assemblies (<c>MtouchInterpreter=-all</c>) so
+/// AppDelegate registrar trampolines stay valid. Interpreting Finanzuebersicht.dll
+/// SIGSEGVs in UIApplication setDelegate on Intel.
 /// </summary>
 public class MacCatalystIntelSupportTests
 {
@@ -26,7 +27,7 @@ public class MacCatalystIntelSupportTests
     }
 
     [Fact]
-    public void MacCatalyst_InterpretsEntryAssemblyOnRelease()
+    public void MacCatalyst_AotAllAssembliesOnRelease()
     {
         var csproj = File.ReadAllText(FindRepoFile("Finanzuebersicht/Finanzuebersicht.csproj"));
         Assert.Contains(
@@ -37,12 +38,12 @@ public class MacCatalystIntelSupportTests
             "<UseInterpreter Condition=\"$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'\">true</UseInterpreter>",
             csproj,
             StringComparison.Ordinal);
-        Assert.Contains(
-            "Condition=\"$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst' AND '$(Configuration)' == 'Release'\"",
+        Assert.DoesNotContain(
+            "<MtouchInterpreter>-all,Finanzuebersicht</MtouchInterpreter>",
             csproj,
             StringComparison.Ordinal);
         Assert.Contains(
-            "<MtouchInterpreter>-all,Finanzuebersicht</MtouchInterpreter>",
+            "<MtouchInterpreter>-all</MtouchInterpreter>",
             csproj,
             StringComparison.Ordinal);
     }

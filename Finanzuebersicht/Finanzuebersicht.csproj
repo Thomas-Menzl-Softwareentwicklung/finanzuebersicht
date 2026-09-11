@@ -73,12 +73,13 @@
 		<UseInterpreter Condition="'$(Configuration)' == 'Debug'">true</UseInterpreter>
 	</PropertyGroup>
 
-	<!-- Universal Mac Catalyst Release: runtimeconfig.bin must be identical across
-	     x64 and arm64 or lipo fails. AOT everything except the entry assembly so
-	     Apple Silicon can start without putting UIKit on the full interpreter
-	     (that aborted in UIApplication.Main on 1.21.16). Intel still JITs the rest. -->
+	<!-- Universal Mac Catalyst Release: runtimeconfig.bin must match across x64/arm64.
+	     AOT every assembly (including AppDelegate in Finanzuebersicht.dll). Interpreting
+	     the entry assembly made 1.21.18 SIGSEGV in [UIApplication setDelegate:]
+	     (registrar respondsToSelector: → null IMP). Interpreter stays available for
+	     dynamic codegen so Apple Silicon is not AOT-only. -->
 	<PropertyGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst' AND '$(Configuration)' == 'Release'">
-		<MtouchInterpreter>-all,Finanzuebersicht</MtouchInterpreter>
+		<MtouchInterpreter>-all</MtouchInterpreter>
 	</PropertyGroup>
 
 	<ItemGroup>
