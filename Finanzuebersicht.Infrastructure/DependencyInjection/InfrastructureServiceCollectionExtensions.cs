@@ -31,8 +31,7 @@ public static class InfrastructureServiceCollectionExtensions
 
         services.AddSingleton<IUncategorizedCategoryService, UncategorizedCategoryService>();
 
-        // CSV import parsers + categorization (Application use cases consume these)
-        services.AddSingleton<IStatementParser, DkbCsvParser>();
+        // Categorization (Application use cases consume these)
         services.AddSingleton<ICategorizationStrategy, KeywordCategorizationStrategy>();
         services.AddSingleton<ICategorizationStrategy, HistoricalCategorizationStrategy>();
         services.AddSingleton<CategorizationService>();

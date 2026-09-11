@@ -1,11 +1,11 @@
 using System.IO;
 using System.Linq;
-using System.Text;
+using Finanzuebersicht.Core.Services;
 using Xunit;
 
 namespace Finanzuebersicht.Tests.Services
 {
-    public class DkbCsvParserTests
+    public class DkbCsvImportProfileTests
     {
         [Fact]
         public void Parse_ShouldParseSampleCsv()
@@ -14,9 +14,8 @@ namespace Finanzuebersicht.Tests.Services
             var relative = Path.Combine(repoRoot, "Finanzuebersicht.Tests", "Services", "test_dkb_sample.csv");
             Assert.True(File.Exists(relative), $"Test CSV not found: {relative}");
 
-            using var fs = File.OpenRead(relative);
-            var parser = new DkbCsvParser();
-            var txs = parser.Parse(fs).ToList();
+            Assert.True(CsvTableReader.TryRead(File.ReadAllBytes(relative), out var table, out _));
+            var txs = CsvMappingApplier.Apply(table!, DkbCsvImportProfile.Instance).ToList();
 
             Assert.Equal(4, txs.Count);
 
@@ -36,9 +35,8 @@ namespace Finanzuebersicht.Tests.Services
             var relative = Path.Combine(repoRoot, "Finanzuebersicht.Tests", "Services", "test_dkb_multiline.csv");
             Assert.True(File.Exists(relative), $"Test CSV not found: {relative}");
 
-            using var fs = File.OpenRead(relative);
-            var parser = new DkbCsvParser();
-            var txs = parser.Parse(fs).ToList();
+            Assert.True(CsvTableReader.TryRead(File.ReadAllBytes(relative), out var table, out _));
+            var txs = CsvMappingApplier.Apply(table!, DkbCsvImportProfile.Instance).ToList();
 
             Assert.Single(txs);
             var v = txs[0].Verwendungszweck;
@@ -54,9 +52,8 @@ namespace Finanzuebersicht.Tests.Services
             var relative = Path.Combine(repoRoot, "Finanzuebersicht.Tests", "Services", "test_dkb_malformed.csv");
             Assert.True(File.Exists(relative), $"Test CSV not found: {relative}");
 
-            using var fs = File.OpenRead(relative);
-            var parser = new DkbCsvParser();
-            var txs = parser.Parse(fs).ToList();
+            Assert.True(CsvTableReader.TryRead(File.ReadAllBytes(relative), out var table, out _));
+            var txs = CsvMappingApplier.Apply(table!, DkbCsvImportProfile.Instance).ToList();
 
             // one malformed line should be skipped, expect 2 valid transactions
             Assert.Equal(2, txs.Count);
