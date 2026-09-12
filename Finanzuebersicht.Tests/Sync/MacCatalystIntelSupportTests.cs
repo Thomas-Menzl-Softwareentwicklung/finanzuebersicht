@@ -5,8 +5,9 @@ namespace Finanzuebersicht.Tests.Sync;
 /// <c>UIRequiredDeviceCapabilities → arm64</c> hides Intel Macs even when the
 /// binary is universal. iOS still requires arm64.
 /// Intel Release stays on JIT (no interpreter). Enabling the interpreter on x64
-/// SIGSEGVs in UIApplication.Main / AppDelegate init. Apple Silicon Release may
-/// use <c>MtouchInterpreter=-all</c> on maccatalyst-arm64 only.
+/// SIGSEGVs in UIApplication.Main / AppDelegate init. Apple Silicon Release uses
+/// <c>UseInterpreter=true</c> on maccatalyst-arm64 only so AOT-only
+/// <c>load_aot_module</c> can fall back (MAUI docs).
 /// </summary>
 public class MacCatalystIntelSupportTests
 {
@@ -47,6 +48,10 @@ public class MacCatalystIntelSupportTests
             csproj,
             StringComparison.Ordinal);
         Assert.Contains(
+            "<UseInterpreter>true</UseInterpreter>",
+            csproj,
+            StringComparison.Ordinal);
+        Assert.DoesNotContain(
             "<MtouchInterpreter>-all</MtouchInterpreter>",
             csproj,
             StringComparison.Ordinal);

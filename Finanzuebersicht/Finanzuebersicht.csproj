@@ -75,9 +75,11 @@
 
 	<!-- Intel Mac Catalyst Release must not link the interpreter: 1.21.16/18/19 all
 	     SIGSEGV/SIGABRT in UIApplication.Main / [AppDelegate init] (null registrar IMP).
-	     Apple Silicon cannot JIT; keep the interpreter on arm64 only (MAUI docs). -->
+	     Apple Silicon is AOT-only; MtouchInterpreter=-all still sets mono_aot_only and
+	     1.21.21 SIGABRTed in load_aot_module during runtime init. UseInterpreter on
+	     arm64 only (MAUI docs) so missing AOT can fall back to the interpreter. -->
 	<PropertyGroup Condition="'$(RuntimeIdentifier)' == 'maccatalyst-arm64' AND '$(Configuration)' == 'Release'">
-		<MtouchInterpreter>-all</MtouchInterpreter>
+		<UseInterpreter>true</UseInterpreter>
 	</PropertyGroup>
 
 	<ItemGroup>
