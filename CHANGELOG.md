@@ -1,5 +1,11 @@
 # Änderungsverlauf
 
+## [1.22] - Unreleased
+
+### Geändert
+
+- Versionsbasis `1.22` (Nerdbank.GitVersioning) — nächste TestFlight/ASC-Linie
+
 ## [1.21] - Unreleased
 
 ### Hinzugefügt

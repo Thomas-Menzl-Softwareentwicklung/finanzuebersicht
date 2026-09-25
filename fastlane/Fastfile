@@ -7,7 +7,7 @@ SCREENSHOTS_PATH = File.join(REPO_ROOT, "fastlane/screenshots")
 MAC_SCREENSHOTS_PATH = File.join(REPO_ROOT, "fastlane/screenshots-mac")
 METADATA_PATH = File.join(REPO_ROOT, "fastlane/metadata")
 ASC_APP_IDENTIFIER = "de.thomasmenzl.finanzuebersicht"
-ASC_APP_VERSION = "1.21"
+ASC_APP_VERSION = "1.22"
 STORE_IPA_PATH = File.join(
   REPO_ROOT,
   "Finanzuebersicht/bin/Release/net10.0-ios/ios-arm64/publish/Finanzuebersicht.ipa"
