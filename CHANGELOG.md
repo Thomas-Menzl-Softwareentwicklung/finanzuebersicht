@@ -2,9 +2,14 @@
 
 ## [1.22] - Unreleased
 
+### Hinzugefügt
+
+- Generischer CSV-Import mit Spaltenzuordnung (#360): Profile-Fingerprint, Mapping-UI, Remap aus der Vorschau; DKB als Built-in-Profil
+
 ### Geändert
 
 - Versionsbasis `1.22` (Nerdbank.GitVersioning) — nächste TestFlight/ASC-Linie
+- Mac Catalyst Store/TestFlight: Start-Fixes für Apple Silicon und Intel (Universal)
 
 ## [1.21] - Unreleased
 
