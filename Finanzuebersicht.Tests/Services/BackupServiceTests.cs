@@ -345,6 +345,62 @@ namespace Finanzuebersicht.Tests.Services
         }
 
         [Fact]
+        public async Task CreateBackupAsync_WhenProfileStoreProvided_ZipContainsCsvImportProfiles()
+        {
+            var profileStore = new InMemoryCsvImportProfileStore();
+            await profileStore.UpsertAsync(SampleCsvImportProfile());
+            var service = new BackupService(
+                _mockDataService, _mockDataService, _mockDataService, _mockDataService, _mockDataService, _mockDataService,
+                _mockSettingsService,
+                new DataMigrationService([new V1ToV2Migrator(), new V2ToV3Migrator()]),
+                csvImportProfileStore: profileStore);
+
+            var metadata = await service.CreateBackupAsync(_testBackupDir);
+            var zipPath = Path.Combine(_testBackupDir, metadata.FileName);
+
+            using var zipArchive = ZipFile.OpenRead(zipPath);
+            var entry = zipArchive.GetEntry(DataFileNames.CsvImportProfiles);
+            Assert.NotNull(entry);
+            using var stream = entry.Open();
+            using var reader = new StreamReader(stream);
+            var profiles = JsonSerializer.Deserialize<List<CsvImportProfile>>(
+                await reader.ReadToEndAsync(),
+                new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+
+            Assert.NotNull(profiles);
+            Assert.Single(profiles);
+            Assert.Equal("user-1", profiles[0].Id);
+            Assert.Equal("Date", profiles[0].Columns.Date);
+            Assert.Equal(1, metadata.EntityCounts[BackupEntityKeys.CsvImportProfiles]);
+        }
+
+        [Fact]
+        public async Task RestoreBackupAsync_WithoutCsvImportProfilesEntry_SucceedsWithEmptyProfiles()
+        {
+            var sourceService = new BackupService(
+                _mockDataService, _mockDataService, _mockDataService, _mockDataService, _mockDataService, _mockDataService,
+                _mockSettingsService,
+                new DataMigrationService([new V1ToV2Migrator(), new V2ToV3Migrator()]));
+            var metadata = await sourceService.CreateBackupAsync(_testBackupDir);
+            var zipPath = Path.Combine(_testBackupDir, metadata.FileName);
+            using (var zipArchive = ZipFile.Open(zipPath, ZipArchiveMode.Update))
+                zipArchive.GetEntry(DataFileNames.CsvImportProfiles)?.Delete();
+
+            var profileStore = new InMemoryCsvImportProfileStore();
+            await profileStore.UpsertAsync(SampleCsvImportProfile("existing"));
+            var restoreService = new BackupService(
+                _mockDataService, _mockDataService, _mockDataService, _mockDataService, _mockDataService, _mockDataService,
+                _mockSettingsService,
+                new DataMigrationService([new V1ToV2Migrator(), new V2ToV3Migrator()]),
+                csvImportProfileStore: profileStore);
+
+            var result = await restoreService.RestoreBackupAsync(_testBackupDir, metadata.Id);
+
+            Assert.True(result.Success, result.ErrorMessage);
+            Assert.Empty(await profileStore.GetUserProfilesAsync());
+        }
+
+        [Fact]
         public async Task DeleteBackupAsync_RemovesBackupFile()
         {
             // Arrange
@@ -364,6 +420,15 @@ namespace Finanzuebersicht.Tests.Services
 
         // ========== Hilfsmethoden ==========
 
+        private static CsvImportProfile SampleCsvImportProfile(string id = "user-1") => new()
+        {
+            Id = id,
+            Name = "My Bank",
+            Delimiter = ';',
+            Headers = ["Date", "Amount", "Text"],
+            Columns = new CsvColumnMapping { Date = "Date", Amount = "Amount", Title = "Text" }
+        };
+
         private static void WriteJsonToZip<T>(ZipArchive archive, string entryName, T data)
         {
             var entry = archive.CreateEntry(entryName);
@@ -377,6 +442,30 @@ namespace Finanzuebersicht.Tests.Services
     }
 
     // ========== Mock-Implementierungen ==========
+
+    internal sealed class InMemoryCsvImportProfileStore : ICsvImportProfileStore
+    {
+        private List<CsvImportProfile> _profiles = [];
+
+        public Task<IReadOnlyList<CsvImportProfile>> GetUserProfilesAsync()
+            => Task.FromResult<IReadOnlyList<CsvImportProfile>>(_profiles.ToList());
+
+        public Task UpsertAsync(CsvImportProfile profile)
+        {
+            var idx = _profiles.FindIndex(p => p.Id == profile.Id);
+            if (idx >= 0)
+                _profiles[idx] = profile;
+            else
+                _profiles.Add(profile);
+            return Task.CompletedTask;
+        }
+
+        public Task ReplaceAllAsync(IEnumerable<CsvImportProfile> profiles)
+        {
+            _profiles = profiles.ToList();
+            return Task.CompletedTask;
+        }
+    }
 
     internal class MockSettingsService : SettingsService
     {

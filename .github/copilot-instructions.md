@@ -114,7 +114,7 @@ Layered clean architecture with MVVM (`CommunityToolkit.Mvvm` source generators)
 - Forward-looking cashflow, **not** account balance
 
 ### Import
-- CSV import (DKB parser), import preview, auto-categorization (`KeywordCategorizationStrategy`, `HistoricalCategorizationStrategy`)
+- CSV import via table reader + column-mapping profiles (built-in DKB, user JSON), preview, auto-categorization. Mapping UI for unknown fingerprints. No Open Banking.
 - No Open Banking / bank API integration
 
 ### Other

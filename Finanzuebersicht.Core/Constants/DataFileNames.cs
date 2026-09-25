@@ -15,6 +15,7 @@ public static class DataFileNames
     public const string Budgets = "budgets.json";
     public const string Sparziele = "sparziele.json";
     public const string TransactionTemplates = "transaction-templates.json";
+    public const string CsvImportProfiles = "csv-import-profiles.json";
     public const string BackupMetadata = "backup.metadata.json";
     public const string SyncTombstones = "sync-tombstones.json";
     public const string SyncMetadata = "sync-metadata.json";

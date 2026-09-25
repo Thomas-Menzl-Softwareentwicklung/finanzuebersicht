@@ -35,10 +35,13 @@ public partial class ImportPreviewViewModel(
 
     private ImportPreviewResult? _activeSession;
     private bool _loadedPreview;
+    private string? _loadedSessionId;
+    private bool _keepSessionOnDisappear;
     private List<ImportPreviewCategoryOption> _categoryOptions = [];
 
     public System.Windows.Input.ICommand AutoLoadCommand => LoadPreviewCommand;
-    public bool ShouldAutoLoad => !_loadedPreview;
+    public bool ShouldAutoLoad =>
+        !_loadedPreview || _importSessionStore.GetActiveSession()?.SessionId != _loadedSessionId;
 
     [ObservableProperty]
     private ObservableCollection<ImportPreviewRowItemViewModel> rows = [];
@@ -61,6 +64,9 @@ public partial class ImportPreviewViewModel(
     [ObservableProperty]
     private string summaryText = string.Empty;
 
+    [ObservableProperty]
+    private bool canRemap;
+
     partial void OnSelectedFilterChanged(ImportPreviewFilterOption? value) => ApplyFilter();
 
     [RelayCommand]
@@ -82,6 +88,9 @@ public partial class ImportPreviewViewModel(
                 return;
             }
 
+            if (_loadedPreview && _activeSession.SessionId == _loadedSessionId)
+                return;
+
             var categories = await _categoryRepository.GetCategoriesAsync();
             _categoryOptions =
             [
@@ -96,6 +105,8 @@ public partial class ImportPreviewViewModel(
                     new ImportPreviewRowItemViewModel(row, _categoryOptions, _loc, OnRowsChanged)));
 
             _loadedPreview = true;
+            _loadedSessionId = _activeSession.SessionId;
+            CanRemap = _importSessionStore.CanRemap;
             RefreshState();
         }
         catch (Exception ex)
@@ -151,6 +162,7 @@ public partial class ImportPreviewViewModel(
 
             _importSessionStore.Clear();
             _loadedPreview = false;
+            _loadedSessionId = null;
             await _navigationService.GoBackAsync();
         }
         catch (Exception ex)
@@ -168,13 +180,28 @@ public partial class ImportPreviewViewModel(
     {
         _importSessionStore.Clear();
         _loadedPreview = false;
+        _loadedSessionId = null;
         await _navigationService.GoBackAsync();
+    }
+
+    [RelayCommand]
+    private async Task RemapColumns()
+    {
+        _keepSessionOnDisappear = true;
+        await _navigationService.GoToAsync(Routes.ImportMapping);
     }
 
     public void HandlePageDisappearing()
     {
+        if (_keepSessionOnDisappear)
+        {
+            _keepSessionOnDisappear = false;
+            return;
+        }
+
         _importSessionStore.Clear();
         _loadedPreview = false;
+        _loadedSessionId = null;
     }
 
     private void OnRowsChanged() => RefreshState();
@@ -295,15 +322,28 @@ public partial class ImportPreviewRowItemViewModel : ObservableObject
     [ObservableProperty]
     private ImportPreviewCategoryOption? selectedCategoryOption;
 
-    public string StatusText => Status switch
+    public string StatusText
     {
-        ImportPreviewRowStatus.Ready => _loc.GetString(ResourceKeys.Lbl_ImportStatusBereit),
-        ImportPreviewRowStatus.Duplicate => _loc.GetString(ResourceKeys.Lbl_ImportStatusDuplikat),
-        ImportPreviewRowStatus.Invalid => _loc.GetString(ResourceKeys.Lbl_ImportStatusUngueltig),
-        ImportPreviewRowStatus.Uncategorized => _loc.GetString(ResourceKeys.Lbl_ImportStatusUnkategorisiert),
-        ImportPreviewRowStatus.SaveError => _loc.GetString(ResourceKeys.Lbl_ImportStatusSpeicherfehler),
-        _ => _loc.GetString(ResourceKeys.Lbl_ImportStatusUnbekannt)
-    };
+        get
+        {
+            if (!string.IsNullOrWhiteSpace(_row.StatusMessage))
+            {
+                var detail = _loc.GetString(_row.StatusMessage);
+                if (!string.IsNullOrWhiteSpace(detail) && detail != _row.StatusMessage)
+                    return detail;
+            }
+
+            return Status switch
+            {
+                ImportPreviewRowStatus.Ready => _loc.GetString(ResourceKeys.Lbl_ImportStatusBereit),
+                ImportPreviewRowStatus.Duplicate => _loc.GetString(ResourceKeys.Lbl_ImportStatusDuplikat),
+                ImportPreviewRowStatus.Invalid => _loc.GetString(ResourceKeys.Lbl_ImportStatusUngueltig),
+                ImportPreviewRowStatus.Uncategorized => _loc.GetString(ResourceKeys.Lbl_ImportStatusUnkategorisiert),
+                ImportPreviewRowStatus.SaveError => _loc.GetString(ResourceKeys.Lbl_ImportStatusSpeicherfehler),
+                _ => _loc.GetString(ResourceKeys.Lbl_ImportStatusUnbekannt)
+            };
+        }
+    }
 
     public void RefreshLocalizedStrings()
     {

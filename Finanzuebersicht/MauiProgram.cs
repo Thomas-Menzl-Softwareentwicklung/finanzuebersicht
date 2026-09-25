@@ -169,6 +169,7 @@ public static class MauiProgram
 		builder.Services.AddTransient<SparZielDetailPage>();
 		builder.Services.AddTransient<BackupListPage>();
 		builder.Services.AddTransient<ImportPreviewPage>();
+		builder.Services.AddTransient<ImportMappingPage>();
 		builder.Services.AddTransient<CashflowPage>();
 		builder.Services.AddTransient<OnboardingPage>();
 		builder.Services.AddTransient<QuickExpenseCapturePage>();

@@ -1,6 +1,7 @@
 using Finanzuebersicht.Application.UseCases.Import;
 using Finanzuebersicht.Core.Services;
 using Finanzuebersicht.Models;
+using Finanzuebersicht.Navigation;
 using Finanzuebersicht.Presentation.Services;
 using Finanzuebersicht.ViewModels;
 using Microsoft.Extensions.Logging;
@@ -11,7 +12,6 @@ public class ImportPreviewViewModelTests
 {
     private static CommitCsvImportUseCase CreateCommitUseCase(ICategoryRepository categoryRepository)
         => new(new CsvImportOrchestrator(
-            [],
             Substitute.For<ITransactionRepository>(),
             Substitute.For<ILogger<CsvImportOrchestrator>>(),
             categoryRepository,
@@ -81,11 +81,68 @@ public class ImportPreviewViewModelTests
         Assert.NotSame(vm.Rows[0].CategoryOptions[1], vm.Rows[1].CategoryOptions[1]);
         Assert.NotNull(vm.SelectedFilter);
         Assert.Equal(ImportPreviewFilter.All, vm.SelectedFilter.Filter);
+        Assert.False(vm.CanRemap);
 
         vm.SelectedFilter = vm.FilterOptions.Single(option => option.Filter == ImportPreviewFilter.Ready);
 
         Assert.Equal(2, vm.FilteredRows.Count);
         Assert.All(vm.FilteredRows, row => Assert.True(row.Status is ImportPreviewRowStatus.Ready or ImportPreviewRowStatus.Uncategorized));
+    }
+
+    [Fact]
+    public async Task LoadPreview_CanRemap_TrueWhenTableInSession()
+    {
+        var sessionStore = new ImportSessionStore();
+        Assert.True(CsvTableReader.TryRead(
+            "Date,Amount,Merchant\n2026-03-01,1.00,Coffee\n"u8.ToArray(),
+            out var table,
+            out _));
+        sessionStore.SetTable(table!, "acc-1");
+        sessionStore.SetActiveSession(new ImportPreviewResult
+        {
+            Rows =
+            [
+                new ImportPreviewRow
+                {
+                    Id = "r1",
+                    Status = ImportPreviewRowStatus.Ready,
+                    IsIncluded = true,
+                    Transaction = new Transaction { Id = "t1", Titel = "Ready", Datum = DateTime.Today, Betrag = 10m }
+                }
+            ]
+        });
+
+        var categoryRepository = Substitute.For<ICategoryRepository>();
+        categoryRepository.GetCategoriesAsync().Returns([]);
+
+        var localization = Substitute.For<ILocalizationService>();
+        localization.GetString(Arg.Any<string>()).Returns(call => call.ArgNotNull<string>());
+        localization.GetString(Arg.Any<string>(), Arg.Any<object[]>()).Returns(call => call.ArgNotNull<string>());
+
+        var navigation = Substitute.For<INavigationService>();
+        navigation.GoToAsync(Arg.Any<string>(), Arg.Any<IDictionary<string, object>>()).Returns(Task.CompletedTask);
+
+        var vm = new ImportPreviewViewModel(
+            CreateCommitUseCase(categoryRepository),
+            sessionStore,
+            categoryRepository,
+            navigation,
+            Substitute.For<IDialogService>(),
+            localization,
+            Substitute.For<IAppEvents>(),
+            Substitute.For<IFeedbackService>(),
+            Substitute.For<ILogger<ImportPreviewViewModel>>());
+
+        await vm.LoadPreviewCommand.ExecuteAsync(null);
+
+        Assert.True(vm.CanRemap);
+
+        await vm.RemapColumnsCommand.ExecuteAsync(null);
+        vm.HandlePageDisappearing();
+
+        await navigation.Received(1).GoToAsync(Routes.ImportMapping, Arg.Any<IDictionary<string, object>>());
+        Assert.NotNull(sessionStore.GetTable());
+        Assert.NotNull(sessionStore.GetActiveSession());
     }
 
     [Fact]

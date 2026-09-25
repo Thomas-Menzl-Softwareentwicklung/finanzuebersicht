@@ -13,6 +13,7 @@ namespace Finanzuebersicht.Core.Services
         public string Umsatztyp { get; set; } = string.Empty;
         public string IBAN { get; set; } = string.Empty;
         public decimal Betrag { get; set; }
+        public bool HasUnparsableAmount { get; set; }
         public string GlueubigerId { get; set; } = string.Empty;
         public string Mandatsreferenz { get; set; } = string.Empty;
         public string Kundenreferenz { get; set; } = string.Empty;

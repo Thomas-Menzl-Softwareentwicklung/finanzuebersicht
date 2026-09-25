@@ -29,6 +29,14 @@
                                          SelectedItem="{Binding SelectedFilter, Mode=TwoWay}"
                                          DisplayMemberPath="DisplayName"
                                          Placeholder="{loc:Translate Lbl_ImportFilterAlle}" />
+                <Button Text="{loc:Translate Btn_ImportSpaltenNeu}"
+                        Command="{Binding RemapColumnsCommand}"
+                        IsVisible="{Binding CanRemap}"
+                        BackgroundColor="Transparent"
+                        TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                        FontSize="13"
+                        Padding="0"
+                        HorizontalOptions="Start" />
             </VerticalStackLayout>
         </Border>
 
