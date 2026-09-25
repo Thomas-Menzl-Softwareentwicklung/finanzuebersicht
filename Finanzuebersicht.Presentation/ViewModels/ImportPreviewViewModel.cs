@@ -322,15 +322,28 @@ public partial class ImportPreviewRowItemViewModel : ObservableObject
     [ObservableProperty]
     private ImportPreviewCategoryOption? selectedCategoryOption;
 
-    public string StatusText => Status switch
+    public string StatusText
     {
-        ImportPreviewRowStatus.Ready => _loc.GetString(ResourceKeys.Lbl_ImportStatusBereit),
-        ImportPreviewRowStatus.Duplicate => _loc.GetString(ResourceKeys.Lbl_ImportStatusDuplikat),
-        ImportPreviewRowStatus.Invalid => _loc.GetString(ResourceKeys.Lbl_ImportStatusUngueltig),
-        ImportPreviewRowStatus.Uncategorized => _loc.GetString(ResourceKeys.Lbl_ImportStatusUnkategorisiert),
-        ImportPreviewRowStatus.SaveError => _loc.GetString(ResourceKeys.Lbl_ImportStatusSpeicherfehler),
-        _ => _loc.GetString(ResourceKeys.Lbl_ImportStatusUnbekannt)
-    };
+        get
+        {
+            if (!string.IsNullOrWhiteSpace(_row.StatusMessage))
+            {
+                var detail = _loc.GetString(_row.StatusMessage);
+                if (!string.IsNullOrWhiteSpace(detail) && detail != _row.StatusMessage)
+                    return detail;
+            }
+
+            return Status switch
+            {
+                ImportPreviewRowStatus.Ready => _loc.GetString(ResourceKeys.Lbl_ImportStatusBereit),
+                ImportPreviewRowStatus.Duplicate => _loc.GetString(ResourceKeys.Lbl_ImportStatusDuplikat),
+                ImportPreviewRowStatus.Invalid => _loc.GetString(ResourceKeys.Lbl_ImportStatusUngueltig),
+                ImportPreviewRowStatus.Uncategorized => _loc.GetString(ResourceKeys.Lbl_ImportStatusUnkategorisiert),
+                ImportPreviewRowStatus.SaveError => _loc.GetString(ResourceKeys.Lbl_ImportStatusSpeicherfehler),
+                _ => _loc.GetString(ResourceKeys.Lbl_ImportStatusUnbekannt)
+            };
+        }
+    }
 
     public void RefreshLocalizedStrings()
     {

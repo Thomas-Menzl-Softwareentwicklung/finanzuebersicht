@@ -27,6 +27,7 @@ public static class DkbCsvImportProfile
             Date = "Buchungsdatum",
             Amount = "Betrag (€)",
             Title = "Zahlungsempfänger*in",
+            Payer = "Zahlungspflichtige*r",
             Purpose = "Verwendungszweck",
             AmountSign = "Umsatztyp",
             Iban = "IBAN"

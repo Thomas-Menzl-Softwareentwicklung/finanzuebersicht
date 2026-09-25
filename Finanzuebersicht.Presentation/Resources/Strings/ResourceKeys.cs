@@ -410,6 +410,7 @@ public static class ResourceKeys
     public const string Lbl_ImportProblemeCount = nameof(Lbl_ImportProblemeCount);
     public const string Lbl_ImportAusgewaehltCount = nameof(Lbl_ImportAusgewaehltCount);
     public const string Msg_ImportStatusMissingDate = nameof(Msg_ImportStatusMissingDate);
+    public const string Msg_ImportStatusUnparsableAmount = nameof(Msg_ImportStatusUnparsableAmount);
     public const string Msg_ImportStatusPossibleDuplicate = nameof(Msg_ImportStatusPossibleDuplicate);
     public const string Msg_ImportStatusCategoryUnresolved = nameof(Msg_ImportStatusCategoryUnresolved);
     public const string Hint_BudgetOptional = nameof(Hint_BudgetOptional);
@@ -442,6 +443,7 @@ public static class ResourceKeys
     public const string Lbl_ImportSpalteDatum = nameof(Lbl_ImportSpalteDatum);
     public const string Lbl_ImportSpalteBetrag = nameof(Lbl_ImportSpalteBetrag);
     public const string Lbl_ImportSpalteTitel = nameof(Lbl_ImportSpalteTitel);
+    public const string Lbl_ImportSpalteZahler = nameof(Lbl_ImportSpalteZahler);
     public const string Lbl_ImportSpalteZweck = nameof(Lbl_ImportSpalteZweck);
     public const string Lbl_ImportSpalteTyp = nameof(Lbl_ImportSpalteTyp);
     public const string Lbl_ImportSpalteIban = nameof(Lbl_ImportSpalteIban);

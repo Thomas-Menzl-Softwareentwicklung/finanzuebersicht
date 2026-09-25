@@ -35,6 +35,7 @@ public class ImportMappingViewModelTests
         var navigation = Substitute.For<INavigationService>();
         navigation.GoToAsync(Arg.Any<string>(), Arg.Any<IDictionary<string, object>>())
             .Returns(Task.CompletedTask);
+        navigation.GoBackAsync().Returns(Task.CompletedTask);
 
         var vm = CreateSut(sessionStore, profileStore, navigation);
         await vm.LoadMappingCommand.ExecuteAsync(null);
@@ -55,6 +56,7 @@ public class ImportMappingViewModelTests
         Assert.Equal("Amount", upserted.Columns.Amount);
         Assert.Equal("Merchant", upserted.Columns.Title);
         await profileStore.Received(1).UpsertAsync(Arg.Any<CsvImportProfile>());
+        await navigation.Received(1).GoBackAsync();
         await navigation.Received(1).GoToAsync(Routes.ImportPreview, Arg.Any<IDictionary<string, object>>());
         Assert.NotNull(sessionStore.GetActiveSession());
         Assert.Same(upserted, sessionStore.GetProfile());
@@ -98,6 +100,28 @@ public class ImportMappingViewModelTests
 
         await navigation.Received(1).GoBackAsync();
         await navigation.DidNotReceive().GoToAsync(Routes.ImportPreview, Arg.Any<IDictionary<string, object>>());
+    }
+
+    [Fact]
+    public async Task LoadMapping_CapsHeaderRowOptions()
+    {
+        var lines = new List<string> { "Date,Amount,Text" };
+        for (var i = 0; i < 40; i++)
+            lines.Add($"2026-03-01,{i}.00,Row{i}");
+        var csv = string.Join('\n', lines) + "\n";
+
+        var sessionStore = new ImportSessionStore();
+        Assert.True(CsvTableReader.TryRead(System.Text.Encoding.UTF8.GetBytes(csv), out var table, out _));
+        sessionStore.SetTable(table!, accountId: null);
+
+        var vm = CreateSut(
+            sessionStore,
+            Substitute.For<ICsvImportProfileStore>(),
+            Substitute.For<INavigationService>());
+        await vm.LoadMappingCommand.ExecuteAsync(null);
+
+        Assert.True(vm.HeaderRowOptions.Count <= 20);
+        Assert.Contains(vm.HeaderRowOptions, o => o.Index == table!.HeaderRowIndex);
     }
 
     private static ImportMappingViewModel CreateSut(

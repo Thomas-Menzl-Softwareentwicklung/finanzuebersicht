@@ -21,6 +21,7 @@ public class CsvMappingGuesserTests
         Assert.Equal("Buchungsdatum", g.Date);
         Assert.Equal("Betrag (€)", g.Amount);
         Assert.Equal("Zahlungsempfänger*in", g.Title);
+        Assert.Equal("Zahlungspflichtige*r", g.Payer);
         Assert.Equal("Verwendungszweck", g.Purpose);
         Assert.Equal("Umsatztyp", g.AmountSign);
         Assert.Equal("IBAN", g.Iban);

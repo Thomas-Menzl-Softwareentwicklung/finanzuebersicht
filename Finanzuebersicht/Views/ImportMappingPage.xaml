@@ -65,6 +65,16 @@
                 </VerticalStackLayout>
 
                 <VerticalStackLayout Spacing="4">
+                    <Label Text="{loc:Translate Lbl_ImportSpalteZahler}"
+                           FontSize="13"
+                           TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
+                    <controls:SelectionField ItemsSource="{Binding ColumnOptions}"
+                                             SelectedItem="{Binding SelectedPayer, Mode=TwoWay}"
+                                             DisplayMemberPath="DisplayName"
+                                             FieldLabel="{loc:Translate Lbl_ImportSpalteZahler}" />
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Spacing="4">
                     <Label Text="{loc:Translate Lbl_ImportSpalteZweck}"
                            FontSize="13"
                            TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />

@@ -12,6 +12,9 @@ public static class CsvMappingGuesser
     private static readonly string[] TitleTokens =
         ["Zahlungsempfänger", "Empfänger", "Payee", "Auftraggeber"];
 
+    private static readonly string[] PayerTokens =
+        ["Zahlungspflichtiger", "Zahlungspflichtige", "Sender", "Payer"];
+
     private static readonly string[] PurposeTokens =
         ["Verwendungszweck", "Buchungstext", "Beschreibung", "Purpose", "Text"];
 
@@ -29,6 +32,7 @@ public static class CsvMappingGuesser
                    ?? FindHeader(table.Headers, used, FallbackDateTokens),
             Amount = FindHeader(table.Headers, used, AmountTokens, ExcludeKontostand),
             Title = FindHeader(table.Headers, used, TitleTokens),
+            Payer = FindHeader(table.Headers, used, PayerTokens),
             Purpose = FindHeader(table.Headers, used, PurposeTokens),
             AmountSign = FindHeader(table.Headers, used, AmountSignTokens),
             Iban = FindHeader(table.Headers, used, IbanTokens)

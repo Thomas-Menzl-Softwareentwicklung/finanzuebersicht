@@ -15,6 +15,9 @@ public partial class ImportMappingViewModel : ObservableObject, IAutoLoadViewMod
     private static readonly string[] DateFormats =
         ["dd.MM.yyyy", "dd.MM.yy", "yyyy-MM-dd", "dd/MM/yyyy", "d.M.yyyy"];
 
+    /// <summary>Cap header-row picker size; bank CSVs can have thousands of data rows.</summary>
+    private const int MaxHeaderRowOptions = 20;
+
     private readonly AnalyzeCsvImportUseCase _analyzeCsvImportUseCase;
     private readonly ICsvImportProfileStore _profileStore;
     private readonly IImportSessionStore _importSessionStore;
@@ -72,6 +75,9 @@ public partial class ImportMappingViewModel : ObservableObject, IAutoLoadViewMod
     private CsvHeaderOption? selectedTitle;
 
     [ObservableProperty]
+    private CsvHeaderOption? selectedPayer;
+
+    [ObservableProperty]
     private CsvHeaderOption? selectedPurpose;
 
     [ObservableProperty]
@@ -112,10 +118,7 @@ public partial class ImportMappingViewModel : ObservableObject, IAutoLoadViewMod
             BuildStaticOptions();
             PreviewRows = new ObservableCollection<string>(
                 _table.AllRows.Take(5).Select(row => string.Join(_table.Delimiter.ToString(), row)));
-            HeaderRowOptions = new ObservableCollection<CsvHeaderRowOption>(
-                _table.AllRows.Select((row, index) => new CsvHeaderRowOption(
-                    index,
-                    $"{index + 1}: {string.Join(" | ", row.Take(4))}")));
+            HeaderRowOptions = BuildHeaderRowOptions(_table);
             SelectedHeaderRow = HeaderRowOptions.FirstOrDefault(o => o.Index == _table.HeaderRowIndex)
                                 ?? HeaderRowOptions.FirstOrDefault();
             RebuildColumnOptions();
@@ -171,9 +174,10 @@ public partial class ImportMappingViewModel : ObservableObject, IAutoLoadViewMod
 
             _importSessionStore.SetActiveSession(preview, profile);
             _leaveWithoutClearing = true;
-            if (_openedFromPreview)
-                await _navigationService.GoBackAsync();
-            else
+            // Always leave mapping first so preview is not stacked above it
+            // (commit/cancel from preview must return to the transactions list).
+            await _navigationService.GoBackAsync();
+            if (!_openedFromPreview)
                 await _navigationService.GoToAsync(Routes.ImportPreview);
         }
         catch (Exception ex)
@@ -323,6 +327,7 @@ public partial class ImportMappingViewModel : ObservableObject, IAutoLoadViewMod
         SelectedDate = FindColumn(profile.Columns.Date);
         SelectedAmount = FindColumn(profile.Columns.Amount);
         SelectedTitle = FindColumn(profile.Columns.Title);
+        SelectedPayer = FindColumn(profile.Columns.Payer);
         SelectedPurpose = FindColumn(profile.Columns.Purpose);
         SelectedAmountSign = FindColumn(profile.Columns.AmountSign);
         SelectedIban = FindColumn(profile.Columns.Iban);
@@ -341,6 +346,7 @@ public partial class ImportMappingViewModel : ObservableObject, IAutoLoadViewMod
         SelectedDate = FindColumn(mapping.Date);
         SelectedAmount = FindColumn(mapping.Amount);
         SelectedTitle = FindColumn(mapping.Title);
+        SelectedPayer = FindColumn(mapping.Payer);
         SelectedPurpose = FindColumn(mapping.Purpose);
         SelectedAmountSign = FindColumn(mapping.AmountSign);
         SelectedIban = FindColumn(mapping.Iban);
@@ -424,6 +430,7 @@ public partial class ImportMappingViewModel : ObservableObject, IAutoLoadViewMod
                 Date = SelectedDate?.Header,
                 Amount = SelectedAmount?.Header,
                 Title = SelectedTitle?.Header,
+                Payer = SelectedPayer?.Header,
                 Purpose = SelectedPurpose?.Header,
                 AmountSign = SelectedAmountSign?.Header,
                 Iban = SelectedIban?.Header
@@ -431,6 +438,31 @@ public partial class ImportMappingViewModel : ObservableObject, IAutoLoadViewMod
             DateFormat = SelectedDateFormat?.Format ?? "dd.MM.yyyy",
             DecimalStyle = SelectedDecimalStyle?.Style ?? CsvDecimalStyle.Comma
         };
+    }
+
+    private ObservableCollection<CsvHeaderRowOption> BuildHeaderRowOptions(CsvTable table)
+    {
+        var options = new ObservableCollection<CsvHeaderRowOption>(
+            table.AllRows
+                .Select((row, index) => (row, index))
+                .Take(MaxHeaderRowOptions)
+                .Select(t => new CsvHeaderRowOption(
+                    t.index,
+                    $"{t.index + 1}: {string.Join(" | ", t.row.Take(4))}")));
+
+        // Ensure the currently selected header stays selectable even if beyond the cap.
+        var headerIndex = table.HeaderRowIndex;
+        if (headerIndex >= MaxHeaderRowOptions
+            && headerIndex < table.AllRows.Count
+            && options.All(o => o.Index != headerIndex))
+        {
+            var row = table.AllRows[headerIndex];
+            options.Add(new CsvHeaderRowOption(
+                headerIndex,
+                $"{headerIndex + 1}: {string.Join(" | ", row.Take(4))}"));
+        }
+
+        return options;
     }
 }
 

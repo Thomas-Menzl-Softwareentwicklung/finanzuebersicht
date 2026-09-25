@@ -62,6 +62,7 @@ public class CsvImportFingerprintTests
         Assert.Equal("Buchungsdatum", p.Columns.Date);
         Assert.Equal("Betrag (€)", p.Columns.Amount);
         Assert.Equal("Zahlungsempfänger*in", p.Columns.Title);
+        Assert.Equal("Zahlungspflichtige*r", p.Columns.Payer);
         Assert.Equal("Verwendungszweck", p.Columns.Purpose);
         Assert.Equal("Umsatztyp", p.Columns.AmountSign);
         Assert.Equal("IBAN", p.Columns.Iban);

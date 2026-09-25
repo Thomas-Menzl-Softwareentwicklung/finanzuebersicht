@@ -17,6 +17,7 @@ public class CsvMappingApplierTests
         Assert.Equal(2500.00m, dtos.Single(d => d.Zahlungsempfaenger.Contains("Muster")).Betrag);
         Assert.Equal(-7.99m, dtos.Single(d => d.Zahlungsempfaenger.Contains("Streaming")).Betrag);
         Assert.Equal("Gehaltszahlung März", dtos.Single(d => d.Betrag == 2500.00m).Verwendungszweck);
+        Assert.Equal("DKB AG", dtos.Single(d => d.Betrag == 2500.00m).Zahlungspflichtige);
     }
 
     [Fact]

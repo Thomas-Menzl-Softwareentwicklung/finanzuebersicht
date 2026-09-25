@@ -20,6 +20,7 @@ public static class CsvMappingApplier
         var dateIdx = ResolveColumnIndex(table.Headers, cols.Date);
         var amountIdx = ResolveColumnIndex(table.Headers, cols.Amount);
         var titleIdx = ResolveColumnIndex(table.Headers, cols.Title);
+        var payerIdx = ResolveColumnIndex(table.Headers, cols.Payer);
         var purposeIdx = ResolveColumnIndex(table.Headers, cols.Purpose);
         var amountSignIdx = ResolveColumnIndex(table.Headers, cols.AmountSign);
         var ibanIdx = ResolveColumnIndex(table.Headers, cols.Iban);
@@ -27,6 +28,7 @@ public static class CsvMappingApplier
         if (cols.Date is not null && dateIdx < 0) return [];
         if (cols.Amount is not null && amountIdx < 0) return [];
         if (cols.Title is not null && titleIdx < 0) return [];
+        if (cols.Payer is not null && payerIdx < 0) return [];
         if (cols.Purpose is not null && purposeIdx < 0) return [];
         if (cols.AmountSign is not null && amountSignIdx < 0) return [];
         if (cols.Iban is not null && ibanIdx < 0) return [];
@@ -49,6 +51,7 @@ public static class CsvMappingApplier
                 Buchungsdatum = dateOk ? date : default,
                 Wertstellung = dateOk ? date : default,
                 Zahlungsempfaenger = titleIdx >= 0 ? GetCell(row, titleIdx) : string.Empty,
+                Zahlungspflichtige = payerIdx >= 0 ? GetCell(row, payerIdx) : string.Empty,
                 Verwendungszweck = purposeIdx >= 0 ? GetCell(row, purposeIdx) : string.Empty,
                 IBAN = ibanIdx >= 0 ? GetCell(row, ibanIdx) : string.Empty,
                 Betrag = amount,

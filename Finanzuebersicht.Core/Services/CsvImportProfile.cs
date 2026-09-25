@@ -11,6 +11,7 @@ public record CsvColumnMapping
     public string? Date { get; init; }
     public string? Amount { get; init; }
     public string? Title { get; init; }
+    public string? Payer { get; init; }
     public string? Purpose { get; init; }
     public string? AmountSign { get; init; }
     public string? Iban { get; init; }

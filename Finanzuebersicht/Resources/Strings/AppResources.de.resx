@@ -398,6 +398,7 @@ Bitte starte die App neu.</value></data>
   <data name="Lbl_ImportProblemeCount" xml:space="preserve"><value>Probleme: {0}</value></data>
   <data name="Lbl_ImportAusgewaehltCount" xml:space="preserve"><value>Ausgewählt: {0}</value></data>
   <data name="Msg_ImportStatusMissingDate" xml:space="preserve"><value>Buchungsdatum fehlt</value></data>
+  <data name="Msg_ImportStatusUnparsableAmount" xml:space="preserve"><value>Betrag konnte nicht gelesen werden</value></data>
   <data name="Msg_ImportStatusPossibleDuplicate" xml:space="preserve"><value>Mögliches Duplikat</value></data>
   <data name="Msg_ImportStatusCategoryUnresolved" xml:space="preserve"><value>Kategorie nicht zugeordnet</value></data>
   <data name="Msg_ImportFileReadFailed" xml:space="preserve"><value>Die Datei konnte nicht gelesen werden.</value></data>
@@ -417,6 +418,7 @@ Bitte starte die App neu.</value></data>
   <data name="Lbl_ImportSpalteDatum" xml:space="preserve"><value>Datum</value></data>
   <data name="Lbl_ImportSpalteBetrag" xml:space="preserve"><value>Betrag</value></data>
   <data name="Lbl_ImportSpalteTitel" xml:space="preserve"><value>Titel / Gegenpartei</value></data>
+  <data name="Lbl_ImportSpalteZahler" xml:space="preserve"><value>Zahler</value></data>
   <data name="Lbl_ImportSpalteZweck" xml:space="preserve"><value>Verwendungszweck</value></data>
   <data name="Lbl_ImportSpalteTyp" xml:space="preserve"><value>Typ / Vorzeichen</value></data>
   <data name="Lbl_ImportSpalteIban" xml:space="preserve"><value>IBAN</value></data>
