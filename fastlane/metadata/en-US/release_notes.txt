@@ -1,1 +1,1 @@
-Optional iCloud sync between iPhone, iPad, and Mac. Data stays in your private iCloud — no Finanzübersicht account. Yearly subscription, independent of Pro. Local use still works without a subscription.
+CSV import with column mapping and saved profiles (DKB still works without an extra step). Mac stability for Apple Silicon and Intel. Optional iCloud sync unchanged.

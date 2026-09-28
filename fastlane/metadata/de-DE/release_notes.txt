@@ -1,1 +1,1 @@
-Optionaler iCloud-Sync zwischen iPhone, iPad und Mac. Daten bleiben in deiner privaten iCloud — ohne Finanzübersicht-Account. Jahresabo, unabhängig von Pro. Lokal weiter ohne Abo nutzbar.
+CSV-Import mit Spaltenzuordnung und gespeicherten Profilen (DKB weiterhin ohne Extra-Schritt). Mac-Stabilität für Apple Silicon und Intel. Optionaler iCloud-Sync unverändert.
