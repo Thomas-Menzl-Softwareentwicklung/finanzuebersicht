@@ -77,7 +77,7 @@ Layered clean architecture with MVVM (`CommunityToolkit.Mvvm` source generators)
 **DI entry points:**
 - `MauiProgram.cs` — app services, pages
 - `AddInfrastructureServices()` — stores + repositories
-- `AddApplicationUseCases()` — all use cases
+- `AddApplicationUseCases()` — all use cases + domain services (`IRecurringGenerationService`, `IForecastService`, `ITransactionValidationService`); host startup via `InitializeAppDataUseCase`
 - `AddPresentationViewModels()` — ViewModels (`Finanzuebersicht.Presentation`)
 
 ## Navigation
@@ -120,7 +120,7 @@ Layered clean architecture with MVVM (`CommunityToolkit.Mvvm` source generators)
 ### Other
 - Sparziele with transaction linking and completion forecast
 - Backup/restore (ZIP/JSON), configurable data path
-- CloudKit Sync MVP (#243) is **in tree**: private CloudKit zone `finanzuebersicht-sync`, LWW + tombstones, Settings iCloud-Sync switch (Store + Sync IAP + iOS 17 / Mac Catalyst 17). Direct/Windows: `NullCloudSyncTransport`. Opt-in; user’s private iCloud; no first-party sync server. Native bridge: `Platforms/iOS/Native/README-CloudKitSync.md`. **#243 QA passed** (iPhone → iPad → iMac, `docs/CLOUDKIT_SYNC_QA.md`). Known gaps: `RecurringGenerationService` bypasses orchestrator notify (instance ids not stable across devices); Mac Catalyst Debug lacks iCloud entitlements. Schema pause: newer cloud `schemaVersion` stops apply/upload and surfaces `Sync_Error`.
+- CloudKit Sync MVP (#243) is **in tree**: private CloudKit zone `finanzuebersicht-sync`, LWW + tombstones, Settings iCloud-Sync switch (Store + Sync IAP + iOS 17 / Mac Catalyst 17). Direct/Windows: `NullCloudSyncTransport`. Opt-in; user’s private iCloud; no first-party sync server. Native bridge: `Platforms/iOS/Native/README-CloudKitSync.md`. **#243 QA passed** (iPhone → iPad → iMac, `docs/CLOUDKIT_SYNC_QA.md`). Recurring auto-generation uses stable instance ids `rec:{dauerauftragId}:{yyyy-MM-dd}` and notifies sync (#372). Mac Catalyst Debug lacks iCloud entitlements. Schema pause: newer cloud `schemaVersion` stops apply/upload and surfaces `Sync_Error`.
 - Architecture milestone **v1.20** (#274–#300) is **done**. Active focus: Milestone 22 product backlog (`docs/ROADMAP.md`) before v2.0.
 - Sync prep (#300 ✅): `ExternalId` / `Source` / `UpdatedAt` on Account, Transaction, Category, RecurringTransaction, SparZiel. Known source constants: `EntitySources`.
 

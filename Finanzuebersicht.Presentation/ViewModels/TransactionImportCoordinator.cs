@@ -51,7 +51,7 @@ public sealed class TransactionImportCoordinator(
             if (prepared.ErrorMessage is not null)
             {
                 var errorDetail = string.IsNullOrWhiteSpace(prepared.ErrorMessage)
-                    ? "Unbekannter Fehler beim Import."
+                    ? _loc.GetString(ResourceKeys.Msg_ImportUnbekannterFehler)
                     : _loc.GetString(prepared.ErrorMessage);
                 if (string.IsNullOrWhiteSpace(errorDetail) || errorDetail == prepared.ErrorMessage)
                     errorDetail = prepared.ErrorMessage ?? errorDetail;

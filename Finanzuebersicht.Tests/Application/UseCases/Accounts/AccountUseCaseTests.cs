@@ -1,3 +1,4 @@
+using Finanzuebersicht.Application.Results;
 using Finanzuebersicht.Application.UseCases.Accounts;
 using Finanzuebersicht.Application.UseCases.Sync;
 using Finanzuebersicht.Core.Sync;
@@ -51,8 +52,9 @@ public class AccountUseCaseTests
 
         var sut = new DeleteAccountUseCase(accountRepository, transactionRepository, templateRepository);
 
-        await sut.ExecuteAsync("acc-old");
+        var result = await sut.ExecuteAsync("acc-old");
 
+        Assert.True(result.IsSuccess);
         await transactionRepository.Received(1).RemapAccountIdAsync("acc-old", "acc-default", Arg.Any<CancellationToken>());
         await templateRepository.Received(1).SaveTransactionTemplateAsync(NonNullArg.Is<TransactionTemplate>(t => t.AccountId == "acc-default"));
         await accountRepository.Received(1).DeleteAccountAsync("acc-old");
@@ -82,8 +84,9 @@ public class AccountUseCaseTests
         var orchestrator = Substitute.For<ICloudSyncOrchestrator>();
         var sut = new DeleteAccountUseCase(accountRepository, transactionRepository, templateRepository, orchestrator);
 
-        await sut.ExecuteAsync("acc-old");
+        var result = await sut.ExecuteAsync("acc-old");
 
+        Assert.True(result.IsSuccess);
         await orchestrator.Received(1).NotifyLocalUpsertAsync(
             SyncEntityType.Transaction, "tx-1", Arg.Any<CancellationToken>());
         await orchestrator.DidNotReceive().NotifyLocalUpsertAsync(
@@ -105,7 +108,10 @@ public class AccountUseCaseTests
 
         var sut = new DeleteAccountUseCase(accountRepository, Substitute.For<ITransactionRepository>(), Substitute.For<ITransactionTemplateRepository>());
 
-        await Assert.ThrowsAsync<InvalidOperationException>(() => sut.ExecuteAsync("acc-default"));
+        var result = await sut.ExecuteAsync("acc-default");
+
+        Assert.False(result.IsSuccess);
+        Assert.Equal(UseCaseErrorCode.DefaultAccountCannotDelete, result.Error!.Code);
     }
 
     [Fact]

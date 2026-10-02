@@ -1,3 +1,4 @@
+using Finanzuebersicht.Application.UseCases;
 using Finanzuebersicht.Application.UseCases.Categories;
 using Finanzuebersicht.Application.UseCases.Accounts;
 using Finanzuebersicht.Application.UseCases.Backup;
@@ -8,6 +9,8 @@ using Finanzuebersicht.Application.UseCases.ScreenshotDemo;
 using Finanzuebersicht.Application.UseCases.SparZiele;
 using Finanzuebersicht.Application.UseCases.Sync;
 using Finanzuebersicht.Application.UseCases.Transactions;
+using Finanzuebersicht.Core.Services;
+using Finanzuebersicht.Core.Sync;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Finanzuebersicht.Application.DependencyInjection;
@@ -88,9 +91,16 @@ public static class ApplicationServiceCollectionExtensions
 
         services.AddTransient<EnableCloudSyncUseCase>();
         services.AddTransient<ClearLocalSyncedDataUseCase>();
+        services.AddTransient<DisableCloudSyncUseCase>();
         services.AddSingleton<ICloudSyncOrchestrator, CloudSyncOrchestrator>();
+        services.AddSingleton<ILocalChangeNotifier, CloudSyncLocalChangeNotifier>();
 
         services.AddSingleton<InitializationService>();
+        services.AddTransient<InitializeAppDataUseCase>();
+
+        services.AddSingleton<IRecurringGenerationService, RecurringGenerationService>();
+        services.AddSingleton<IForecastService, ForecastService>();
+        services.AddSingleton<ITransactionValidationService, TransactionValidationService>();
 
         return services;
     }

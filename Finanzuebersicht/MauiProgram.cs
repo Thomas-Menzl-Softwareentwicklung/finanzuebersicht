@@ -107,11 +107,6 @@ public static class MauiProgram
 				sp.GetService<Microsoft.Extensions.Logging.ILogger<Finanzuebersicht.Infrastructure.Services.MirroredQuickExpenseWidgetPresetStore>>(),
 				sp.GetService<Microsoft.Extensions.Logging.ILogger<Finanzuebersicht.Infrastructure.Services.FileQuickExpenseWidgetPresetStore>>()));
 #endif
-		builder.Services.AddSingleton<IRecurringGenerationService, RecurringGenerationService>();
-		builder.Services.AddSingleton<IReportingService, ReportingService>();
-		builder.Services.AddSingleton<IForecastService, ForecastService>();
-		builder.Services.AddSingleton<ITransactionValidationService, TransactionValidationService>();
-
 		builder.Services.AddApplicationUseCases();
 
 		builder.Services.AddSingleton<ThemeService>();

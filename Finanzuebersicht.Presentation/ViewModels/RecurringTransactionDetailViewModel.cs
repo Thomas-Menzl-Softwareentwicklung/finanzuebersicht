@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Finanzuebersicht.Application.UseCases.RecurringTransactions;
+using Finanzuebersicht.Presentation.Services;
 using Finanzuebersicht.Core.Services;
 using Finanzuebersicht.Models;
 using Finanzuebersicht.Navigation;
@@ -250,7 +251,7 @@ public partial class RecurringTransactionDetailViewModel(
 
         try
         {
-            await _saveRecurringTransactionDetailUseCase.ExecuteAsync(
+            var result = await _saveRecurringTransactionDetailUseCase.ExecuteAsync(
                 _existing,
                 betrag,
                 Titel,
@@ -264,6 +265,12 @@ public partial class RecurringTransactionDetailViewModel(
                 IntervalFactor,
                 ReminderDaysBefore,
                 Exceptions.ToList());
+            if (!result.IsSuccess)
+            {
+                await UseCaseErrorPresenter.ShowAsync(_dialogService, _loc, result.Error!);
+                return false;
+            }
+
             _appEvents.NotifyDataChanged();
             await _feedbackService.ShowSnackbarAsync(_loc.GetString(ResourceKeys.Msg_Gespeichert));
             return true;

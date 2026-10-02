@@ -2,6 +2,7 @@
 using System.Text.Json;
 using Finanzuebersicht.Core.Constants;
 using Finanzuebersicht.Core.Services;
+using Finanzuebersicht.Infrastructure.Services;
 using Foundation;
 using Microsoft.Extensions.Logging;
 
@@ -40,7 +41,7 @@ public sealed class AppGroupQuickExpenseInboxStore : IQuickExpenseInboxStore
                 try
                 {
                     json = File.ReadAllText(path);
-                    File.WriteAllText(path, "[]");
+                    AtomicFile.WriteAllText(path, "[]");
                 }
                 catch (Exception ex)
                 {
@@ -109,7 +110,7 @@ public sealed class AppGroupQuickExpenseInboxStore : IQuickExpenseInboxStore
             await Task.Run(() =>
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                File.WriteAllText(path, JsonSerializer.Serialize(dtos, JsonOptions));
+                AtomicFile.WriteAllText(path, JsonSerializer.Serialize(dtos, JsonOptions));
             }, cancellationToken).ConfigureAwait(false);
         }
         finally
@@ -125,7 +126,6 @@ public sealed class AppGroupQuickExpenseInboxStore : IQuickExpenseInboxStore
         if (defaults is null)
             return;
         defaults.SetBool(hasPro, AppGroupIds.HasProFlagKey);
-        defaults.Synchronize();
     }
 
     /// <summary>Publishes in-app language so the widget can match (empty = system).</summary>
@@ -139,8 +139,6 @@ public sealed class AppGroupQuickExpenseInboxStore : IQuickExpenseInboxStore
             defaults.RemoveObject(AppGroupIds.PreferredLanguageKey);
         else
             defaults.SetString(languageCode.Trim(), AppGroupIds.PreferredLanguageKey);
-
-        defaults.Synchronize();
     }
 
     private static string? ResolvePendingPath()

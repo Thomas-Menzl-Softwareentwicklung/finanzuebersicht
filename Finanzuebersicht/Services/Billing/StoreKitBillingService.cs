@@ -11,13 +11,14 @@ namespace Finanzuebersicht.Services.Billing;
 /// StoreKit 2 awaits fuller .NET Swift interop; StoreKit 1 remains supported (Microsoft MAUI sample pattern).
 /// </summary>
 #pragma warning disable CA1422
-public sealed class StoreKitBillingService : IStoreBillingService
+public sealed class StoreKitBillingService : IStoreBillingService, IDisposable
 {
     private readonly ILogger<StoreKitBillingService> _logger;
     private readonly HashSet<string> _ownedProducts = new(StringComparer.Ordinal);
     private PaymentTransactionObserver? _paymentObserver;
     private TaskCompletionSource<StorePurchaseResult>? _purchaseTcs;
     private bool _initialized;
+    private bool _disposed;
 
     public StoreKitBillingService(ILogger<StoreKitBillingService> logger)
     {
@@ -29,6 +30,7 @@ public sealed class StoreKitBillingService : IStoreBillingService
     public Task<bool> InitializeAsync(CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
+        ObjectDisposedException.ThrowIf(_disposed, this);
         if (_initialized)
             return Task.FromResult(true);
 
@@ -190,6 +192,32 @@ public sealed class StoreKitBillingService : IStoreBillingService
         using var reg = cancellationToken.Register(() =>
             requestDelegate.TryCancel(new OperationCanceledException(cancellationToken)));
         return await requestDelegate.GetProductsAsync().ConfigureAwait(false);
+    }
+
+    public void Dispose()
+    {
+        if (_disposed)
+            return;
+
+        _disposed = true;
+        if (_paymentObserver is not null)
+        {
+            try
+            {
+                SKPaymentQueue.DefaultQueue.RemoveTransactionObserver(_paymentObserver);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to remove StoreKit transaction observer");
+            }
+
+            _paymentObserver.Dispose();
+            _paymentObserver = null;
+        }
+
+        _purchaseTcs?.TrySetCanceled();
+        _purchaseTcs = null;
+        _initialized = false;
     }
 }
 

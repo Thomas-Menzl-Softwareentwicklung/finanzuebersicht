@@ -1,3 +1,4 @@
+using Finanzuebersicht.Application.UseCases.Categories;
 using Finanzuebersicht.Application.UseCases.Import;
 using Finanzuebersicht.Core.Services;
 using Finanzuebersicht.Models;
@@ -16,6 +17,9 @@ public class ImportPreviewViewModelTests
             Substitute.For<ILogger<CsvImportOrchestrator>>(),
             categoryRepository,
             uncategorizedCategoryService: new UncategorizedCategoryService(categoryRepository)));
+
+    private static LoadCategoriesUseCase CreateLoadCategoriesUseCase(ICategoryRepository categoryRepository)
+        => new(categoryRepository);
 
     [Fact]
     public async Task LoadPreview_LoadsRowsAndDefaultFilterIsAll()
@@ -67,7 +71,7 @@ public class ImportPreviewViewModelTests
         var vm = new ImportPreviewViewModel(
             CreateCommitUseCase(categoryRepository),
             sessionStore,
-            categoryRepository,
+            CreateLoadCategoriesUseCase(categoryRepository),
             navigation,
             dialog,
             localization,
@@ -125,7 +129,7 @@ public class ImportPreviewViewModelTests
         var vm = new ImportPreviewViewModel(
             CreateCommitUseCase(categoryRepository),
             sessionStore,
-            categoryRepository,
+            CreateLoadCategoriesUseCase(categoryRepository),
             navigation,
             Substitute.For<IDialogService>(),
             localization,
@@ -168,7 +172,7 @@ public class ImportPreviewViewModelTests
         var vm = new ImportPreviewViewModel(
             CreateCommitUseCase(categoryRepository),
             sessionStore,
-            categoryRepository,
+            CreateLoadCategoriesUseCase(categoryRepository),
             Substitute.For<INavigationService>(),
             Substitute.For<IDialogService>(),
             localization,

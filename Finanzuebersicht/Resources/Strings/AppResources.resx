@@ -128,6 +128,12 @@
   <data name="Err_TransferKontenErforderlich" xml:space="preserve"><value>Please select a source and a target account.</value></data>
   <data name="Err_KontoNichtGefunden" xml:space="preserve"><value>The selected account was not found.</value></data>
   <data name="Err_KontoArchiviert" xml:space="preserve"><value>Archived accounts cannot be used for this action.</value></data>
+  <data name="Err_DauerauftragNichtGefunden" xml:space="preserve"><value>The recurring transaction was not found.</value></data>
+  <data name="Err_DauerauftragBereitsGebucht" xml:space="preserve"><value>This recurring instance has already been booked.</value></data>
+  <data name="Err_KeinAktivesKonto" xml:space="preserve"><value>No active account is available for booking.</value></data>
+  <data name="Err_StandardkontoNichtLoeschen" xml:space="preserve"><value>The default account cannot be deleted.</value></data>
+  <data name="Err_SystemkontoNichtArchivieren" xml:space="preserve"><value>System accounts cannot be archived.</value></data>
+  <data name="Err_KontoSaldoNichtGefunden" xml:space="preserve"><value>Account balance could not be calculated.</value></data>
   <data name="Err_UmbuchungNichtBearbeitbar" xml:space="preserve"><value>Transfers cannot be edited as a single transaction.</value></data>
   <data name="Err_OrdnerNichtWaehlbar" xml:space="preserve"><value>Folder could not be selected: {0}</value></data>
   <data name="Err_SucheFehlgeschlagen" xml:space="preserve"><value>The search could not be completed.</value></data>
@@ -243,6 +249,7 @@ Please restart the app.</value></data>
 
   <!-- Import Messages -->
   <data name="Msg_ImportFehlgeschlagen_Title" xml:space="preserve"><value>Import failed</value></data>
+  <data name="Msg_ImportUnbekannterFehler" xml:space="preserve"><value>Unknown error during import.</value></data>
   <data name="Msg_ImportServiceNichtVerfuegbar" xml:space="preserve"><value>Import service not available.</value></data>
   <data name="Msg_ImportAbgeschlossen_Title" xml:space="preserve"><value>Import completed</value></data>
   <data name="Msg_ImportiertCount" xml:space="preserve"><value>Imported: {0} transactions</value></data>

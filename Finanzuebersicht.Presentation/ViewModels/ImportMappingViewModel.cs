@@ -161,7 +161,7 @@ public partial class ImportMappingViewModel : ObservableObject, IAutoLoadViewMod
             if (!preview.Success)
             {
                 var errorDetail = string.IsNullOrWhiteSpace(preview.ErrorMessage)
-                    ? "Unbekannter Fehler beim Import."
+                    ? _loc.GetString(ResourceKeys.Msg_ImportUnbekannterFehler)
                     : _loc.GetString(preview.ErrorMessage);
                 if (string.IsNullOrWhiteSpace(errorDetail) || errorDetail == preview.ErrorMessage)
                     errorDetail = preview.ErrorMessage ?? errorDetail;

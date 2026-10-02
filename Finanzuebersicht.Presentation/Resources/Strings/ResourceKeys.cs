@@ -118,6 +118,12 @@ public static class ResourceKeys
     public const string Err_TransferKontenErforderlich = nameof(Err_TransferKontenErforderlich);
     public const string Err_KontoNichtGefunden = nameof(Err_KontoNichtGefunden);
     public const string Err_KontoArchiviert = nameof(Err_KontoArchiviert);
+    public const string Err_DauerauftragNichtGefunden = nameof(Err_DauerauftragNichtGefunden);
+    public const string Err_DauerauftragBereitsGebucht = nameof(Err_DauerauftragBereitsGebucht);
+    public const string Err_KeinAktivesKonto = nameof(Err_KeinAktivesKonto);
+    public const string Err_StandardkontoNichtLoeschen = nameof(Err_StandardkontoNichtLoeschen);
+    public const string Err_SystemkontoNichtArchivieren = nameof(Err_SystemkontoNichtArchivieren);
+    public const string Err_KontoSaldoNichtGefunden = nameof(Err_KontoSaldoNichtGefunden);
     public const string Err_UmbuchungNichtBearbeitbar = nameof(Err_UmbuchungNichtBearbeitbar);
     public const string Err_OrdnerNichtWaehlbar = nameof(Err_OrdnerNichtWaehlbar);
     public const string Err_SucheFehlgeschlagen = nameof(Err_SucheFehlgeschlagen);
@@ -253,6 +259,7 @@ public static class ResourceKeys
 
     // Import messages
     public const string Msg_ImportFehlgeschlagen_Title = nameof(Msg_ImportFehlgeschlagen_Title);
+    public const string Msg_ImportUnbekannterFehler = nameof(Msg_ImportUnbekannterFehler);
     public const string Msg_ImportServiceNichtVerfuegbar = nameof(Msg_ImportServiceNichtVerfuegbar);
     public const string Msg_ImportAbgeschlossen_Title = nameof(Msg_ImportAbgeschlossen_Title);
     public const string Msg_ImportiertCount = nameof(Msg_ImportiertCount);

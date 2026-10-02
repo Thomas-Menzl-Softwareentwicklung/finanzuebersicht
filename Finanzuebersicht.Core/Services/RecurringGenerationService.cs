@@ -1,3 +1,4 @@
+using Finanzuebersicht.Core.Sync;
 using Finanzuebersicht.Models;
 using Microsoft.Extensions.Logging;
 
@@ -8,13 +9,15 @@ public class RecurringGenerationService(
     ITransactionRepository transactionRepository,
     Finanzuebersicht.Core.Services.IClock? clock = null,
     ILogger<RecurringGenerationService>? logger = null,
-    IAccountRepository? accountRepository = null) : IRecurringGenerationService
+    IAccountRepository? accountRepository = null,
+    ILocalChangeNotifier? localChangeNotifier = null) : IRecurringGenerationService
 {
     private readonly IRecurringTransactionRepository _recurringRepository = recurringRepository;
     private readonly ITransactionRepository _transactionRepository = transactionRepository;
     private readonly IAccountRepository? _accountRepository = accountRepository;
     private readonly Finanzuebersicht.Core.Services.IClock _clock = clock ?? Finanzuebersicht.Core.Services.SystemClock.Instance;
     private readonly ILogger<RecurringGenerationService>? _logger = logger;
+    private readonly ILocalChangeNotifier? _localChangeNotifier = localChangeNotifier;
     private const int MaxInstancesPerRun = 500;
 
     public async Task GeneratePendingRecurringTransactionsAsync(CancellationToken cancellationToken = default)
@@ -22,6 +25,9 @@ public class RecurringGenerationService(
         var recurringItems = await _recurringRepository.GetRecurringTransactionsAsync();
         var defaultAccountId = await ResolveDefaultAccountIdAsync(cancellationToken);
         var today = _clock.Today;
+        var existingTransactionIds = (await _transactionRepository.GetAllTransactionsAsync(cancellationToken))
+            .Select(t => t.Id)
+            .ToHashSet(StringComparer.Ordinal);
 
         foreach (var recurring in recurringItems.Where(item => item.Aktiv))
         {
@@ -64,8 +70,17 @@ public class RecurringGenerationService(
                     transactionDate = exception.ShiftToDate.Value.Date;
                 }
 
+                var instanceId = RecurringInstanceIds.For(recurring.Id, candidate);
+                if (existingTransactionIds.Contains(instanceId))
+                {
+                    recurring.LetzteAusfuehrung = candidate;
+                    candidate = RecurringScheduleCalculator.GetNextInstance(recurring, candidate);
+                    continue;
+                }
+
                 var transaction = new Transaction
                 {
+                    Id = instanceId,
                     Betrag = recurring.Betrag,
                     Titel = recurring.Titel,
                     Datum = transactionDate,
@@ -77,7 +92,11 @@ public class RecurringGenerationService(
 
                 recurring.AccountId ??= defaultAccountId;
                 await _transactionRepository.SaveTransactionAsync(transaction);
+                existingTransactionIds.Add(instanceId);
                 generatedCount++;
+
+                if (_localChangeNotifier is not null)
+                    await _localChangeNotifier.NotifyTransactionUpsertAsync(transaction.Id, cancellationToken);
 
                 // mark this instance as last executed (use the template instance date)
                 recurring.LetzteAusfuehrung = candidate;
@@ -94,6 +113,8 @@ public class RecurringGenerationService(
             }
 
             await _recurringRepository.SaveRecurringTransactionAsync(recurring);
+            if (_localChangeNotifier is not null)
+                await _localChangeNotifier.NotifyRecurringUpsertAsync(recurring.Id, cancellationToken);
         }
     }
 

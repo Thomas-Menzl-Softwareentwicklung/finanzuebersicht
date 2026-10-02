@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using Finanzuebersicht.Application.UseCases;
 using Finanzuebersicht.Application.UseCases.ScreenshotDemo;
 using Finanzuebersicht.Application.UseCases.Sync;
 using Finanzuebersicht.Application.UseCases.Transactions;
@@ -16,7 +17,7 @@ namespace Finanzuebersicht;
 public partial class App : global::Microsoft.Maui.Controls.Application
 {
 	private readonly IRecurringGenerationService _recurringGenerationService;
-	private readonly InitializationService _initService;
+	private readonly InitializeAppDataUseCase _initializeAppDataUseCase;
 	private readonly ThemeService _themeService;
 	private readonly ProcessQuickExpenseInboxUseCase _processQuickExpenseInboxUseCase;
 	private readonly ILicenseService _licenseService;
@@ -44,7 +45,7 @@ public partial class App : global::Microsoft.Maui.Controls.Application
 	}
 
 	public App(
-		InitializationService initService,
+		InitializeAppDataUseCase initializeAppDataUseCase,
 		IRecurringGenerationService recurringGenerationService,
 		ISettingsService settings,
 		ThemeService themeService,
@@ -78,7 +79,7 @@ public partial class App : global::Microsoft.Maui.Controls.Application
 
 		InitializeComponent();
 		_recurringGenerationService = recurringGenerationService;
-		_initService = initService;
+		_initializeAppDataUseCase = initializeAppDataUseCase;
 		_themeService = themeService;
 		_processQuickExpenseInboxUseCase = processQuickExpenseInboxUseCase;
 		_licenseService = licenseService;
@@ -194,7 +195,7 @@ public partial class App : global::Microsoft.Maui.Controls.Application
 		base.OnStart();
 		try
 		{
-			await _initService.InitializeAsync();
+			await _initializeAppDataUseCase.ExecuteAsync();
 			if (_screenshotDemoMode)
 			{
 				await ScreenshotDemoBootstrap.TrySeedAsync(_seedScreenshotDemoDataUseCase);

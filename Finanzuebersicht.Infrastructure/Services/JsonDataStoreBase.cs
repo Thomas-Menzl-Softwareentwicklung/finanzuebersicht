@@ -55,7 +55,7 @@ public abstract class JsonDataStoreBase : IDisposable
     protected static async Task SaveAsync<T>(string path, List<T> items)
     {
         var json = JsonSerializer.Serialize(items, JsonOptions);
-        await File.WriteAllTextAsync(path, json);
+        await AtomicFile.WriteAllTextAsync(path, json);
     }
 
     /// <summary>

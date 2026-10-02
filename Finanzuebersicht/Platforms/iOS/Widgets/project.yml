@@ -39,6 +39,10 @@ targets:
       - path: QuickExpenseWidget
         excludes:
           - "*.entitlements"
+          - PrivacyInfo.xcprivacy
+      - path: QuickExpenseWidget/PrivacyInfo.xcprivacy
+        buildPhase: resources
+        optional: false
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: de.thomasmenzl.finanzuebersicht.QuickExpenseWidget

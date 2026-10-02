@@ -1,3 +1,4 @@
+using Finanzuebersicht.Application.Results;
 using Finanzuebersicht.Application.UseCases.Sync;
 using Finanzuebersicht.Core.Licensing;
 using Finanzuebersicht.Core.Sync;
@@ -18,7 +19,7 @@ public class SaveRecurringTransactionDetailUseCase(
     private readonly ILicenseService _licenseService = licenseService ?? UnrestrictedLicenseService.Instance;
     private readonly ICloudSyncOrchestrator? _cloudSyncOrchestrator = cloudSyncOrchestrator;
 
-    public async Task ExecuteAsync(
+    public async Task<UseCaseResult> ExecuteAsync(
         RecurringTransaction? existing,
         decimal betrag,
         string titel,
@@ -31,7 +32,8 @@ public class SaveRecurringTransactionDetailUseCase(
         RecurrenceInterval interval = RecurrenceInterval.Monthly,
         int intervalFactor = 1,
         int reminderDaysBefore = 0,
-        List<RecurringException>? exceptions = null, CancellationToken cancellationToken = default)
+        List<RecurringException>? exceptions = null,
+        CancellationToken cancellationToken = default)
     {
         if (existing == null)
         {
@@ -42,10 +44,11 @@ public class SaveRecurringTransactionDetailUseCase(
         if (!string.IsNullOrWhiteSpace(accountId))
         {
             var accounts = await _accountRepository.GetAccountsAsync();
-            var account = accounts.FirstOrDefault(a => a.Id == accountId)
-                ?? throw new InvalidOperationException("Selected account not found.");
+            var account = accounts.FirstOrDefault(a => a.Id == accountId);
+            if (account is null)
+                return UseCaseResult.Fail(UseCaseErrorCode.AccountNotFound);
             if (account.IsArchived && (existing == null || existing.AccountId != accountId))
-                throw new InvalidOperationException("Archived account cannot be assigned to new recurring transactions.");
+                return UseCaseResult.Fail(UseCaseErrorCode.AccountArchived);
         }
 
         var recurring = existing ?? new RecurringTransaction();
@@ -70,6 +73,8 @@ public class SaveRecurringTransactionDetailUseCase(
             SyncEntityType.RecurringTransaction,
             recurring.Id,
             cancellationToken);
-        await _recurringGenerationService.GeneratePendingRecurringTransactionsAsync();
+        await _recurringGenerationService.GeneratePendingRecurringTransactionsAsync(cancellationToken);
+
+        return UseCaseResult.Ok();
     }
 }

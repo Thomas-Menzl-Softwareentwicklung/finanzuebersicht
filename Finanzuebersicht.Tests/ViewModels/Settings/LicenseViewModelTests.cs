@@ -423,10 +423,12 @@ public class LicenseViewModelTests
         IFeedbackService? feedback = null,
         CreateBackupUseCase? backupUseCase = null,
         ClearLocalSyncedDataUseCase? clearUseCase = null,
+        DisableCloudSyncUseCase? disableUseCase = null,
         IAppEvents? appEvents = null,
         IExternalBrowser? browser = null)
     {
         var metadata = metadataStore ?? Substitute.For<ISyncMetadataStore>();
+        var cloudSyncOrchestrator = orchestrator ?? Substitute.For<ICloudSyncOrchestrator>();
         return new LicenseViewModel(
             license,
             entitlementStore ?? Substitute.For<ILicenseEntitlementStore>(),
@@ -438,9 +440,10 @@ public class LicenseViewModelTests
                 Substitute.For<ISyncMetadataStore>(),
                 license),
             clearUseCase ?? CreateClearUseCase(Substitute.For<ISyncTombstoneStore>(), metadata),
+            disableUseCase ?? new DisableCloudSyncUseCase(metadata, cloudSyncOrchestrator),
             backupUseCase ?? new CreateBackupUseCase(Substitute.For<IBackupService>()),
             metadata,
-            orchestrator ?? Substitute.For<ICloudSyncOrchestrator>(),
+            cloudSyncOrchestrator,
             appEvents ?? Substitute.For<IAppEvents>(),
             browser ?? Substitute.For<IExternalBrowser>());
     }
