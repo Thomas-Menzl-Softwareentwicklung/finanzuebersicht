@@ -25,7 +25,7 @@ public partial class App : global::Microsoft.Maui.Controls.Application
 	private readonly IAppEvents _appEvents;
 	private readonly IQuickExpenseWidgetPresetStore? _quickExpenseWidgetPresetStore;
 	private readonly SeedScreenshotDemoDataUseCase _seedScreenshotDemoDataUseCase;
-	private readonly ICloudSyncOrchestrator _cloudSyncOrchestrator;
+	private readonly StartCloudSyncUseCase _startCloudSyncUseCase;
 	private readonly ILogger<App>? _logger;
 	private readonly string _savedTheme;
 	private readonly bool _screenshotDemoMode;
@@ -53,7 +53,7 @@ public partial class App : global::Microsoft.Maui.Controls.Application
 		IDisplayCurrencyService displayCurrency,
 		ProcessQuickExpenseInboxUseCase processQuickExpenseInboxUseCase,
 		SeedScreenshotDemoDataUseCase seedScreenshotDemoDataUseCase,
-		ICloudSyncOrchestrator cloudSyncOrchestrator,
+		StartCloudSyncUseCase startCloudSyncUseCase,
 		ILicenseService licenseService,
 		INavigationService navigationService,
 		IAppEvents appEvents,
@@ -86,7 +86,7 @@ public partial class App : global::Microsoft.Maui.Controls.Application
 		_navigationService = navigationService;
 		_quickExpenseWidgetPresetStore = quickExpenseWidgetPresetStore;
 		_seedScreenshotDemoDataUseCase = seedScreenshotDemoDataUseCase;
-		_cloudSyncOrchestrator = cloudSyncOrchestrator;
+		_startCloudSyncUseCase = startCloudSyncUseCase;
 		_logger = logger;
 
 		// Gespeichertes Theme anwenden (MAUI-Ebene); Screenshot-Demo erzwingt Light ohne Settings-Persistenz
@@ -303,8 +303,7 @@ public partial class App : global::Microsoft.Maui.Controls.Application
 	{
 		try
 		{
-			await _cloudSyncOrchestrator.StartIfEnabledAsync();
-			await _cloudSyncOrchestrator.SyncNowAsync();
+			await _startCloudSyncUseCase.ExecuteAsync();
 		}
 		catch (Exception ex)
 		{

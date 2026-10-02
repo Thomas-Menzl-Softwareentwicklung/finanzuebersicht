@@ -442,8 +442,9 @@ public class LicenseViewModelTests
             clearUseCase ?? CreateClearUseCase(Substitute.For<ISyncTombstoneStore>(), metadata),
             disableUseCase ?? new DisableCloudSyncUseCase(metadata, cloudSyncOrchestrator),
             backupUseCase ?? new CreateBackupUseCase(Substitute.For<IBackupService>()),
-            metadata,
-            cloudSyncOrchestrator,
+            new GetCloudSyncStatusUseCase(metadata),
+            new RecordCloudSyncErrorUseCase(metadata),
+            new StartCloudSyncUseCase(cloudSyncOrchestrator),
             appEvents ?? Substitute.For<IAppEvents>(),
             browser ?? Substitute.For<IExternalBrowser>());
     }
