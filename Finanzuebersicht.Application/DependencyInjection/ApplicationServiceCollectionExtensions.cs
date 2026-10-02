@@ -92,6 +92,9 @@ public static class ApplicationServiceCollectionExtensions
         services.AddTransient<EnableCloudSyncUseCase>();
         services.AddTransient<ClearLocalSyncedDataUseCase>();
         services.AddTransient<DisableCloudSyncUseCase>();
+        services.AddTransient<GetCloudSyncStatusUseCase>();
+        services.AddTransient<RecordCloudSyncErrorUseCase>();
+        services.AddTransient<StartCloudSyncUseCase>();
         services.AddSingleton<ICloudSyncOrchestrator, CloudSyncOrchestrator>();
         services.AddSingleton<ILocalChangeNotifier, CloudSyncLocalChangeNotifier>();
 
