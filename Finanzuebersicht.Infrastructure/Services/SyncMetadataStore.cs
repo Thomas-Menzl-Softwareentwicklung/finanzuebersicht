@@ -60,6 +60,6 @@ public class SyncMetadataStore : JsonDataStoreBase, ISyncMetadataStore
     private static async Task SaveSingleAsync<T>(string path, T item)
     {
         var json = JsonSerializer.Serialize(item, JsonOptions);
-        await File.WriteAllTextAsync(path, json);
+        await AtomicFile.WriteAllTextAsync(path, json);
     }
 }

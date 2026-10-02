@@ -32,6 +32,7 @@ public static class PresentationServiceCollectionExtensions
         services.AddTransient<TransferDetailViewModel>();
         services.AddTransient<TransactionImportCoordinator>();
         services.AddTransient<TransactionTemplatesCoordinator>();
+        services.AddTransient<TransactionSearchCoordinator>();
         services.AddTransient<TransactionsViewModel>();
         services.AddTransient<TransactionDetailViewModel>();
         services.AddTransient<QuickExpenseCaptureViewModel>();

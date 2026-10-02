@@ -29,7 +29,7 @@
 
 ## Known gaps (not blockers for the MVP path)
 
-- `RecurringGenerationService` writes bypass orchestrator notify. Do **not** notify auto-generated transactions until instance ids are stable across devices (`DauerauftragId` + date); notifying two Guid copies would double-book.
+- Auto-generated recurring transactions use stable ids (`rec:{recurringId}:{yyyy-MM-dd}`) and enqueue sync via `ILocalChangeNotifier`. Legacy Guid instances on other devices are not migrated automatically — LWW may leave duplicates until cleaned up manually.
 - Mac Catalyst **Debug** has no iCloud entitlements — use Release/Store Mac build for Mac-side QA.
 - Schema pause is implemented: a cloud `SyncMeta.schemaVersion` newer than the app persists `LastError` and skips apply/upload (`Sync_Error` in Settings).
 

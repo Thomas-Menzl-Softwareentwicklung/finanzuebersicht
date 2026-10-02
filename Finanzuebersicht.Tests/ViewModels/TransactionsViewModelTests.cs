@@ -797,6 +797,15 @@ public class TransactionsViewModelTests
             dialogService,
             localizationService);
 
+        var searchCoordinator = new TransactionSearchCoordinator(
+            new SearchTransactionsUseCase(searchTransactionRepository, searchCategoryRepository, searchAccountRepository),
+            new LoadCategoriesUseCase(loadCategoryRepository),
+            new LoadAccountsUseCase(loadAccountRepository),
+            dispatcher,
+            dialogService,
+            localizationService,
+            Substitute.For<ILogger<TransactionSearchCoordinator>>());
+
         transactionCreateSheet = Substitute.For<ITransactionCreateSheetService>();
         transactionCreateSheet.ShowAsync(Arg.Any<TransactionDetailViewModel>()).Returns(false);
         transferCreateSheet = Substitute.For<ITransferCreateSheetService>();
@@ -848,10 +857,10 @@ public class TransactionsViewModelTests
             new DeleteTransactionUseCase(deleteTransactionRepository),
             new RestoreTransactionUseCase(deleteTransactionRepository),
             new LoadTransactionsMonthUseCase(loadTransactionRepository, loadCategoryRepository, loadAccountRepository),
-            new SearchTransactionsUseCase(searchTransactionRepository, searchCategoryRepository, searchAccountRepository),
             navigationService,
             importCoordinator,
             templatesCoordinator,
+            searchCoordinator,
             createTransactionVm,
             createTransferVm,
             quickExpenseVm,
@@ -861,9 +870,6 @@ public class TransactionsViewModelTests
             dialogService,
             feedbackService,
             localizationService,
-            new LoadCategoriesUseCase(loadCategoryRepository),
-            new LoadAccountsUseCase(loadAccountRepository),
-            dispatcher,
             appEvents,
             logger);
     }

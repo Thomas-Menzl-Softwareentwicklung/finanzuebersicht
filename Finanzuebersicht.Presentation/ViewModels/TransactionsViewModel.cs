@@ -1,8 +1,6 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Finanzuebersicht.Application.UseCases.Accounts;
-using Finanzuebersicht.Application.UseCases.Categories;
 using Finanzuebersicht.Application.UseCases.Transactions;
 using Finanzuebersicht.Core.Services;
 using Finanzuebersicht.Models;
@@ -19,10 +17,10 @@ public partial class TransactionsViewModel(
     DeleteTransactionUseCase deleteTransactionUseCase,
     RestoreTransactionUseCase restoreTransactionUseCase,
     LoadTransactionsMonthUseCase loadTransactionsMonthUseCase,
-    SearchTransactionsUseCase searchTransactionsUseCase,
     INavigationService navigationService,
     TransactionImportCoordinator importCoordinator,
     TransactionTemplatesCoordinator templatesCoordinator,
+    TransactionSearchCoordinator searchCoordinator,
     TransactionDetailViewModel createTransactionViewModel,
     TransferDetailViewModel createTransferViewModel,
     QuickExpenseCaptureViewModel quickExpenseCaptureViewModel,
@@ -32,9 +30,6 @@ public partial class TransactionsViewModel(
     IDialogService dialogService,
     IFeedbackService feedbackService,
     ILocalizationService localizationService,
-    LoadCategoriesUseCase loadCategoriesUseCase,
-    LoadAccountsUseCase loadAccountsUseCase,
-    IMainThreadDispatcher dispatcher,
     IAppEvents appEvents,
     ILogger<TransactionsViewModel> logger,
     CountUncategorizedTransactionsUseCase? countUncategorizedTransactionsUseCase = null,
@@ -45,10 +40,10 @@ public partial class TransactionsViewModel(
     private readonly LoadTransactionsMonthUseCase _loadTransactionsMonthUseCase = loadTransactionsMonthUseCase;
 
     public System.Windows.Input.ICommand AutoLoadCommand => LoadTransaktionenCommand;
-    private readonly SearchTransactionsUseCase _searchTransactionsUseCase = searchTransactionsUseCase;
     private readonly INavigationService _navigationService = navigationService;
     private readonly TransactionImportCoordinator _importCoordinator = importCoordinator;
     private readonly TransactionTemplatesCoordinator _templatesCoordinator = templatesCoordinator;
+    private readonly TransactionSearchCoordinator _searchCoordinator = searchCoordinator;
     private readonly TransactionDetailViewModel _createTransactionViewModel = createTransactionViewModel;
     private readonly TransferDetailViewModel _createTransferViewModel = createTransferViewModel;
     private readonly QuickExpenseCaptureViewModel _quickExpenseCaptureViewModel = quickExpenseCaptureViewModel;
@@ -58,16 +53,11 @@ public partial class TransactionsViewModel(
     private readonly IDialogService _dialogService = dialogService;
     private readonly IFeedbackService _feedbackService = feedbackService;
     private readonly ILocalizationService _loc = localizationService;
-    private readonly LoadCategoriesUseCase _loadCategoriesUseCase = loadCategoriesUseCase;
-    private readonly LoadAccountsUseCase _loadAccountsUseCase = loadAccountsUseCase;
-    private readonly IMainThreadDispatcher _dispatcher = dispatcher;
     private readonly IAppEvents _appEvents = appEvents;
     private readonly ILogger<TransactionsViewModel> _logger = logger;
     private readonly CountUncategorizedTransactionsUseCase? _countUncategorizedTransactionsUseCase = countUncategorizedTransactionsUseCase;
     private readonly IUncategorizedCategoryService? _uncategorizedCategoryService = uncategorizedCategoryService;
 
-    private CancellationTokenSource? _searchDebounce;
-    private int _searchVersion;
     private bool _reloadQueued;
 
     private void LogError(string context, Exception? ex = null)
@@ -335,25 +325,8 @@ public partial class TransactionsViewModel(
     partial void OnVonDatumChanged(DateTime? value) => TriggerSearchDebounced();
     partial void OnBisDatumChanged(DateTime? value) => TriggerSearchDebounced();
 
-    private void TriggerSearchDebounced()
-    {
-        var oldCts = _searchDebounce;
-        _searchDebounce = new CancellationTokenSource();
-        oldCts?.Cancel();
-        oldCts?.Dispose();
-        var token = _searchDebounce.Token;
-        var version = Interlocked.Increment(ref _searchVersion);
-        _ = Task.Run(async () =>
-        {
-            try
-            {
-                await Task.Delay(300, token);
-                if (!token.IsCancellationRequested)
-                    await _dispatcher.InvokeAsync(() => ExecuteSearchAsync(version));
-            }
-            catch (TaskCanceledException) { }
-        });
-    }
+    private void TriggerSearchDebounced() =>
+        _searchCoordinator.TriggerDebounced(ExecuteSearchAsync);
 
     private async Task ExecuteSearchAsync(int version = -1)
     {
@@ -363,39 +336,44 @@ public partial class TransactionsViewModel(
             TotalSearchCount = 0;
             return;
         }
+
+        var query = new SearchTransactionsQuery(
+            SearchText: SearchText.Trim(),
+            KategorieId: SelectedKategorieId,
+            AccountId: SelectedAccountId,
+            Typ: SelectedTypFilter,
+            VonDatum: VonDatum,
+            BisDatum: BisDatum);
+
         IsLoading = true;
+        var clearLoading = true;
         try
         {
-            var query = new SearchTransactionsQuery(
-                SearchText: SearchText.Trim(),
-                KategorieId: SelectedKategorieId,
-                AccountId: SelectedAccountId,
-                Typ: SelectedTypFilter,
-                VonDatum: VonDatum,
-                BisDatum: BisDatum);
-            var result = await _searchTransactionsUseCase.ExecuteAsync(query);
-            if (version >= 0 && version != _searchVersion) return;
-            SearchErgebnisGruppen = new ObservableCollection<TransactionGroup>(result.Gruppen);
-            TotalSearchCount = result.TotalCount;
-            IconMap = result.IconMap;
-            CategoryNameMap = result.CategoryNameMap;
-            ColorMap = result.ColorMap;
-            AccountMap = result.AccountMap;
-        }
-        catch (Exception ex)
-        {
-            LogError(nameof(ExecuteSearchAsync), ex);
-            if (version >= 0 && version != _searchVersion) return;
-            SearchErgebnisGruppen = [];
-            TotalSearchCount = 0;
-            await _dialogService.ShowAlertAsync(
-                _loc.GetString(ResourceKeys.Err_Titel),
-                _loc.GetString(ResourceKeys.Err_SucheFehlgeschlagen),
-                _loc.GetString(ResourceKeys.Btn_OK));
+            var outcome = await _searchCoordinator.ExecuteSearchAsync(query, isSearchActive: true, version);
+            switch (outcome.Status)
+            {
+                case TransactionSearchExecuteStatus.Stale:
+                    clearLoading = false;
+                    break;
+                case TransactionSearchExecuteStatus.Error:
+                    SearchErgebnisGruppen = [];
+                    TotalSearchCount = 0;
+                    await _searchCoordinator.ShowSearchFailedAlertAsync();
+                    break;
+                case TransactionSearchExecuteStatus.Success:
+                    var result = outcome.Result!;
+                    SearchErgebnisGruppen = new ObservableCollection<TransactionGroup>(result.Gruppen);
+                    TotalSearchCount = result.TotalCount;
+                    IconMap = result.IconMap;
+                    CategoryNameMap = result.CategoryNameMap;
+                    ColorMap = result.ColorMap;
+                    AccountMap = result.AccountMap;
+                    break;
+            }
         }
         finally
         {
-            if (version < 0 || version == _searchVersion)
+            if (clearLoading)
                 IsLoading = false;
         }
     }
@@ -429,7 +407,7 @@ public partial class TransactionsViewModel(
     /// </summary>
     private async Task ExitToMonthModeAsync()
     {
-        _searchDebounce?.Cancel();
+        _searchCoordinator.CancelPending();
         IsGesamtMode = false;
         SearchText = string.Empty;
         SelectedKategorieId = null;
@@ -451,13 +429,7 @@ public partial class TransactionsViewModel(
 
     private async Task LoadKategorienAsync()
     {
-        var kategorien = await _loadCategoriesUseCase.ExecuteAsync();
-        var items = new ObservableCollection<KategorieFilterItem>
-        {
-            new(null, _loc.GetString(ResourceKeys.Lbl_AlleKategorien), ResourceKeys.Lbl_AlleKategorien)
-        };
-        foreach (var k in kategorien.OrderBy(k => k.Name))
-            items.Add(new KategorieFilterItem(k.Id, $"{k.Icon} {k.Name}"));
+        var items = await _searchCoordinator.LoadCategoryFilterItemsAsync();
         AvailableKategorien = items;
         SelectedKategorieFilterItem = items[0];
         SelectedTypFilterItem ??= TypFilterItems[SelectedTypIndex];
@@ -465,15 +437,9 @@ public partial class TransactionsViewModel(
 
     private async Task LoadKontenAsync()
     {
-        var konten = await _loadAccountsUseCase.ExecuteAsync();
-        var items = new ObservableCollection<KategorieFilterItem>
-        {
-            new(null, _loc.GetString(ResourceKeys.Lbl_AlleKonten), ResourceKeys.Lbl_AlleKonten)
-        };
-        foreach (var konto in konten.OrderBy(k => k.Name))
-            items.Add(new KategorieFilterItem(konto.Id, konto.Name));
+        var items = await _searchCoordinator.LoadAccountFilterItemsAsync(SelectedAccountId);
         AvailableKonten = items;
-        SelectedKontoFilterItem = items.FirstOrDefault(i => i.Id == SelectedAccountId) ?? items[0];
+        SelectedKontoFilterItem = _searchCoordinator.ResolveSelectedAccountItem(items, SelectedAccountId);
     }
 
     [RelayCommand]

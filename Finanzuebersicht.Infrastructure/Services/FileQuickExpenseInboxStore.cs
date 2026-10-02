@@ -91,7 +91,7 @@ public sealed class FileQuickExpenseInboxStore : IQuickExpenseInboxStore
                 })
                 .ToList();
 
-            await File.WriteAllTextAsync(
+            await AtomicFile.WriteAllTextAsync(
                 _filePath,
                 JsonSerializer.Serialize(dtos, JsonOptions),
                 cancellationToken).ConfigureAwait(false);
@@ -124,7 +124,7 @@ public sealed class FileQuickExpenseInboxStore : IQuickExpenseInboxStore
                 CreatedAt = item.CreatedAt
             });
 
-            await File.WriteAllTextAsync(
+            await AtomicFile.WriteAllTextAsync(
                 _filePath,
                 JsonSerializer.Serialize(items, JsonOptions),
                 cancellationToken).ConfigureAwait(false);

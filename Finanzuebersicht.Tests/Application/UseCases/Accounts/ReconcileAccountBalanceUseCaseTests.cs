@@ -37,10 +37,11 @@ public class ReconcileAccountBalanceUseCaseTests
 
         var result = await sut.ExecuteAsync("acc-1", 200m);
 
-        Assert.Equal(150m, result.CalculatedBalance);
-        Assert.Equal(200m, result.ActualBalance);
-        Assert.Equal(50m, result.Delta);
-        Assert.Equal(150m, result.NewOpeningBalance);
+        Assert.True(result.IsSuccess);
+        Assert.Equal(150m, result.Value!.CalculatedBalance);
+        Assert.Equal(200m, result.Value.ActualBalance);
+        Assert.Equal(50m, result.Value.Delta);
+        Assert.Equal(150m, result.Value.NewOpeningBalance);
         await accountRepository.Received(1).SaveAccountAsync(NonNullArg.Is<Account>(a => a.OpeningBalance == 150m));
     }
 }

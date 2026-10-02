@@ -2,8 +2,8 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Finanzuebersicht.Application.UseCases.Categories;
 using Finanzuebersicht.Application.UseCases.Import;
-using Finanzuebersicht.Core.Services;
 using Finanzuebersicht.Models;
 using Finanzuebersicht.Navigation;
 using Finanzuebersicht.Presentation.Services;
@@ -15,7 +15,7 @@ namespace Finanzuebersicht.ViewModels;
 public partial class ImportPreviewViewModel(
     CommitCsvImportUseCase commitCsvImportUseCase,
     IImportSessionStore importSessionStore,
-    ICategoryRepository categoryRepository,
+    LoadCategoriesUseCase loadCategoriesUseCase,
     INavigationService navigationService,
     IDialogService dialogService,
     ILocalizationService localizationService,
@@ -25,7 +25,7 @@ public partial class ImportPreviewViewModel(
 {
     private readonly CommitCsvImportUseCase _commitCsvImportUseCase = commitCsvImportUseCase;
     private readonly IImportSessionStore _importSessionStore = importSessionStore;
-    private readonly ICategoryRepository _categoryRepository = categoryRepository;
+    private readonly LoadCategoriesUseCase _loadCategoriesUseCase = loadCategoriesUseCase;
     private readonly INavigationService _navigationService = navigationService;
     private readonly IDialogService _dialogService = dialogService;
     private readonly ILocalizationService _loc = localizationService;
@@ -91,7 +91,7 @@ public partial class ImportPreviewViewModel(
             if (_loadedPreview && _activeSession.SessionId == _loadedSessionId)
                 return;
 
-            var categories = await _categoryRepository.GetCategoriesAsync();
+            var categories = await _loadCategoriesUseCase.ExecuteAsync();
             _categoryOptions =
             [
                 new ImportPreviewCategoryOption(string.Empty, _loc.GetString(ResourceKeys.Lbl_OhneKategorie)),

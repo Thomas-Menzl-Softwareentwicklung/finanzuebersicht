@@ -66,7 +66,13 @@ public sealed class DashboardDueRecurringCoordinator(
 
         try
         {
-            await _bookDueRecurringUseCase.ExecuteAsync(item.Recurring.Id, item.InstanceDate);
+            var result = await _bookDueRecurringUseCase.ExecuteAsync(item.Recurring.Id, item.InstanceDate);
+            if (!result.IsSuccess)
+            {
+                await UseCaseErrorPresenter.ShowAsync(_dialogService, _loc, result.Error!);
+                return false;
+            }
+
             return true;
         }
         catch (Exception ex)

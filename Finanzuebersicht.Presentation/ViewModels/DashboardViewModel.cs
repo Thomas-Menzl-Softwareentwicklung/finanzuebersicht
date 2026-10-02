@@ -24,6 +24,7 @@ public partial class DashboardViewModel : MonthNavigationViewModel, ILocalizable
     private readonly DashboardDueRecurringCoordinator _dueRecurringCoordinator;
     private readonly DashboardCashflowPreviewCoordinator _cashflowCoordinator;
     private readonly DashboardAccountsCoordinator _accountsCoordinator;
+    private readonly DashboardInsightsCoordinator _insightsCoordinator;
     private readonly DashboardExpandSettingsHelper _expandSettings;
     private readonly GetDefaultBudgetTotalUseCase _getDefaultBudgetTotalUseCase;
     private readonly GetEarliestTransactionYearUseCase _getEarliestTransactionYearUseCase;
@@ -272,7 +273,7 @@ public partial class DashboardViewModel : MonthNavigationViewModel, ILocalizable
 
     public bool ShowKontenInsightRow => ShowInsightRows && HasKontenUebersicht;
 
-    public bool ShowBudgetInsightRow => ShowInsightRows && GetBudgetWarnings().Any();
+    public bool ShowBudgetInsightRow => _insightsCoordinator.ShowBudgetInsightRow(ShowInsightRows, BudgetHinweise);
 
     public bool ShowCashflowInsightRow => ShowInsightRows && HasCashflowPreview;
 
@@ -400,6 +401,7 @@ public partial class DashboardViewModel : MonthNavigationViewModel, ILocalizable
         _cashflowCoordinator = cashflowCoordinator;
         _dueRecurringCoordinator = dueRecurringCoordinator;
         _accountsCoordinator = accountsCoordinator;
+        _insightsCoordinator = new DashboardInsightsCoordinator(localizationService);
         _expandSettings = expandSettings;
         _getDefaultBudgetTotalUseCase = getDefaultBudgetTotalUseCase;
         _getEarliestTransactionYearUseCase = getEarliestTransactionYearUseCase;
@@ -505,24 +507,15 @@ public partial class DashboardViewModel : MonthNavigationViewModel, ILocalizable
         KontenUebersicht = snapshot.Overview;
     }
 
-    private IEnumerable<BudgetHintSummary> GetBudgetWarnings() =>
-        BudgetHinweise.Where(b => b.IstWarnung || b.IstAusgeschoepft);
-
     private void UpdateInsightSummaries()
     {
-        var culture = CurrencyCulture.Instance;
-        KontenCompactSummary = string.Join(" · ",
-            KontenUebersicht.Take(3).Select(k => $"{k.Name} {k.Saldo.ToString("C", culture)}"));
-
-        var budgetWarnings = GetBudgetWarnings().ToList();
-        BudgetInsightDetail = budgetWarnings.Count switch
-        {
-            0 => string.Empty,
-            1 => budgetWarnings[0].CategoryName,
-            _ => _loc.GetString(ResourceKeys.Fmt_BudgetUeberLimitCount, budgetWarnings.Count)
-        };
-
-        DueRecurringCompactDetail = DueRecurringItems.FirstOrDefault()?.Recurring.Titel ?? string.Empty;
+        var texts = _insightsCoordinator.BuildInsightTexts(
+            KontenUebersicht,
+            BudgetHinweise,
+            DueRecurringItems.FirstOrDefault()?.Recurring.Titel);
+        KontenCompactSummary = texts.KontenCompactSummary;
+        BudgetInsightDetail = texts.BudgetInsightDetail;
+        DueRecurringCompactDetail = texts.DueRecurringCompactDetail;
 
         OnPropertyChanged(nameof(ShowHeroSaldo));
         OnPropertyChanged(nameof(ShowKontenInsightRow));
@@ -556,14 +549,12 @@ public partial class DashboardViewModel : MonthNavigationViewModel, ILocalizable
         KategorieAusgaben = new ObservableCollection<CategorySummary>(data.KategorieAusgaben);
         KategorieEinnahmen = new ObservableCollection<CategorySummary>(data.KategorieEinnahmen);
         BudgetHinweise = new ObservableCollection<BudgetHintSummary>(data.BudgetHinweise);
-        BudgetGesamt = data.BudgetHinweise.Sum(b => b.BudgetBetrag);
-        BudgetVerbraucht = data.BudgetHinweise.Sum(b => b.Verbrauch);
-        BudgetRest = data.BudgetHinweise.Sum(b => b.Restbudget);
-        ShowBudgetTagesbudget = data.BudgetHinweise.Any(b => b.ZeigeTagesbudget);
-        var remainingDays = data.BudgetHinweise.FirstOrDefault(b => b.IstAktuellerMonat)?.VerbleibendeTage ?? 0;
-        BudgetTagesbudget = remainingDays > 0
-            ? data.BudgetHinweise.Sum(b => b.RestbudgetPositiv) / remainingDays
-            : 0;
+        var budgetTotals = _insightsCoordinator.ComputeMonthBudgetTotals(data.BudgetHinweise);
+        BudgetGesamt = budgetTotals.BudgetGesamt;
+        BudgetVerbraucht = budgetTotals.BudgetVerbraucht;
+        BudgetRest = budgetTotals.BudgetRest;
+        ShowBudgetTagesbudget = budgetTotals.ShowBudgetTagesbudget;
+        BudgetTagesbudget = budgetTotals.BudgetTagesbudget;
 
         // Vormonatsvergleich: nur Gesamt-Ausgaben via ReportingService (keine Kategorien nötig)
         var prevMonth = AktuellerMonat.AddMonths(-1);
