@@ -315,6 +315,44 @@ public class RecurringGenerationServiceTests
     }
 
     [Fact]
+    public async Task UpToDateRecurring_DoesNotSaveOrNotify()
+    {
+        var recurringRepository = Substitute.For<IRecurringTransactionRepository>();
+        var transactionRepository = Substitute.For<ITransactionRepository>();
+        var notifier = Substitute.For<ILocalChangeNotifier>();
+        var clock = new FixedClock(new DateTime(2024, 6, 15));
+
+        var recurring = new RecurringTransaction
+        {
+            Id = "rec-idle",
+            Titel = "Monthly",
+            Betrag = 10m,
+            Typ = TransactionType.Ausgabe,
+            Startdatum = new DateTime(2024, 5, 1),
+            LetzteAusfuehrung = new DateTime(2024, 6, 1),
+            Aktiv = true,
+            KategorieId = "cat-1",
+            Interval = RecurrenceInterval.Monthly,
+            IntervalFactor = 1
+        };
+
+        recurringRepository.GetRecurringTransactionsAsync().Returns(new List<RecurringTransaction> { recurring });
+        transactionRepository.GetAllTransactionsAsync(Arg.Any<CancellationToken>()).Returns(new List<Transaction>());
+
+        var service = new RecurringGenerationService(
+            recurringRepository,
+            transactionRepository,
+            clock,
+            localChangeNotifier: notifier);
+        await service.GeneratePendingRecurringTransactionsAsync();
+
+        await transactionRepository.DidNotReceive().SaveTransactionAsync(Arg.Any<Transaction>());
+        await recurringRepository.DidNotReceive().SaveRecurringTransactionAsync(Arg.Any<RecurringTransaction>());
+        await notifier.DidNotReceive().NotifyTransactionUpsertAsync(Arg.Any<string>(), Arg.Any<CancellationToken>());
+        await notifier.DidNotReceive().NotifyRecurringUpsertAsync(Arg.Any<string>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
     public async Task MaxInstancesPerRun_StopsAtLimitAndSavesState()
     {
         var recurringRepository = Substitute.For<IRecurringTransactionRepository>();

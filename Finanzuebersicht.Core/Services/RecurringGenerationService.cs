@@ -46,6 +46,7 @@ public class RecurringGenerationService(
             }
 
             var generatedCount = 0;
+            var changed = false;
 
             // determine the first instance to consider
             var candidate = !recurring.LetzteAusfuehrung.HasValue
@@ -60,6 +61,7 @@ public class RecurringGenerationService(
                 {
                     // mark as executed (skip this instance)
                     recurring.LetzteAusfuehrung = candidate;
+                    changed = true;
                     candidate = RecurringScheduleCalculator.GetNextInstance(recurring, candidate);
                     continue;
                 }
@@ -74,6 +76,7 @@ public class RecurringGenerationService(
                 if (existingTransactionIds.Contains(instanceId))
                 {
                     recurring.LetzteAusfuehrung = candidate;
+                    changed = true;
                     candidate = RecurringScheduleCalculator.GetNextInstance(recurring, candidate);
                     continue;
                 }
@@ -94,6 +97,7 @@ public class RecurringGenerationService(
                 await _transactionRepository.SaveTransactionAsync(transaction);
                 existingTransactionIds.Add(instanceId);
                 generatedCount++;
+                changed = true;
 
                 if (_localChangeNotifier is not null)
                     await _localChangeNotifier.NotifyTransactionUpsertAsync(transaction.Id, cancellationToken);
@@ -111,6 +115,9 @@ public class RecurringGenerationService(
                     "Oldest pending instance: {PendingDate}. Remaining instances will be generated on next run.",
                     recurring.Id, recurring.Titel, MaxInstancesPerRun, candidate.Date);
             }
+
+            if (!changed)
+                continue;
 
             await _recurringRepository.SaveRecurringTransactionAsync(recurring);
             if (_localChangeNotifier is not null)
