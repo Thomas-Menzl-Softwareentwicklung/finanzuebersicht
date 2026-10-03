@@ -56,7 +56,7 @@ optional “Spalten neu zuordnen” (same CsvTable in session)
 
 - **Core:** `CsvTable`, profile model, fingerprint, header/format heuristics, mapping → `TransactionDto`, sign-column rules, built-in DKB profile.
 - **Application:** detect/analyze orchestration; persist profiles via repository; existing analyze/commit stay the DTO→preview→save path.
-- **Infrastructure:** `csv-import-profiles.json` in `DataPath` (`DataFileNames`), included in ZIP backup/restore; not CloudKit.
+- **Infrastructure:** `csv-import-profiles.json` in `DataPath` (`DataFileNames`), included in ZIP backup/restore; user profiles also sync via CloudKit (`CsvImportProfile`).
 - **Presentation:** coordinator branches to mapping vs preview; mapping ViewModel; extend import session with the table; preview action to remap.
 
 `IStatementParser` is not used for CSV after this change. CAMT (#361) can add a separate XML reader that still emits `TransactionDto` into Analyze/Commit.
@@ -124,7 +124,7 @@ Built-in DKB column names (exact export headers):
 
 - File: `csv-import-profiles.json` next to `transactions.json`.
 - ZIP backup/restore includes that file (optional in old archives: missing = empty user profiles; DKB built-in remains).
-- Not a CloudKit entity.
+- CloudKit: each user profile is a `CsvImportProfile` record (LWW via `UpdatedAt`); built-in DKB does not sync. See `docs/superpowers/specs/2026-10-03-csv-import-profile-sync-design.md`.
 
 ## Flow
 

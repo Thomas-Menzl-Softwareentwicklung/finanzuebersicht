@@ -8,7 +8,7 @@
 //  Container: iCloud.de.thomasmenzl.finanzuebersicht  (private database)
 //  Zone:      finanzuebersicht-sync                   (custom zone, current user)
 //
-//  Record types: Account, Category, Transaction, RecurringTransaction, SparZiel
+//  Record types: Account, Category, Transaction, RecurringTransaction, SparZiel, CsvImportProfile
 //    - payload   (String) — camelCase entity JSON
 //    - updatedAt (Date)   — last local write, drives last-write-wins
 //    - recordName == entity Id
@@ -16,7 +16,8 @@
 //  Record type SyncMeta — schema fence (stable recordName "sync-meta")
 //    - schemaVersion (Int) — first shipping format is 1
 //    - payload       (String) — {"schemaVersion":N}
-//    NOT in entityRecordTypes; ordinals 0–4 must stay aligned with C# SyncEntityType
+//    NOT in entityRecordTypes; SyncMeta ordinal is 5; CsvImportProfile is 6
+//    (do not use array index for ordinals — index 5 would collide with SyncMeta)
 //
 //  Record type Tombstone — durable deletion marker
 //    - entityType (String) — one of the entity record types
@@ -61,11 +62,22 @@ private enum CKBridgeConfig {
     static let stateDefaultsKey = "de.thomasmenzl.finanzuebersicht.cloudkit.syncEngineState"
     static let stagedRecordsDefaultsKey = "de.thomasmenzl.finanzuebersicht.cloudkit.stagedRecords"
 
-    /// Index == SyncEntityType ordinal in C# (Account = 0 … SparZiel = 4).
-    static let entityRecordTypes = ["Account", "Category", "Transaction", "RecurringTransaction", "SparZiel"]
+    /// Known entity record types (CloudKit). Ordinals match C# SyncEntityType:
+    /// Account=0 … SparZiel=4, CsvImportProfile=6. SyncMeta=5 is separate.
+    static let entityRecordTypes = [
+        "Account", "Category", "Transaction", "RecurringTransaction", "SparZiel", "CsvImportProfile"
+    ]
 
     static func entityTypeOrdinal(forRecordType recordType: String) -> Int? {
-        entityRecordTypes.firstIndex(of: recordType)
+        switch recordType {
+        case "Account": return 0
+        case "Category": return 1
+        case "Transaction": return 2
+        case "RecurringTransaction": return 3
+        case "SparZiel": return 4
+        case "CsvImportProfile": return 6
+        default: return nil
+        }
     }
 
     static func isKnownEntityRecordType(_ recordType: String) -> Bool {

@@ -19,6 +19,12 @@ public sealed class InMemoryCsvImportProfileStore : ICsvImportProfileStore
         return Task.CompletedTask;
     }
 
+    public Task DeleteAsync(string id)
+    {
+        _items.RemoveAll(p => p.Id == id);
+        return Task.CompletedTask;
+    }
+
     public Task ReplaceAllAsync(IEnumerable<CsvImportProfile> profiles)
     {
         _items.Clear();

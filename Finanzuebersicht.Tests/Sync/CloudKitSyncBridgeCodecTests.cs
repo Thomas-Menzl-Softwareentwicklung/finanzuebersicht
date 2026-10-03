@@ -11,6 +11,7 @@ public class CloudKitSyncBridgeCodecTests
     [InlineData(SyncEntityType.RecurringTransaction, "RecurringTransaction")]
     [InlineData(SyncEntityType.SparZiel, "SparZiel")]
     [InlineData(SyncEntityType.SyncMeta, "SyncMeta")]
+    [InlineData(SyncEntityType.CsvImportProfile, "CsvImportProfile")]
     public void ToRecordType_MapsEveryEntityType(SyncEntityType type, string expected)
     {
         Assert.Equal(expected, CloudKitSyncBridgeCodec.ToRecordType(type));

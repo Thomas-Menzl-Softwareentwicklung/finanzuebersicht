@@ -1,4 +1,5 @@
 using Finanzuebersicht.Application.UseCases.Sync;
+using Finanzuebersicht.Core.Services;
 using Finanzuebersicht.Core.Sync;
 using Finanzuebersicht.Models;
 
@@ -61,12 +62,15 @@ public class ClearLocalSyncedDataUseCaseTests
             new TransactionTemplate { Id = "tpl-1", Name = "Miete", AccountId = userAccount.Id, KategorieId = userCategory.Id }
         ]);
 
+        var csvImportProfileStore = Substitute.For<ICsvImportProfileStore>();
+
         var sut = new ClearLocalSyncedDataUseCase(
             accountRepository,
             categoryRepository,
             transactionRepository,
             recurringRepository,
             sparZielRepository,
+            csvImportProfileStore,
             budgetRepository,
             templateRepository,
             tombstoneStore,
@@ -80,6 +84,8 @@ public class ClearLocalSyncedDataUseCaseTests
             Arg.Is<IEnumerable<RecurringTransaction>>(items => !items.Any()));
         await sparZielRepository.Received(1).ReplaceAllSparZieleAsync(
             Arg.Is<IEnumerable<SparZiel>>(items => !items.Any()));
+        await csvImportProfileStore.Received(1).ReplaceAllAsync(
+            Arg.Is<IEnumerable<CsvImportProfile>>(items => !items.Any()));
         await accountRepository.Received(1).ReplaceAllAccountsAsync(
             Arg.Is<IEnumerable<Account>>(kept => kept.Single().Id == "sys-acc"));
         await categoryRepository.Received(1).ReplaceAllCategoriesAsync(

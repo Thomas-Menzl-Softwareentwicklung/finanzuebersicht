@@ -14,6 +14,7 @@ public sealed class EnableCloudSyncUseCase(
     ITransactionRepository transactionRepository,
     IRecurringTransactionRepository recurringTransactionRepository,
     ISparZielRepository sparZielRepository,
+    ICsvImportProfileStore csvImportProfileStore,
     ILicenseService licenseService)
 {
     private static readonly JsonSerializerOptions PayloadJsonOptions = new()
@@ -102,7 +103,13 @@ public sealed class EnableCloudSyncUseCase(
         }
 
         var sparZiele = await sparZielRepository.GetSparZieleAsync();
-        return sparZiele.Count == 0;
+        if (sparZiele.Count > 0)
+        {
+            return false;
+        }
+
+        var profiles = await csvImportProfileStore.GetUserProfilesAsync();
+        return profiles.Count == 0;
     }
 
     private async Task SeedLocalEntitiesAsync(CancellationToken ct)
@@ -145,6 +152,15 @@ public sealed class EnableCloudSyncUseCase(
             await StampAndSaveSparZielAsync(sparZiel);
             await transport.EnqueueUpsertAsync(
                 ToRecord(SyncEntityType.SparZiel, sparZiel.Id, sparZiel, sparZiel.UpdatedAt),
+                ct);
+        }
+
+        var profiles = await csvImportProfileStore.GetUserProfilesAsync();
+        foreach (var profile in profiles.Where(p => !p.IsBuiltIn))
+        {
+            await StampAndSaveCsvImportProfileAsync(profile);
+            await transport.EnqueueUpsertAsync(
+                ToRecord(SyncEntityType.CsvImportProfile, profile.Id, profile, profile.UpdatedAt),
                 ct);
         }
     }
@@ -202,6 +218,17 @@ public sealed class EnableCloudSyncUseCase(
 
         sparZiel.UpdatedAt = DateTime.UtcNow;
         await sparZielRepository.SaveSparZielAsync(sparZiel);
+    }
+
+    private async Task StampAndSaveCsvImportProfileAsync(CsvImportProfile profile)
+    {
+        if (profile.UpdatedAt is not null)
+        {
+            return;
+        }
+
+        profile.UpdatedAt = DateTime.UtcNow;
+        await csvImportProfileStore.UpsertAsync(profile);
     }
 
     private static CloudSyncRecordDto CreateSyncMetaRecord() =>

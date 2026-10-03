@@ -460,6 +460,12 @@ namespace Finanzuebersicht.Tests.Services
             return Task.CompletedTask;
         }
 
+        public Task DeleteAsync(string id)
+        {
+            _profiles.RemoveAll(p => p.Id == id);
+            return Task.CompletedTask;
+        }
+
         public Task ReplaceAllAsync(IEnumerable<CsvImportProfile> profiles)
         {
             _profiles = profiles.ToList();

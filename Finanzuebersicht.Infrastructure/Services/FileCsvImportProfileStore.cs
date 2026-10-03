@@ -41,6 +41,22 @@ public class FileCsvImportProfileStore(string dataDir, ILogger<FileCsvImportProf
         }
     }
 
+    public async Task DeleteAsync(string id)
+    {
+        await StoreLock.WaitAsync();
+        try
+        {
+            var items = await LoadAsync<CsvImportProfile>(ProfilesFile);
+            var removed = items.RemoveAll(p => p.Id == id);
+            if (removed > 0)
+                await SaveAsync(ProfilesFile, items);
+        }
+        finally
+        {
+            StoreLock.Release();
+        }
+    }
+
     public Task ReplaceAllAsync(IEnumerable<CsvImportProfile> profiles)
         => ReplaceAllAsync(ProfilesFile, profiles);
 
@@ -54,6 +70,7 @@ public class FileCsvImportProfileStore(string dataDir, ILogger<FileCsvImportProf
         HeaderRowIndex = profile.HeaderRowIndex,
         Columns = profile.Columns,
         DateFormat = profile.DateFormat,
-        DecimalStyle = profile.DecimalStyle
+        DecimalStyle = profile.DecimalStyle,
+        UpdatedAt = profile.UpdatedAt
     };
 }

@@ -171,7 +171,8 @@ public class EnableCloudSyncUseCaseTests
         ICategoryRepository? categoryRepository = null,
         ITransactionRepository? transactionRepository = null,
         IRecurringTransactionRepository? recurringRepository = null,
-        ISparZielRepository? sparZielRepository = null)
+        ISparZielRepository? sparZielRepository = null,
+        ICsvImportProfileStore? csvImportProfileStore = null)
     {
         if (accountRepository is null)
         {
@@ -203,6 +204,12 @@ public class EnableCloudSyncUseCaseTests
             sparZielRepository.GetSparZieleAsync().Returns([]);
         }
 
+        if (csvImportProfileStore is null)
+        {
+            csvImportProfileStore = Substitute.For<ICsvImportProfileStore>();
+            csvImportProfileStore.GetUserProfilesAsync().Returns([]);
+        }
+
         license ??= CreateLicensedService();
 
         return new EnableCloudSyncUseCase(
@@ -213,6 +220,7 @@ public class EnableCloudSyncUseCaseTests
             transactionRepository,
             recurringRepository,
             sparZielRepository,
+            csvImportProfileStore,
             license);
     }
 }

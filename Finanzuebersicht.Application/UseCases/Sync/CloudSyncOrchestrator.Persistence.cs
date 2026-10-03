@@ -43,6 +43,12 @@ public sealed partial class CloudSyncOrchestrator
                 var entity = (await sparZielRepository.GetSparZieleAsync()).FirstOrDefault(s => s.Id == id);
                 return (entity is not null, entity?.UpdatedAt);
             }
+            case SyncEntityType.CsvImportProfile:
+            {
+                var entity = (await csvImportProfileStore.GetUserProfilesAsync())
+                    .FirstOrDefault(p => p.Id == id && !p.IsBuiltIn);
+                return (entity is not null, entity?.UpdatedAt);
+            }
             default:
                 return (false, null);
         }
@@ -67,6 +73,9 @@ public sealed partial class CloudSyncOrchestrator
             case SyncEntityType.SparZiel:
                 await sparZielRepository.DeleteSparZielAsync(id);
                 break;
+            case SyncEntityType.CsvImportProfile:
+                await csvImportProfileStore.DeleteAsync(id);
+                break;
         }
     }
 
@@ -89,6 +98,9 @@ public sealed partial class CloudSyncOrchestrator
             case SyncEntityType.SparZiel:
                 await sparZielRepository.SaveSparZielAsync((SparZiel)entity);
                 break;
+            case SyncEntityType.CsvImportProfile:
+                await csvImportProfileStore.UpsertAsync((CsvImportProfile)entity);
+                break;
         }
     }
 
@@ -103,6 +115,7 @@ public sealed partial class CloudSyncOrchestrator
                 SyncEntityType.Transaction => JsonSerializer.Deserialize<Transaction>(record.PayloadJson!, PayloadJsonOptions),
                 SyncEntityType.RecurringTransaction => JsonSerializer.Deserialize<RecurringTransaction>(record.PayloadJson!, PayloadJsonOptions),
                 SyncEntityType.SparZiel => JsonSerializer.Deserialize<SparZiel>(record.PayloadJson!, PayloadJsonOptions),
+                SyncEntityType.CsvImportProfile => JsonSerializer.Deserialize<CsvImportProfile>(record.PayloadJson!, PayloadJsonOptions),
                 _ => null
             };
         }
@@ -140,6 +153,10 @@ public sealed partial class CloudSyncOrchestrator
                 sparZiel.Id = record.Id;
                 sparZiel.Source = EntitySources.CloudKit;
                 sparZiel.UpdatedAt = record.UpdatedAt;
+                break;
+            case CsvImportProfile profile:
+                profile.Id = record.Id;
+                profile.UpdatedAt = record.UpdatedAt;
                 break;
         }
     }

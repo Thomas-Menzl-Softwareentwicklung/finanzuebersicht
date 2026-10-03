@@ -19,7 +19,7 @@ public record CsvColumnMapping
 
 public class CsvImportProfile
 {
-    public string Id { get; init; } = "";
+    public string Id { get; set; } = "";
     public string Name { get; init; } = "";
     public bool IsBuiltIn { get; init; }
     public char Delimiter { get; init; }
@@ -28,6 +28,9 @@ public class CsvImportProfile
     public CsvColumnMapping Columns { get; init; } = new();
     public string DateFormat { get; init; } = "dd.MM.yyyy";
     public CsvDecimalStyle DecimalStyle { get; init; } = CsvDecimalStyle.Comma;
+
+    /// <summary>Last local write (UTC); drives CloudKit last-write-wins.</summary>
+    public DateTime? UpdatedAt { get; set; }
 
     public bool IsComplete =>
         Columns.Date is not null

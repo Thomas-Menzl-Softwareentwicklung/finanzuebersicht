@@ -19,6 +19,7 @@ public sealed partial class CloudSyncOrchestrator
         await EnqueueDirtyOfTypeAsync(SyncEntityType.Transaction, lastSync, ct);
         await EnqueueDirtyOfTypeAsync(SyncEntityType.RecurringTransaction, lastSync, ct);
         await EnqueueDirtyOfTypeAsync(SyncEntityType.SparZiel, lastSync, ct);
+        await EnqueueDirtyOfTypeAsync(SyncEntityType.CsvImportProfile, lastSync, ct);
     }
 
     private async Task EnqueueDirtyOfTypeAsync(SyncEntityType type, DateTime lastSyncUtc, CancellationToken ct)
@@ -40,6 +41,9 @@ public sealed partial class CloudSyncOrchestrator
             SyncEntityType.SparZiel => (await sparZielRepository.GetSparZieleAsync())
                 .Where(s => s.UpdatedAt > lastSyncUtc)
                 .Select(s => s.Id),
+            SyncEntityType.CsvImportProfile => (await csvImportProfileStore.GetUserProfilesAsync())
+                .Where(p => !p.IsBuiltIn && p.UpdatedAt > lastSyncUtc)
+                .Select(p => p.Id),
             _ => []
         };
 
@@ -153,6 +157,23 @@ public sealed partial class CloudSyncOrchestrator
                 }
 
                 return ToRecord(type, id, sparZiel, sparZiel.UpdatedAt);
+            }
+            case SyncEntityType.CsvImportProfile:
+            {
+                var profile = (await csvImportProfileStore.GetUserProfilesAsync())
+                    .FirstOrDefault(p => p.Id == id && !p.IsBuiltIn);
+                if (profile is null)
+                {
+                    return null;
+                }
+
+                if (profile.UpdatedAt is null)
+                {
+                    profile.UpdatedAt = DateTime.UtcNow;
+                    await csvImportProfileStore.UpsertAsync(profile);
+                }
+
+                return ToRecord(type, id, profile, profile.UpdatedAt);
             }
             default:
                 return null;

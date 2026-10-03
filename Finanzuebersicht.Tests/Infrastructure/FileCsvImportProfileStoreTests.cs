@@ -63,6 +63,33 @@ public class FileCsvImportProfileStoreTests
     }
 
     [Fact]
+    public async Task DeleteAsync_RemovesProfileById()
+    {
+        var dir = Path.Combine(Path.GetTempPath(), "fu-csv-profiles-" + Guid.NewGuid().ToString("N"));
+        try
+        {
+            var store = new FileCsvImportProfileStore(dir);
+            await store.UpsertAsync(new CsvImportProfile
+            {
+                Id = "user-1",
+                Name = "My Bank",
+                Delimiter = ';',
+                Headers = ["Date"],
+                Columns = new CsvColumnMapping { Date = "Date", Amount = "Amount", Title = "Text" }
+            });
+
+            await store.DeleteAsync("user-1");
+
+            Assert.Empty(await store.GetUserProfilesAsync());
+        }
+        finally
+        {
+            if (Directory.Exists(dir))
+                Directory.Delete(dir, true);
+        }
+    }
+
+    [Fact]
     public async Task UpsertAsync_BuiltIn_ClonesAsUserProfile()
     {
         var dir = Path.Combine(Path.GetTempPath(), "fu-csv-profiles-" + Guid.NewGuid().ToString("N"));

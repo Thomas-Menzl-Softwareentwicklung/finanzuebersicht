@@ -19,7 +19,7 @@ public partial class ImportMappingViewModel : ObservableObject, IAutoLoadViewMod
     private const int MaxHeaderRowOptions = 20;
 
     private readonly AnalyzeCsvImportUseCase _analyzeCsvImportUseCase;
-    private readonly ICsvImportProfileStore _profileStore;
+    private readonly UpsertCsvImportProfileUseCase _upsertCsvImportProfileUseCase;
     private readonly IImportSessionStore _importSessionStore;
     private readonly INavigationService _navigationService;
     private readonly IDialogService _dialogService;
@@ -34,7 +34,7 @@ public partial class ImportMappingViewModel : ObservableObject, IAutoLoadViewMod
 
     public ImportMappingViewModel(
         AnalyzeCsvImportUseCase analyzeCsvImportUseCase,
-        ICsvImportProfileStore profileStore,
+        UpsertCsvImportProfileUseCase upsertCsvImportProfileUseCase,
         IImportSessionStore importSessionStore,
         INavigationService navigationService,
         IDialogService dialogService,
@@ -42,7 +42,7 @@ public partial class ImportMappingViewModel : ObservableObject, IAutoLoadViewMod
         ILogger<ImportMappingViewModel>? logger = null)
     {
         _analyzeCsvImportUseCase = analyzeCsvImportUseCase;
-        _profileStore = profileStore;
+        _upsertCsvImportProfileUseCase = upsertCsvImportProfileUseCase;
         _importSessionStore = importSessionStore;
         _navigationService = navigationService;
         _dialogService = dialogService;
@@ -141,7 +141,7 @@ public partial class ImportMappingViewModel : ObservableObject, IAutoLoadViewMod
         var profile = BuildProfile();
         try
         {
-            await _profileStore.UpsertAsync(profile);
+            await _upsertCsvImportProfileUseCase.ExecuteAsync(profile);
         }
         catch (Exception ex)
         {

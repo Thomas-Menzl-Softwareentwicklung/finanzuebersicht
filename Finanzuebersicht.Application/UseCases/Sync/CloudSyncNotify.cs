@@ -1,3 +1,4 @@
+using Finanzuebersicht.Core.Services;
 using Finanzuebersicht.Core.Sync;
 using Finanzuebersicht.Models;
 
@@ -14,6 +15,8 @@ internal static class CloudSyncNotify
     internal static void StampUpdatedAt(RecurringTransaction entity) => entity.UpdatedAt = DateTime.UtcNow;
 
     internal static void StampUpdatedAt(SparZiel entity) => entity.UpdatedAt = DateTime.UtcNow;
+
+    internal static void StampUpdatedAt(CsvImportProfile entity) => entity.UpdatedAt = DateTime.UtcNow;
 
     internal static Task NotifyUpsertAsync(
         ICloudSyncOrchestrator? orchestrator,

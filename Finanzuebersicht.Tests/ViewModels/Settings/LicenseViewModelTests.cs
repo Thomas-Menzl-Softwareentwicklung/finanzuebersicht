@@ -1,6 +1,7 @@
 using Finanzuebersicht.Application.UseCases.Backup;
 using Finanzuebersicht.Application.UseCases.Sync;
 using Finanzuebersicht.Core.Licensing;
+using Finanzuebersicht.Core.Services;
 using Finanzuebersicht.Core.Sync;
 using Finanzuebersicht.Models;
 using Finanzuebersicht.Presentation.Services;
@@ -321,6 +322,8 @@ public class LicenseViewModelTests
         templateRepository.GetTransactionTemplatesAsync().Returns([]);
         var tombstoneStore = Substitute.For<ISyncTombstoneStore>();
 
+        var csvImportProfileStore = Substitute.For<ICsvImportProfileStore>();
+        csvImportProfileStore.GetUserProfilesAsync().Returns([]);
         var enableUseCase = new EnableCloudSyncUseCase(
             transport,
             metadataStore,
@@ -329,6 +332,7 @@ public class LicenseViewModelTests
             transactionRepository,
             recurringRepository,
             sparZielRepository,
+            csvImportProfileStore,
             license);
         var clearUseCase = new ClearLocalSyncedDataUseCase(
             accountRepository,
@@ -336,6 +340,7 @@ public class LicenseViewModelTests
             transactionRepository,
             recurringRepository,
             sparZielRepository,
+            csvImportProfileStore,
             budgetRepository,
             templateRepository,
             tombstoneStore,
@@ -487,12 +492,14 @@ public class LicenseViewModelTests
         var templates = Substitute.For<ITransactionTemplateRepository>();
         templates.GetTransactionTemplatesAsync().Returns([]);
 
+        var profiles = Substitute.For<ICsvImportProfileStore>();
         return new ClearLocalSyncedDataUseCase(
             accounts,
             categories,
             transactions,
             recurring,
             sparZiele,
+            profiles,
             budgets,
             templates,
             tombstoneStore,
@@ -529,6 +536,9 @@ public class LicenseViewModelTests
         var sparZielRepository = Substitute.For<ISparZielRepository>();
         sparZielRepository.GetSparZieleAsync().Returns([]);
 
+        var csvImportProfileStore = Substitute.For<ICsvImportProfileStore>();
+        csvImportProfileStore.GetUserProfilesAsync().Returns([]);
+
         return new EnableCloudSyncUseCase(
             transport,
             metadataStore,
@@ -537,6 +547,7 @@ public class LicenseViewModelTests
             transactionRepository,
             recurringRepository,
             sparZielRepository,
+            csvImportProfileStore,
             license);
     }
 
@@ -579,6 +590,9 @@ public class LicenseViewModelTests
         var sparZielRepository = Substitute.For<ISparZielRepository>();
         sparZielRepository.GetSparZieleAsync().Returns([]);
 
+        var csvImportProfileStore = Substitute.For<ICsvImportProfileStore>();
+        csvImportProfileStore.GetUserProfilesAsync().Returns([]);
+
         return new EnableCloudSyncUseCase(
             transport,
             metadataStore,
@@ -587,6 +601,7 @@ public class LicenseViewModelTests
             transactionRepository,
             recurringRepository,
             sparZielRepository,
+            csvImportProfileStore,
             license);
     }
 }

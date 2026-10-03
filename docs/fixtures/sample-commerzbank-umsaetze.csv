@@ -1,0 +1,6 @@
+Buchungstag;Wertstellung;Umsatzart;Buchungstext;Betrag;Währung;IBAN Kontoinhaber;Kategorie
+03.10.2026;03.10.2026;Gutschrift Überweisung;Gehalt Oktober 2026 Muster AG End-to-End-Ref.: GEHALT-2026-10;3200,00;EUR;DE79500400000123456700;
+02.10.2026;02.10.2026;Lastschrift;Stadtwerke Beispiel Strom Abschlag 10/2026 Mandatsref: SW-001 Gläubiger-ID: DE00ZZZ00000000000;-85,40;EUR;DE79500400000123456700;
+01.10.2026;01.10.2026;Dauerauftrag;Miete Musterstr. 1 Vermieter GmbH;-950,00;EUR;DE79500400000123456700;
+28.09.2026;28.09.2026;Kartenzahlung;Supermarkt SE Einkauf KW39;-67,23;EUR;DE79500400000123456700;
+15.09.2026;15.09.2026;Bareinzahlung;Bareinzahlung Filiale;100,00;EUR;DE79500400000123456700;

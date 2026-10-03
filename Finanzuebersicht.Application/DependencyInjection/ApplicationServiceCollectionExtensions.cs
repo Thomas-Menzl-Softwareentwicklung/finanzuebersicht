@@ -76,6 +76,7 @@ public static class ApplicationServiceCollectionExtensions
         services.AddTransient<PrepareCsvImportUseCase>();
         services.AddTransient<AnalyzeCsvImportUseCase>();
         services.AddTransient<CommitCsvImportUseCase>();
+        services.AddTransient<UpsertCsvImportProfileUseCase>();
 
         services.AddTransient<CreateBackupUseCase>();
         services.AddTransient<ListBackupsUseCase>();

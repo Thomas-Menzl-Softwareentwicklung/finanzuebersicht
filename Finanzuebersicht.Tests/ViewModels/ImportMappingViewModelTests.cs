@@ -55,6 +55,7 @@ public class ImportMappingViewModelTests
         Assert.Equal("Date", upserted.Columns.Date);
         Assert.Equal("Amount", upserted.Columns.Amount);
         Assert.Equal("Merchant", upserted.Columns.Title);
+        Assert.NotNull(upserted.UpdatedAt);
         await profileStore.Received(1).UpsertAsync(Arg.Any<CsvImportProfile>());
         await navigation.Received(1).GoBackAsync();
         await navigation.Received(1).GoToAsync(Routes.ImportPreview, Arg.Any<IDictionary<string, object>>());
@@ -148,10 +149,11 @@ public class ImportMappingViewModelTests
             uncategorizedCategoryService: new UncategorizedCategoryService(catRepo));
         var prepare = new PrepareCsvImportUseCase(new InMemoryCsvImportProfileStore(), orchestrator);
         var analyze = new AnalyzeCsvImportUseCase(orchestrator, prepare);
+        var upsert = new UpsertCsvImportProfileUseCase(profileStore);
 
         return new ImportMappingViewModel(
             analyze,
-            profileStore,
+            upsert,
             sessionStore,
             navigation,
             dialog,

@@ -17,6 +17,7 @@ public sealed partial class CloudSyncOrchestrator(
     ITransactionRepository transactionRepository,
     IRecurringTransactionRepository recurringTransactionRepository,
     ISparZielRepository sparZielRepository,
+    ICsvImportProfileStore csvImportProfileStore,
     ILicenseService licenseService) : ICloudSyncOrchestrator
 {
     private static readonly JsonSerializerOptions PayloadJsonOptions = new()
