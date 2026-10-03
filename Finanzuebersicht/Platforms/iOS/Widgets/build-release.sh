@@ -68,7 +68,9 @@ fi
 resolve_versions
 echo "Widget versions: MARKETING_VERSION=$MARKETING_VERSION CURRENT_PROJECT_VERSION=$CURRENT_PROJECT_VERSION"
 
-if [[ ! -d QuickExpenseWidget.xcodeproj ]]; then
+# project.yml is the source of truth. Regenerate when it is newer than the
+# committed project so a new resource (e.g. PrivacyInfo.xcprivacy) is not left out.
+if [[ ! -f QuickExpenseWidget.xcodeproj/project.pbxproj ]] || [[ project.yml -nt QuickExpenseWidget.xcodeproj/project.pbxproj ]]; then
   echo "Generating QuickExpenseWidget.xcodeproj from project.yml..."
   xcodegen generate
 fi

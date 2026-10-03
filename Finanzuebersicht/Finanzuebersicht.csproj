@@ -199,7 +199,7 @@
 
 	<!-- Mac Catalyst shares the Swift source (fat arm64+x86_64 macabi .a) and the C# transport. -->
 	<ItemGroup Condition="$(TargetFramework.Contains('-maccatalyst'))">
-		<BundleResource Include="Platforms\MacCatalyst\PrivacyInfo.xcprivacy" />
+		<BundleResource Include="Platforms\MacCatalyst\PrivacyInfo.xcprivacy" LogicalName="PrivacyInfo.xcprivacy" />
 		<NativeReference Include="Platforms/iOS/Native/lib/Release-maccatalyst/libCloudKitSyncBridge.a">
 			<Kind>Static</Kind>
 			<ForceLoad>true</ForceLoad>
