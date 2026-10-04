@@ -249,8 +249,14 @@ public partial class AccountDetailViewModel(
         try
         {
             var result = await _reconcileAccountBalanceUseCase.ExecuteAsync(_existingAccount.Id, actualBalance);
-            OpeningBalanceText = result.NewOpeningBalance.ToString("F2", CultureInfo.CurrentCulture);
-            _existingAccount.OpeningBalance = result.NewOpeningBalance;
+            if (!result.IsSuccess)
+            {
+                await UseCaseErrorPresenter.ShowAsync(_dialogService, _loc, result.Error!);
+                return;
+            }
+
+            OpeningBalanceText = result.Value!.NewOpeningBalance.ToString("F2", CultureInfo.CurrentCulture);
+            _existingAccount.OpeningBalance = result.Value.NewOpeningBalance;
             await LoadCalculatedBalanceAsync();
             _appEvents.NotifyDataChanged();
             await _feedbackService.ShowSnackbarAsync(_loc.GetString(ResourceKeys.Msg_SaldoAbgeglichen));

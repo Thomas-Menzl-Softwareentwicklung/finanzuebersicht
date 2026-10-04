@@ -24,7 +24,7 @@ Kurz: .NET 10 + MAUI, Multi-Language UI (Deutsch & Englisch), MVVM-Architektur.
 - **Mehrere Konten** mit Anfangssaldo, Saldo pro Konto und **Umbuchungen** zwischen Konten
 - Transaktionen anlegen, editieren, suchen, filtern, duplizieren und als Vorlage speichern
 - **Schnellerfassung:** In-App „Schnell“ (Free) auf allen Plattformen; auf iOS zusätzlich Home-Screen-Widget mit konfigurierbaren Shortcuts (Pro)
-- CSV-Import (DKB-Format) mit Vorschau, Auto-Kategorisierung und Duplikat-Erkennung
+- CSV-Import mit Spaltenzuordnung und gespeicherten Profilen (DKB als Built-in), Vorschau, Auto-Kategorisierung und Duplikat-Erkennung
 - Wiederkehrende Buchungen (Daueraufträge) mit Instanz-Verschieben und Ausnahmen
 - Kategorien mit Icon, Farbe und monatlichem Budget
 - **Sparziele** mit Fortschrittsbalken und Prognose
@@ -213,7 +213,7 @@ Finanzuebersicht.Tests/            ← xUnit Tests (net10.0)
 
 ## Versionierung & CI
 
-- Nerdbank.GitVersioning (`version.json`) steuert Versionsnummern (aktuell Basis `1.21`)
+- Nerdbank.GitVersioning (`version.json`) steuert Versionsnummern (aktuell Basis `1.22`)
 - CI / Pre-Release / Release Workflows in `.github/workflows/`
 
 ### Full MAUI build (macCatalyst)

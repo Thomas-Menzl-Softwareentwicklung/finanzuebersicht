@@ -14,6 +14,7 @@
 		38AA0E2029CFFEEE3D7336DF /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 89C07390DE04D26F5F7B1959 /* Localizable.xcstrings */; };
 		60C1E322BB443A4108747882 /* QuickExpenseWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = AED6AA31B22AD6A00E6A0E00 /* QuickExpenseWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		EA27217F0711511DCB96B15A /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = C8369D2A818A48700A52DF8A /* InfoPlist.strings */; };
+		EA284DDDE15C6BAA206E635A /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 1C6DD0E6B7F372961A1B0448 /* PrivacyInfo.xcprivacy */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -43,6 +44,7 @@
 /* Begin PBXFileReference section */
 		12EE9747AC84438E9C7028A1 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		1937560B137C3D8509EF6785 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		1C6DD0E6B7F372961A1B0448 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		3276586BD003741044901FE5 /* WidgetHostApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetHostApp.swift; sourceTree = "<group>"; };
 		5399279586D1FC99DCB568C8 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		6340955998BB227C9409604A /* QuickExpenseWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickExpenseWidget.swift; sourceTree = "<group>"; };
@@ -78,6 +80,7 @@
 				FA2793D43FA27C8E753A53E6 /* Assets.xcassets */,
 				A78EC288B0E4AFBC6B4864DB /* Info.plist */,
 				89C07390DE04D26F5F7B1959 /* Localizable.xcstrings */,
+				1C6DD0E6B7F372961A1B0448 /* PrivacyInfo.xcprivacy */,
 				6340955998BB227C9409604A /* QuickExpenseWidget.swift */,
 				C8369D2A818A48700A52DF8A /* InfoPlist.strings */,
 			);
@@ -181,6 +184,7 @@
 				01E01E481859A76668D633B3 /* Assets.xcassets in Resources */,
 				EA27217F0711511DCB96B15A /* InfoPlist.strings in Resources */,
 				38AA0E2029CFFEEE3D7336DF /* Localizable.xcstrings in Resources */,
+				EA284DDDE15C6BAA206E635A /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

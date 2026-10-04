@@ -147,6 +147,39 @@ namespace Finanzuebersicht.Tests.Services
         }
 
         [Fact]
+        public async Task FullBackupRestoreCycle_PreservesCsvImportProfiles()
+        {
+            var profileStore = new InMemoryCsvImportProfileStore();
+            await profileStore.UpsertAsync(new CsvImportProfile
+            {
+                Id = "user-1",
+                Name = "My Bank",
+                Delimiter = ';',
+                Headers = ["Date", "Amount", "Text"],
+                Columns = new CsvColumnMapping { Date = "Date", Amount = "Amount", Title = "Text" }
+            });
+            var service = new BackupService(
+                _mockDataService, _mockDataService, _mockDataService, _mockDataService, _mockDataService, _mockDataService,
+                _mockSettingsService,
+                new DataMigrationService([new V1ToV2Migrator(), new V2ToV3Migrator()]),
+                csvImportProfileStore: profileStore);
+            var backupPath = Path.Combine(_testDir, "backups");
+
+            var backup = await service.CreateBackupAsync(backupPath);
+            Assert.Equal(1, backup.EntityCounts[BackupEntityKeys.CsvImportProfiles]);
+
+            await profileStore.ReplaceAllAsync([]);
+
+            var restoreResult = await service.RestoreBackupAsync(backupPath, backup.Id);
+
+            Assert.True(restoreResult.Success, restoreResult.ErrorMessage);
+            var restored = await profileStore.GetUserProfilesAsync();
+            Assert.Single(restored);
+            Assert.Equal("user-1", restored[0].Id);
+            Assert.Equal("Date", restored[0].Columns.Date);
+        }
+
+        [Fact]
         public async Task MultipleBackups_ListsInCorrectOrder()
         {
             // Arrange

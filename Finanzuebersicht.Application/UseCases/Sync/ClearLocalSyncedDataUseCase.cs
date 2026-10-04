@@ -13,6 +13,7 @@ public sealed class ClearLocalSyncedDataUseCase(
     ITransactionRepository transactionRepository,
     IRecurringTransactionRepository recurringTransactionRepository,
     ISparZielRepository sparZielRepository,
+    ICsvImportProfileStore csvImportProfileStore,
     IBudgetRepository budgetRepository,
     ITransactionTemplateRepository transactionTemplateRepository,
     ISyncTombstoneStore tombstoneStore,
@@ -23,6 +24,7 @@ public sealed class ClearLocalSyncedDataUseCase(
         await transactionRepository.ReplaceAllTransactionsAsync([]);
         await recurringTransactionRepository.ReplaceAllRecurringTransactionsAsync([]);
         await sparZielRepository.ReplaceAllSparZieleAsync([]);
+        await csvImportProfileStore.ReplaceAllAsync([]);
 
         var accounts = await accountRepository.GetAccountsAsync();
         var keptAccounts = accounts.Where(a => a.IsSystemAccount).ToList();

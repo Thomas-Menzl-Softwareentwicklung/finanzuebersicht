@@ -67,3 +67,7 @@ vendor/bundle/
 # Local Mac dev helpers (machine-specific)
 scripts/run-maccatalyst.sh
 scripts/install-maccatalyst-dev-app.sh
+
+# Isolated git worktrees and SDD scratch
+.worktrees/
+.superpowers/

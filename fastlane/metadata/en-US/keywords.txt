@@ -1,1 +1,1 @@
-finance,budget,expense,savings,recurring,account,csv,private,offline,iCloud
+finance,budget,expense,savings,recurring,account,csv,private,local,iCloud

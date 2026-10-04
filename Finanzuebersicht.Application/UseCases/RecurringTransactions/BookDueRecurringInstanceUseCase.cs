@@ -1,3 +1,4 @@
+using Finanzuebersicht.Application.Results;
 using Finanzuebersicht.Application.UseCases.Sync;
 using Finanzuebersicht.Constants;
 using Finanzuebersicht.Core.Services;
@@ -14,7 +15,7 @@ public class BookDueRecurringInstanceUseCase(
 {
     private readonly ICloudSyncOrchestrator? _cloudSyncOrchestrator = cloudSyncOrchestrator;
 
-    public async Task ExecuteAsync(
+    public async Task<UseCaseResult> ExecuteAsync(
         string recurringTransactionId,
         DateTime instanceDate,
         decimal? amountOverride = null,
@@ -23,8 +24,9 @@ public class BookDueRecurringInstanceUseCase(
         cancellationToken.ThrowIfCancellationRequested();
 
         var list = await recurringTransactionRepository.GetRecurringTransactionsAsync();
-        var recurring = list.FirstOrDefault(r => r.Id == recurringTransactionId)
-            ?? throw new InvalidOperationException("Recurring transaction not found.");
+        var recurring = list.FirstOrDefault(r => r.Id == recurringTransactionId);
+        if (recurring is null)
+            return UseCaseResult.Fail(UseCaseErrorCode.RecurringNotFound);
 
         var effectiveDate = RecurringScheduleCalculator.ApplyExceptions(recurring, instanceDate.Date);
         var amount = amountOverride ?? recurring.Betrag;
@@ -33,7 +35,7 @@ public class BookDueRecurringInstanceUseCase(
             effectiveDate.Date,
             effectiveDate.Date.AddDays(1).AddTicks(-1));
         if (existing.Any(t => t.DauerauftragId == recurring.Id))
-            throw new InvalidOperationException("This recurring instance has already been booked.");
+            return UseCaseResult.Fail(UseCaseErrorCode.RecurringAlreadyBooked);
 
         var accountId = recurring.AccountId;
         if (string.IsNullOrWhiteSpace(accountId))
@@ -44,10 +46,11 @@ public class BookDueRecurringInstanceUseCase(
         }
 
         if (string.IsNullOrWhiteSpace(accountId))
-            throw new InvalidOperationException("No active account available for booking.");
+            return UseCaseResult.Fail(UseCaseErrorCode.NoActiveAccount);
 
         var transaction = new Transaction
         {
+            Id = RecurringInstanceIds.For(recurring.Id, instanceDate.Date),
             Betrag = amount,
             Titel = recurring.Titel,
             KategorieId = recurring.KategorieId,
@@ -73,5 +76,7 @@ public class BookDueRecurringInstanceUseCase(
             SyncEntityType.RecurringTransaction,
             recurring.Id,
             cancellationToken);
+
+        return UseCaseResult.Ok();
     }
 }

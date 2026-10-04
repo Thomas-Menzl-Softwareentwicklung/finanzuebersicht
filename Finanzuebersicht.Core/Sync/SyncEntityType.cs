@@ -7,5 +7,7 @@ public enum SyncEntityType
     Transaction = 2,
     RecurringTransaction = 3,
     SparZiel = 4,
-    SyncMeta = 5
+    SyncMeta = 5,
+    /// <summary>User CSV column-mapping profile (not built-in DKB).</summary>
+    CsvImportProfile = 6
 }

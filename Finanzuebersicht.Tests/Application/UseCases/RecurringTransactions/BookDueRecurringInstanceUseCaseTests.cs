@@ -1,5 +1,7 @@
+using Finanzuebersicht.Application.Results;
 using Finanzuebersicht.Application.UseCases.RecurringTransactions;
 using Finanzuebersicht.Constants;
+using Finanzuebersicht.Core.Sync;
 using Finanzuebersicht.Models;
 
 namespace Finanzuebersicht.Tests.Application.UseCases.RecurringTransactions;
@@ -30,10 +32,12 @@ public class BookDueRecurringInstanceUseCaseTests
         var sut = new BookDueRecurringInstanceUseCase(recurringRepository, transactionRepository, accountRepository);
         var instanceDate = new DateTime(2026, 3, 1);
 
-        await sut.ExecuteAsync("rec-1", instanceDate);
+        var result = await sut.ExecuteAsync("rec-1", instanceDate);
 
+        Assert.True(result.IsSuccess);
         await transactionRepository.Received(1).SaveTransactionAsync(NonNullArg.Is<Transaction>(t =>
-            t.DauerauftragId == "rec-1"
+            t.Id == RecurringInstanceIds.For("rec-1", instanceDate)
+            && t.DauerauftragId == "rec-1"
             && t.Betrag == 800m
             && t.AccountId == "acc-1"
             && t.Datum == instanceDate));
@@ -67,8 +71,9 @@ public class BookDueRecurringInstanceUseCaseTests
 
         var sut = new BookDueRecurringInstanceUseCase(recurringRepository, transactionRepository, accountRepository);
 
-        await sut.ExecuteAsync("rec-1", new DateTime(2026, 3, 1));
+        var result = await sut.ExecuteAsync("rec-1", new DateTime(2026, 3, 1));
 
+        Assert.True(result.IsSuccess);
         await transactionRepository.Received(1).SaveTransactionAsync(NonNullArg.Is<Transaction>(t => t.AccountId == "acc-default"));
     }
 
@@ -99,7 +104,10 @@ public class BookDueRecurringInstanceUseCaseTests
         var accountRepository = Substitute.For<IAccountRepository>();
         var sut = new BookDueRecurringInstanceUseCase(recurringRepository, transactionRepository, accountRepository);
 
-        await Assert.ThrowsAsync<InvalidOperationException>(() => sut.ExecuteAsync("rec-1", instanceDate));
+        var result = await sut.ExecuteAsync("rec-1", instanceDate);
+
+        Assert.False(result.IsSuccess);
+        Assert.Equal(UseCaseErrorCode.RecurringAlreadyBooked, result.Error!.Code);
         await transactionRepository.DidNotReceive().SaveTransactionAsync(Arg.Any<Transaction>());
     }
 }

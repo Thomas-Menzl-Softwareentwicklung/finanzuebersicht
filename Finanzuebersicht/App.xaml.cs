@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using Finanzuebersicht.Application.UseCases;
 using Finanzuebersicht.Application.UseCases.ScreenshotDemo;
 using Finanzuebersicht.Application.UseCases.Sync;
 using Finanzuebersicht.Application.UseCases.Transactions;
@@ -16,7 +17,7 @@ namespace Finanzuebersicht;
 public partial class App : global::Microsoft.Maui.Controls.Application
 {
 	private readonly IRecurringGenerationService _recurringGenerationService;
-	private readonly InitializationService _initService;
+	private readonly InitializeAppDataUseCase _initializeAppDataUseCase;
 	private readonly ThemeService _themeService;
 	private readonly ProcessQuickExpenseInboxUseCase _processQuickExpenseInboxUseCase;
 	private readonly ILicenseService _licenseService;
@@ -24,7 +25,7 @@ public partial class App : global::Microsoft.Maui.Controls.Application
 	private readonly IAppEvents _appEvents;
 	private readonly IQuickExpenseWidgetPresetStore? _quickExpenseWidgetPresetStore;
 	private readonly SeedScreenshotDemoDataUseCase _seedScreenshotDemoDataUseCase;
-	private readonly ICloudSyncOrchestrator _cloudSyncOrchestrator;
+	private readonly StartCloudSyncUseCase _startCloudSyncUseCase;
 	private readonly ILogger<App>? _logger;
 	private readonly string _savedTheme;
 	private readonly bool _screenshotDemoMode;
@@ -44,7 +45,7 @@ public partial class App : global::Microsoft.Maui.Controls.Application
 	}
 
 	public App(
-		InitializationService initService,
+		InitializeAppDataUseCase initializeAppDataUseCase,
 		IRecurringGenerationService recurringGenerationService,
 		ISettingsService settings,
 		ThemeService themeService,
@@ -52,7 +53,7 @@ public partial class App : global::Microsoft.Maui.Controls.Application
 		IDisplayCurrencyService displayCurrency,
 		ProcessQuickExpenseInboxUseCase processQuickExpenseInboxUseCase,
 		SeedScreenshotDemoDataUseCase seedScreenshotDemoDataUseCase,
-		ICloudSyncOrchestrator cloudSyncOrchestrator,
+		StartCloudSyncUseCase startCloudSyncUseCase,
 		ILicenseService licenseService,
 		INavigationService navigationService,
 		IAppEvents appEvents,
@@ -78,14 +79,14 @@ public partial class App : global::Microsoft.Maui.Controls.Application
 
 		InitializeComponent();
 		_recurringGenerationService = recurringGenerationService;
-		_initService = initService;
+		_initializeAppDataUseCase = initializeAppDataUseCase;
 		_themeService = themeService;
 		_processQuickExpenseInboxUseCase = processQuickExpenseInboxUseCase;
 		_licenseService = licenseService;
 		_navigationService = navigationService;
 		_quickExpenseWidgetPresetStore = quickExpenseWidgetPresetStore;
 		_seedScreenshotDemoDataUseCase = seedScreenshotDemoDataUseCase;
-		_cloudSyncOrchestrator = cloudSyncOrchestrator;
+		_startCloudSyncUseCase = startCloudSyncUseCase;
 		_logger = logger;
 
 		// Gespeichertes Theme anwenden (MAUI-Ebene); Screenshot-Demo erzwingt Light ohne Settings-Persistenz
@@ -194,7 +195,7 @@ public partial class App : global::Microsoft.Maui.Controls.Application
 		base.OnStart();
 		try
 		{
-			await _initService.InitializeAsync();
+			await _initializeAppDataUseCase.ExecuteAsync();
 			if (_screenshotDemoMode)
 			{
 				await ScreenshotDemoBootstrap.TrySeedAsync(_seedScreenshotDemoDataUseCase);
@@ -302,8 +303,7 @@ public partial class App : global::Microsoft.Maui.Controls.Application
 	{
 		try
 		{
-			await _cloudSyncOrchestrator.StartIfEnabledAsync();
-			await _cloudSyncOrchestrator.SyncNowAsync();
+			await _startCloudSyncUseCase.ExecuteAsync();
 		}
 		catch (Exception ex)
 		{

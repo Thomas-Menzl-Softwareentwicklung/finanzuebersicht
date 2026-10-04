@@ -10,7 +10,7 @@ Personal finance app built with **.NET 10** and **.NET MAUI**, targeting **macOS
 Data is persisted locally as JSON. Architecture: **Clean Architecture + MVVM**.
 Languages: **German and English** (`AppResources.resx` / `AppResources.de.resx`).
 
-Current version baseline: `version.json` → `1.21` (patch = git height via Nerdbank.GitVersioning).
+Current version baseline: `version.json` → `1.22` (patch = git height via Nerdbank.GitVersioning).
 
 ## Build & Run
 
@@ -77,7 +77,7 @@ Layered clean architecture with MVVM (`CommunityToolkit.Mvvm` source generators)
 **DI entry points:**
 - `MauiProgram.cs` — app services, pages
 - `AddInfrastructureServices()` — stores + repositories
-- `AddApplicationUseCases()` — all use cases
+- `AddApplicationUseCases()` — all use cases + domain services (`IRecurringGenerationService`, `IForecastService`, `ITransactionValidationService`); host startup via `InitializeAppDataUseCase`
 - `AddPresentationViewModels()` — ViewModels (`Finanzuebersicht.Presentation`)
 
 ## Navigation
@@ -114,13 +114,13 @@ Layered clean architecture with MVVM (`CommunityToolkit.Mvvm` source generators)
 - Forward-looking cashflow, **not** account balance
 
 ### Import
-- CSV import (DKB parser), import preview, auto-categorization (`KeywordCategorizationStrategy`, `HistoricalCategorizationStrategy`)
+- CSV import via table reader + column-mapping profiles (built-in DKB, user JSON), preview, auto-categorization. Mapping UI for unknown fingerprints. No Open Banking.
 - No Open Banking / bank API integration
 
 ### Other
 - Sparziele with transaction linking and completion forecast
 - Backup/restore (ZIP/JSON), configurable data path
-- CloudKit Sync MVP (#243) is **in tree**: private CloudKit zone `finanzuebersicht-sync`, LWW + tombstones, Settings iCloud-Sync switch (Store + Sync IAP + iOS 17 / Mac Catalyst 17). Direct/Windows: `NullCloudSyncTransport`. Opt-in; user’s private iCloud; no first-party sync server. Native bridge: `Platforms/iOS/Native/README-CloudKitSync.md`. **#243 QA passed** (iPhone → iPad → iMac, `docs/CLOUDKIT_SYNC_QA.md`). Known gaps: `RecurringGenerationService` bypasses orchestrator notify (instance ids not stable across devices); Mac Catalyst Debug lacks iCloud entitlements. Schema pause: newer cloud `schemaVersion` stops apply/upload and surfaces `Sync_Error`.
+- CloudKit Sync MVP (#243) is **in tree**: private CloudKit zone `finanzuebersicht-sync`, LWW + tombstones, Settings iCloud-Sync switch (Store + Sync IAP + iOS 17 / Mac Catalyst 17). Direct/Windows: `NullCloudSyncTransport`. Opt-in; user’s private iCloud; no first-party sync server. Native bridge: `Platforms/iOS/Native/README-CloudKitSync.md`. **#243 QA passed** (iPhone → iPad → iMac, `docs/CLOUDKIT_SYNC_QA.md`). Recurring auto-generation uses stable instance ids `rec:{dauerauftragId}:{yyyy-MM-dd}` and notifies sync (#372). Mac Catalyst Debug lacks iCloud entitlements. Schema pause: newer cloud `schemaVersion` stops apply/upload and surfaces `Sync_Error`.
 - Architecture milestone **v1.20** (#274–#300) is **done**. Active focus: Milestone 22 product backlog (`docs/ROADMAP.md`) before v2.0.
 - Sync prep (#300 ✅): `ExternalId` / `Source` / `UpdatedAt` on Account, Transaction, Category, RecurringTransaction, SparZiel. Known source constants: `EntitySources`.
 
@@ -170,7 +170,7 @@ In-app **Schnell** sheet (`CaptureQuickExpenseUseCase`, Unkategorisiert + defaul
 
 Automatic **SemVer** via **Nerdbank.GitVersioning** (`version.json`):
 
-- Version = `<major>.<minor>.<git-height>` (e.g. `1.21.1`)
+- Version = `<major>.<minor>.<git-height>` (e.g. `1.22.1`)
 - Bump: edit `version.json` or `nbgv set-version <version>`
 - Current: `nbgv get-version`
 - Stable releases: `main` and `release/v*` branches

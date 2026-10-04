@@ -31,6 +31,14 @@ Capture App Store screenshots (2 devices × 2 locales)
 
 Upload listing texts and iOS screenshots to App Store Connect (no binary, no review)
 
+### ios upload_listing_text
+
+```sh
+[bundle exec] fastlane ios upload_listing_text
+```
+
+Upload listing texts only (no screenshots, no binary, no review)
+
 ### ios upload_listing_mac
 
 ```sh
@@ -39,6 +47,14 @@ Upload listing texts and iOS screenshots to App Store Connect (no binary, no rev
 
 Upload listing texts and Mac screenshots to the Mac App Store listing (no binary, no review)
 
+### ios upload_listing_text_mac
+
+```sh
+[bundle exec] fastlane ios upload_listing_text_mac
+```
+
+Upload Mac listing texts only (no screenshots)
+
 ### ios upload_listing_all
 
 ```sh
@@ -46,6 +62,14 @@ Upload listing texts and Mac screenshots to the Mac App Store listing (no binary
 ```
 
 Upload iOS listing+screenshots then Mac listing texts
+
+### ios upload_listing_text_all
+
+```sh
+[bundle exec] fastlane ios upload_listing_text_all
+```
+
+Upload iOS+Mac listing texts only (no screenshots)
 
 ### ios upload_ipa
 

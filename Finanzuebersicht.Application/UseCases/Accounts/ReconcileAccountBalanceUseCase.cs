@@ -1,3 +1,4 @@
+using Finanzuebersicht.Application.Results;
 using Finanzuebersicht.Models;
 
 namespace Finanzuebersicht.Application.UseCases.Accounts;
@@ -7,7 +8,7 @@ public class ReconcileAccountBalanceUseCase(
     GetAccountBalancesUseCase getAccountBalancesUseCase,
     SaveAccountDetailUseCase saveAccountDetailUseCase)
 {
-    public async Task<AccountBalanceReconciliationResult> ExecuteAsync(
+    public async Task<UseCaseResult<AccountBalanceReconciliationResult>> ExecuteAsync(
         string accountId,
         decimal actualBalance,
         CancellationToken cancellationToken = default)
@@ -15,12 +16,14 @@ public class ReconcileAccountBalanceUseCase(
         cancellationToken.ThrowIfCancellationRequested();
 
         var accounts = await accountRepository.GetAccountsAsync();
-        var account = accounts.FirstOrDefault(a => a.Id == accountId)
-            ?? throw new InvalidOperationException("Account not found.");
+        var account = accounts.FirstOrDefault(a => a.Id == accountId);
+        if (account is null)
+            return UseCaseResult.Fail<AccountBalanceReconciliationResult>(UseCaseErrorCode.AccountNotFound);
 
         var summaries = await getAccountBalancesUseCase.ExecuteAsync(cancellationToken);
-        var summary = summaries.FirstOrDefault(s => s.AccountId == accountId)
-            ?? throw new InvalidOperationException("Account balance not found.");
+        var summary = summaries.FirstOrDefault(s => s.AccountId == accountId);
+        if (summary is null)
+            return UseCaseResult.Fail<AccountBalanceReconciliationResult>(UseCaseErrorCode.AccountBalanceNotFound);
 
         var delta = actualBalance - summary.Saldo;
         var newOpeningBalance = account.OpeningBalance + delta;
@@ -34,15 +37,17 @@ public class ReconcileAccountBalanceUseCase(
             account.OpeningBalanceDate,
             cancellationToken);
         if (!saveResult.IsSuccess)
-            throw new InvalidOperationException($"Account save failed: {saveResult.Error!.Code}");
+            return UseCaseResult.Fail<AccountBalanceReconciliationResult>(
+                saveResult.Error!.Code,
+                saveResult.Error.FormatArgs.ToArray());
 
-        return new AccountBalanceReconciliationResult
+        return UseCaseResult.Ok(new AccountBalanceReconciliationResult
         {
             CalculatedBalance = summary.Saldo,
             ActualBalance = actualBalance,
             Delta = delta,
             NewOpeningBalance = newOpeningBalance
-        };
+        });
     }
 }
 

@@ -182,7 +182,7 @@ main      → v1.x-Tag (löst release.yml aus)
 Nutzer können in den Einstellungen:
 - Backup erstellen (ZIP-Export mit allen Daten)
 - Backup wiederherstellen mit automatischer Schema-Migration
-- CSV-Import durchführen (mit Auto-Kategorisierung)
+- CSV-Import durchführen (Spalten-Mapping, Auto-Kategorisierung; DKB ohne Mapping)
 
 ### Schema-Versionierung
 
@@ -198,8 +198,8 @@ Neue Migratoren als `IDataMigrator`-Implementierungen in DI registrieren.
 
 ## 11. Versionierung
 
-- **System:** Nerdbank.GitVersioning (`version.json`, aktuell Basis `1.21`)
-- **Format:** `<major>.<minor>.<git-height>` (z.B. `1.21.1`)
+- **System:** Nerdbank.GitVersioning (`version.json`, aktuell Basis `1.22`)
+- **Format:** `<major>.<minor>.<git-height>` (z.B. `1.22.1`)
 - **MAUI-Version:** Automatisch gesetzt via `ApplicationDisplayVersion` und `ApplicationVersion` zur Buildzeit
 
 ```bash

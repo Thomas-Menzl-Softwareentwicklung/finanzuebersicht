@@ -1,1 +1,1 @@
-Optionaler iCloud-Sync zwischen iPhone, iPad und Mac. Daten bleiben in deiner privaten iCloud — ohne Finanzübersicht-Account. Jahresabo, unabhängig von Pro. Lokal weiter ohne Abo nutzbar.
+CSV-Import mit Spaltenzuordnung; gespeicherte Profile synchronisieren über iCloud Sync mit. Mac: Dateiauswahl für Import/Export unter Sandbox behoben.

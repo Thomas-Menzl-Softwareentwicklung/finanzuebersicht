@@ -1,3 +1,4 @@
+using Finanzuebersicht.Application.Results;
 using Finanzuebersicht.Application.UseCases.Sync;
 using Finanzuebersicht.Constants;
 using Finanzuebersicht.Core.Sync;
@@ -16,16 +17,17 @@ public class DeleteAccountUseCase(
     private readonly ITransactionTemplateRepository _transactionTemplateRepository = transactionTemplateRepository;
     private readonly ICloudSyncOrchestrator? _cloudSyncOrchestrator = cloudSyncOrchestrator;
 
-    public async Task ExecuteAsync(string accountId, CancellationToken cancellationToken = default)
+    public async Task<UseCaseResult> ExecuteAsync(string accountId, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
         var accounts = await _accountRepository.GetAccountsAsync();
         var target = accounts.FirstOrDefault(a => a.Id == accountId);
-        if (target == null) return;
+        if (target == null)
+            return UseCaseResult.Ok();
 
         if (target.SystemKey == SystemAccountKeys.Default)
-            throw new InvalidOperationException("Default account cannot be deleted.");
+            return UseCaseResult.Fail(UseCaseErrorCode.DefaultAccountCannotDelete);
 
         var fallback = accounts.FirstOrDefault(a => a.SystemKey == SystemAccountKeys.Default && a.Id != accountId)
             ?? accounts.FirstOrDefault(a => a.Id != accountId);
@@ -86,5 +88,7 @@ public class DeleteAccountUseCase(
                 fallback.Id,
                 cancellationToken);
         }
+
+        return UseCaseResult.Ok();
     }
 }

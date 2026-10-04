@@ -69,8 +69,17 @@
 		     -p:RuntimeIdentifier=maccatalyst-arm64 for Store publish. -->
 		<RuntimeIdentifiers Condition="'$(Configuration)' == 'Release' AND $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst' AND '$(RuntimeIdentifier)' == ''">maccatalyst-x64;maccatalyst-arm64</RuntimeIdentifiers>
 		<UserDialogs>false</UserDialogs>
-		<!-- Ensure UseInterpreter is true if link is None, though usually implied for Debug -->
+		<!-- Debug (all Apple targets): interpreter. -->
 		<UseInterpreter Condition="'$(Configuration)' == 'Debug'">true</UseInterpreter>
+	</PropertyGroup>
+
+	<!-- Intel Mac Catalyst Release must not link the interpreter: 1.21.16/18/19 all
+	     SIGSEGV/SIGABRT in UIApplication.Main / [AppDelegate init] (null registrar IMP).
+	     Apple Silicon is AOT-only; MtouchInterpreter=-all still sets mono_aot_only and
+	     1.21.21 SIGABRTed in load_aot_module during runtime init. UseInterpreter on
+	     arm64 only (MAUI docs) so missing AOT can fall back to the interpreter. -->
+	<PropertyGroup Condition="'$(RuntimeIdentifier)' == 'maccatalyst-arm64' AND '$(Configuration)' == 'Release'">
+		<UseInterpreter>true</UseInterpreter>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -100,8 +109,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.90" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.11" />
+		<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.110" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.12" />
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
 		<PackageReference Include="CommunityToolkit.Maui" Version="15.0.1" />
 	</ItemGroup>
@@ -190,6 +199,7 @@
 
 	<!-- Mac Catalyst shares the Swift source (fat arm64+x86_64 macabi .a) and the C# transport. -->
 	<ItemGroup Condition="$(TargetFramework.Contains('-maccatalyst'))">
+		<BundleResource Include="Platforms\MacCatalyst\PrivacyInfo.xcprivacy" LogicalName="PrivacyInfo.xcprivacy" />
 		<NativeReference Include="Platforms/iOS/Native/lib/Release-maccatalyst/libCloudKitSyncBridge.a">
 			<Kind>Static</Kind>
 			<ForceLoad>true</ForceLoad>
@@ -197,16 +207,20 @@
 		</NativeReference>
 	</ItemGroup>
 
-	<!-- SingleProject drops Platforms/iOS/** from @(Compile) for the maccatalyst TFM, and it does
-	     so in a target — a plain ItemGroup Include here would be removed again afterwards.
-	     CloudKitSyncTransport.cs is guarded with #if IOS || MACCATALYST and serves both. -->
-	<Target Name="IncludeCloudKitSyncTransportForMacCatalyst"
-	        BeforeTargets="BeforeCompile;CoreCompile"
-	        Condition="$(TargetFramework.Contains('-maccatalyst'))">
+	<!-- Universal Mac Catalyst merge requires byte-identical runtimeconfig.bin. x64 JIT sets
+	     IsDynamicCodeSupported=true; arm64 AOT omits it. Copy the Intel file onto arm64 so
+	     merge succeeds without compiling the interpreter into the x64 slice. -->
+	<Target Name="AlignMacCatalystRuntimeConfigForUniversalMerge"
+	        BeforeTargets="_CreateMergedAppBundle"
+	        Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst' AND '$(RuntimeIdentifier)' == ''">
 		<ItemGroup>
-			<Compile Remove="Platforms/iOS/CloudKitSyncTransport.cs" />
-			<Compile Include="Platforms/iOS/CloudKitSyncTransport.cs" />
+			<_X64RuntimeConfig Include="$(OutputPath)maccatalyst-x64/**/Contents/MonoBundle/runtimeconfig.bin" />
+			<_Arm64RuntimeConfig Include="$(OutputPath)maccatalyst-arm64/**/Contents/MonoBundle/runtimeconfig.bin" />
 		</ItemGroup>
+		<Copy Condition="'@(_X64RuntimeConfig)' != '' AND '@(_Arm64RuntimeConfig)' != ''"
+		      SourceFiles="@(_X64RuntimeConfig)"
+		      DestinationFiles="@(_Arm64RuntimeConfig)"
+		      OverwriteReadOnlyFiles="true" />
 	</Target>
 
 	<!-- Store: re-sign PlugIns/*.appex with Distribution + Store profile, then re-seal outer .app

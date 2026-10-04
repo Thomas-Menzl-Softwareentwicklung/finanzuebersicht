@@ -559,6 +559,7 @@ public class CloudSyncOrchestratorTests
         ITransactionRepository? transactionRepository = null,
         IRecurringTransactionRepository? recurringRepository = null,
         ISparZielRepository? sparZielRepository = null,
+        ICsvImportProfileStore? csvImportProfileStore = null,
         ISyncTombstoneStore? tombstoneStore = null,
         ILicenseService? licenseService = null)
     {
@@ -592,6 +593,12 @@ public class CloudSyncOrchestratorTests
             sparZielRepository.GetSparZieleAsync().Returns([]);
         }
 
+        if (csvImportProfileStore is null)
+        {
+            csvImportProfileStore = Substitute.For<ICsvImportProfileStore>();
+            csvImportProfileStore.GetUserProfilesAsync().Returns([]);
+        }
+
         tombstoneStore ??= Substitute.For<ISyncTombstoneStore>();
 
         if (licenseService is null)
@@ -609,6 +616,7 @@ public class CloudSyncOrchestratorTests
             transactionRepository,
             recurringRepository,
             sparZielRepository,
+            csvImportProfileStore,
             licenseService);
     }
 

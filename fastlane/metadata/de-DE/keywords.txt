@@ -1,1 +1,1 @@
-Finanzen,Budget,Ausgaben,Sparziele,Dauerauftrag,Konto,CSV,Privat,offline,iCloud
+Finanzen,Budget,Ausgaben,Sparziele,Dauerauftrag,Konto,CSV,Privat,lokal,iCloud

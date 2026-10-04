@@ -4,7 +4,6 @@ using CommunityToolkit.Mvvm.Input;
 using Finanzuebersicht.Application.UseCases.Backup;
 using Finanzuebersicht.Application.UseCases.Sync;
 using Finanzuebersicht.Core.Licensing;
-using Finanzuebersicht.Core.Sync;
 using Finanzuebersicht.Presentation.Services;
 using Finanzuebersicht.Resources.Strings;
 
@@ -17,14 +16,9 @@ public partial class LicenseViewModel : ObservableObject
     private readonly IStoreBillingService _billingService;
     private readonly ILocalizationService _loc;
     private readonly IDialogService _dialogService;
-    private readonly IFeedbackService _feedbackService;
-    private readonly EnableCloudSyncUseCase _enableCloudSyncUseCase;
-    private readonly ClearLocalSyncedDataUseCase _clearLocalSyncedDataUseCase;
-    private readonly CreateBackupUseCase _createBackupUseCase;
-    private readonly ISyncMetadataStore _syncMetadataStore;
-    private readonly ICloudSyncOrchestrator _cloudSyncOrchestrator;
-    private readonly IAppEvents _appEvents;
     private readonly IExternalBrowser _externalBrowser;
+    private readonly LicenseBillingCoordinator _billingCoordinator;
+    private readonly LicenseCloudSyncCoordinator _cloudSync;
     private bool _suppressCloudSyncToggle;
     private bool _lastKnownCloudSyncEnabled;
     private bool _metadataSyncEnabled;
@@ -38,9 +32,11 @@ public partial class LicenseViewModel : ObservableObject
         IFeedbackService feedbackService,
         EnableCloudSyncUseCase enableCloudSyncUseCase,
         ClearLocalSyncedDataUseCase clearLocalSyncedDataUseCase,
+        DisableCloudSyncUseCase disableCloudSyncUseCase,
         CreateBackupUseCase createBackupUseCase,
-        ISyncMetadataStore syncMetadataStore,
-        ICloudSyncOrchestrator cloudSyncOrchestrator,
+        GetCloudSyncStatusUseCase getCloudSyncStatusUseCase,
+        RecordCloudSyncErrorUseCase recordCloudSyncErrorUseCase,
+        StartCloudSyncUseCase startCloudSyncUseCase,
         IAppEvents appEvents,
         IExternalBrowser externalBrowser)
     {
@@ -49,14 +45,26 @@ public partial class LicenseViewModel : ObservableObject
         _billingService = billingService;
         _loc = localizationService;
         _dialogService = dialogService;
-        _feedbackService = feedbackService;
-        _enableCloudSyncUseCase = enableCloudSyncUseCase;
-        _clearLocalSyncedDataUseCase = clearLocalSyncedDataUseCase;
-        _createBackupUseCase = createBackupUseCase;
-        _syncMetadataStore = syncMetadataStore;
-        _cloudSyncOrchestrator = cloudSyncOrchestrator;
-        _appEvents = appEvents;
         _externalBrowser = externalBrowser;
+        _billingCoordinator = new LicenseBillingCoordinator(
+            billingService,
+            entitlementStore,
+            licenseService,
+            dialogService,
+            feedbackService,
+            localizationService);
+        _cloudSync = new LicenseCloudSyncCoordinator(
+            licenseService,
+            localizationService,
+            dialogService,
+            enableCloudSyncUseCase,
+            clearLocalSyncedDataUseCase,
+            disableCloudSyncUseCase,
+            createBackupUseCase,
+            getCloudSyncStatusUseCase,
+            recordCloudSyncErrorUseCase,
+            startCloudSyncUseCase,
+            appEvents);
         RefreshFromService();
     }
 
@@ -123,7 +131,7 @@ public partial class LicenseViewModel : ObservableObject
     public async Task InitializeAsync()
     {
         await _licenseService.RefreshAsync();
-        await LoadProductPriceAsync();
+        await ApplyProductPricesAsync();
         await RefreshCloudSyncFromMetadataAsync();
         RefreshFromService();
     }
@@ -151,22 +159,8 @@ public partial class LicenseViewModel : ObservableObject
         IsBusy = true;
         try
         {
-            if (enable)
-                await EnableCloudSyncAsync();
-            else
-                await DisableCloudSyncAsync();
-        }
-        catch (Exception ex)
-        {
-            SetCloudSyncEnabledSilently(_lastKnownCloudSyncEnabled);
-            var metadata = await _syncMetadataStore.GetAsync();
-            metadata.LastError = ex.Message;
-            await _syncMetadataStore.SaveAsync(metadata);
-            CloudSyncStatusLine = BuildCloudSyncStatusLine(metadata);
-            await _dialogService.ShowAlertAsync(
-                _loc.GetString(ResourceKeys.Err_Titel),
-                _loc.GetString(ResourceKeys.Sync_Error, ex.Message),
-                _loc.GetString(ResourceKeys.Btn_OK));
+            var outcome = await _cloudSync.ToggleAsync(enable, _lastKnownCloudSyncEnabled);
+            ApplyCloudSyncToggle(outcome);
         }
         finally
         {
@@ -188,7 +182,12 @@ public partial class LicenseViewModel : ObservableObject
         if (_licenseService.HasPro)
             return;
 
-        await PurchaseProductAsync(LicenseProductIds.Pro, ResourceKeys.Lic_PurchaseSuccess);
+        await _billingCoordinator.PurchaseProductAsync(
+            LicenseProductIds.Pro,
+            ResourceKeys.Lic_PurchaseSuccess,
+            () => IsBusy,
+            v => IsBusy = v,
+            OnBillingEntitlementsRefreshedAsync);
     }
 
     [RelayCommand]
@@ -197,36 +196,20 @@ public partial class LicenseViewModel : ObservableObject
         if (_licenseService.CanUseCloudSync)
             return;
 
-        await PurchaseProductAsync(LicenseProductIds.SyncYearly, ResourceKeys.Lic_SyncPurchaseSuccess);
+        await _billingCoordinator.PurchaseProductAsync(
+            LicenseProductIds.SyncYearly,
+            ResourceKeys.Lic_SyncPurchaseSuccess,
+            () => IsBusy,
+            v => IsBusy = v,
+            OnBillingEntitlementsRefreshedAsync);
     }
 
     [RelayCommand]
-    private async Task RestorePurchases()
-    {
-        if (IsBusy || !_billingService.IsAvailable)
-            return;
-
-        IsBusy = true;
-        try
-        {
-            await _entitlementStore.ClearStubPreferenceAsync();
-            var ok = await _billingService.RestorePurchasesAsync();
-            // Only overwrite cache when StoreKit reports owned products (empty restore keeps cache).
-            var owned = await _billingService.GetOwnedProductIdsAsync();
-            if (owned.Count > 0)
-                await _entitlementStore.ApplyOwnedProductIdsAsync(owned);
-            await _licenseService.RefreshAsync();
-            await RefreshCloudSyncFromMetadataAsync();
-            RefreshFromService();
-            await _feedbackService.ShowSnackbarAsync(ok || owned.Count > 0
-                ? _loc.GetString(ResourceKeys.Lic_RestoreSuccess)
-                : _loc.GetString(ResourceKeys.Lic_RestoreEmpty));
-        }
-        finally
-        {
-            IsBusy = false;
-        }
-    }
+    private Task RestorePurchases() =>
+        _billingCoordinator.RestorePurchasesAsync(
+            () => IsBusy,
+            v => IsBusy = v,
+            OnBillingEntitlementsRefreshedAsync);
 
     [RelayCommand]
     private async Task ApplyStubEntitlements()
@@ -248,124 +231,39 @@ public partial class LicenseViewModel : ObservableObject
 
         await _entitlementStore.ClearStubPreferenceAsync();
         await _licenseService.RefreshAsync();
-        await LoadProductPriceAsync();
-        await RefreshCloudSyncFromMetadataAsync();
-        RefreshFromService();
-    }
-
-    private async Task EnableCloudSyncAsync()
-    {
-        var result = await _enableCloudSyncUseCase.ExecuteAsync();
-        if (result.Status == EnableCloudSyncStatus.Enabled)
-        {
-            await FinishEnableCloudSyncAsync();
-            return;
-        }
-
-        SetCloudSyncEnabledSilently(false);
-
-        if (result.Status == EnableCloudSyncStatus.BlockedBothHaveData)
-        {
-            await OfferReplaceLocalWithCloudAsync();
-            return;
-        }
-
-        await _dialogService.ShowAlertAsync(
-            _loc.GetString(ResourceKeys.Err_Titel),
-            _loc.GetString(GetBlockedMessageKey(result.Status)),
-            _loc.GetString(ResourceKeys.Btn_OK));
-    }
-
-    private async Task OfferReplaceLocalWithCloudAsync()
-    {
-        var replace = await _dialogService.ShowConfirmationAsync(
-            _loc.GetString(ResourceKeys.Sync_ReplaceLocalWithCloudTitle),
-            _loc.GetString(ResourceKeys.Sync_ReplaceLocalWithCloudMessage),
-            _loc.GetString(ResourceKeys.Sync_ReplaceLocalWithCloudAccept),
-            _loc.GetString(ResourceKeys.Btn_Abbrechen));
-        if (!replace)
-            return;
-
-        var backup = await _createBackupUseCase.ExecuteAsync();
-        if (!backup.IsSuccess)
-        {
-            await UseCaseErrorPresenter.ShowAsync(_dialogService, _loc, backup.Error!);
-            return;
-        }
-
-        await _clearLocalSyncedDataUseCase.ExecuteAsync();
-        _appEvents.NotifyDataChanged();
-
-        var result = await _enableCloudSyncUseCase.ExecuteAsync();
-        if (result.Status == EnableCloudSyncStatus.Enabled)
-        {
-            await FinishEnableCloudSyncAsync();
-            _appEvents.NotifyDataChanged();
-            return;
-        }
-
-        await _dialogService.ShowAlertAsync(
-            _loc.GetString(ResourceKeys.Err_Titel),
-            _loc.GetString(GetBlockedMessageKey(result.Status)),
-            _loc.GetString(ResourceKeys.Btn_OK));
-    }
-
-    private async Task FinishEnableCloudSyncAsync()
-    {
-        await RefreshCloudSyncFromMetadataAsync();
-        RefreshFromService();
-        await _cloudSyncOrchestrator.StartIfEnabledAsync();
-        await _cloudSyncOrchestrator.SyncNowAsync();
-    }
-
-    private async Task DisableCloudSyncAsync()
-    {
-        var metadata = await _syncMetadataStore.GetAsync();
-        metadata.SyncEnabled = false;
-        await _syncMetadataStore.SaveAsync(metadata);
-        await _cloudSyncOrchestrator.StopAsync();
+        await ApplyProductPricesAsync();
         await RefreshCloudSyncFromMetadataAsync();
         RefreshFromService();
     }
 
     private async Task RefreshCloudSyncFromMetadataAsync()
     {
-        if (!_licenseService.IsCloudSyncImplemented)
+        var state = await _cloudSync.TryReadStateAsync();
+        if (state is null)
             return;
 
-        var metadata = await _syncMetadataStore.GetAsync();
-        _metadataSyncEnabled = metadata.SyncEnabled;
-        SetCloudSyncEnabledSilently(metadata.SyncEnabled);
-        CloudSyncStatusLine = BuildCloudSyncStatusLine(metadata);
+        _metadataSyncEnabled = state.SyncEnabled;
+        SetCloudSyncEnabledSilently(state.SyncEnabled);
+        CloudSyncStatusLine = state.StatusLine;
         OnPropertyChanged(nameof(ShowCloudSyncControls));
         OnPropertyChanged(nameof(CanToggleCloudSync));
     }
 
-    private string BuildCloudSyncStatusLine(SyncMetadata metadata)
+    private void ApplyCloudSyncToggle(LicenseCloudSyncToggleOutcome outcome)
     {
-        if (metadata.SyncEnabled && !_licenseService.CanUseCloudSync)
-            return _loc.GetString(ResourceKeys.Sync_PausedRenew);
-
-        if (!string.IsNullOrWhiteSpace(metadata.LastError))
-            return _loc.GetString(ResourceKeys.Sync_Error, metadata.LastError);
-
-        if (metadata.LastSyncUtc.HasValue)
+        SetCloudSyncEnabledSilently(outcome.SwitchEnabled);
+        if (outcome.StatusLine is not null)
+            CloudSyncStatusLine = outcome.StatusLine;
+        if (outcome.MetadataSyncEnabled is bool enabled)
         {
-            var formatted = metadata.LastSyncUtc.Value.ToLocalTime().ToString("g");
-            return _loc.GetString(ResourceKeys.Sync_LastSync, formatted);
+            _metadataSyncEnabled = enabled;
+            OnPropertyChanged(nameof(ShowCloudSyncControls));
+            OnPropertyChanged(nameof(CanToggleCloudSync));
         }
 
-        return _loc.GetString(ResourceKeys.Sync_NeverSynced);
+        if (outcome.RefreshLicenseLabels)
+            RefreshFromService();
     }
-
-    private static string GetBlockedMessageKey(EnableCloudSyncStatus status) => status switch
-    {
-        EnableCloudSyncStatus.BlockedBothHaveData => ResourceKeys.Sync_BlockedBothHaveData,
-        EnableCloudSyncStatus.BlockedNoEntitlement => ResourceKeys.Sync_BlockedNoEntitlement,
-        EnableCloudSyncStatus.BlockedUnsupported => ResourceKeys.Sync_BlockedUnsupported,
-        EnableCloudSyncStatus.BlockedNoICloud => ResourceKeys.Sync_BlockedNoICloud,
-        _ => ResourceKeys.Sync_BlockedUnsupported
-    };
 
     private void SetCloudSyncEnabledSilently(bool value)
     {
@@ -381,70 +279,17 @@ public partial class LicenseViewModel : ObservableObject
         OnPropertyChanged(nameof(CanBuySync));
     }
 
-    private async Task PurchaseProductAsync(string productId, string successKey)
+    private async Task OnBillingEntitlementsRefreshedAsync()
     {
-        if (IsBusy || !_billingService.IsAvailable)
-            return;
-
-        IsBusy = true;
-        try
-        {
-            var result = await _billingService.PurchaseAsync(productId);
-            if (result.WasCancelled)
-                return;
-
-            if (!result.IsSuccess)
-            {
-                await _dialogService.ShowAlertAsync(
-                    _loc.GetString(ResourceKeys.Err_Titel),
-                    result.ErrorMessage ?? _loc.GetString(ResourceKeys.Lic_PurchaseFailed),
-                    _loc.GetString(ResourceKeys.Btn_OK));
-                return;
-            }
-
-            await PersistOwnedAndRefreshAsync();
-            await _feedbackService.ShowSnackbarAsync(_loc.GetString(successKey));
-        }
-        finally
-        {
-            IsBusy = false;
-        }
-    }
-
-    private async Task PersistOwnedAndRefreshAsync()
-    {
-        var owned = await _billingService.GetOwnedProductIdsAsync();
-        await _entitlementStore.ApplyOwnedProductIdsAsync(owned);
-        await _licenseService.RefreshAsync();
         await RefreshCloudSyncFromMetadataAsync();
         RefreshFromService();
     }
 
-    private async Task LoadProductPriceAsync()
+    private async Task ApplyProductPricesAsync()
     {
-        ProPriceLabel = string.Empty;
-        SyncPriceLabel = string.Empty;
-        if (!_billingService.IsAvailable)
-            return;
-
-        try
-        {
-            if (!await _billingService.InitializeAsync())
-                return;
-
-            var products = await _billingService.GetProductsAsync();
-            var pro = products.FirstOrDefault(p => p.Id == LicenseProductIds.Pro);
-            if (pro != null && !string.IsNullOrWhiteSpace(pro.LocalizedPrice))
-                ProPriceLabel = pro.LocalizedPrice;
-
-            var sync = products.FirstOrDefault(p => p.Id == LicenseProductIds.SyncYearly);
-            if (sync != null && !string.IsNullOrWhiteSpace(sync.LocalizedPrice))
-                SyncPriceLabel = sync.LocalizedPrice;
-        }
-        catch
-        {
-            // Sandbox / missing products — UI still shows Buy without price.
-        }
+        var prices = await _billingCoordinator.LoadProductPricesAsync();
+        ProPriceLabel = prices.ProPriceLabel;
+        SyncPriceLabel = prices.SyncPriceLabel;
     }
 
     private void RefreshFromService()

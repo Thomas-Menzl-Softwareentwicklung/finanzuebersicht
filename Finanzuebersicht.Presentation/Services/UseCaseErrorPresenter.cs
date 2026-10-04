@@ -32,6 +32,12 @@ public static class UseCaseErrorPresenter
             UseCaseErrorCode.BackupRestoreFailed => loc.GetString(ResourceKeys.Msg_RestoreFailedTitle),
             UseCaseErrorCode.BackupExportFailed => loc.GetString(ResourceKeys.Msg_CSVExportFailedTitle),
             UseCaseErrorCode.BackupFailed => loc.GetString(ResourceKeys.Msg_BackupFailedTitle),
+            UseCaseErrorCode.RecurringNotFound => loc.GetString(ResourceKeys.Err_DauerauftragNichtGefunden),
+            UseCaseErrorCode.RecurringAlreadyBooked => loc.GetString(ResourceKeys.Err_DauerauftragBereitsGebucht),
+            UseCaseErrorCode.NoActiveAccount => loc.GetString(ResourceKeys.Err_KeinAktivesKonto),
+            UseCaseErrorCode.DefaultAccountCannotDelete => loc.GetString(ResourceKeys.Err_StandardkontoNichtLoeschen),
+            UseCaseErrorCode.SystemAccountCannotArchive => loc.GetString(ResourceKeys.Err_SystemkontoNichtArchivieren),
+            UseCaseErrorCode.AccountBalanceNotFound => loc.GetString(ResourceKeys.Err_KontoSaldoNichtGefunden),
             _ => loc.GetString(ResourceKeys.Err_SpeichernFehlgeschlagen, error.Code.ToString())
         };
     }

@@ -27,8 +27,7 @@ public class CloudKitNativeCallbackAotTests
             var candidate = Path.Combine(
                 dir.FullName,
                 "Finanzuebersicht",
-                "Platforms",
-                "iOS",
+                "CloudKit",
                 "CloudKitSyncTransport.cs");
             if (File.Exists(candidate))
             {

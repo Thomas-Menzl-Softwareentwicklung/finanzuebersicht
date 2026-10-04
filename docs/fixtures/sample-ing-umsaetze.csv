@@ -1,0 +1,18 @@
+Umsatzanzeige;Datei erstellt am: 03.10.2026 12:00
+
+IBAN;DE89370400440532013000
+Kontoname;Girokonto
+Bank;ING
+Kunde;Erika Mustermann
+Zeitraum;01.09.2026 - 03.10.2026
+
+Sortierung;Datum absteigend
+
+In der CSV-Datei finden Sie alle bereits gebuchten Umsätze. Die vorgemerkten Umsätze werden nicht aufgenommen, auch wenn sie in Ihrem Internetbanking angezeigt werden.
+
+Buchung;Wertstellungsdatum;Auftraggeber/Empfänger;Buchungstext;Verwendungszweck;Betrag;Währung
+03.10.2026;03.10.2026;Muster AG;Gehalt/Rente;Gehalt Oktober 2026;3200,00;EUR
+02.10.2026;02.10.2026;Stadtwerke Beispiel;Lastschrift;Strom Abschlag 10/2026;-85,40;EUR
+01.10.2026;01.10.2026;Vermieter GmbH;Dauerauftrag / Terminüberweisung;Miete Musterstr. 1;-950,00;EUR
+28.09.2026;28.09.2026;Supermarkt SE;Lastschrift;Einkauf KW39;-67,23;EUR
+15.09.2026;15.09.2026;Erika Mustermann;Überweisung;Bareinzahlung Filiale;100,00;EUR

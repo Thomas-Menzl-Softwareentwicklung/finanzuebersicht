@@ -1,10 +1,10 @@
-Finanzübersicht verwaltet Einnahmen, Ausgaben und Daueraufträge lokal auf dem Gerät. Daten liegen als JSON bei dir — ohne eigenes Konto, ohne Werbung, ohne Tracking.
+Finanzübersicht verwaltet Einnahmen, Ausgaben und Daueraufträge lokal auf dem Gerät. Daten liegen als JSON bei dir — ohne Finanzübersicht-Konto, ohne Bank-Login, ohne Kontoanbindung, ohne Werbung, ohne Tracking.
 
 DASHBOARD UND KONTEN
 Monats- und Jahresübersicht, Konten mit Salden, Umbuchungen, Budgets und eine 30-Tage-Cashflow-Vorschau. Kategorien mit Icon, Farbe und Monatsbudget.
 
 TRANSAKTIONEN
-Anlegen, suchen, filtern, duplizieren und als Vorlage speichern. CSV-Import (DKB) mit Vorschau, Auto-Kategorisierung und Duplikat-Erkennung. Schnellerfassung in der App; auf dem iPhone optional als Home-Screen-Widget (Pro).
+Anlegen, suchen, filtern, duplizieren und als Vorlage speichern. CSV-Import mit Spaltenzuordnung und gespeicherten Profilen (z. B. DKB), Vorschau, Auto-Kategorisierung und Duplikat-Erkennung. Schnellerfassung in der App; auf dem iPhone optional als Home-Screen-Widget (Pro).
 
 DAUERAUFTRÄGE UND SPARZIELE
 Wiederkehrende Buchungen mit Erinnerung. Sparziele mit Fortschritt und Prognose. Backup und Restore inklusive Schema-Migration.

@@ -18,5 +18,11 @@ public enum UseCaseErrorCode
     BackupSchemaIncompatible,
     BackupRestoreFailed,
     BackupDataInconsistent,
-    BackupExportFailed
+    BackupExportFailed,
+    RecurringNotFound,
+    RecurringAlreadyBooked,
+    NoActiveAccount,
+    DefaultAccountCannotDelete,
+    SystemAccountCannotArchive,
+    AccountBalanceNotFound
 }

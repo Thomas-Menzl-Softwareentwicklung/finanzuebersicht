@@ -128,6 +128,12 @@
   <data name="Err_TransferKontenErforderlich" xml:space="preserve"><value>Bitte Quell- und Zielkonto auswählen.</value></data>
   <data name="Err_KontoNichtGefunden" xml:space="preserve"><value>Das ausgewählte Konto wurde nicht gefunden.</value></data>
   <data name="Err_KontoArchiviert" xml:space="preserve"><value>Archivierte Konten können für diese Aktion nicht verwendet werden.</value></data>
+  <data name="Err_DauerauftragNichtGefunden" xml:space="preserve"><value>Der Dauerauftrag wurde nicht gefunden.</value></data>
+  <data name="Err_DauerauftragBereitsGebucht" xml:space="preserve"><value>Diese Dauerauftrags-Instanz wurde bereits gebucht.</value></data>
+  <data name="Err_KeinAktivesKonto" xml:space="preserve"><value>Es ist kein aktives Konto für die Buchung verfügbar.</value></data>
+  <data name="Err_StandardkontoNichtLoeschen" xml:space="preserve"><value>Das Standardkonto kann nicht gelöscht werden.</value></data>
+  <data name="Err_SystemkontoNichtArchivieren" xml:space="preserve"><value>Systemkonten können nicht archiviert werden.</value></data>
+  <data name="Err_KontoSaldoNichtGefunden" xml:space="preserve"><value>Der Kontosaldo konnte nicht berechnet werden.</value></data>
   <data name="Err_UmbuchungNichtBearbeitbar" xml:space="preserve"><value>Umbuchungen können nicht als Einzelbuchung bearbeitet werden.</value></data>
   <data name="Err_OrdnerNichtWaehlbar" xml:space="preserve"><value>Ordner konnte nicht gewählt werden: {0}</value></data>
   <data name="Err_SucheFehlgeschlagen" xml:space="preserve"><value>Die Suche konnte nicht abgeschlossen werden.</value></data>
@@ -243,6 +249,7 @@ Bitte starte die App neu.</value></data>
 
   <!-- Import Messages -->
   <data name="Msg_ImportFehlgeschlagen_Title" xml:space="preserve"><value>Import fehlgeschlagen</value></data>
+  <data name="Msg_ImportUnbekannterFehler" xml:space="preserve"><value>Unbekannter Fehler beim Import.</value></data>
   <data name="Msg_ImportServiceNichtVerfuegbar" xml:space="preserve"><value>ImportService nicht verfügbar.</value></data>
   <data name="Msg_ImportAbgeschlossen_Title" xml:space="preserve"><value>Import abgeschlossen</value></data>
   <data name="Msg_ImportiertCount" xml:space="preserve"><value>Importiert: {0} Transaktionen</value></data>
@@ -398,6 +405,7 @@ Bitte starte die App neu.</value></data>
   <data name="Lbl_ImportProblemeCount" xml:space="preserve"><value>Probleme: {0}</value></data>
   <data name="Lbl_ImportAusgewaehltCount" xml:space="preserve"><value>Ausgewählt: {0}</value></data>
   <data name="Msg_ImportStatusMissingDate" xml:space="preserve"><value>Buchungsdatum fehlt</value></data>
+  <data name="Msg_ImportStatusUnparsableAmount" xml:space="preserve"><value>Betrag konnte nicht gelesen werden</value></data>
   <data name="Msg_ImportStatusPossibleDuplicate" xml:space="preserve"><value>Mögliches Duplikat</value></data>
   <data name="Msg_ImportStatusCategoryUnresolved" xml:space="preserve"><value>Kategorie nicht zugeordnet</value></data>
   <data name="Msg_ImportFileReadFailed" xml:space="preserve"><value>Die Datei konnte nicht gelesen werden.</value></data>
@@ -412,6 +420,25 @@ Bitte starte die App neu.</value></data>
   <data name="Hint_BudgetOptional" xml:space="preserve"><value>0,00 (kein Budget)</value></data>
   <data name="Empty_ImportVorschauLeer" xml:space="preserve"><value>Keine Zeilen für den aktuellen Filter.</value></data>
   <data name="Ttl_ImportVorschau" xml:space="preserve"><value>Import-Vorschau</value></data>
+  <data name="Ttl_ImportZuordnung" xml:space="preserve"><value>Spalten zuordnen</value></data>
+  <data name="Lbl_ImportKopfzeile" xml:space="preserve"><value>Kopfzeile</value></data>
+  <data name="Lbl_ImportSpalteDatum" xml:space="preserve"><value>Datum</value></data>
+  <data name="Lbl_ImportSpalteBetrag" xml:space="preserve"><value>Betrag</value></data>
+  <data name="Lbl_ImportSpalteTitel" xml:space="preserve"><value>Titel / Gegenpartei</value></data>
+  <data name="Lbl_ImportSpalteZahler" xml:space="preserve"><value>Zahler</value></data>
+  <data name="Lbl_ImportSpalteZweck" xml:space="preserve"><value>Verwendungszweck</value></data>
+  <data name="Lbl_ImportSpalteTyp" xml:space="preserve"><value>Typ / Vorzeichen</value></data>
+  <data name="Lbl_ImportSpalteIban" xml:space="preserve"><value>IBAN</value></data>
+  <data name="Lbl_ImportDatumsformat" xml:space="preserve"><value>Datumsformat</value></data>
+  <data name="Lbl_ImportDezimalstil" xml:space="preserve"><value>Dezimalzahlen</value></data>
+  <data name="Lbl_ImportDezimalKomma" xml:space="preserve"><value>1.234,56</value></data>
+  <data name="Lbl_ImportDezimalPunkt" xml:space="preserve"><value>1,234.56</value></data>
+  <data name="Lbl_ImportSpalteKeine" xml:space="preserve"><value>— nicht verwendet —</value></data>
+  <data name="Btn_ImportWeiter" xml:space="preserve"><value>Weiter</value></data>
+  <data name="Btn_ImportSpaltenNeu" xml:space="preserve"><value>Spalten neu zuordnen</value></data>
+  <data name="Msg_ImportCsvNotTabular" xml:space="preserve"><value>Die Datei ist leer oder kein gültiges CSV.</value></data>
+  <data name="Msg_ImportCsvNeedsMapping" xml:space="preserve"><value>Die Spalten dieser Datei müssen zugeordnet werden.</value></data>
+  <data name="Msg_ImportProfilSpeichernFehlgeschlagen" xml:space="preserve"><value>Das Import-Profil konnte nicht gespeichert werden.</value></data>
   <data name="Hint_BudgetNull" xml:space="preserve"><value>Auf 0 setzen um Budget zu entfernen</value></data>
   <data name="Hint_ZielTitel" xml:space="preserve"><value>z.B. Urlaub, Neuer Laptop</value></data>
   <data name="Empty_KeineSparZiele" xml:space="preserve"><value>Noch keine Sparziele angelegt</value></data>

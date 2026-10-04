@@ -4,6 +4,10 @@ namespace Finanzuebersicht.Tests.Sync;
 /// Mac App Store / TestFlight reject arm64-only Mac Catalyst packages, and
 /// <c>UIRequiredDeviceCapabilities → arm64</c> hides Intel Macs even when the
 /// binary is universal. iOS still requires arm64.
+/// Intel Release stays on JIT (no interpreter). Enabling the interpreter on x64
+/// SIGSEGVs in UIApplication.Main / AppDelegate init. Apple Silicon Release uses
+/// <c>UseInterpreter=true</c> on maccatalyst-arm64 only so AOT-only
+/// <c>load_aot_module</c> can fall back (MAUI docs).
 /// </summary>
 public class MacCatalystIntelSupportTests
 {
@@ -21,6 +25,44 @@ public class MacCatalystIntelSupportTests
         var plist = File.ReadAllText(FindRepoFile("Finanzuebersicht/Platforms/iOS/Info.plist"));
         Assert.Contains("<key>UIRequiredDeviceCapabilities</key>", plist, StringComparison.Ordinal);
         Assert.Contains("<string>arm64</string>", plist, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void MacCatalyst_InterpreterOnlyOnArm64Release()
+    {
+        var csproj = File.ReadAllText(FindRepoFile("Finanzuebersicht/Finanzuebersicht.csproj"));
+        Assert.Contains(
+            "<UseInterpreter Condition=\"'$(Configuration)' == 'Debug'\">true</UseInterpreter>",
+            csproj,
+            StringComparison.Ordinal);
+        Assert.DoesNotContain(
+            "<UseInterpreter Condition=\"$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'\">true</UseInterpreter>",
+            csproj,
+            StringComparison.Ordinal);
+        Assert.DoesNotContain(
+            "Condition=\"$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst' AND '$(Configuration)' == 'Release'\"",
+            csproj,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "Condition=\"'$(RuntimeIdentifier)' == 'maccatalyst-arm64' AND '$(Configuration)' == 'Release'\"",
+            csproj,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "<UseInterpreter>true</UseInterpreter>",
+            csproj,
+            StringComparison.Ordinal);
+        Assert.DoesNotContain(
+            "<MtouchInterpreter>-all</MtouchInterpreter>",
+            csproj,
+            StringComparison.Ordinal);
+        Assert.DoesNotContain(
+            "<MtouchInterpreter>-all,Finanzuebersicht</MtouchInterpreter>",
+            csproj,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            "AlignMacCatalystRuntimeConfigForUniversalMerge",
+            csproj,
+            StringComparison.Ordinal);
     }
 
     [Fact]

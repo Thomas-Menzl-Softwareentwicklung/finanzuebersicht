@@ -31,8 +31,7 @@ public static class InfrastructureServiceCollectionExtensions
 
         services.AddSingleton<IUncategorizedCategoryService, UncategorizedCategoryService>();
 
-        // CSV import parsers + categorization (Application use cases consume these)
-        services.AddSingleton<IStatementParser, DkbCsvParser>();
+        // Categorization (Application use cases consume these)
         services.AddSingleton<ICategorizationStrategy, KeywordCategorizationStrategy>();
         services.AddSingleton<ICategorizationStrategy, HistoricalCategorizationStrategy>();
         services.AddSingleton<CategorizationService>();
@@ -109,6 +108,11 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddSingleton<ITransactionTemplateRepository>(sp => sp.GetRequiredService<LocalDataService>());
 
         // Default inbox (tests / non-iOS). MAUI host may replace with App Group store.
+        services.AddSingleton<ICsvImportProfileStore>(sp =>
+            new FileCsvImportProfileStore(
+                GetDataDir(sp),
+                sp.GetService<ILogger<FileCsvImportProfileStore>>()));
+
         services.AddSingleton<IQuickExpenseInboxStore>(sp =>
             new FileQuickExpenseInboxStore(
                 GetDataDir(sp),

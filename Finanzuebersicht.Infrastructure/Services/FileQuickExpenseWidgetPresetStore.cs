@@ -89,7 +89,7 @@ public sealed class FileQuickExpenseWidgetPresetStore : IQuickExpenseWidgetPrese
                 })
                 .ToList();
 
-            await File.WriteAllTextAsync(
+            await AtomicFile.WriteAllTextAsync(
                 _filePath,
                 JsonSerializer.Serialize(dtos, JsonOptions),
                 cancellationToken).ConfigureAwait(false);

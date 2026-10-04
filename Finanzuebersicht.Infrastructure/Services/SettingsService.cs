@@ -87,7 +87,7 @@ public class SettingsService : ISettingsService
             Directory.CreateDirectory(dir);
             var json = System.Text.Json.JsonSerializer.Serialize(_settings,
                 new System.Text.Json.JsonSerializerOptions { WriteIndented = true });
-            File.WriteAllText(_settingsFile, json);
+            AtomicFile.WriteAllText(_settingsFile, json);
         }
         catch (Exception ex)
         {

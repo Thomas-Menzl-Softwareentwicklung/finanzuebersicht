@@ -14,6 +14,8 @@ Interactive Home Screen capture for small expenses (**Pro**). In-App â€žSchnellâ
 
 App Group id: `group.de.thomasmenzl.finanzuebersicht` (`AppGroupIds.Finanzuebersicht`).
 
+**Privacy:** `QuickExpenseWidget/PrivacyInfo.xcprivacy` declares `NSPrivacyAccessedAPICategoryUserDefaults` (CA92.1) and file timestamps (C617.1) for App Group `UserDefaults` + inbox file I/O. Rebuild the `.appex` after changing it (`project.yml` copies it as a bundle resource). Mac Catalyst ships `Platforms/MacCatalyst/PrivacyInfo.xcprivacy` (same API reasons as the iOS app manifest).
+
 JSON shape (camelCase, array):
 
 ```json

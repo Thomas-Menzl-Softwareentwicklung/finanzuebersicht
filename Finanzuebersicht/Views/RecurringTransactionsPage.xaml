@@ -65,7 +65,7 @@
                                     CommandParameter="{Binding .}" />
                             </Grid.GestureRecognizers>
 
-                            <Border Grid.Column="0" BackgroundColor="#F2F2F7"
+                            <Border Grid.Column="0" BackgroundColor="{AppThemeBinding Light={StaticResource GroupedBackground}, Dark={StaticResource GroupedBackgroundDark}}"
                                     StrokeShape="RoundRectangle 10"
                                     Stroke="Transparent"
                                     WidthRequest="40" HeightRequest="40"

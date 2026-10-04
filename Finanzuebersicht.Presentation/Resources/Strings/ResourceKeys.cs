@@ -118,6 +118,12 @@ public static class ResourceKeys
     public const string Err_TransferKontenErforderlich = nameof(Err_TransferKontenErforderlich);
     public const string Err_KontoNichtGefunden = nameof(Err_KontoNichtGefunden);
     public const string Err_KontoArchiviert = nameof(Err_KontoArchiviert);
+    public const string Err_DauerauftragNichtGefunden = nameof(Err_DauerauftragNichtGefunden);
+    public const string Err_DauerauftragBereitsGebucht = nameof(Err_DauerauftragBereitsGebucht);
+    public const string Err_KeinAktivesKonto = nameof(Err_KeinAktivesKonto);
+    public const string Err_StandardkontoNichtLoeschen = nameof(Err_StandardkontoNichtLoeschen);
+    public const string Err_SystemkontoNichtArchivieren = nameof(Err_SystemkontoNichtArchivieren);
+    public const string Err_KontoSaldoNichtGefunden = nameof(Err_KontoSaldoNichtGefunden);
     public const string Err_UmbuchungNichtBearbeitbar = nameof(Err_UmbuchungNichtBearbeitbar);
     public const string Err_OrdnerNichtWaehlbar = nameof(Err_OrdnerNichtWaehlbar);
     public const string Err_SucheFehlgeschlagen = nameof(Err_SucheFehlgeschlagen);
@@ -253,6 +259,7 @@ public static class ResourceKeys
 
     // Import messages
     public const string Msg_ImportFehlgeschlagen_Title = nameof(Msg_ImportFehlgeschlagen_Title);
+    public const string Msg_ImportUnbekannterFehler = nameof(Msg_ImportUnbekannterFehler);
     public const string Msg_ImportServiceNichtVerfuegbar = nameof(Msg_ImportServiceNichtVerfuegbar);
     public const string Msg_ImportAbgeschlossen_Title = nameof(Msg_ImportAbgeschlossen_Title);
     public const string Msg_ImportiertCount = nameof(Msg_ImportiertCount);
@@ -410,6 +417,7 @@ public static class ResourceKeys
     public const string Lbl_ImportProblemeCount = nameof(Lbl_ImportProblemeCount);
     public const string Lbl_ImportAusgewaehltCount = nameof(Lbl_ImportAusgewaehltCount);
     public const string Msg_ImportStatusMissingDate = nameof(Msg_ImportStatusMissingDate);
+    public const string Msg_ImportStatusUnparsableAmount = nameof(Msg_ImportStatusUnparsableAmount);
     public const string Msg_ImportStatusPossibleDuplicate = nameof(Msg_ImportStatusPossibleDuplicate);
     public const string Msg_ImportStatusCategoryUnresolved = nameof(Msg_ImportStatusCategoryUnresolved);
     public const string Hint_BudgetOptional = nameof(Hint_BudgetOptional);
@@ -437,6 +445,25 @@ public static class ResourceKeys
     public const string Hint_EinrichtungWiederholen = nameof(Hint_EinrichtungWiederholen);
     public const string Btn_EinrichtungWiederholen = nameof(Btn_EinrichtungWiederholen);
     public const string Ttl_ImportVorschau = nameof(Ttl_ImportVorschau);
+    public const string Ttl_ImportZuordnung = nameof(Ttl_ImportZuordnung);
+    public const string Lbl_ImportKopfzeile = nameof(Lbl_ImportKopfzeile);
+    public const string Lbl_ImportSpalteDatum = nameof(Lbl_ImportSpalteDatum);
+    public const string Lbl_ImportSpalteBetrag = nameof(Lbl_ImportSpalteBetrag);
+    public const string Lbl_ImportSpalteTitel = nameof(Lbl_ImportSpalteTitel);
+    public const string Lbl_ImportSpalteZahler = nameof(Lbl_ImportSpalteZahler);
+    public const string Lbl_ImportSpalteZweck = nameof(Lbl_ImportSpalteZweck);
+    public const string Lbl_ImportSpalteTyp = nameof(Lbl_ImportSpalteTyp);
+    public const string Lbl_ImportSpalteIban = nameof(Lbl_ImportSpalteIban);
+    public const string Lbl_ImportDatumsformat = nameof(Lbl_ImportDatumsformat);
+    public const string Lbl_ImportDezimalstil = nameof(Lbl_ImportDezimalstil);
+    public const string Lbl_ImportDezimalKomma = nameof(Lbl_ImportDezimalKomma);
+    public const string Lbl_ImportDezimalPunkt = nameof(Lbl_ImportDezimalPunkt);
+    public const string Lbl_ImportSpalteKeine = nameof(Lbl_ImportSpalteKeine);
+    public const string Btn_ImportWeiter = nameof(Btn_ImportWeiter);
+    public const string Btn_ImportSpaltenNeu = nameof(Btn_ImportSpaltenNeu);
+    public const string Msg_ImportCsvNotTabular = nameof(Msg_ImportCsvNotTabular);
+    public const string Msg_ImportCsvNeedsMapping = nameof(Msg_ImportCsvNeedsMapping);
+    public const string Msg_ImportProfilSpeichernFehlgeschlagen = nameof(Msg_ImportProfilSpeichernFehlgeschlagen);
     public const string Msg_BackupRestoreConfirmTitle = nameof(Msg_BackupRestoreConfirmTitle);
     public const string Msg_BackupRestoreConfirmBody = nameof(Msg_BackupRestoreConfirmBody);
 

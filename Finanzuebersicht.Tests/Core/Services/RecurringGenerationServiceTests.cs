@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Finanzuebersicht.Core.Sync;
 using Finanzuebersicht.Models;
 using Finanzuebersicht.Tests.TestHelpers;
 using Xunit;
@@ -32,6 +33,7 @@ public class RecurringGenerationServiceTests
         };
 
         recurringRepository.GetRecurringTransactionsAsync().Returns(new List<RecurringTransaction> { recurring });
+        transactionRepository.GetAllTransactionsAsync(Arg.Any<CancellationToken>()).Returns(new List<Transaction>());
 
         var saved = new List<Transaction>();
         transactionRepository.When(x => x.SaveTransactionAsync(Arg.Any<Transaction>()))
@@ -47,6 +49,7 @@ public class RecurringGenerationServiceTests
             Assert.Equal("Weekly", t.Titel);
             Assert.Equal(10m, t.Betrag);
             Assert.Null(t.AccountId);
+            Assert.StartsWith($"rec:{recurring.Id}:", t.Id);
         });
 
         // expected last candidate: advance by 7 days until <= today
@@ -78,6 +81,7 @@ public class RecurringGenerationServiceTests
         };
 
         recurringRepository.GetRecurringTransactionsAsync().Returns(new List<RecurringTransaction> { recurring });
+        transactionRepository.GetAllTransactionsAsync(Arg.Any<CancellationToken>()).Returns(new List<Transaction>());
 
         var saved = new List<Transaction>();
         transactionRepository.When(x => x.SaveTransactionAsync(Arg.Any<Transaction>()))
@@ -118,6 +122,7 @@ public class RecurringGenerationServiceTests
         };
 
         recurringRepository.GetRecurringTransactionsAsync().Returns(new List<RecurringTransaction> { recurring });
+        transactionRepository.GetAllTransactionsAsync(Arg.Any<CancellationToken>()).Returns(new List<Transaction>());
 
         var saved = new List<Transaction>();
         transactionRepository.When(x => x.SaveTransactionAsync(Arg.Any<Transaction>()))
@@ -161,6 +166,7 @@ public class RecurringGenerationServiceTests
         };
 
         recurringRepository.GetRecurringTransactionsAsync().Returns(new List<RecurringTransaction> { recurring });
+        transactionRepository.GetAllTransactionsAsync(Arg.Any<CancellationToken>()).Returns(new List<Transaction>());
 
         var saved = new List<Transaction>();
         transactionRepository.When(x => x.SaveTransactionAsync(Arg.Any<Transaction>()))
@@ -170,6 +176,7 @@ public class RecurringGenerationServiceTests
         await service.GeneratePendingRecurringTransactionsAsync();
 
         Assert.Contains(saved, t => t.Datum.Date == shifted.Date && t.DauerauftragId == recurring.Id);
+        Assert.Contains(saved, t => t.Id == RecurringInstanceIds.For(recurring.Id, instance));
         await recurringRepository.Received(1).SaveRecurringTransactionAsync(NonNullArg.Is<RecurringTransaction>(r => r.LetzteAusfuehrung.HasValue));
     }
 
@@ -194,6 +201,7 @@ public class RecurringGenerationServiceTests
         };
 
         recurringRepository.GetRecurringTransactionsAsync().Returns(new List<RecurringTransaction> { recurring });
+        transactionRepository.GetAllTransactionsAsync(Arg.Any<CancellationToken>()).Returns(new List<Transaction>());
         accountRepository.GetAccountsAsync().Returns(new List<Account>
         {
             new() { Id = "acc-default", Name = "Girokonto", SystemKey = Finanzuebersicht.Constants.SystemAccountKeys.Default }
@@ -233,12 +241,115 @@ public class RecurringGenerationServiceTests
         };
 
         recurringRepository.GetRecurringTransactionsAsync().Returns(new List<RecurringTransaction> { recurring });
+        transactionRepository.GetAllTransactionsAsync(Arg.Any<CancellationToken>()).Returns(new List<Transaction>());
 
         var service = new RecurringGenerationService(recurringRepository, transactionRepository, clock);
         await service.GeneratePendingRecurringTransactionsAsync();
 
         await transactionRepository.DidNotReceive().SaveTransactionAsync(Arg.Any<Transaction>());
         await recurringRepository.DidNotReceive().SaveRecurringTransactionAsync(Arg.Any<RecurringTransaction>());
+    }
+
+    [Fact]
+    public async Task SkipsSave_WhenStableInstanceIdAlreadyExists()
+    {
+        var recurringRepository = Substitute.For<IRecurringTransactionRepository>();
+        var transactionRepository = Substitute.For<ITransactionRepository>();
+        var start = DateTime.Today.AddMonths(-1);
+        var recurring = new RecurringTransaction
+        {
+            Id = "rec-stable",
+            Titel = "Monthly",
+            Betrag = 25m,
+            Typ = TransactionType.Ausgabe,
+            Startdatum = start,
+            Aktiv = true,
+            KategorieId = "cat-1",
+            Interval = RecurrenceInterval.Monthly,
+            IntervalFactor = 1
+        };
+
+        var existingId = RecurringInstanceIds.For(recurring.Id, start);
+        recurringRepository.GetRecurringTransactionsAsync().Returns(new List<RecurringTransaction> { recurring });
+        transactionRepository.GetAllTransactionsAsync(Arg.Any<CancellationToken>())
+            .Returns(new List<Transaction> { new() { Id = existingId } });
+
+        var service = new RecurringGenerationService(recurringRepository, transactionRepository);
+        await service.GeneratePendingRecurringTransactionsAsync();
+
+        await transactionRepository.DidNotReceive().SaveTransactionAsync(
+            Arg.Is<Transaction>(t => t.Id == existingId));
+    }
+
+    [Fact]
+    public async Task NotifiesLocalChangeNotifier_ForGeneratedTransactions()
+    {
+        var recurringRepository = Substitute.For<IRecurringTransactionRepository>();
+        var transactionRepository = Substitute.For<ITransactionRepository>();
+        var notifier = Substitute.For<ILocalChangeNotifier>();
+
+        var recurring = new RecurringTransaction
+        {
+            Id = "rec-notify",
+            Titel = "Monthly",
+            Betrag = 10m,
+            Typ = TransactionType.Ausgabe,
+            Startdatum = DateTime.Today.AddMonths(-1),
+            Aktiv = true,
+            KategorieId = "cat-1",
+            Interval = RecurrenceInterval.Monthly,
+            IntervalFactor = 1
+        };
+
+        recurringRepository.GetRecurringTransactionsAsync().Returns(new List<RecurringTransaction> { recurring });
+        transactionRepository.GetAllTransactionsAsync(Arg.Any<CancellationToken>()).Returns(new List<Transaction>());
+
+        var service = new RecurringGenerationService(
+            recurringRepository,
+            transactionRepository,
+            localChangeNotifier: notifier);
+        await service.GeneratePendingRecurringTransactionsAsync();
+
+        await notifier.Received().NotifyTransactionUpsertAsync(Arg.Any<string>(), Arg.Any<CancellationToken>());
+        await notifier.Received().NotifyRecurringUpsertAsync("rec-notify", Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task UpToDateRecurring_DoesNotSaveOrNotify()
+    {
+        var recurringRepository = Substitute.For<IRecurringTransactionRepository>();
+        var transactionRepository = Substitute.For<ITransactionRepository>();
+        var notifier = Substitute.For<ILocalChangeNotifier>();
+        var clock = new FixedClock(new DateTime(2024, 6, 15));
+
+        var recurring = new RecurringTransaction
+        {
+            Id = "rec-idle",
+            Titel = "Monthly",
+            Betrag = 10m,
+            Typ = TransactionType.Ausgabe,
+            Startdatum = new DateTime(2024, 5, 1),
+            LetzteAusfuehrung = new DateTime(2024, 6, 1),
+            Aktiv = true,
+            KategorieId = "cat-1",
+            Interval = RecurrenceInterval.Monthly,
+            IntervalFactor = 1
+        };
+
+        recurringRepository.GetRecurringTransactionsAsync().Returns(new List<RecurringTransaction> { recurring });
+        transactionRepository.GetAllTransactionsAsync(Arg.Any<CancellationToken>()).Returns(new List<Transaction>());
+
+        var service = new RecurringGenerationService(
+            recurringRepository,
+            transactionRepository,
+            clock,
+            localChangeNotifier: notifier);
+        await service.GeneratePendingRecurringTransactionsAsync();
+
+        await transactionRepository.DidNotReceive().SaveTransactionAsync(Arg.Any<Transaction>());
+        await recurringRepository.DidNotReceive().SaveRecurringTransactionAsync(Arg.Any<RecurringTransaction>());
+        await notifier.DidNotReceive().NotifyTransactionUpsertAsync(Arg.Any<string>(), Arg.Any<CancellationToken>());
+        await notifier.DidNotReceive().NotifyRecurringUpsertAsync(Arg.Any<string>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -264,6 +375,7 @@ public class RecurringGenerationServiceTests
         };
 
         recurringRepository.GetRecurringTransactionsAsync().Returns(new List<RecurringTransaction> { recurring });
+        transactionRepository.GetAllTransactionsAsync(Arg.Any<CancellationToken>()).Returns(new List<Transaction>());
 
         var saved = new List<Transaction>();
         transactionRepository.When(x => x.SaveTransactionAsync(Arg.Any<Transaction>()))

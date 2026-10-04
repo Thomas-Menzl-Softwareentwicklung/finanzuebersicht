@@ -29,6 +29,7 @@ public static class CloudKitSyncBridgeCodec
         SyncEntityType.RecurringTransaction => "RecurringTransaction",
         SyncEntityType.SparZiel => "SparZiel",
         SyncEntityType.SyncMeta => "SyncMeta",
+        SyncEntityType.CsvImportProfile => "CsvImportProfile",
         _ => throw new ArgumentOutOfRangeException(nameof(type), type, "Unknown sync entity type.")
     };
 
@@ -42,6 +43,7 @@ public static class CloudKitSyncBridgeCodec
             case "RecurringTransaction": type = SyncEntityType.RecurringTransaction; return true;
             case "SparZiel": type = SyncEntityType.SparZiel; return true;
             case "SyncMeta": type = SyncEntityType.SyncMeta; return true;
+            case "CsvImportProfile": type = SyncEntityType.CsvImportProfile; return true;
             default: type = default; return false;
         }
     }

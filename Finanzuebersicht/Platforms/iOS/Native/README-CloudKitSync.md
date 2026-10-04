@@ -10,7 +10,7 @@ Native Swift bridge (`CloudKitSyncBridge.swift`) around **CKSyncEngine** for the
 | Database | private (current user) |
 | Custom zone | `finanzuebersicht-sync` |
 
-Entity record types: `Account`, `Category`, `Transaction`, `RecurringTransaction`, `SparZiel`. Schema fence: `SyncMeta` (`schemaVersion`, record name `sync-meta`) — not part of the 0–4 entity ordinals. Tombstones use record name `tombstone-<entityId>`.
+Entity record types: `Account`, `Category`, `Transaction`, `RecurringTransaction`, `SparZiel`, `CsvImportProfile`. Schema fence: `SyncMeta` (`schemaVersion`, record name `sync-meta`) — ordinal **5**; `CsvImportProfile` is ordinal **6** (not array index 5). Tombstones use record name `tombstone-<entityId>`.
 
 ## Rebuild `libCloudKitSyncBridge.a`
 

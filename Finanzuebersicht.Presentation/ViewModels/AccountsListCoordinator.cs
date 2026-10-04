@@ -88,7 +88,13 @@ public sealed class AccountsListCoordinator(
 
         try
         {
-            await _deleteAccountUseCase.ExecuteAsync(konto.Account.Id);
+            var result = await _deleteAccountUseCase.ExecuteAsync(konto.Account.Id);
+            if (!result.IsSuccess)
+            {
+                await UseCaseErrorPresenter.ShowAsync(_dialogService, _loc, result.Error!);
+                return false;
+            }
+
             konten.Remove(konto);
             _appEvents.NotifyDataChanged();
             await _feedbackService.ShowSnackbarAsync(_loc.GetString(ResourceKeys.Msg_Geloescht));
@@ -125,7 +131,13 @@ public sealed class AccountsListCoordinator(
 
         try
         {
-            await _toggleAccountArchiveUseCase.ExecuteAsync(konto.Account, setArchived);
+            var result = await _toggleAccountArchiveUseCase.ExecuteAsync(konto.Account, setArchived);
+            if (!result.IsSuccess)
+            {
+                await UseCaseErrorPresenter.ShowAsync(_dialogService, _loc, result.Error!);
+                return false;
+            }
+
             return true;
         }
         catch (Exception ex)

@@ -86,7 +86,7 @@ public static class MauiProgram
 		builder.Services.AddSingleton<Finanzuebersicht.Core.Licensing.IStoreBillingService, Finanzuebersicht.Core.Licensing.UnavailableStoreBillingService>();
 #endif
 		builder.Services.AddInfrastructureServices();
-#if (IOS || MACCATALYST) && APP_DISTRIBUTION_STORE
+#if ((IOS || MACCATALYST) || (__IOS__ || __MACCATALYST__)) && APP_DISTRIBUTION_STORE
 		// Cloud Sync is a Store-only feature; Direct builds keep Infrastructure's
 		// NullCloudSyncTransport and therefore never touch CloudKit.
 		builder.Services.Replace(
@@ -107,11 +107,6 @@ public static class MauiProgram
 				sp.GetService<Microsoft.Extensions.Logging.ILogger<Finanzuebersicht.Infrastructure.Services.MirroredQuickExpenseWidgetPresetStore>>(),
 				sp.GetService<Microsoft.Extensions.Logging.ILogger<Finanzuebersicht.Infrastructure.Services.FileQuickExpenseWidgetPresetStore>>()));
 #endif
-		builder.Services.AddSingleton<IRecurringGenerationService, RecurringGenerationService>();
-		builder.Services.AddSingleton<IReportingService, ReportingService>();
-		builder.Services.AddSingleton<IForecastService, ForecastService>();
-		builder.Services.AddSingleton<ITransactionValidationService, TransactionValidationService>();
-
 		builder.Services.AddApplicationUseCases();
 
 		builder.Services.AddSingleton<ThemeService>();
@@ -169,6 +164,7 @@ public static class MauiProgram
 		builder.Services.AddTransient<SparZielDetailPage>();
 		builder.Services.AddTransient<BackupListPage>();
 		builder.Services.AddTransient<ImportPreviewPage>();
+		builder.Services.AddTransient<ImportMappingPage>();
 		builder.Services.AddTransient<CashflowPage>();
 		builder.Services.AddTransient<OnboardingPage>();
 		builder.Services.AddTransient<QuickExpenseCapturePage>();

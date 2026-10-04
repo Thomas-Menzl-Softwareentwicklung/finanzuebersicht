@@ -1,3 +1,4 @@
+using Finanzuebersicht.Application.Results;
 using Finanzuebersicht.Application.UseCases.Sync;
 using Finanzuebersicht.Core.Sync;
 using Finanzuebersicht.Models;
@@ -11,12 +12,15 @@ public class ToggleAccountArchiveUseCase(
     private readonly IAccountRepository _accountRepository = accountRepository;
     private readonly ICloudSyncOrchestrator? _cloudSyncOrchestrator = cloudSyncOrchestrator;
 
-    public async Task<Account> ExecuteAsync(Account account, bool isArchived, CancellationToken cancellationToken = default)
+    public async Task<UseCaseResult<Account>> ExecuteAsync(
+        Account account,
+        bool isArchived,
+        CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
         if (account.IsSystemAccount)
-            throw new InvalidOperationException("System account cannot be archived.");
+            return UseCaseResult.Fail<Account>(UseCaseErrorCode.SystemAccountCannotArchive);
 
         account.IsArchived = isArchived;
         CloudSyncNotify.StampUpdatedAt(account);
@@ -26,6 +30,6 @@ public class ToggleAccountArchiveUseCase(
             SyncEntityType.Account,
             account.Id,
             cancellationToken);
-        return account;
+        return UseCaseResult.Ok(account);
     }
 }
