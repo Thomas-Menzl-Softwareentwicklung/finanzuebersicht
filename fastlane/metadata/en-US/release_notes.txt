@@ -1,1 +1,1 @@
-CSV import with column mapping and saved profiles (DKB still works without an extra step). Mac stability for Apple Silicon and Intel. Optional iCloud sync unchanged.
+CSV import with column mapping; saved profiles now sync via iCloud Sync. Mac: fixed sandboxed file picker for import/export.

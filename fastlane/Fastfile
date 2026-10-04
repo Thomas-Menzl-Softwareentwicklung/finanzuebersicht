@@ -167,6 +167,12 @@ platform :ios do
     upload_to_app_store(listing_upload_options(platform: "ios", skip_screenshots: false))
   end
 
+  desc "Upload listing texts only (no screenshots, no binary, no review)"
+  lane :upload_listing_text do
+    require_asc_api_key!
+    upload_to_app_store(listing_upload_options(platform: "ios", skip_screenshots: true))
+  end
+
   desc "Upload listing texts and Mac screenshots to the Mac App Store listing (no binary, no review)"
   lane :upload_listing_mac do
     require_asc_api_key!
@@ -180,10 +186,28 @@ platform :ios do
     )
   end
 
+  desc "Upload Mac listing texts only (no screenshots)"
+  lane :upload_listing_text_mac do
+    require_asc_api_key!
+    upload_to_app_store(
+      listing_upload_options(
+        platform: "osx",
+        skip_screenshots: true,
+        screenshots_path: MAC_SCREENSHOTS_PATH
+      )
+    )
+  end
+
   desc "Upload iOS listing+screenshots then Mac listing texts"
   lane :upload_listing_all do
     upload_listing
     upload_listing_mac
+  end
+
+  desc "Upload iOS+Mac listing texts only (no screenshots)"
+  lane :upload_listing_text_all do
+    upload_listing_text
+    upload_listing_text_mac
   end
 
   desc "Upload the Store IPA to App Store Connect / TestFlight (API key, no Transporter.app, no review)"

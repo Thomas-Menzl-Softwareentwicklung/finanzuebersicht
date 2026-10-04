@@ -1,1 +1,1 @@
-CSV-Import mit Spaltenzuordnung und gespeicherten Profilen (DKB weiterhin ohne Extra-Schritt). Mac-Stabilität für Apple Silicon und Intel. Optionaler iCloud-Sync unverändert.
+CSV-Import mit Spaltenzuordnung; gespeicherte Profile synchronisieren über iCloud Sync mit. Mac: Dateiauswahl für Import/Export unter Sandbox behoben.
