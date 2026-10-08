@@ -182,25 +182,26 @@ platform :ios do
   lane :upload_listing_mac do
     require_asc_api_key!
     require_mac_screenshots!
-    upload_to_app_store(
-      listing_upload_options(
-        platform: "osx",
-        skip_screenshots: false,
-        screenshots_path: MAC_SCREENSHOTS_PATH
-      )
+    # Mac store line is 1.23 (iOS listing stays on ASC_APP_VERSION / 1.22).
+    opts = listing_upload_options(
+      platform: "osx",
+      skip_screenshots: false,
+      screenshots_path: MAC_SCREENSHOTS_PATH
     )
+    opts[:app_version] = ENV.fetch("ASC_MAC_APP_VERSION", "1.23")
+    upload_to_app_store(opts)
   end
 
   desc "Upload Mac listing texts only (no screenshots)"
   lane :upload_listing_text_mac do
     require_asc_api_key!
-    upload_to_app_store(
-      listing_upload_options(
-        platform: "osx",
-        skip_screenshots: true,
-        screenshots_path: MAC_SCREENSHOTS_PATH
-      )
+    opts = listing_upload_options(
+      platform: "osx",
+      skip_screenshots: true,
+      screenshots_path: MAC_SCREENSHOTS_PATH
     )
+    opts[:app_version] = ENV.fetch("ASC_MAC_APP_VERSION", "1.23")
+    upload_to_app_store(opts)
   end
 
   desc "Upload iOS listing+screenshots then Mac listing texts"
