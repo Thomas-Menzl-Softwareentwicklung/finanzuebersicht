@@ -83,6 +83,12 @@
   <data name="Btn_Loeschen" xml:space="preserve"><value>Delete</value></data>
   <data name="Btn_Abbrechen" xml:space="preserve"><value>Cancel</value></data>
   <data name="Btn_OK" xml:space="preserve"><value>OK</value></data>
+  <data name="Btn_Aktualisieren" xml:space="preserve"><value>Refresh</value></data>
+  <data name="A11y_Aktualisieren" xml:space="preserve"><value>Refresh list</value></data>
+  <data name="Menu_Aktionen" xml:space="preserve"><value>Actions</value></data>
+  <data name="Menu_GeheZu" xml:space="preserve"><value>Go to</value></data>
+  <data name="Menu_Suchen" xml:space="preserve"><value>Find</value></data>
+  <data name="Menu_Ablage" xml:space="preserve"><value>File</value></data>
   <data name="Btn_OrdnerWaehlen" xml:space="preserve"><value>Choose Folder</value></data>
   <data name="Btn_Zuruecksetzen" xml:space="preserve"><value>Reset</value></data>
   <data name="Btn_System" xml:space="preserve"><value>System</value></data>

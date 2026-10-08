@@ -7,6 +7,8 @@
              xmlns:conv="clr-namespace:Finanzuebersicht.Converters"
              xmlns:loc="clr-namespace:Finanzuebersicht.Extensions"
              xmlns:controls="clr-namespace:Finanzuebersicht.Controls"
+             xmlns:helpers="clr-namespace:Finanzuebersicht.Helpers"
+             xmlns:icons="clr-namespace:Finanzuebersicht.Resources"
              xmlns:screenshot="clr-namespace:Finanzuebersicht.Core.Constants;assembly=Finanzuebersicht.Core"
              x:Class="Finanzuebersicht.Views.TransactionsPage"
              AutomationId="{x:Static screenshot:ScreenshotAutomationIds.PageTransactions}"
@@ -43,7 +45,7 @@
                     <VerticalStackLayout BindableLayout.ItemsSource="{Binding .}">
                         <BindableLayout.ItemTemplate>
                             <DataTemplate x:DataType="models:Transaction">
-                                <SwipeView>
+                                <SwipeView helpers:DesktopChrome.SuppressSwipeOnDesktop="True">
                                     <SwipeView.RightItems>
                                         <SwipeItems>
                                             <SwipeItem Text="{loc:Translate Btn_Duplizieren}"
@@ -57,6 +59,16 @@
                                         </SwipeItems>
                                     </SwipeView.RightItems>
                                     <Grid ColumnDefinitions="44,*,Auto" Padding="14,10" ColumnSpacing="12">
+                                        <FlyoutBase.ContextFlyout>
+                                            <MenuFlyout>
+                                                <MenuFlyoutItem Text="{loc:Translate Btn_Duplizieren}"
+                                                                Command="{Binding Source={RelativeSource AncestorType={x:Type views:BaseContentPage}}, Path=BindingContext.DuplicateTransaktionCommand}"
+                                                                CommandParameter="{Binding .}" />
+                                                <MenuFlyoutItem Text="{loc:Translate Btn_Loeschen}"
+                                                                Command="{Binding Source={RelativeSource AncestorType={x:Type views:BaseContentPage}}, Path=BindingContext.DeleteTransaktionCommand}"
+                                                                CommandParameter="{Binding .}" />
+                                            </MenuFlyout>
+                                        </FlyoutBase.ContextFlyout>
                                         <SemanticProperties.Description>
                                             <MultiBinding Converter="{StaticResource TransactionAccessibility}">
                                                 <Binding Path="." />
@@ -66,9 +78,11 @@
                                         </SemanticProperties.Description>
                                         <Grid.GestureRecognizers>
                                             <TapGestureRecognizer
+                                                NumberOfTapsRequired="{x:Static helpers:DesktopChrome.DetailOpenTapCount}"
                                                 Command="{Binding Source={RelativeSource AncestorType={x:Type views:BaseContentPage}}, Path=BindingContext.GoToDetailCommand}"
                                                 CommandParameter="{Binding .}" />
                                         </Grid.GestureRecognizers>
+                                        <helpers:DesktopChrome.EnableRowHover>True</helpers:DesktopChrome.EnableRowHover>
                                         <Border Grid.Column="0" WidthRequest="38" HeightRequest="38"
                                                 StrokeShape="RoundRectangle 11" Stroke="Transparent">
                                             <Border.BackgroundColor>
@@ -100,11 +114,41 @@
                                                 </Label.Text>
                                             </Label>
                                         </VerticalStackLayout>
-                                        <Label Grid.Column="2"
-                                               Text="{Binding ., Converter={StaticResource BetragDisplay}}"
-                                               TextColor="{Binding Typ, Converter={StaticResource TypToColor}}"
-                                               FontSize="15" FontAttributes="Bold"
-                                               VerticalTextAlignment="Center" />
+                                        <!-- Icons + amount in one Auto column so phone layout stays 44,*,Auto -->
+                                        <HorizontalStackLayout Grid.Column="2"
+                                                               Spacing="8"
+                                                               VerticalOptions="Center">
+                                            <HorizontalStackLayout Spacing="4"
+                                                                   VerticalOptions="Center"
+                                                                   IsVisible="{x:Static helpers:DesktopChrome.IsDesktop}">
+                                                <Image Source="{x:Static icons:AppIcons.Duplicate}"
+                                                       WidthRequest="{x:Static helpers:DesktopChrome.RowActionIconSize}"
+                                                       HeightRequest="{x:Static helpers:DesktopChrome.RowActionIconSize}"
+                                                       Aspect="AspectFit"
+                                                       SemanticProperties.Description="{loc:Translate Btn_Duplizieren}">
+                                                    <Image.GestureRecognizers>
+                                                        <TapGestureRecognizer
+                                                            Command="{Binding Source={RelativeSource AncestorType={x:Type views:BaseContentPage}}, Path=BindingContext.DuplicateTransaktionCommand}"
+                                                            CommandParameter="{Binding .}" />
+                                                    </Image.GestureRecognizers>
+                                                </Image>
+                                                <Image Source="{x:Static icons:AppIcons.Delete}"
+                                                       WidthRequest="{x:Static helpers:DesktopChrome.RowActionIconSize}"
+                                                       HeightRequest="{x:Static helpers:DesktopChrome.RowActionIconSize}"
+                                                       Aspect="AspectFit"
+                                                       SemanticProperties.Description="{loc:Translate Btn_Loeschen}">
+                                                    <Image.GestureRecognizers>
+                                                        <TapGestureRecognizer
+                                                            Command="{Binding Source={RelativeSource AncestorType={x:Type views:BaseContentPage}}, Path=BindingContext.DeleteTransaktionCommand}"
+                                                            CommandParameter="{Binding .}" />
+                                                    </Image.GestureRecognizers>
+                                                </Image>
+                                            </HorizontalStackLayout>
+                                            <Label Text="{Binding ., Converter={StaticResource BetragDisplay}}"
+                                                   TextColor="{Binding Typ, Converter={StaticResource TypToColor}}"
+                                                   FontSize="15" FontAttributes="Bold"
+                                                   VerticalTextAlignment="Center" />
+                                        </HorizontalStackLayout>
                                     </Grid>
                                 </SwipeView>
                             </DataTemplate>
@@ -115,11 +159,14 @@
         </DataTemplate>
     </views:BaseContentPage.Resources>
 
+    <Grid>
+    <controls:DesktopContentHost>
     <Grid RowDefinitions="Auto, Auto, Auto, Auto, Auto, *">
 
         <!-- Row 0: Suchleiste + Filter-Button -->
         <Grid Grid.Row="0" ColumnDefinitions="*, Auto" Padding="12,8,12,4" ColumnSpacing="8">
-            <SearchBar Grid.Column="0"
+            <SearchBar x:Name="TransactionSearchBar"
+                       Grid.Column="0"
                        Text="{Binding SearchText}"
                        Placeholder="{loc:Translate Hint_SucheTransaktionen}"
                        CancelButtonColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
@@ -428,11 +475,12 @@
 
         </Grid>
 
-        <!-- FABs: Import, Umbuchen, Neue Transaktion.
+        <!-- FABs: Import, Umbuchen, Neue Transaktion (phone only; Mac uses toolbar #351).
              CascadeInputTransparent=False: parent stays pass-through for the list,
              but children must receive taps (default cascade would disable all FABs;
              taps then hit list rows → TransactionDetail). -->
         <VerticalStackLayout Grid.Row="5"
+                             IsVisible="{x:Static helpers:DesktopChrome.IsPhone}"
                              HorizontalOptions="End"
                              VerticalOptions="End"
                              Padding="20,0,20,20"
@@ -485,5 +533,7 @@
                     Command="{Binding GoToDetailCommand}" />
         </VerticalStackLayout>
 
+    </Grid>
+    </controls:DesktopContentHost>
     </Grid>
 </views:BaseContentPage>

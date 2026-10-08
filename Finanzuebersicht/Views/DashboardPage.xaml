@@ -7,6 +7,7 @@
              xmlns:conv="clr-namespace:Finanzuebersicht.Converters"
              xmlns:loc="clr-namespace:Finanzuebersicht.Extensions"
              xmlns:controls="clr-namespace:Finanzuebersicht.Controls"
+             xmlns:helpers="clr-namespace:Finanzuebersicht.Helpers"
              xmlns:screenshot="clr-namespace:Finanzuebersicht.Core.Constants;assembly=Finanzuebersicht.Core"
              x:Class="Finanzuebersicht.Views.DashboardPage"
              AutomationId="{x:Static screenshot:ScreenshotAutomationIds.PageDashboard}"
@@ -53,6 +54,7 @@
     </ContentPage.Resources>
 
     <Grid>
+    <controls:DesktopContentHost>
     <RefreshView Command="{Binding LoadDashboardCommand}"
                  IsRefreshing="{Binding IsLoading}">
         <ScrollView>
@@ -623,8 +625,10 @@
             </VerticalStackLayout>
         </ScrollView>
     </RefreshView>
+    </controls:DesktopContentHost>
 
         <Border AutomationId="{x:Static screenshot:ScreenshotAutomationIds.FabSchnell}"
+                IsVisible="{x:Static helpers:DesktopChrome.IsPhone}"
                 StrokeShape="RoundRectangle 28"
                 Stroke="Transparent"
                 BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"

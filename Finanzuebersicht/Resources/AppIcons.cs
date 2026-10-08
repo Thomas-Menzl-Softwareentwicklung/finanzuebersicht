@@ -15,4 +15,7 @@ public static class AppIcons
     public const string FabImport = "fab_import.png";
     public const string FabTransfer = "fab_transfer.png";
     public const string FabSchnell = "fab_schnell.png";
+    public const string Delete = "icon_delete.png";
+    public const string Duplicate = "icon_duplicate.png";
+    public const string Toggle = "icon_toggle.png";
 }
