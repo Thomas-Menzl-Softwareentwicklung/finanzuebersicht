@@ -1,22 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900">
   <defs>
-    <linearGradient id="band" x1="130.0" y1="0" x2="532.1" y2="0" gradientUnits="userSpaceOnUse">
+    <linearGradient id="band" x1="118.0" y1="0" x2="468.4" y2="0" gradientUnits="userSpaceOnUse">
       <stop offset="0" stop-color="#0032C3"/>
       <stop offset="1" stop-color="#0ACDDE"/>
     </linearGradient>
   </defs>
   <rect width="1600" height="900" fill="#f7f8fb"/>
   <g id="mark">
-    <path fill="url(#band)" d="M130.0 305.3L189.6 239.2L198.9 230.8L207.2 219.7L214.7 215.9L531.1 215.0L532.1 216.9L521.8 232.7L518.1 235.5L467.8 298.8L462.3 304.3L456.7 306.2L223.1 306.2L224.0 432.8L226.8 431.9L227.7 429.1L249.1 406.7L275.2 375.1L284.5 370.4L461.3 370.4L461.3 374.1L392.5 457.0L278.0 457.9L277.0 554.7L233.3 595.7L224.9 601.2L213.8 613.3L203.5 620.8L189.6 634.7L131.9 685.0L130.0 684.1L130.0 306.2Z"/>
-    <path fill="url(#band)" d="M285.4 601.2L300.3 581.7L308.7 580.8L308.7 571.5L306.8 569.6L286.4 569.6L286.4 567.7L301.2 548.2L315.2 547.3L325.4 516.5L355.2 487.7L454.8 486.8L452.0 492.3L432.5 516.5L364.5 516.5L342.2 547.3L427.8 548.2L427.8 551.0L416.7 566.8L411.1 570.5L342.2 569.6L340.3 576.1L342.2 581.7L410.1 581.7L411.1 582.6L406.4 590.1L395.2 603.1L343.1 602.2L342.2 604.0L366.4 633.8L452.0 633.8L430.6 664.5L357.1 664.5L326.4 638.5L314.3 605.0L311.5 602.2L285.4 602.2Z"/>
+    <path fill="url(#band)" d="M118.0 235.0L468.4 200.0L436.1 260.6L231.2 284.4L231.2 355.0L433.4 334.8L409.1 383.3L231.2 403.5L118.0 700.0Z"/>
+    <path fill="url(#band)" d="M377.9 440.5L372.6 434.5L366.5 429.2L359.9 424.7L352.8 421.0L345.3 418.3L337.5 416.5L329.5 415.7L321.5 415.9L313.6 417.0L305.8 419.2L298.4 422.2L291.5 426.2L285.1 431.0L279.3 436.5L274.2 442.8L270.0 449.6L266.6 456.8L264.2 464.5L262.7 472.3L262.2 480.3L262.7 488.3L264.2 496.2L266.6 503.8L270.0 511.1L274.2 517.9L279.3 524.1L285.1 529.7L291.5 534.5L298.4 538.4L305.8 541.5L313.6 543.6L321.5 544.8L329.5 545.0L337.5 544.1L345.3 542.3L352.8 539.6L359.9 535.9L366.5 531.4L372.6 526.1L377.9 520.2L355.6 502.7L351.8 506.9L347.4 510.4L342.5 513.2L337.2 515.2L331.7 516.4L326.1 516.7L320.5 516.1L315.0 514.7L309.9 512.5L305.1 509.5L300.9 505.8L297.3 501.5L294.4 496.6L292.2 491.4L290.9 485.9L290.5 480.3L290.9 474.7L292.2 469.2L294.4 464.0L297.3 459.2L300.9 454.9L305.1 451.2L309.9 448.2L315.0 445.9L320.5 444.5L326.1 443.9L331.7 444.3L337.2 445.4L342.5 447.4L347.4 450.2L351.8 453.8L355.6 457.9Z"/>
+    <path fill="url(#band)" d="M250.1 461.5L341.7 452.3L341.7 461.7L250.1 470.9Z"/>
+    <path fill="url(#band)" d="M247.4 484.4L345.8 474.5L345.8 484.0L247.4 493.8Z"/>
   </g>
   <g id="brackets" fill="none" stroke="#0ACDDE" stroke-width="8" stroke-linecap="square">
-    <path d="M96 233V181H148"/>
-    <path d="M514 181H566V233"/>
-    <path d="M96 667V719H148"/>
-    <path d="M514 719H566V667"/>
+    <path d="M92 220V174H138"/>
+    <path d="M448 174H494V220"/>
+    <path d="M92 680V726H138"/>
+    <path d="M448 726H494V680"/>
   </g>
-  <text x="622" y="448" fill="#152038" font-family="Arial, Helvetica, sans-serif" font-size="46" font-weight="700" letter-spacing="1.6">FINANZÜBERSICHT</text>
-  <text x="622" y="506" fill="#0A9FBF" font-family="Arial, Helvetica, sans-serif" font-size="22" letter-spacing="1.2">FINANZEN LOKAL. KLAR. PRIVAT.</text>
+  <text x="546" y="446" fill="#152038" font-family="Arial, Helvetica, sans-serif" font-size="48" font-weight="700" letter-spacing="1.4">FINANZÜBERSICHT</text>
+  <text x="546" y="506" fill="#0A9FBF" font-family="Arial, Helvetica, sans-serif" font-size="22" letter-spacing="1.0">FINANZEN LOKAL. KLAR. PRIVAT.</text>
 </svg>
