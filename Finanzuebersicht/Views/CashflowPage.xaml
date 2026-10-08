@@ -17,6 +17,7 @@
         <conv:InvertBoolConverter x:Key="InvertBool" />
     </views:BaseContentPage.Resources>
 
+    <controls:DesktopContentHost>
     <RefreshView Command="{Binding LoadCashflowCommand}" IsRefreshing="{Binding IsLoading}">
         <CollectionView ItemsSource="{Binding Days}"
                         SelectionMode="None"
@@ -103,4 +104,5 @@
             </CollectionView.ItemTemplate>
         </CollectionView>
     </RefreshView>
+    </controls:DesktopContentHost>
 </views:BaseContentPage>

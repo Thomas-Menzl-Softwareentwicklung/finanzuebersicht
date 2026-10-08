@@ -1,15 +1,36 @@
 # Änderungsverlauf
 
-## [1.22] - Unreleased
+## [1.23] - Unreleased
+
+### Hinzugefügt
+
+- Mac Catalyst Desktop-UX Welle 1 (#350–#353): Toolbar statt FAB, Rechtsklick-Kontextmenüs, zentrierte Anlege-Dialoge, begrenzte Inhaltsbreite (~720px), Toolbar-Aktualisieren
+- `DesktopChrome` / `DesktopContentHost` als schmale Desktop-Chrome-Schicht (Windows später anschließbar)
+
+### Geändert
+
+- Versionsbasis `1.23` (Nerdbank.GitVersioning) — geplanter **macOS-only** Store-Upload; iOS bleibt bei 1.22 im App Store
+- Create-UX: Mac-Anlegen als FormSheet-Dialog statt Bottom-Sheet (`docs/CREATE_UX.md`)
+
+### Geplant (nicht in 1.23)
+
+- Sidebar-Navigation und Tastaturkürzel (#354) — Welle 2 nach Review
+
+## [1.22] - 2026-10-04
 
 ### Hinzugefügt
 
 - Generischer CSV-Import mit Spaltenzuordnung (#360): Profile-Fingerprint, Mapping-UI, Remap aus der Vorschau; DKB als Built-in-Profil
+- CSV-Import-Profile synchronisieren über CloudKit Sync
 
 ### Geändert
 
-- Versionsbasis `1.22` (Nerdbank.GitVersioning) — nächste TestFlight/ASC-Linie
+- Versionsbasis `1.22` (Nerdbank.GitVersioning)
 - Mac Catalyst Store/TestFlight: Start-Fixes für Apple Silicon und Intel (Universal)
+
+### Behoben
+
+- Mac Store: Datei-Dialog hing beim CSV-Import (Sandbox-Entitlements)
 
 ## [1.21] - Unreleased
 

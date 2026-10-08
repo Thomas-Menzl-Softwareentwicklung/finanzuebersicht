@@ -7,6 +7,7 @@
              xmlns:conv="clr-namespace:Finanzuebersicht.Converters"
              xmlns:loc="clr-namespace:Finanzuebersicht.Extensions"
              xmlns:controls="clr-namespace:Finanzuebersicht.Controls"
+             xmlns:helpers="clr-namespace:Finanzuebersicht.Helpers"
              xmlns:screenshot="clr-namespace:Finanzuebersicht.Core.Constants;assembly=Finanzuebersicht.Core"
              x:Class="Finanzuebersicht.Views.SparZielePage"
              AutomationId="{x:Static screenshot:ScreenshotAutomationIds.PageSavings}"
@@ -19,6 +20,7 @@
     </views:BaseContentPage.Resources>
 
     <Grid>
+        <controls:DesktopContentHost>
         <RefreshView Command="{Binding LoadSparZieleCommand}"
                      IsRefreshing="{Binding IsLoading}">
             <CollectionView ItemsSource="{Binding SparZiele}"
@@ -37,7 +39,7 @@
                 </CollectionView.ItemsLayout>
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="models:SparZielSummary">
-                        <SwipeView>
+                        <SwipeView helpers:DesktopChrome.SuppressSwipeOnDesktop="True">
                             <SwipeView.RightItems>
                                 <SwipeItems>
                                     <SwipeItem Text="{loc:Translate Btn_Loeschen}"
@@ -51,6 +53,13 @@
                                     BackgroundColor="{AppThemeBinding Light={StaticResource CardBackground}, Dark={StaticResource CardBackgroundDark}}"
                                     Padding="16"
                                     SemanticProperties.Description="{Binding ., Converter={StaticResource SparZielAccessibility}}">
+                                <FlyoutBase.ContextFlyout>
+                                    <MenuFlyout>
+                                        <MenuFlyoutItem Text="{loc:Translate Btn_Loeschen}"
+                                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SparZieleViewModel}}, Path=DeleteSparZielCommand}"
+                                                        CommandParameter="{Binding SparZiel.Id}" />
+                                    </MenuFlyout>
+                                </FlyoutBase.ContextFlyout>
                                 <Border.GestureRecognizers>
                                     <TapGestureRecognizer
                                         Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SparZieleViewModel}}, Path=OpenSparZielCommand}"
@@ -110,8 +119,10 @@
                 </CollectionView.ItemTemplate>
             </CollectionView>
         </RefreshView>
+        </controls:DesktopContentHost>
 
         <Button Text="{loc:Translate Btn_Hinzufuegen}"
+                IsVisible="{x:Static helpers:DesktopChrome.IsPhone}"
                 FontSize="28" TextColor="White"
                 BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
                 CornerRadius="28"

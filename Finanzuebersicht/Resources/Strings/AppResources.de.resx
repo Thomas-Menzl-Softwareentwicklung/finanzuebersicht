@@ -83,6 +83,8 @@
   <data name="Btn_Loeschen" xml:space="preserve"><value>Löschen</value></data>
   <data name="Btn_Abbrechen" xml:space="preserve"><value>Abbrechen</value></data>
   <data name="Btn_OK" xml:space="preserve"><value>OK</value></data>
+  <data name="Btn_Aktualisieren" xml:space="preserve"><value>Aktualisieren</value></data>
+  <data name="A11y_Aktualisieren" xml:space="preserve"><value>Liste aktualisieren</value></data>
   <data name="Btn_OrdnerWaehlen" xml:space="preserve"><value>Ordner wählen</value></data>
   <data name="Btn_Zuruecksetzen" xml:space="preserve"><value>Zurücksetzen</value></data>
   <data name="Btn_System" xml:space="preserve"><value>System</value></data>

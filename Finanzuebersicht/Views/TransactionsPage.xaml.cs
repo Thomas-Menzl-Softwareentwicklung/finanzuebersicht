@@ -1,3 +1,6 @@
+using Finanzuebersicht.Helpers;
+using Finanzuebersicht.Resources.Strings;
+using Finanzuebersicht.Services;
 using Finanzuebersicht.ViewModels;
 using Microsoft.Extensions.Logging;
 
@@ -17,7 +20,19 @@ public partial class TransactionsPage : BaseContentPage
         else
         {
             BindingContext = viewModel;
+            AttachDesktopToolbar(viewModel);
         }
+    }
+
+    void AttachDesktopToolbar(TransactionsViewModel viewModel)
+    {
+        var loc = LocalizationResourceManager.Current;
+        DesktopChrome.AddToolbarItems(
+            this,
+            DesktopChrome.CreateToolbarItem(loc[ResourceKeys.Btn_Aktualisieren], viewModel.LoadTransaktionenCommand, priority: 0),
+            DesktopChrome.CreateToolbarItem(loc[ResourceKeys.Btn_Import], viewModel.ImportCsvCommand, priority: 1),
+            DesktopChrome.CreateToolbarItem(loc[ResourceKeys.Btn_Umbuchen], viewModel.GoToTransferCommand, priority: 2),
+            DesktopChrome.CreateToolbarItem(loc[ResourceKeys.Btn_Hinzufuegen], viewModel.GoToDetailCommand, priority: 3));
     }
 
     protected override void OnAppearing()

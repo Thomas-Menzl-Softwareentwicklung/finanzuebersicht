@@ -7,6 +7,7 @@
              xmlns:conv="clr-namespace:Finanzuebersicht.Converters"
              xmlns:loc="clr-namespace:Finanzuebersicht.Extensions"
              xmlns:controls="clr-namespace:Finanzuebersicht.Controls"
+             xmlns:helpers="clr-namespace:Finanzuebersicht.Helpers"
              xmlns:screenshot="clr-namespace:Finanzuebersicht.Core.Constants;assembly=Finanzuebersicht.Core"
              x:Class="Finanzuebersicht.Views.CategoriesPage"
              AutomationId="{x:Static screenshot:ScreenshotAutomationIds.PageManagement}"
@@ -30,6 +31,7 @@
     </views:BaseContentPage.Resources>
 
     <Grid>
+        <controls:DesktopContentHost>
         <Grid RowDefinitions="Auto, *">
             <Border Grid.Row="0"
                     Margin="16,12"
@@ -72,7 +74,7 @@
                         </CollectionView.ItemsLayout>
                         <CollectionView.ItemTemplate>
                             <DataTemplate x:DataType="models:Category">
-                                <SwipeView>
+                                <SwipeView helpers:DesktopChrome.SuppressSwipeOnDesktop="True">
                                     <SwipeView.RightItems>
                                         <SwipeItems>
                                             <SwipeItem Text="{loc:Translate Btn_Loeschen}"
@@ -86,6 +88,13 @@
                                             BackgroundColor="{AppThemeBinding Light={StaticResource CardBackground}, Dark={StaticResource CardBackgroundDark}}"
                                             Padding="16"
                                             SemanticProperties.Description="{Binding ., Converter={StaticResource CategoryAccessibility}}">
+                                        <FlyoutBase.ContextFlyout>
+                                            <MenuFlyout>
+                                                <MenuFlyoutItem Text="{loc:Translate Btn_Loeschen}"
+                                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:CategoriesViewModel}}, Path=DeleteKategorieCommand}"
+                                                                CommandParameter="{Binding .}" />
+                                            </MenuFlyout>
+                                        </FlyoutBase.ContextFlyout>
                                         <Border.GestureRecognizers>
                                             <TapGestureRecognizer
                                                 Command="{Binding Source={RelativeSource AncestorType={x:Type vm:CategoriesViewModel}}, Path=GoToDetailCommand}"
@@ -160,7 +169,7 @@
                         </CollectionView.ItemsLayout>
                         <CollectionView.ItemTemplate>
                             <DataTemplate x:DataType="vm:AccountListItem">
-                                <SwipeView>
+                                <SwipeView helpers:DesktopChrome.SuppressSwipeOnDesktop="True">
                                     <SwipeView.RightItems>
                                         <SwipeItems>
                                             <SwipeItem Text="{loc:Translate Btn_Loeschen}"
@@ -176,6 +185,14 @@
                                             Padding="16"
                                             Opacity="{Binding CardOpacity}"
                                             SemanticProperties.Description="{Binding ., Converter={StaticResource AccountAccessibility}}">
+                                        <FlyoutBase.ContextFlyout>
+                                            <MenuFlyout>
+                                                <MenuFlyoutItem Text="{loc:Translate Btn_Loeschen}"
+                                                                IsEnabled="{Binding CanDelete}"
+                                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:CategoriesViewModel}}, Path=DeleteKontoCommand}"
+                                                                CommandParameter="{Binding .}" />
+                                            </MenuFlyout>
+                                        </FlyoutBase.ContextFlyout>
                                         <Border.GestureRecognizers>
                                             <TapGestureRecognizer
                                                 Command="{Binding Source={RelativeSource AncestorType={x:Type vm:CategoriesViewModel}}, Path=GoToDetailCommand}"
@@ -238,8 +255,10 @@
             </Grid>
 
         </Grid>
+        </controls:DesktopContentHost>
 
         <Button Text="{loc:Translate Btn_Hinzufuegen}"
+                IsVisible="{x:Static helpers:DesktopChrome.IsPhone}"
                 FontSize="28" TextColor="White"
                 BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
                 CornerRadius="28"

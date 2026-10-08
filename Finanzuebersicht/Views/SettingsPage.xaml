@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:Finanzuebersicht.ViewModels"
              xmlns:loc="clr-namespace:Finanzuebersicht.Extensions"
+             xmlns:controls="clr-namespace:Finanzuebersicht.Controls"
              xmlns:screenshot="clr-namespace:Finanzuebersicht.Core.Constants;assembly=Finanzuebersicht.Core"
              x:Class="Finanzuebersicht.Views.SettingsPage"
              AutomationId="{x:Static screenshot:ScreenshotAutomationIds.PageSettings}"
@@ -11,7 +12,8 @@
              BackgroundColor="{AppThemeBinding Light={StaticResource PageBackground}, Dark={StaticResource PageBackgroundDark}}">
 
     <Grid RowDefinitions="*, Auto">
-        <ScrollView Grid.Row="0" Padding="16">
+        <controls:DesktopContentHost Grid.Row="0">
+        <ScrollView Padding="16">
             <VerticalStackLayout Spacing="24" Padding="0,0,0,24">
 
             <!-- Darstellung -->
@@ -469,6 +471,7 @@
 
             </VerticalStackLayout>
         </ScrollView>
+        </controls:DesktopContentHost>
         <Label Grid.Row="1"
                Text="▼"
                FontSize="10"

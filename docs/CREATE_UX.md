@@ -8,7 +8,7 @@ Referenz-Klickdummy (extern): `Finanzübersicht Mobile App Verfeinerung-2` — d
 
 ## Ist-Zustand (Stand feature/create-ux-modal-sheets)
 
-**Anlegen** (FAB / Empty State) öffnet ein **Modal** über `CreateFormModalService` (Schnell-Muster, kein Toolkit-Popup):
+**Anlegen** (FAB / Empty State auf dem iPhone; Toolbar auf Mac Catalyst) öffnet ein **Modal** über `CreateFormModalService` (Schnell-Muster, kein Toolkit-Popup). iPhone: Page Sheet mit Grabber/Detents. Mac: zentrierter FormSheet-Dialog (#353):
 
 | Kontext | Create |
 |---------|--------|

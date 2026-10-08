@@ -7,6 +7,7 @@
              xmlns:conv="clr-namespace:Finanzuebersicht.Converters"
              xmlns:loc="clr-namespace:Finanzuebersicht.Extensions"
              xmlns:controls="clr-namespace:Finanzuebersicht.Controls"
+             xmlns:helpers="clr-namespace:Finanzuebersicht.Helpers"
              xmlns:screenshot="clr-namespace:Finanzuebersicht.Core.Constants;assembly=Finanzuebersicht.Core"
              x:Class="Finanzuebersicht.Views.TransactionsPage"
              AutomationId="{x:Static screenshot:ScreenshotAutomationIds.PageTransactions}"
@@ -43,7 +44,7 @@
                     <VerticalStackLayout BindableLayout.ItemsSource="{Binding .}">
                         <BindableLayout.ItemTemplate>
                             <DataTemplate x:DataType="models:Transaction">
-                                <SwipeView>
+                                <SwipeView helpers:DesktopChrome.SuppressSwipeOnDesktop="True">
                                     <SwipeView.RightItems>
                                         <SwipeItems>
                                             <SwipeItem Text="{loc:Translate Btn_Duplizieren}"
@@ -57,6 +58,16 @@
                                         </SwipeItems>
                                     </SwipeView.RightItems>
                                     <Grid ColumnDefinitions="44,*,Auto" Padding="14,10" ColumnSpacing="12">
+                                        <FlyoutBase.ContextFlyout>
+                                            <MenuFlyout>
+                                                <MenuFlyoutItem Text="{loc:Translate Btn_Duplizieren}"
+                                                                Command="{Binding Source={RelativeSource AncestorType={x:Type views:BaseContentPage}}, Path=BindingContext.DuplicateTransaktionCommand}"
+                                                                CommandParameter="{Binding .}" />
+                                                <MenuFlyoutItem Text="{loc:Translate Btn_Loeschen}"
+                                                                Command="{Binding Source={RelativeSource AncestorType={x:Type views:BaseContentPage}}, Path=BindingContext.DeleteTransaktionCommand}"
+                                                                CommandParameter="{Binding .}" />
+                                            </MenuFlyout>
+                                        </FlyoutBase.ContextFlyout>
                                         <SemanticProperties.Description>
                                             <MultiBinding Converter="{StaticResource TransactionAccessibility}">
                                                 <Binding Path="." />
@@ -115,6 +126,8 @@
         </DataTemplate>
     </views:BaseContentPage.Resources>
 
+    <Grid>
+    <controls:DesktopContentHost>
     <Grid RowDefinitions="Auto, Auto, Auto, Auto, Auto, *">
 
         <!-- Row 0: Suchleiste + Filter-Button -->
@@ -428,11 +441,12 @@
 
         </Grid>
 
-        <!-- FABs: Import, Umbuchen, Neue Transaktion.
+        <!-- FABs: Import, Umbuchen, Neue Transaktion (phone only; Mac uses toolbar #351).
              CascadeInputTransparent=False: parent stays pass-through for the list,
              but children must receive taps (default cascade would disable all FABs;
              taps then hit list rows → TransactionDetail). -->
         <VerticalStackLayout Grid.Row="5"
+                             IsVisible="{x:Static helpers:DesktopChrome.IsPhone}"
                              HorizontalOptions="End"
                              VerticalOptions="End"
                              Padding="20,0,20,20"
@@ -485,5 +499,7 @@
                     Command="{Binding GoToDetailCommand}" />
         </VerticalStackLayout>
 
+    </Grid>
+    </controls:DesktopContentHost>
     </Grid>
 </views:BaseContentPage>

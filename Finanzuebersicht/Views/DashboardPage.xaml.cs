@@ -1,6 +1,9 @@
 using Finanzuebersicht.Charts;
+using Finanzuebersicht.Helpers;
 using Finanzuebersicht.Navigation;
 using Finanzuebersicht.Presentation.Services;
+using Finanzuebersicht.Resources.Strings;
+using Finanzuebersicht.Services;
 using Finanzuebersicht.ViewModels;
 using System.ComponentModel;
 
@@ -30,6 +33,8 @@ public partial class DashboardPage : ContentPage
         _navigationService = navigationService;
         _appEvents = appEvents;
 
+        AttachDesktopToolbar();
+
         MonthDonutChart.Drawable = _monthDonut;
         YearBarChart.Drawable = _yearBar;
         YearDonutChart.Drawable = _yearDonut;
@@ -43,6 +48,15 @@ public partial class DashboardPage : ContentPage
         _yearDonut.Items = _vm.JahrKategorien;
 
         _vm.PropertyChanged += OnViewModelPropertyChanged;
+    }
+
+    void AttachDesktopToolbar()
+    {
+        var loc = LocalizationResourceManager.Current;
+        DesktopChrome.AddToolbarItems(
+            this,
+            DesktopChrome.CreateToolbarItem(loc[ResourceKeys.Btn_Aktualisieren], _vm.LoadDashboardCommand, priority: 0),
+            DesktopChrome.CreateToolbarItem(loc[ResourceKeys.Btn_SchnellAusgabe], _vm.QuickCaptureCommand, priority: 1));
     }
 
     protected override async void OnAppearing()
