@@ -62,7 +62,8 @@ public class AppDelegate : MauiUIApplicationDelegate
 				(NSString)route));
 		}
 
-		var menu = UIMenu.Create(title, null, GoToMenuId, default, elements.ToArray());
+		// Arg 3 is UIMenuIdentifier on MacCatalyst 26.0 (CI) and NSString on 26.2 — same ObjC type.
+		var menu = UIMenu.Create(title, null, (dynamic)GoToMenuId, default(UIMenuOptions), elements.ToArray());
 		if (UIMenuIdentifier.View.GetConstant() is { } viewId)
 			builder.InsertSiblingMenuAfter(menu, viewId);
 		else if (UIMenuIdentifier.File.GetConstant() is { } fileId)
@@ -105,8 +106,8 @@ public class AppDelegate : MauiUIApplicationDelegate
 		var actionsMenu = UIMenu.Create(
 			loc[ResourceKeys.Menu_Aktionen],
 			null,
-			ActionsMenuId,
-			default,
+			(dynamic)ActionsMenuId,
+			default(UIMenuOptions),
 			actionElements.ToArray());
 
 		if (UIMenuIdentifier.Help.GetConstant() is { } helpId)
