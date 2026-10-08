@@ -37,7 +37,7 @@ def require_mac_screenshots!
   unless pngs.any?
     UI.user_error!(
       "No Mac screenshots in #{MAC_SCREENSHOTS_PATH}. " \
-      "Place 1280x800 (16:10) PNGs under screenshots-mac/<locale>/."
+      "Run: bundle exec fastlane screenshots_mac"
     )
   end
 end
@@ -158,6 +158,11 @@ platform :ios do
       ),
       output_directory: File.join(REPO_ROOT, "fastlane/screenshots")
     )
+  end
+
+  desc "Capture Mac Catalyst screenshots (de-DE + en-US, 16:10) into fastlane/screenshots-mac/"
+  lane :screenshots_mac do
+    sh("\"#{REPO_ROOT}/scripts/capture-mac-screenshots.sh\" --build")
   end
 
   desc "Upload listing texts and iOS screenshots to App Store Connect (no binary, no review)"

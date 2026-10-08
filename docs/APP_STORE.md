@@ -112,11 +112,17 @@ bundle exec fastlane upload_listing
 
 `upload_listing` setzt Version **1.22** falls nötig, lädt DE/EN-Texte und überschreibt iOS-Screenshots. Kein Binary, kein Review.
 
-Mac-Listing (Texte + Screenshots aus `fastlane/screenshots-mac/`, 1280×800). Die macOS-App muss in ASC existieren, sonst schlägt die Lane fehl:
+Mac-Listing (Texte + Screenshots aus `fastlane/screenshots-mac/`, 16:10 — typisch Retina 2560×1600). Die macOS-App muss in ASC existieren, sonst schlägt die Lane fehl:
 
 ```bash
+# Aufnahmen (Debug-App + --screenshot-demo, ⌘1–⌘5 / ⌘,)
+bundle exec fastlane screenshots_mac
+# oder: ./scripts/capture-mac-screenshots.sh [--build]
+
 bundle exec fastlane upload_listing_mac
 ```
+
+README (DE-Mac → `docs/screenshots/`): `./scripts/copy-readme-screenshots-mac.sh`
 
 Beide hintereinander:
 
