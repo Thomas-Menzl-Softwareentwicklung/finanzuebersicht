@@ -15,6 +15,12 @@
 - Versionsbasis `1.23` (Nerdbank.GitVersioning) — geplanter **macOS-only** Store-Upload; iOS bleibt bei 1.22 im App Store
 - Create-UX: Mac-Anlegen als FormSheet-Dialog statt Bottom-Sheet (`docs/CREATE_UX.md`)
 
+### Behoben / Mac-Polish
+
+- Aktionen-Menü wird auf Settings/Detail/Import geleert (keine hängenden ⌘N/⌘I vom vorherigen Tab)
+- Mac-Fensterminimum 960×640 (Default 1200×800); Create-Dialog fokussiert das erste Eingabefeld
+- Widget-Shortcuts und ▼-Scroll-Hinweise nur noch auf dem iPhone
+
 ### Geplant (nicht in 1.23)
 
 - Sidebar-Navigation und Tastaturkürzel (#354) — Welle 2 nach Review
