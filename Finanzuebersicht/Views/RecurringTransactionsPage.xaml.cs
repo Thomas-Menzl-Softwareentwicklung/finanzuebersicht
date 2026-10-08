@@ -17,9 +17,10 @@ public partial class RecurringTransactionsPage : BaseContentPage
     void AttachDesktopToolbar(RecurringTransactionsViewModel viewModel)
     {
         var loc = LocalizationResourceManager.Current;
-        DesktopChrome.AddToolbarItems(
+        DesktopChrome.AttachPageActions(
             this,
-            DesktopChrome.CreateToolbarItem(loc[ResourceKeys.Btn_Aktualisieren], viewModel.LoadDauerauftraegeCommand, priority: 0),
-            DesktopChrome.CreateToolbarItem(loc[ResourceKeys.Btn_Hinzufuegen], viewModel.GoToDetailCommand, priority: 1));
+            loc[ResourceKeys.Menu_Aktionen],
+            new DesktopChrome.DesktopAction(loc[ResourceKeys.Btn_Aktualisieren], viewModel.LoadDauerauftraegeCommand, "R"),
+            new DesktopChrome.DesktopAction(loc[ResourceKeys.Btn_Hinzufuegen], viewModel.GoToDetailCommand, "N"));
     }
 }

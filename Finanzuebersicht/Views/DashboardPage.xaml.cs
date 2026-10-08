@@ -53,15 +53,17 @@ public partial class DashboardPage : ContentPage
     void AttachDesktopToolbar()
     {
         var loc = LocalizationResourceManager.Current;
-        DesktopChrome.AddToolbarItems(
+        DesktopChrome.AttachPageActions(
             this,
-            DesktopChrome.CreateToolbarItem(loc[ResourceKeys.Btn_Aktualisieren], _vm.LoadDashboardCommand, priority: 0),
-            DesktopChrome.CreateToolbarItem(loc[ResourceKeys.Btn_SchnellAusgabe], _vm.QuickCaptureCommand, priority: 1));
+            loc[ResourceKeys.Menu_Aktionen],
+            new DesktopChrome.DesktopAction(loc[ResourceKeys.Btn_Aktualisieren], _vm.LoadDashboardCommand, "R"),
+            new DesktopChrome.DesktopAction(loc[ResourceKeys.Btn_SchnellAusgabe], _vm.QuickCaptureCommand, "N"));
     }
 
     protected override async void OnAppearing()
     {
         base.OnAppearing();
+        DesktopChrome.PublishPageActions(this);
         if (BindingContext is DashboardViewModel vm)
             vm.LoadDashboardCommand.Execute(null);
 

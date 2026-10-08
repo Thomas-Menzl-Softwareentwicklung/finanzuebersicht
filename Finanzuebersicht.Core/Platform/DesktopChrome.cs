@@ -6,8 +6,11 @@ namespace Finanzuebersicht.Core.Platform;
 /// </summary>
 public static class DesktopChrome
 {
-    /// <summary>Readable content width on wide Mac windows (~15″+).</summary>
-    public const double ContentMaxWidth = 720;
+    /// <summary>
+    /// Soft upper bound for optional future two-column / card layouts.
+    /// Tab pages use full width + side padding via <c>DesktopContentHost</c> (no 720px phone column).
+    /// </summary>
+    public const double ContentMaxWidth = 1200;
 
     public static bool IsDesktop => OperatingSystem.IsMacCatalyst();
 

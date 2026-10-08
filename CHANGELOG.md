@@ -4,7 +4,9 @@
 
 ### Hinzugefügt
 
-- Mac Catalyst Desktop-UX Welle 1 (#350–#353): Toolbar statt FAB, Rechtsklick-Kontextmenüs, zentrierte Anlege-Dialoge, begrenzte Inhaltsbreite (~720px), Toolbar-Aktualisieren
+- Mac Catalyst Desktop-UX Welle 1 (#350–#353): Toolbar statt FAB, Rechtsklick-Kontextmenüs, zentrierte Anlege-Dialoge, volle Fensterbreite mit Seiten-Padding, Toolbar-Aktualisieren
+- Native macOS-Menüleiste: **Aktionen** (seitenbezogen, mit ⌘-Shortcuts) und **Einstellungen…**; Document/Format-Ballast entfernt
+- Desktop-Zeilenaktionen (Duplizieren/Löschen/Toggle) als kompakte Icons neben dem Betrag
 - `DesktopChrome` / `DesktopContentHost` als schmale Desktop-Chrome-Schicht (Windows später anschließbar)
 
 ### Geändert

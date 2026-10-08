@@ -17,8 +17,9 @@ public partial class BackupListPage : BaseContentPage
     void AttachDesktopToolbar(BackupListViewModel viewModel)
     {
         var loc = LocalizationResourceManager.Current;
-        DesktopChrome.AddToolbarItems(
+        DesktopChrome.AttachPageActions(
             this,
-            DesktopChrome.CreateToolbarItem(loc[ResourceKeys.Btn_Aktualisieren], viewModel.LoadBackupsCommand, priority: 0));
+            loc[ResourceKeys.Menu_Aktionen],
+            new DesktopChrome.DesktopAction(loc[ResourceKeys.Btn_Aktualisieren], viewModel.LoadBackupsCommand, "R"));
     }
 }

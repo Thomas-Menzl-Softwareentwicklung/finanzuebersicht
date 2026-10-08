@@ -27,12 +27,13 @@ public partial class TransactionsPage : BaseContentPage
     void AttachDesktopToolbar(TransactionsViewModel viewModel)
     {
         var loc = LocalizationResourceManager.Current;
-        DesktopChrome.AddToolbarItems(
+        DesktopChrome.AttachPageActions(
             this,
-            DesktopChrome.CreateToolbarItem(loc[ResourceKeys.Btn_Aktualisieren], viewModel.LoadTransaktionenCommand, priority: 0),
-            DesktopChrome.CreateToolbarItem(loc[ResourceKeys.Btn_Import], viewModel.ImportCsvCommand, priority: 1),
-            DesktopChrome.CreateToolbarItem(loc[ResourceKeys.Btn_Umbuchen], viewModel.GoToTransferCommand, priority: 2),
-            DesktopChrome.CreateToolbarItem(loc[ResourceKeys.Btn_Hinzufuegen], viewModel.GoToDetailCommand, priority: 3));
+            loc[ResourceKeys.Menu_Aktionen],
+            new DesktopChrome.DesktopAction(loc[ResourceKeys.Btn_Aktualisieren], viewModel.LoadTransaktionenCommand, "R"),
+            new DesktopChrome.DesktopAction(loc[ResourceKeys.Btn_Import], viewModel.ImportCsvCommand, "I"),
+            new DesktopChrome.DesktopAction(loc[ResourceKeys.Btn_Umbuchen], viewModel.GoToTransferCommand, "U"),
+            new DesktopChrome.DesktopAction(loc[ResourceKeys.Btn_Hinzufuegen], viewModel.GoToDetailCommand, "N"));
     }
 
     protected override void OnAppearing()

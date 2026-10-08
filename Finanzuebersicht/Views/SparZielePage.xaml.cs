@@ -17,9 +17,10 @@ public partial class SparZielePage : BaseContentPage
     void AttachDesktopToolbar(SparZieleViewModel viewModel)
     {
         var loc = LocalizationResourceManager.Current;
-        DesktopChrome.AddToolbarItems(
+        DesktopChrome.AttachPageActions(
             this,
-            DesktopChrome.CreateToolbarItem(loc[ResourceKeys.Btn_Aktualisieren], viewModel.LoadSparZieleCommand, priority: 0),
-            DesktopChrome.CreateToolbarItem(loc[ResourceKeys.Btn_Hinzufuegen], viewModel.OpenCreateFormCommand, priority: 1));
+            loc[ResourceKeys.Menu_Aktionen],
+            new DesktopChrome.DesktopAction(loc[ResourceKeys.Btn_Aktualisieren], viewModel.LoadSparZieleCommand, "R"),
+            new DesktopChrome.DesktopAction(loc[ResourceKeys.Btn_Hinzufuegen], viewModel.OpenCreateFormCommand, "N"));
     }
 }

@@ -1,3 +1,4 @@
+using Finanzuebersicht.Helpers;
 using Finanzuebersicht.Presentation.Services;
 using Finanzuebersicht.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
@@ -47,6 +48,7 @@ public abstract class BaseContentPage : ContentPage
     protected override void OnAppearing()
     {
         base.OnAppearing();
+        DesktopChrome.PublishPageActions(this);
         AppEvents.LanguageChanged += OnLanguageChanged;
         AppEvents.CurrencyChanged += OnCurrencyChanged;
         if (BindingContext is IAutoLoadViewModel vm && vm.ShouldAutoLoad)

@@ -11,8 +11,8 @@ public class DesktopChromeTests
     }
 
     [Fact]
-    public void ContentMaxWidth_IsReadableDesktopDefault()
+    public void ContentMaxWidth_IsWideDesktopSoftCap()
     {
-        Assert.Equal(720, DesktopChrome.ContentMaxWidth);
+        Assert.Equal(1200, DesktopChrome.ContentMaxWidth);
     }
 }

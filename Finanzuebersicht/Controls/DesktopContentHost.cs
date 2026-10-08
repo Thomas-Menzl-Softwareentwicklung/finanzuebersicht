@@ -3,17 +3,21 @@ using Finanzuebersicht.Helpers;
 namespace Finanzuebersicht.Controls;
 
 /// <summary>
-/// Centers content and caps width on Mac Catalyst; full-bleed on phone (#352).
+/// On Mac Catalyst: full-width content with comfortable side padding (no phone-column cap).
+/// On phone: passthrough (#352).
 /// </summary>
 public sealed class DesktopContentHost : ContentView
 {
+    /// <summary>Horizontal inset so lists/cards aren't flush against window edges.</summary>
+    public const double DesktopSidePadding = 28;
+
     public DesktopContentHost()
     {
         if (!DesktopChrome.IsDesktop)
             return;
 
-        MaximumWidthRequest = DesktopChrome.ContentMaxWidth;
-        HorizontalOptions = LayoutOptions.Center;
+        HorizontalOptions = LayoutOptions.Fill;
+        Padding = new Thickness(DesktopSidePadding, 0);
     }
 
     protected override void OnChildAdded(Element child)

@@ -8,6 +8,7 @@
              xmlns:loc="clr-namespace:Finanzuebersicht.Extensions"
              xmlns:controls="clr-namespace:Finanzuebersicht.Controls"
              xmlns:helpers="clr-namespace:Finanzuebersicht.Helpers"
+             xmlns:icons="clr-namespace:Finanzuebersicht.Resources"
              xmlns:screenshot="clr-namespace:Finanzuebersicht.Core.Constants;assembly=Finanzuebersicht.Core"
              x:Class="Finanzuebersicht.Views.SparZielePage"
              AutomationId="{x:Static screenshot:ScreenshotAutomationIds.PageSavings}"
@@ -67,13 +68,27 @@
                                 </Border.GestureRecognizers>
                                 <VerticalStackLayout Spacing="10">
 
-                                    <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="10">
+                                    <Grid ColumnDefinitions="Auto, *, Auto, Auto" ColumnSpacing="10">
                                         <Label Grid.Column="0" Text="{Binding SparZiel.Icon}"
                                                FontSize="24" VerticalTextAlignment="Center" />
                                         <Label Grid.Column="1" Text="{Binding SparZiel.Titel}"
                                                FontSize="16" FontAttributes="Bold"
                                                VerticalTextAlignment="Center" />
-                                        <VerticalStackLayout Grid.Column="2" HorizontalOptions="End">
+                                        <Image Grid.Column="2"
+                                               Source="{x:Static icons:AppIcons.Delete}"
+                                               WidthRequest="{x:Static helpers:DesktopChrome.RowActionIconSize}"
+                                               HeightRequest="{x:Static helpers:DesktopChrome.RowActionIconSize}"
+                                               Aspect="AspectFit"
+                                               VerticalOptions="Center"
+                                               IsVisible="{x:Static helpers:DesktopChrome.IsDesktop}"
+                                               SemanticProperties.Description="{loc:Translate Btn_Loeschen}">
+                                            <Image.GestureRecognizers>
+                                                <TapGestureRecognizer
+                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SparZieleViewModel}}, Path=DeleteSparZielCommand}"
+                                                    CommandParameter="{Binding SparZiel.Id}" />
+                                            </Image.GestureRecognizers>
+                                        </Image>
+                                        <VerticalStackLayout Grid.Column="3" HorizontalOptions="End">
                                             <Label Text="{Binding GesamtFortschritt, Converter={StaticResource Currency}}"
                                                    FontSize="15" FontAttributes="Bold"
                                                    TextColor="{AppThemeBinding Light={StaticResource Einnahme}, Dark={StaticResource EinnahmeDark}}" HorizontalTextAlignment="End" />
