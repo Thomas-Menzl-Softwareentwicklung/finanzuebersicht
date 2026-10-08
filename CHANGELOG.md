@@ -20,6 +20,8 @@
 - Aktionen-Menü wird auf Settings/Detail/Import geleert (keine hängenden ⌘N/⌘I vom vorherigen Tab)
 - Mac-Fensterminimum 960×640 (Default 1200×800); Create-Dialog fokussiert das erste Eingabefeld
 - Widget-Shortcuts und ▼-Scroll-Hinweise nur noch auf dem iPhone
+- Esc schließt Mac-Anlege-Dialoge auch bei fokussiertem Textfeld (nicht nur Fokus weg / Piepton)
+- Desktop-Zeilen-Hover: Tint wird beim Verlassen wieder entfernt; Kontrast zu Karten-/Seitenhintergrund
 
 ### Geplant (nicht in 1.23)
 
