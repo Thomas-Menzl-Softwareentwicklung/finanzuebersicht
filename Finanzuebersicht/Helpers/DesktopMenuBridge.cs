@@ -22,7 +22,7 @@ public static class DesktopMenuBridge
 
     public static Func<string, Task>? GoToRouteAsync { get; set; }
 
-    /// <summary>Fixed "Gehe zu" destinations (⌘1–⌘5) — substitutes for the hidden Mac tab bar.</summary>
+    /// <summary>Fixed "Gehe zu" destinations (⌘1–⌘5); TabBar stays visible for discoverability.</summary>
     public static IReadOnlyList<GoToItem> GoToItems { get; set; } = [];
 
     public static IReadOnlyList<Item> Actions

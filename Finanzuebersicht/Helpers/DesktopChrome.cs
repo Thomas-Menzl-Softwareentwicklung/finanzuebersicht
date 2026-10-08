@@ -146,7 +146,11 @@ public static class DesktopChrome
         var actions = GetRegisteredActions(page);
         var title = GetActionsMenuTitle(page);
         if (actions is null || actions.Length == 0 || string.IsNullOrEmpty(title))
+        {
+            // Settings / detail / import have no page actions — clear stale ⌘N/⌘I from the prior tab.
+            DesktopMenuBridge.ClearActions();
             return;
+        }
 
         // Always push through AppShell when available; otherwise publish directly so
         // early constructor AttachPageActions still reaches the native menu bar.

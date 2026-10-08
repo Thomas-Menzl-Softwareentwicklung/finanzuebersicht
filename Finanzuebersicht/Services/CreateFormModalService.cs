@@ -1,3 +1,4 @@
+using Finanzuebersicht.Controls;
 using Finanzuebersicht.Helpers;
 using Finanzuebersicht.Resources.Strings;
 
@@ -80,6 +81,8 @@ public sealed class CreateFormModalService : ICreateFormModalService
             if (formHost.Content is not null)
                 return;
             formHost.Content = formContentFactory();
+            // Next turn so the Entry is in the visual tree (Catalyst Focus is flaky otherwise).
+            MainThread.BeginInvokeOnMainThread(() => FormFocusHelper.TryFocusFirstInput(formHost));
         }
 
         formHost.Loaded += (_, _) => AssignForm();
