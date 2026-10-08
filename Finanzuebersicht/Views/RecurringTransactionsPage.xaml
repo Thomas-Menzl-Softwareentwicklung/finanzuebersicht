@@ -59,7 +59,7 @@
                             </SwipeItems>
                         </SwipeView.RightItems>
 
-                        <Grid ColumnDefinitions="44, *, Auto, Auto" Padding="16,12" ColumnSpacing="12"
+                        <Grid ColumnDefinitions="44, *, Auto" Padding="16,12" ColumnSpacing="12"
                               Opacity="{Binding Aktiv, Converter={StaticResource BoolToOpacity}}"
                               SemanticProperties.Description="{Binding ., Converter={StaticResource RecurringAccessibility}}">
                             <FlyoutBase.ContextFlyout>
@@ -104,37 +104,39 @@
                             </VerticalStackLayout>
 
                             <HorizontalStackLayout Grid.Column="2"
-                                                   Spacing="4"
-                                                   VerticalOptions="Center"
-                                                   IsVisible="{x:Static helpers:DesktopChrome.IsDesktop}">
-                                <Image Source="{x:Static icons:AppIcons.Toggle}"
-                                       WidthRequest="{x:Static helpers:DesktopChrome.RowActionIconSize}"
-                                       HeightRequest="{x:Static helpers:DesktopChrome.RowActionIconSize}"
-                                       Aspect="AspectFit"
-                                       SemanticProperties.Description="{loc:Translate Btn_AktivInaktiv}">
-                                    <Image.GestureRecognizers>
-                                        <TapGestureRecognizer
-                                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:RecurringTransactionsViewModel}}, Path=ToggleAktivCommand}"
-                                            CommandParameter="{Binding .}" />
-                                    </Image.GestureRecognizers>
-                                </Image>
-                                <Image Source="{x:Static icons:AppIcons.Delete}"
-                                       WidthRequest="{x:Static helpers:DesktopChrome.RowActionIconSize}"
-                                       HeightRequest="{x:Static helpers:DesktopChrome.RowActionIconSize}"
-                                       Aspect="AspectFit"
-                                       SemanticProperties.Description="{loc:Translate Btn_Loeschen}">
-                                    <Image.GestureRecognizers>
-                                        <TapGestureRecognizer
-                                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:RecurringTransactionsViewModel}}, Path=DeleteDauerauftragCommand}"
-                                            CommandParameter="{Binding .}" />
-                                    </Image.GestureRecognizers>
-                                </Image>
+                                                   Spacing="8"
+                                                   VerticalOptions="Center">
+                                <HorizontalStackLayout Spacing="4"
+                                                       VerticalOptions="Center"
+                                                       IsVisible="{x:Static helpers:DesktopChrome.IsDesktop}">
+                                    <Image Source="{x:Static icons:AppIcons.Toggle}"
+                                           WidthRequest="{x:Static helpers:DesktopChrome.RowActionIconSize}"
+                                           HeightRequest="{x:Static helpers:DesktopChrome.RowActionIconSize}"
+                                           Aspect="AspectFit"
+                                           SemanticProperties.Description="{loc:Translate Btn_AktivInaktiv}">
+                                        <Image.GestureRecognizers>
+                                            <TapGestureRecognizer
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:RecurringTransactionsViewModel}}, Path=ToggleAktivCommand}"
+                                                CommandParameter="{Binding .}" />
+                                        </Image.GestureRecognizers>
+                                    </Image>
+                                    <Image Source="{x:Static icons:AppIcons.Delete}"
+                                           WidthRequest="{x:Static helpers:DesktopChrome.RowActionIconSize}"
+                                           HeightRequest="{x:Static helpers:DesktopChrome.RowActionIconSize}"
+                                           Aspect="AspectFit"
+                                           SemanticProperties.Description="{loc:Translate Btn_Loeschen}">
+                                        <Image.GestureRecognizers>
+                                            <TapGestureRecognizer
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:RecurringTransactionsViewModel}}, Path=DeleteDauerauftragCommand}"
+                                                CommandParameter="{Binding .}" />
+                                        </Image.GestureRecognizers>
+                                    </Image>
+                                </HorizontalStackLayout>
+                                <Label Text="{Binding ., Converter={StaticResource BetragDisplay}}"
+                                       TextColor="{Binding Typ, Converter={StaticResource TypToColor}}"
+                                       FontSize="16" FontAttributes="Bold"
+                                       VerticalTextAlignment="Center" />
                             </HorizontalStackLayout>
-                            <Label Grid.Column="3"
-                                   Text="{Binding ., Converter={StaticResource BetragDisplay}}"
-                                   TextColor="{Binding Typ, Converter={StaticResource TypToColor}}"
-                                   FontSize="16" FontAttributes="Bold"
-                                   VerticalTextAlignment="Center" />
                         </Grid>
                     </SwipeView>
                 </DataTemplate>

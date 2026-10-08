@@ -70,34 +70,38 @@
                                 <helpers:DesktopChrome.EnableRowHover>True</helpers:DesktopChrome.EnableRowHover>
                                 <VerticalStackLayout Spacing="10">
 
-                                    <Grid ColumnDefinitions="Auto, *, Auto, Auto" ColumnSpacing="10">
+                                    <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="10">
                                         <Label Grid.Column="0" Text="{Binding SparZiel.Icon}"
                                                FontSize="24" VerticalTextAlignment="Center" />
                                         <Label Grid.Column="1" Text="{Binding SparZiel.Titel}"
                                                FontSize="16" FontAttributes="Bold"
                                                VerticalTextAlignment="Center" />
-                                        <Image Grid.Column="2"
-                                               Source="{x:Static icons:AppIcons.Delete}"
-                                               WidthRequest="{x:Static helpers:DesktopChrome.RowActionIconSize}"
-                                               HeightRequest="{x:Static helpers:DesktopChrome.RowActionIconSize}"
-                                               Aspect="AspectFit"
-                                               VerticalOptions="Center"
-                                               IsVisible="{x:Static helpers:DesktopChrome.IsDesktop}"
-                                               SemanticProperties.Description="{loc:Translate Btn_Loeschen}">
-                                            <Image.GestureRecognizers>
-                                                <TapGestureRecognizer
-                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SparZieleViewModel}}, Path=DeleteSparZielCommand}"
-                                                    CommandParameter="{Binding SparZiel.Id}" />
-                                            </Image.GestureRecognizers>
-                                        </Image>
-                                        <VerticalStackLayout Grid.Column="3" HorizontalOptions="End">
-                                            <Label Text="{Binding GesamtFortschritt, Converter={StaticResource Currency}}"
-                                                   FontSize="15" FontAttributes="Bold"
-                                                   TextColor="{AppThemeBinding Light={StaticResource Einnahme}, Dark={StaticResource EinnahmeDark}}" HorizontalTextAlignment="End" />
-                                            <Label Text="{Binding SparZiel.ZielBetrag, Converter={StaticResource Currency}}"
-                                                   FontSize="12" HorizontalTextAlignment="End"
-                                                   TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
-                                        </VerticalStackLayout>
+                                        <HorizontalStackLayout Grid.Column="2"
+                                                               Spacing="8"
+                                                               VerticalOptions="Center"
+                                                               HorizontalOptions="End">
+                                            <Image Source="{x:Static icons:AppIcons.Delete}"
+                                                   WidthRequest="{x:Static helpers:DesktopChrome.RowActionIconSize}"
+                                                   HeightRequest="{x:Static helpers:DesktopChrome.RowActionIconSize}"
+                                                   Aspect="AspectFit"
+                                                   VerticalOptions="Center"
+                                                   IsVisible="{x:Static helpers:DesktopChrome.IsDesktop}"
+                                                   SemanticProperties.Description="{loc:Translate Btn_Loeschen}">
+                                                <Image.GestureRecognizers>
+                                                    <TapGestureRecognizer
+                                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SparZieleViewModel}}, Path=DeleteSparZielCommand}"
+                                                        CommandParameter="{Binding SparZiel.Id}" />
+                                                </Image.GestureRecognizers>
+                                            </Image>
+                                            <VerticalStackLayout HorizontalOptions="End">
+                                                <Label Text="{Binding GesamtFortschritt, Converter={StaticResource Currency}}"
+                                                       FontSize="15" FontAttributes="Bold"
+                                                       TextColor="{AppThemeBinding Light={StaticResource Einnahme}, Dark={StaticResource EinnahmeDark}}" HorizontalTextAlignment="End" />
+                                                <Label Text="{Binding SparZiel.ZielBetrag, Converter={StaticResource Currency}}"
+                                                       FontSize="12" HorizontalTextAlignment="End"
+                                                       TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
+                                            </VerticalStackLayout>
+                                        </HorizontalStackLayout>
                                     </Grid>
 
                                     <VerticalStackLayout Spacing="4">

@@ -103,7 +103,7 @@
                                                 CommandParameter="{Binding .}" />
                                         </Border.GestureRecognizers>
                                         <helpers:DesktopChrome.EnableRowHover>True</helpers:DesktopChrome.EnableRowHover>
-                                        <Grid ColumnDefinitions="Auto, *, Auto, Auto" ColumnSpacing="10">
+                                        <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="10">
                                             <Border Grid.Column="0"
                                                     BackgroundColor="{Binding Color}"
                                                     StrokeShape="RoundRectangle 12"
@@ -117,27 +117,29 @@
                                                 <Label Text="{Binding ., Converter={StaticResource KategorieName}}"
                                                        FontSize="16" FontAttributes="Bold" />
                                             </VerticalStackLayout>
-                                            <Image Grid.Column="2"
-                                                   Source="{x:Static icons:AppIcons.Delete}"
-                                                   WidthRequest="{x:Static helpers:DesktopChrome.RowActionIconSize}"
-                                                   HeightRequest="{x:Static helpers:DesktopChrome.RowActionIconSize}"
-                                                   Aspect="AspectFit"
-                                                   VerticalOptions="Center"
-                                                   IsVisible="{x:Static helpers:DesktopChrome.IsDesktop}"
-                                                   SemanticProperties.Description="{loc:Translate Btn_Loeschen}">
-                                                <Image.GestureRecognizers>
-                                                    <TapGestureRecognizer
-                                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:CategoriesViewModel}}, Path=DeleteKategorieCommand}"
-                                                        CommandParameter="{Binding .}" />
-                                                </Image.GestureRecognizers>
-                                            </Image>
-                                            <Label Grid.Column="3"
-                                                   Text="{Binding Typ, Converter={StaticResource TransactionTypeToLocalizedStringConverter}}"
-                                                   FontSize="13"
-                                                   FontAttributes="Bold"
-                                                   TextColor="{Binding Typ, Converter={StaticResource TransactionTypColor}}"
-                                                   HorizontalTextAlignment="End"
-                                                   VerticalTextAlignment="Center" />
+                                            <HorizontalStackLayout Grid.Column="2"
+                                                                   Spacing="8"
+                                                                   VerticalOptions="Center">
+                                                <Image Source="{x:Static icons:AppIcons.Delete}"
+                                                       WidthRequest="{x:Static helpers:DesktopChrome.RowActionIconSize}"
+                                                       HeightRequest="{x:Static helpers:DesktopChrome.RowActionIconSize}"
+                                                       Aspect="AspectFit"
+                                                       VerticalOptions="Center"
+                                                       IsVisible="{x:Static helpers:DesktopChrome.IsDesktop}"
+                                                       SemanticProperties.Description="{loc:Translate Btn_Loeschen}">
+                                                    <Image.GestureRecognizers>
+                                                        <TapGestureRecognizer
+                                                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:CategoriesViewModel}}, Path=DeleteKategorieCommand}"
+                                                            CommandParameter="{Binding .}" />
+                                                    </Image.GestureRecognizers>
+                                                </Image>
+                                                <Label Text="{Binding Typ, Converter={StaticResource TransactionTypeToLocalizedStringConverter}}"
+                                                       FontSize="13"
+                                                       FontAttributes="Bold"
+                                                       TextColor="{Binding Typ, Converter={StaticResource TransactionTypColor}}"
+                                                       HorizontalTextAlignment="End"
+                                                       VerticalTextAlignment="Center" />
+                                            </HorizontalStackLayout>
                                         </Grid>
                                     </Border>
                                 </SwipeView>
@@ -219,7 +221,7 @@
                                         <helpers:DesktopChrome.EnableRowHover>True</helpers:DesktopChrome.EnableRowHover>
                                         <VerticalStackLayout Spacing="10">
 
-                                            <Grid ColumnDefinitions="Auto, *, Auto, Auto" ColumnSpacing="10">
+                                            <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="10">
                                                 <Label Grid.Column="0" Text="{Binding Icon}"
                                                        FontSize="24" VerticalTextAlignment="Center" />
                                                 <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
@@ -230,27 +232,28 @@
                                                            TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
                                                 </VerticalStackLayout>
                                                 <HorizontalStackLayout Grid.Column="2"
-                                                                       VerticalOptions="Center"
-                                                                       IsVisible="{x:Static helpers:DesktopChrome.IsDesktop}">
-                                                    <Image Source="{x:Static icons:AppIcons.Delete}"
-                                                           WidthRequest="{x:Static helpers:DesktopChrome.RowActionIconSize}"
-                                                           HeightRequest="{x:Static helpers:DesktopChrome.RowActionIconSize}"
-                                                           Aspect="AspectFit"
-                                                           IsVisible="{Binding CanDelete}"
-                                                           SemanticProperties.Description="{loc:Translate Btn_Loeschen}">
-                                                        <Image.GestureRecognizers>
-                                                            <TapGestureRecognizer
-                                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:CategoriesViewModel}}, Path=DeleteKontoCommand}"
-                                                                CommandParameter="{Binding .}" />
-                                                        </Image.GestureRecognizers>
-                                                    </Image>
+                                                                       Spacing="8"
+                                                                       VerticalOptions="Center">
+                                                    <HorizontalStackLayout IsVisible="{x:Static helpers:DesktopChrome.IsDesktop}">
+                                                        <Image Source="{x:Static icons:AppIcons.Delete}"
+                                                               WidthRequest="{x:Static helpers:DesktopChrome.RowActionIconSize}"
+                                                               HeightRequest="{x:Static helpers:DesktopChrome.RowActionIconSize}"
+                                                               Aspect="AspectFit"
+                                                               IsVisible="{Binding CanDelete}"
+                                                               SemanticProperties.Description="{loc:Translate Btn_Loeschen}">
+                                                            <Image.GestureRecognizers>
+                                                                <TapGestureRecognizer
+                                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:CategoriesViewModel}}, Path=DeleteKontoCommand}"
+                                                                    CommandParameter="{Binding .}" />
+                                                            </Image.GestureRecognizers>
+                                                        </Image>
+                                                    </HorizontalStackLayout>
+                                                    <Label Text="{Binding Saldo, Converter={StaticResource Currency}}"
+                                                           FontSize="15" FontAttributes="Bold"
+                                                           TextColor="{Binding Saldo, Converter={StaticResource BilanzColor}}"
+                                                           HorizontalTextAlignment="End"
+                                                           VerticalTextAlignment="Center" />
                                                 </HorizontalStackLayout>
-                                                <Label Grid.Column="3"
-                                                       Text="{Binding Saldo, Converter={StaticResource Currency}}"
-                                                       FontSize="15" FontAttributes="Bold"
-                                                       TextColor="{Binding Saldo, Converter={StaticResource BilanzColor}}"
-                                                       HorizontalTextAlignment="End"
-                                                       VerticalTextAlignment="Center" />
                                             </Grid>
 
                                             <HorizontalStackLayout Spacing="8" IsVisible="{Binding HasStatusBadge}">
