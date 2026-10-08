@@ -94,25 +94,35 @@ public static class DesktopChrome
         };
     }
 
+    // Distinct from PageBackground (#F2F2F7) and CardBackground / CardBackgroundDark (#FFFFFF / #2C2C2E).
+    static readonly Color RowHoverLight = Color.FromArgb("#D8D8DE");
+    static readonly Color RowHoverDark = Color.FromArgb("#3A3A3C");
+
     static void OnEnableRowHoverChanged(BindableObject bindable, object oldValue, object newValue)
     {
         if (bindable is not View view || newValue is not true || !IsDesktop)
             return;
 
-        Color? restore = null;
+        // Capture even when BackgroundColor is null — otherwise exit never clears the hover tint.
+        Color? original = null;
+        var captured = false;
         var pointer = new PointerGestureRecognizer();
         pointer.PointerEntered += (_, _) =>
         {
-            restore ??= view.BackgroundColor;
+            if (!captured)
+            {
+                original = view.BackgroundColor;
+                captured = true;
+            }
+
             var dark = Microsoft.Maui.Controls.Application.Current?.RequestedTheme == AppTheme.Dark;
-            view.BackgroundColor = dark
-                ? Color.FromArgb("#2C2C2E")
-                : Color.FromArgb("#E8E8ED");
+            view.BackgroundColor = dark ? RowHoverDark : RowHoverLight;
         };
         pointer.PointerExited += (_, _) =>
         {
-            if (restore is not null)
-                view.BackgroundColor = restore;
+            if (!captured)
+                return;
+            view.BackgroundColor = original;
         };
         view.GestureRecognizers.Add(pointer);
     }

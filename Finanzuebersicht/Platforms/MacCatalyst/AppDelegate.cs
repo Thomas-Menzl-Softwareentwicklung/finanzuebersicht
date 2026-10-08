@@ -144,10 +144,12 @@ public class AppDelegate : MauiUIApplicationDelegate
 	static void BuildEscapeCommand(IUIMenuBuilder builder)
 	{
 		// Escape dismisses the create FormSheet; keep it out of the visible menu.
+		// Without priority, a focused Entry/UITextField eats Esc (resign first responder → beep).
 		var escape = UIKeyCommand.Create(
 			(NSString)UIKeyCommand.Escape,
 			default,
 			new Selector("onDesktopEscape:"));
+		escape.WantsPriorityOverSystemBehavior = true;
 		var menu = UIMenu.Create(
 			string.Empty,
 			null,
