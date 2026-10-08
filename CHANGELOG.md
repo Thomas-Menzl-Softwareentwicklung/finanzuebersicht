@@ -1,6 +1,6 @@
 # Änderungsverlauf
 
-## [1.23] - Unreleased
+## [1.23] - 2026-10-08
 
 ### Hinzugefügt
 
