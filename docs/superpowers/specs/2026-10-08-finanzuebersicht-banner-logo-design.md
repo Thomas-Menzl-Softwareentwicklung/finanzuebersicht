@@ -54,10 +54,8 @@ Unter `docs/brand/`:
 
 | File | Use |
 |---|---|
-| `logo-icon.svg` | Quelle für Icon |
-| `logo-icon.png` | 1024×1024, aus dem SVG |
-| `banner.svg` | Quelle für Banner, 16:9 |
-| `banner.png` | etwa 1600×900, aus dem SVG |
+| `logo-icon.png` | Icon-Master, 4096×4096, gefaltetes Band |
+| `banner.png` | Banner-Master, 3840×2160, 16:9 |
 
 Die JPG-Entwürfe in `docs/brand/preview/` bleiben die visuelle Referenz. Sie sind nicht die Lieferdatei.
 
