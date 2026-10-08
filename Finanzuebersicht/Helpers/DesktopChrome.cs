@@ -50,6 +50,20 @@ public static class DesktopChrome
             typeof(DesktopChrome),
             null);
 
+    static readonly BindableProperty AttachedToolbarItemsProperty =
+        BindableProperty.CreateAttached(
+            "AttachedToolbarItems",
+            typeof(ToolbarItem[]),
+            typeof(DesktopChrome),
+            null);
+
+    static readonly BindableProperty ToolbarBuilderProperty =
+        BindableProperty.CreateAttached(
+            "ToolbarBuilder",
+            typeof(Action),
+            typeof(DesktopChrome),
+            null);
+
     public static bool GetSuppressSwipeOnDesktop(BindableObject view) =>
         (bool)view.GetValue(SuppressSwipeOnDesktopProperty);
 
@@ -130,21 +144,50 @@ public static class DesktopChrome
     /// <summary>
     /// Toolbar on the page + register actions for the Shell macOS menu
     /// (page-level MenuBarItems are unreliable under Shell on Mac Catalyst).
+    /// <paramref name="build"/> is re-run on language change via <see cref="RefreshPageActions"/>.
     /// </summary>
-    public static void AttachPageActions(Page page, string menuTitle, params DesktopAction[] actions)
+    public static void AttachPageActions(Page page, Func<(string MenuTitle, DesktopAction[] Actions)> build)
     {
-        if (!IsDesktop || actions.Length == 0)
+        if (!IsDesktop)
             return;
 
-        for (var i = 0; i < actions.Length; i++)
+        void Apply()
         {
-            var action = actions[i];
-            page.ToolbarItems.Add(CreateToolbarItem(action.Text, action.Command, priority: i));
+            var (menuTitle, actions) = build();
+            if (actions.Length == 0)
+                return;
+
+            if (page.GetValue(AttachedToolbarItemsProperty) is ToolbarItem[] previous)
+            {
+                foreach (var item in previous)
+                    page.ToolbarItems.Remove(item);
+            }
+
+            var created = new ToolbarItem[actions.Length];
+            for (var i = 0; i < actions.Length; i++)
+            {
+                var action = actions[i];
+                created[i] = CreateToolbarItem(action.Text, action.Command, priority: i);
+                page.ToolbarItems.Add(created[i]);
+            }
+
+            page.SetValue(AttachedToolbarItemsProperty, created);
+            SetActionsMenuTitle(page, menuTitle);
+            SetRegisteredActions(page, actions);
+            PublishPageActions(page);
         }
 
-        SetActionsMenuTitle(page, menuTitle);
-        SetRegisteredActions(page, actions);
-        PublishPageActions(page);
+        page.SetValue(ToolbarBuilderProperty, (Action)Apply);
+        Apply();
+    }
+
+    /// <summary>Re-apply toolbar/menu action titles after an in-app language change.</summary>
+    public static void RefreshPageActions(Page page)
+    {
+        if (!IsDesktop)
+            return;
+        if (page.GetValue(ToolbarBuilderProperty) is Action apply)
+            apply();
     }
 
     /// <summary>Re-publish this page's actions into the Shell menu bar (call from OnAppearing).</summary>

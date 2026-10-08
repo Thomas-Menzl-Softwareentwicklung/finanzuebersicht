@@ -103,7 +103,7 @@ public class AppDelegate : MauiUIApplicationDelegate
 		}
 
 		var actionsMenu = UIMenu.Create(
-			"Aktionen",
+			loc[ResourceKeys.Menu_Aktionen],
 			null,
 			ActionsMenuId,
 			default,
@@ -162,8 +162,9 @@ public class AppDelegate : MauiUIApplicationDelegate
 
 	static void BuildSettingsCommand(IUIMenuBuilder builder)
 	{
+		var settingsTitle = LocalizationResourceManager.Current[ResourceKeys.Nav_Einstellungen] + "\u2026";
 		var settingsCommand = UIKeyCommand.Create(
-			"Einstellungen…",
+			settingsTitle,
 			null,
 			new Selector("onDesktopSettings:"),
 			",",

@@ -22,6 +22,7 @@
 - Widget-Shortcuts und ▼-Scroll-Hinweise nur noch auf dem iPhone
 - Esc schließt Mac-Anlege-Dialoge auch bei fokussiertem Textfeld (nicht nur Fokus weg / Piepton)
 - Desktop-Zeilen-Hover: Tint wird beim Verlassen wieder entfernt; Kontrast zu Karten-/Seitenhintergrund
+- Mac-Menü Aktionen/Einstellungen lokalisiert; Gehe-zu/Toolbar-Texte nach Sprachwechsel neu gebaut; Settings leert Aktionen defensiv
 
 ### Geplant (nicht in 1.23)
 

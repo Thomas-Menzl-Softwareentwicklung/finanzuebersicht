@@ -1,3 +1,4 @@
+using Finanzuebersicht.Helpers;
 using Finanzuebersicht.ViewModels;
 #if IOS
 using ObjCRuntime;
@@ -17,6 +18,8 @@ public partial class SettingsPage : ContentPage
     protected override async void OnAppearing()
     {
         base.OnAppearing();
+        // Clear stale tab Aktionen (Settings has none); Shell.Navigated may not always cover this path.
+        DesktopChrome.PublishPageActions(this);
         if (BindingContext is SettingsViewModel vm)
         {
             await vm.License.InitializeAsync();

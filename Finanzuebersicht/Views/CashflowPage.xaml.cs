@@ -16,10 +16,14 @@ public partial class CashflowPage : BaseContentPage
 
     void AttachDesktopToolbar(CashflowViewModel viewModel)
     {
-        var loc = LocalizationResourceManager.Current;
-        DesktopChrome.AttachPageActions(
-            this,
-            loc[ResourceKeys.Menu_Aktionen],
-            new DesktopChrome.DesktopAction(loc[ResourceKeys.Btn_Aktualisieren], viewModel.LoadCashflowCommand, "R"));
+        DesktopChrome.AttachPageActions(this, () =>
+        {
+            var loc = LocalizationResourceManager.Current;
+            return (
+                loc[ResourceKeys.Menu_Aktionen],
+                [
+                    new DesktopChrome.DesktopAction(loc[ResourceKeys.Btn_Aktualisieren], viewModel.LoadCashflowCommand, "R")
+                ]);
+        });
     }
 }

@@ -52,12 +52,16 @@ public partial class DashboardPage : ContentPage
 
     void AttachDesktopToolbar()
     {
-        var loc = LocalizationResourceManager.Current;
-        DesktopChrome.AttachPageActions(
-            this,
-            loc[ResourceKeys.Menu_Aktionen],
-            new DesktopChrome.DesktopAction(loc[ResourceKeys.Btn_Aktualisieren], _vm.LoadDashboardCommand, "R"),
-            new DesktopChrome.DesktopAction(loc[ResourceKeys.Btn_SchnellAusgabe], _vm.QuickCaptureCommand, "N"));
+        DesktopChrome.AttachPageActions(this, () =>
+        {
+            var loc = LocalizationResourceManager.Current;
+            return (
+                loc[ResourceKeys.Menu_Aktionen],
+                [
+                    new DesktopChrome.DesktopAction(loc[ResourceKeys.Btn_Aktualisieren], _vm.LoadDashboardCommand, "R"),
+                    new DesktopChrome.DesktopAction(loc[ResourceKeys.Btn_SchnellAusgabe], _vm.QuickCaptureCommand, "N")
+                ]);
+        });
     }
 
     protected override async void OnAppearing()
@@ -97,6 +101,7 @@ public partial class DashboardPage : ContentPage
         _vm.LoadDashboardCommand.Execute(null);
         if (BindingContext is ILocalizableViewModel locVm)
             locVm.RefreshLocalizedStrings();
+        DesktopChrome.RefreshPageActions(this);
     }
 
     private void OnAppDataChanged()

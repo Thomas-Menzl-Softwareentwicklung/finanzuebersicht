@@ -29,12 +29,16 @@ public partial class CategoriesPage : BaseContentPage
 
     void AttachDesktopToolbar(CategoriesViewModel viewModel)
     {
-        var loc = LocalizationResourceManager.Current;
-        DesktopChrome.AttachPageActions(
-            this,
-            loc[ResourceKeys.Menu_Aktionen],
-            new DesktopChrome.DesktopAction(loc[ResourceKeys.Btn_Aktualisieren], viewModel.LoadKategorienCommand, "R"),
-            new DesktopChrome.DesktopAction(loc[ResourceKeys.Btn_Hinzufuegen], viewModel.GoToDetailCommand, "N"));
+        DesktopChrome.AttachPageActions(this, () =>
+        {
+            var loc = LocalizationResourceManager.Current;
+            return (
+                loc[ResourceKeys.Menu_Aktionen],
+                [
+                    new DesktopChrome.DesktopAction(loc[ResourceKeys.Btn_Aktualisieren], viewModel.LoadKategorienCommand, "R"),
+                    new DesktopChrome.DesktopAction(loc[ResourceKeys.Btn_Hinzufuegen], viewModel.GoToDetailCommand, "N")
+                ]);
+        });
     }
 
     protected override void OnAppearing()

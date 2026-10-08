@@ -29,14 +29,18 @@ public partial class TransactionsPage : BaseContentPage
 
     void AttachDesktopToolbar(TransactionsViewModel viewModel)
     {
-        var loc = LocalizationResourceManager.Current;
-        DesktopChrome.AttachPageActions(
-            this,
-            loc[ResourceKeys.Menu_Aktionen],
-            new DesktopChrome.DesktopAction(loc[ResourceKeys.Btn_Aktualisieren], viewModel.LoadTransaktionenCommand, "R"),
-            new DesktopChrome.DesktopAction(loc[ResourceKeys.Btn_Import], viewModel.ImportCsvCommand, "I"),
-            new DesktopChrome.DesktopAction(loc[ResourceKeys.Btn_Umbuchen], viewModel.GoToTransferCommand, "U"),
-            new DesktopChrome.DesktopAction(loc[ResourceKeys.Btn_Hinzufuegen], viewModel.GoToDetailCommand, "N"));
+        DesktopChrome.AttachPageActions(this, () =>
+        {
+            var loc = LocalizationResourceManager.Current;
+            return (
+                loc[ResourceKeys.Menu_Aktionen],
+                [
+                    new DesktopChrome.DesktopAction(loc[ResourceKeys.Btn_Aktualisieren], viewModel.LoadTransaktionenCommand, "R"),
+                    new DesktopChrome.DesktopAction(loc[ResourceKeys.Btn_Import], viewModel.ImportCsvCommand, "I"),
+                    new DesktopChrome.DesktopAction(loc[ResourceKeys.Btn_Umbuchen], viewModel.GoToTransferCommand, "U"),
+                    new DesktopChrome.DesktopAction(loc[ResourceKeys.Btn_Hinzufuegen], viewModel.GoToDetailCommand, "N")
+                ]);
+        });
     }
 
     /// <summary>Used by ⌘F / Menü „Suchen“ on Mac Catalyst.</summary>

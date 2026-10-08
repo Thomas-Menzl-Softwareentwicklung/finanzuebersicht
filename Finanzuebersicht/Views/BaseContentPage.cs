@@ -71,6 +71,8 @@ public abstract class BaseContentPage : ContentPage
         if (BindingContext is ILocalizableViewModel locVm)
             locVm.RefreshLocalizedStrings();
 
+        DesktopChrome.RefreshPageActions(this);
+
         if (BindingContext is IAutoLoadViewModel vm && vm.ShouldAutoLoad)
             vm.AutoLoadCommand.Execute(null);
     }

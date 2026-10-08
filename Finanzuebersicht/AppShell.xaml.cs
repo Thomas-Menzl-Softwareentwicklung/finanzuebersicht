@@ -1,13 +1,18 @@
 using Finanzuebersicht.Helpers;
 using Finanzuebersicht.Navigation;
+using Finanzuebersicht.Presentation.Services;
 using Finanzuebersicht.Resources.Strings;
 using Finanzuebersicht.Services;
 using Finanzuebersicht.Views;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Finanzuebersicht;
 
 public partial class AppShell : Shell
 {
+	IAppEvents? _appEvents;
+	bool _desktopLanguageHooked;
+
 	public AppShell()
 	{
 		InitializeComponent();
@@ -30,23 +35,52 @@ public partial class AppShell : Shell
 		if (DesktopChrome.IsDesktop)
 		{
 			// TabBar stays visible for discoverability; "Gehe zu" + ⌘1–⌘5 are extras.
-			var loc = LocalizationResourceManager.Current;
-			DesktopMenuBridge.GoToItems =
-			[
-				new("finanz.goto.dashboard", loc[ResourceKeys.Nav_Dashboard], "1", "//DashboardPage"),
-				new("finanz.goto.transactions", loc[ResourceKeys.Nav_Transaktionen], "2", "//TransactionsPage"),
-				new("finanz.goto.recurring", loc[ResourceKeys.Nav_Dauerauftraege], "3", "//RecurringTransactionsPage"),
-				new("finanz.goto.management", loc[ResourceKeys.Nav_Verwaltung], "4", "//CategoriesPage"),
-				new("finanz.goto.savings", loc[ResourceKeys.Nav_SparZiele], "5", "//SparZielePage"),
-			];
+			RebuildGoToItems();
 			DesktopMenuBridge.GoToRouteAsync = GoToTabAsync;
 			DesktopMenuBridge.OpenSettingsHandler = () => _ = OpenSettingsAsync();
 			DesktopMenuBridge.FocusSearchHandler = FocusTransactionsSearch;
 			Navigated += OnShellNavigated;
+			HandlerChanged += OnDesktopHandlerChanged;
 #if MACCATALYST
 			Platforms.MacCatalyst.MacMenuBar.RequestRebuild();
 #endif
 		}
+	}
+
+	void OnDesktopHandlerChanged(object? sender, EventArgs e)
+	{
+		if (_desktopLanguageHooked || Handler?.MauiContext?.Services is null)
+			return;
+
+		_appEvents = Handler.MauiContext.Services.GetService<IAppEvents>();
+		if (_appEvents is null)
+			return;
+
+		_desktopLanguageHooked = true;
+		_appEvents.LanguageChanged += OnDesktopLanguageChanged;
+	}
+
+	void OnDesktopLanguageChanged()
+	{
+		RebuildGoToItems();
+		if (CurrentPage is Page page)
+			DesktopChrome.RefreshPageActions(page);
+#if MACCATALYST
+		Platforms.MacCatalyst.MacMenuBar.RequestRebuild();
+#endif
+	}
+
+	static void RebuildGoToItems()
+	{
+		var loc = LocalizationResourceManager.Current;
+		DesktopMenuBridge.GoToItems =
+		[
+			new("finanz.goto.dashboard", loc[ResourceKeys.Nav_Dashboard], "1", "//DashboardPage"),
+			new("finanz.goto.transactions", loc[ResourceKeys.Nav_Transaktionen], "2", "//TransactionsPage"),
+			new("finanz.goto.recurring", loc[ResourceKeys.Nav_Dauerauftraege], "3", "//RecurringTransactionsPage"),
+			new("finanz.goto.management", loc[ResourceKeys.Nav_Verwaltung], "4", "//CategoriesPage"),
+			new("finanz.goto.savings", loc[ResourceKeys.Nav_SparZiele], "5", "//SparZielePage"),
+		];
 	}
 
 	void OnShellNavigated(object? sender, ShellNavigatedEventArgs e)
