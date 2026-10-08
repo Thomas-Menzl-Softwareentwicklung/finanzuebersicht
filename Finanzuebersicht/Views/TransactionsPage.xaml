@@ -78,9 +78,11 @@
                                         </SemanticProperties.Description>
                                         <Grid.GestureRecognizers>
                                             <TapGestureRecognizer
+                                                NumberOfTapsRequired="{x:Static helpers:DesktopChrome.DetailOpenTapCount}"
                                                 Command="{Binding Source={RelativeSource AncestorType={x:Type views:BaseContentPage}}, Path=BindingContext.GoToDetailCommand}"
                                                 CommandParameter="{Binding .}" />
                                         </Grid.GestureRecognizers>
+                                        <helpers:DesktopChrome.EnableRowHover>True</helpers:DesktopChrome.EnableRowHover>
                                         <Border Grid.Column="0" WidthRequest="38" HeightRequest="38"
                                                 StrokeShape="RoundRectangle 11" Stroke="Transparent">
                                             <Border.BackgroundColor>
@@ -160,7 +162,8 @@
 
         <!-- Row 0: Suchleiste + Filter-Button -->
         <Grid Grid.Row="0" ColumnDefinitions="*, Auto" Padding="12,8,12,4" ColumnSpacing="8">
-            <SearchBar Grid.Column="0"
+            <SearchBar x:Name="TransactionSearchBar"
+                       Grid.Column="0"
                        Text="{Binding SearchText}"
                        Placeholder="{loc:Translate Hint_SucheTransaktionen}"
                        CancelButtonColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />

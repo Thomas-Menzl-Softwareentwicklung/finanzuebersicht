@@ -9,10 +9,21 @@ public static class DesktopMenuBridge
 {
     public sealed record Item(string Id, string Title, string? Key, Action Execute);
 
+    public sealed record GoToItem(string Id, string Title, string Key, string Route);
+
     static readonly object Gate = new();
     static Item[] _actions = [];
 
     public static Action? OpenSettingsHandler { get; set; }
+
+    public static Action? FocusSearchHandler { get; set; }
+
+    public static Func<Task>? DismissModalAsync { get; set; }
+
+    public static Func<string, Task>? GoToRouteAsync { get; set; }
+
+    /// <summary>Fixed "Gehe zu" destinations (⌘1–⌘5) — substitutes for the hidden Mac tab bar.</summary>
+    public static IReadOnlyList<GoToItem> GoToItems { get; set; } = [];
 
     public static IReadOnlyList<Item> Actions
     {
@@ -61,4 +72,23 @@ public static class DesktopMenuBridge
 
     public static void OpenSettings() =>
         MainThread.BeginInvokeOnMainThread(() => OpenSettingsHandler?.Invoke());
+
+    public static void FocusSearch() =>
+        MainThread.BeginInvokeOnMainThread(() => FocusSearchHandler?.Invoke());
+
+    public static void DismissModal() =>
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            var dismiss = DismissModalAsync;
+            if (dismiss is not null)
+                _ = dismiss();
+        });
+
+    public static void GoTo(string route) =>
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            var go = GoToRouteAsync;
+            if (go is not null)
+                _ = go(route);
+        });
 }

@@ -13,6 +13,9 @@ public static class DesktopChrome
     /// <summary>Desktop row action glyph size — between row title (~15pt) and category tile (~36).</summary>
     public const double RowActionIconSize = 18;
 
+    /// <summary>List rows open detail on double-click on Mac; single tap on phone.</summary>
+    public static int DetailOpenTapCount => CoreDesktop.DetailOpenTapCount;
+
     public static bool IsDesktop => CoreDesktop.IsDesktop;
 
     public static bool IsPhone => CoreDesktop.IsPhone;
@@ -24,6 +27,14 @@ public static class DesktopChrome
             typeof(DesktopChrome),
             false,
             propertyChanged: OnSuppressSwipeChanged);
+
+    public static readonly BindableProperty EnableRowHoverProperty =
+        BindableProperty.CreateAttached(
+            "EnableRowHover",
+            typeof(bool),
+            typeof(DesktopChrome),
+            false,
+            propertyChanged: OnEnableRowHoverChanged);
 
     public static readonly BindableProperty RegisteredActionsProperty =
         BindableProperty.CreateAttached(
@@ -44,6 +55,12 @@ public static class DesktopChrome
 
     public static void SetSuppressSwipeOnDesktop(BindableObject view, bool value) =>
         view.SetValue(SuppressSwipeOnDesktopProperty, value);
+
+    public static bool GetEnableRowHover(BindableObject view) =>
+        (bool)view.GetValue(EnableRowHoverProperty);
+
+    public static void SetEnableRowHover(BindableObject view, bool value) =>
+        view.SetValue(EnableRowHoverProperty, value);
 
     public static DesktopAction[]? GetRegisteredActions(BindableObject view) =>
         (DesktopAction[]?)view.GetValue(RegisteredActionsProperty);
@@ -75,6 +92,29 @@ public static class DesktopChrome
             if (swipe.Handler is not null)
                 Clear();
         };
+    }
+
+    static void OnEnableRowHoverChanged(BindableObject bindable, object oldValue, object newValue)
+    {
+        if (bindable is not View view || newValue is not true || !IsDesktop)
+            return;
+
+        Color? restore = null;
+        var pointer = new PointerGestureRecognizer();
+        pointer.PointerEntered += (_, _) =>
+        {
+            restore ??= view.BackgroundColor;
+            var dark = Microsoft.Maui.Controls.Application.Current?.RequestedTheme == AppTheme.Dark;
+            view.BackgroundColor = dark
+                ? Color.FromArgb("#2C2C2E")
+                : Color.FromArgb("#E8E8ED");
+        };
+        pointer.PointerExited += (_, _) =>
+        {
+            if (restore is not null)
+                view.BackgroundColor = restore;
+        };
+        view.GestureRecognizers.Add(pointer);
     }
 
     /// <summary>

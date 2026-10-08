@@ -63,9 +63,11 @@
                                 </FlyoutBase.ContextFlyout>
                                 <Border.GestureRecognizers>
                                     <TapGestureRecognizer
+                                        NumberOfTapsRequired="{x:Static helpers:DesktopChrome.DetailOpenTapCount}"
                                         Command="{Binding Source={RelativeSource AncestorType={x:Type vm:SparZieleViewModel}}, Path=OpenSparZielCommand}"
                                         CommandParameter="{Binding .}" />
                                 </Border.GestureRecognizers>
+                                <helpers:DesktopChrome.EnableRowHover>True</helpers:DesktopChrome.EnableRowHover>
                                 <VerticalStackLayout Spacing="10">
 
                                     <Grid ColumnDefinitions="Auto, *, Auto, Auto" ColumnSpacing="10">

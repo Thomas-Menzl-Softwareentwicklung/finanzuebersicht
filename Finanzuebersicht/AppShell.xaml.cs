@@ -29,8 +29,23 @@ public partial class AppShell : Shell
 
 		if (DesktopChrome.IsDesktop)
 		{
+			// TabBar stays visible for discoverability; "Gehe zu" + ⌘1–⌘5 are extras.
+			var loc = LocalizationResourceManager.Current;
+			DesktopMenuBridge.GoToItems =
+			[
+				new("finanz.goto.dashboard", loc[ResourceKeys.Nav_Dashboard], "1", "//DashboardPage"),
+				new("finanz.goto.transactions", loc[ResourceKeys.Nav_Transaktionen], "2", "//TransactionsPage"),
+				new("finanz.goto.recurring", loc[ResourceKeys.Nav_Dauerauftraege], "3", "//RecurringTransactionsPage"),
+				new("finanz.goto.management", loc[ResourceKeys.Nav_Verwaltung], "4", "//CategoriesPage"),
+				new("finanz.goto.savings", loc[ResourceKeys.Nav_SparZiele], "5", "//SparZielePage"),
+			];
+			DesktopMenuBridge.GoToRouteAsync = GoToTabAsync;
 			DesktopMenuBridge.OpenSettingsHandler = () => _ = OpenSettingsAsync();
+			DesktopMenuBridge.FocusSearchHandler = FocusTransactionsSearch;
 			Navigated += OnShellNavigated;
+#if MACCATALYST
+			Platforms.MacCatalyst.MacMenuBar.RequestRebuild();
+#endif
 		}
 	}
 
@@ -74,5 +89,38 @@ public partial class AppShell : Shell
 		if (location.EndsWith(Routes.Settings))
 			return;
 		await Shell.Current.GoToAsync(Routes.Settings);
+	}
+
+	static async Task GoToTabAsync(string route)
+	{
+		if (Shell.Current is null || string.IsNullOrWhiteSpace(route))
+			return;
+		await Shell.Current.GoToAsync(route);
+	}
+
+	static void FocusTransactionsSearch()
+	{
+		_ = FocusTransactionsSearchAsync();
+	}
+
+	static async Task FocusTransactionsSearchAsync()
+	{
+		if (Shell.Current is null)
+			return;
+
+		var location = Shell.Current.CurrentState.Location.ToString();
+		if (!location.Contains("TransactionsPage", StringComparison.Ordinal))
+			await Shell.Current.GoToAsync("//TransactionsPage");
+
+		// Shell/page may not be ready on the first tick after navigation.
+		for (var attempt = 0; attempt < 8; attempt++)
+		{
+			await Task.Delay(50);
+			if (Shell.Current?.CurrentPage is TransactionsPage page)
+			{
+				page.FocusSearchBar();
+				return;
+			}
+		}
 	}
 }

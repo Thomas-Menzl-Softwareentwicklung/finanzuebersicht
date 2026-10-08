@@ -146,6 +146,18 @@ public sealed class CreateFormModalService : ICreateFormModalService
 
         page.Disappearing += (_, _) => Complete(false);
 
+        if (DesktopChrome.IsDesktop)
+        {
+            DesktopMenuBridge.DismissModalAsync = async () =>
+            {
+                if (Volatile.Read(ref settled) != 0)
+                    return;
+                Complete(false);
+                if (navigation.ModalStack.Count > 0)
+                    await navigation.PopModalAsync();
+            };
+        }
+
         try
         {
             await MainThread.InvokeOnMainThreadAsync(async () =>
@@ -165,6 +177,13 @@ public sealed class CreateFormModalService : ICreateFormModalService
             return false;
         }
 
-        return await tcs.Task;
+        try
+        {
+            return await tcs.Task;
+        }
+        finally
+        {
+            DesktopMenuBridge.DismissModalAsync = null;
+        }
     }
 }

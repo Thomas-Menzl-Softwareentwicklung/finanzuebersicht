@@ -3,6 +3,9 @@ using Finanzuebersicht.Resources.Strings;
 using Finanzuebersicht.Services;
 using Finanzuebersicht.ViewModels;
 using Microsoft.Extensions.Logging;
+#if MACCATALYST
+using UIKit;
+#endif
 
 namespace Finanzuebersicht.Views;
 
@@ -35,6 +38,35 @@ public partial class TransactionsPage : BaseContentPage
             new DesktopChrome.DesktopAction(loc[ResourceKeys.Btn_Umbuchen], viewModel.GoToTransferCommand, "U"),
             new DesktopChrome.DesktopAction(loc[ResourceKeys.Btn_Hinzufuegen], viewModel.GoToDetailCommand, "N"));
     }
+
+    /// <summary>Used by ⌘F / Menü „Suchen“ on Mac Catalyst.</summary>
+    public void FocusSearchBar()
+    {
+        TransactionSearchBar.Focus();
+
+#if MACCATALYST
+        // MAUI SearchBar.Focus() often no-ops on Catalyst — activate the native field.
+        if (TransactionSearchBar.Handler?.PlatformView is UIView platform)
+            FindFirstResponderTarget(platform)?.BecomeFirstResponder();
+#endif
+    }
+
+#if MACCATALYST
+    static UIView? FindFirstResponderTarget(UIView root)
+    {
+        if (root is UITextField or UISearchBar or UITextView)
+            return root;
+
+        foreach (var child in root.Subviews)
+        {
+            var found = FindFirstResponderTarget(child);
+            if (found is not null)
+                return found;
+        }
+
+        return null;
+    }
+#endif
 
     protected override void OnAppearing()
     {

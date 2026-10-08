@@ -15,4 +15,7 @@ public static class DesktopChrome
     public static bool IsDesktop => OperatingSystem.IsMacCatalyst();
 
     public static bool IsPhone => !IsDesktop;
+
+    /// <summary>List rows open detail on double-click on desktop; single tap on phone.</summary>
+    public static int DetailOpenTapCount => IsDesktop ? 2 : 1;
 }

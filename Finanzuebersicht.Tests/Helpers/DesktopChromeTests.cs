@@ -15,4 +15,11 @@ public class DesktopChromeTests
     {
         Assert.Equal(1200, DesktopChrome.ContentMaxWidth);
     }
+
+    [Fact]
+    public void DetailOpenTapCount_IsDoubleOnDesktopOtherwiseSingle()
+    {
+        var expected = DesktopChrome.IsDesktop ? 2 : 1;
+        Assert.Equal(expected, DesktopChrome.DetailOpenTapCount);
+    }
 }

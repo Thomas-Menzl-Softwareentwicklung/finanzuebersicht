@@ -74,9 +74,11 @@
                             </FlyoutBase.ContextFlyout>
                             <Grid.GestureRecognizers>
                                 <TapGestureRecognizer
+                                    NumberOfTapsRequired="{x:Static helpers:DesktopChrome.DetailOpenTapCount}"
                                     Command="{Binding Source={RelativeSource AncestorType={x:Type vm:RecurringTransactionsViewModel}}, Path=GoToDetailCommand}"
                                     CommandParameter="{Binding .}" />
                             </Grid.GestureRecognizers>
+                            <helpers:DesktopChrome.EnableRowHover>True</helpers:DesktopChrome.EnableRowHover>
 
                             <Border Grid.Column="0" BackgroundColor="{AppThemeBinding Light={StaticResource GroupedBackground}, Dark={StaticResource GroupedBackgroundDark}}"
                                     StrokeShape="RoundRectangle 10"

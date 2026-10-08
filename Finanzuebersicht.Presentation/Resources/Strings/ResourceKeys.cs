@@ -532,4 +532,6 @@ public static class ResourceKeys
     public const string A11y_Aktualisieren = nameof(A11y_Aktualisieren);
     public const string Menu_Aktionen = nameof(Menu_Aktionen);
     public const string Menu_Ablage = nameof(Menu_Ablage);
+    public const string Menu_GeheZu = nameof(Menu_GeheZu);
+    public const string Menu_Suchen = nameof(Menu_Suchen);
 }
