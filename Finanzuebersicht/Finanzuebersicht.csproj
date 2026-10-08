@@ -92,6 +92,10 @@
 		<!-- Images -->
 		<MauiImage Include="Resources\Images\*" />
 		<MauiImage Update="Resources\Images\dotnet_bot.png" Resize="True" BaseSize="300,185" />
+		<!-- Row action glyphs: default SVG viewBox is 24pt — without BaseSize, Mac shows intrinsic size -->
+		<MauiImage Update="Resources\Images\icon_delete.svg" BaseSize="18,18" />
+		<MauiImage Update="Resources\Images\icon_duplicate.svg" BaseSize="18,18" />
+		<MauiImage Update="Resources\Images\icon_toggle.svg" BaseSize="18,18" />
 
 		<!-- Custom Fonts -->
 		<MauiFont Include="Resources\Fonts\*" />

@@ -6,6 +6,7 @@
              xmlns:loc="clr-namespace:Finanzuebersicht.Extensions"
              xmlns:conv="clr-namespace:Finanzuebersicht.Converters"
              xmlns:controls="clr-namespace:Finanzuebersicht.Controls"
+             xmlns:helpers="clr-namespace:Finanzuebersicht.Helpers"
              x:Class="Finanzuebersicht.Views.SparZielDetailPage"
              x:DataType="vm:SparZielDetailViewModel"
              Title="{Binding PageTitle}">
@@ -100,6 +101,7 @@
                HorizontalTextAlignment="Center"
                Padding="0,2,0,6"
                InputTransparent="True"
+               IsVisible="{x:Static helpers:DesktopChrome.IsPhone}"
                TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray600}}" />
     </Grid>
 </views:BaseContentPage>

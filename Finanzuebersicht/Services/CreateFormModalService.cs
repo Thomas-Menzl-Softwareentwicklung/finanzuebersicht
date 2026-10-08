@@ -1,11 +1,13 @@
+using Finanzuebersicht.Controls;
+using Finanzuebersicht.Helpers;
 using Finanzuebersicht.Resources.Strings;
 
 namespace Finanzuebersicht.Services;
 
 /// <summary>
 /// Modal create-form host modeled on <see cref="QuickExpenseCaptureSheetService"/> —
-/// plain ContentPage as iOS/Mac page sheet (content-height detent when possible),
-/// no Toolkit Popup, no NavigationPage wrapper.
+/// plain ContentPage as iOS page sheet (content-height detent when possible) or
+/// Mac Catalyst centered form dialog (#353), no Toolkit Popup, no NavigationPage wrapper.
 /// </summary>
 public sealed class CreateFormModalService : ICreateFormModalService
 {
@@ -79,6 +81,8 @@ public sealed class CreateFormModalService : ICreateFormModalService
             if (formHost.Content is not null)
                 return;
             formHost.Content = formContentFactory();
+            // Next turn so the Entry is in the visual tree (Catalyst Focus is flaky otherwise).
+            MainThread.BeginInvokeOnMainThread(() => FormFocusHelper.TryFocusFirstInput(formHost));
         }
 
         formHost.Loaded += (_, _) => AssignForm();
@@ -100,33 +104,34 @@ public sealed class CreateFormModalService : ICreateFormModalService
         };
         Grid.SetColumn(saveButton, 1);
 
-        var grabber = new BoxView
-        {
-            WidthRequest = 36,
-            HeightRequest = 5,
-            CornerRadius = 2.5,
-            HorizontalOptions = LayoutOptions.Center,
-            Color = Colors.Gray.WithAlpha(0.45f),
-            Margin = new Thickness(0, 4, 0, 4)
-        };
+        // Grabber is iPhone sheet chrome only — Mac uses a centered FormSheet dialog (#353).
+        View? grabber = DesktopChrome.IsDesktop
+            ? null
+            : new BoxView
+            {
+                WidthRequest = 36,
+                HeightRequest = 5,
+                CornerRadius = 2.5,
+                HorizontalOptions = LayoutOptions.Center,
+                Color = Colors.Gray.WithAlpha(0.45f),
+                Margin = new Thickness(0, 4, 0, 4)
+            };
 
         var sheetBody = new VerticalStackLayout
         {
-            Padding = new Thickness(20, 8, 20, 20),
-            Spacing = 16,
-            Children =
-            {
-                grabber,
-                new Label
-                {
-                    Text = title,
-                    FontSize = 20,
-                    FontAttributes = FontAttributes.Bold
-                },
-                formHost,
-                buttonRow
-            }
+            Padding = new Thickness(20, DesktopChrome.IsDesktop ? 16 : 8, 20, 20),
+            Spacing = 16
         };
+        if (grabber is not null)
+            sheetBody.Children.Add(grabber);
+        sheetBody.Children.Add(new Label
+        {
+            Text = title,
+            FontSize = 20,
+            FontAttributes = FontAttributes.Bold
+        });
+        sheetBody.Children.Add(formHost);
+        sheetBody.Children.Add(buttonRow);
 
         var page = new ContentPage
         {
@@ -143,6 +148,18 @@ public sealed class CreateFormModalService : ICreateFormModalService
 #endif
 
         page.Disappearing += (_, _) => Complete(false);
+
+        if (DesktopChrome.IsDesktop)
+        {
+            DesktopMenuBridge.DismissModalAsync = async () =>
+            {
+                if (Volatile.Read(ref settled) != 0)
+                    return;
+                Complete(false);
+                if (navigation.ModalStack.Count > 0)
+                    await navigation.PopModalAsync();
+            };
+        }
 
         try
         {
@@ -163,6 +180,13 @@ public sealed class CreateFormModalService : ICreateFormModalService
             return false;
         }
 
-        return await tcs.Task;
+        try
+        {
+            return await tcs.Task;
+        }
+        finally
+        {
+            DesktopMenuBridge.DismissModalAsync = null;
+        }
     }
 }

@@ -4,7 +4,7 @@
 
 > **Hinweis:** Die Milestone-Bezeichnungen (v1.14, v1.2, v2.0) sind thematische GitHub-Planungslabels, keine sequenziellen Release-Versionen. Tatsächliche Releases (v1.0, v1.6, v1.12 …) werden durch Git-Commit-Höhe via Nerdbank.GitVersioning bestimmt.
 
-**Aktueller Stand:** TestFlight-Linie **v1.22**. App-Store-Release **v1.20** bleibt Latest (CloudKit-Sync #243 kam mit v1.21). Als Nächstes: Feature-Ideen (**[Milestone 22](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/milestone/22)**), dann **v2.0** (Verschlüsselung, echte Mehrwährung).
+**Aktueller Stand:** App-Store **iOS 1.22** / geplante **macOS 1.23** Desktop-UX (#350–#353). Sidebar/Shortcuts (#354) als Welle 2. Feature-Ideen weiter in **[Milestone 22](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/milestone/22)**; danach **v2.0** (Verschlüsselung, echte Mehrwährung).
 
 ---
 
@@ -179,6 +179,8 @@ Größere Produkt-Features. Sync/Open Banking setzen idealerweise #300 (und stab
 
 | Issue | Thema | Aufwand |
 |-------|-------|---------|
+| [#350](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/350)–[#353](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/353) | Mac Desktop-UX Welle 1 (Toolbar, Rechtsklick, Dialog, Breite) | M — in **v1.23** (macOS-only) |
+| [#354](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/354) | Mac Sidebar + Tastaturkürzel (Welle 2) | L |
 | [#241](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/241) | Kategorien-Hierarchie (Ober-/Unterkategorien) | L |
 | [#242](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/242) | Home-Screen-Widget Anzeige (iOS / macOS) | L |
 | — | Interaktives iOS-Widget (Pro) + In-App Schnellerfassung (Free) | ✅ (iOS-Widget + Inbox; Mac/Windows nur In-App „Schnell“) |

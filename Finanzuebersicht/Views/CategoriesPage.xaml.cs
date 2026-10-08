@@ -1,3 +1,5 @@
+using Finanzuebersicht.Helpers;
+using Finanzuebersicht.Resources.Strings;
 using Finanzuebersicht.Services;
 using Finanzuebersicht.ViewModels;
 using Microsoft.Extensions.Logging;
@@ -15,6 +17,7 @@ public partial class CategoriesPage : BaseContentPage
         {
             InitializeComponent();
             BindingContext = viewModel;
+            AttachDesktopToolbar(viewModel);
         }
         catch (Exception ex)
         {
@@ -22,6 +25,20 @@ public partial class CategoriesPage : BaseContentPage
             _logger?.LogError(ex, "CategoriesPage InitializeComponent failed");
             Content = CreateErrorContent("Init", ex);
         }
+    }
+
+    void AttachDesktopToolbar(CategoriesViewModel viewModel)
+    {
+        DesktopChrome.AttachPageActions(this, () =>
+        {
+            var loc = LocalizationResourceManager.Current;
+            return (
+                loc[ResourceKeys.Menu_Aktionen],
+                [
+                    new DesktopChrome.DesktopAction(loc[ResourceKeys.Btn_Aktualisieren], viewModel.LoadKategorienCommand, "R"),
+                    new DesktopChrome.DesktopAction(loc[ResourceKeys.Btn_Hinzufuegen], viewModel.GoToDetailCommand, "N")
+                ]);
+        });
     }
 
     protected override void OnAppearing()

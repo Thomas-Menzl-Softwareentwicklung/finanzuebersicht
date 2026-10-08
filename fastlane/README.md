@@ -23,6 +23,14 @@ For _fastlane_ installation instructions, see [Installing _fastlane_](https://do
 
 Capture App Store screenshots (2 devices × 2 locales)
 
+### ios screenshots_mac
+
+```sh
+[bundle exec] fastlane ios screenshots_mac
+```
+
+Capture Mac Catalyst screenshots (de-DE + en-US, 16:10) into fastlane/screenshots-mac/
+
 ### ios upload_listing
 
 ```sh

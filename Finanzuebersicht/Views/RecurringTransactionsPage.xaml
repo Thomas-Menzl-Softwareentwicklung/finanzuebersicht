@@ -7,6 +7,8 @@
              xmlns:conv="clr-namespace:Finanzuebersicht.Converters"
              xmlns:loc="clr-namespace:Finanzuebersicht.Extensions"
              xmlns:controls="clr-namespace:Finanzuebersicht.Controls"
+             xmlns:helpers="clr-namespace:Finanzuebersicht.Helpers"
+             xmlns:icons="clr-namespace:Finanzuebersicht.Resources"
              xmlns:screenshot="clr-namespace:Finanzuebersicht.Core.Constants;assembly=Finanzuebersicht.Core"
              x:Class="Finanzuebersicht.Views.RecurringTransactionsPage"
              AutomationId="{x:Static screenshot:ScreenshotAutomationIds.PageRecurring}"
@@ -22,6 +24,7 @@
     </views:BaseContentPage.Resources>
 
     <Grid>
+        <controls:DesktopContentHost>
         <RefreshView Command="{Binding LoadDauerauftraegeCommand}"
                      IsRefreshing="{Binding IsLoading}">
         <CollectionView ItemsSource="{Binding Dauerauftraege}"
@@ -38,7 +41,7 @@
 
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="models:RecurringTransaction">
-                    <SwipeView>
+                    <SwipeView helpers:DesktopChrome.SuppressSwipeOnDesktop="True">
                         <SwipeView.LeftItems>
                             <SwipeItems>
                                 <SwipeItem Text="{loc:Translate Btn_AktivInaktiv}"
@@ -59,11 +62,23 @@
                         <Grid ColumnDefinitions="44, *, Auto" Padding="16,12" ColumnSpacing="12"
                               Opacity="{Binding Aktiv, Converter={StaticResource BoolToOpacity}}"
                               SemanticProperties.Description="{Binding ., Converter={StaticResource RecurringAccessibility}}">
+                            <FlyoutBase.ContextFlyout>
+                                <MenuFlyout>
+                                    <MenuFlyoutItem Text="{loc:Translate Btn_AktivInaktiv}"
+                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:RecurringTransactionsViewModel}}, Path=ToggleAktivCommand}"
+                                                    CommandParameter="{Binding .}" />
+                                    <MenuFlyoutItem Text="{loc:Translate Btn_Loeschen}"
+                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:RecurringTransactionsViewModel}}, Path=DeleteDauerauftragCommand}"
+                                                    CommandParameter="{Binding .}" />
+                                </MenuFlyout>
+                            </FlyoutBase.ContextFlyout>
                             <Grid.GestureRecognizers>
                                 <TapGestureRecognizer
+                                    NumberOfTapsRequired="{x:Static helpers:DesktopChrome.DetailOpenTapCount}"
                                     Command="{Binding Source={RelativeSource AncestorType={x:Type vm:RecurringTransactionsViewModel}}, Path=GoToDetailCommand}"
                                     CommandParameter="{Binding .}" />
                             </Grid.GestureRecognizers>
+                            <helpers:DesktopChrome.EnableRowHover>True</helpers:DesktopChrome.EnableRowHover>
 
                             <Border Grid.Column="0" BackgroundColor="{AppThemeBinding Light={StaticResource GroupedBackground}, Dark={StaticResource GroupedBackgroundDark}}"
                                     StrokeShape="RoundRectangle 10"
@@ -88,20 +103,51 @@
                                 </Label>
                             </VerticalStackLayout>
 
-                            <Label Grid.Column="2"
-                                   Text="{Binding ., Converter={StaticResource BetragDisplay}}"
-                                   TextColor="{Binding Typ, Converter={StaticResource TypToColor}}"
-                                   FontSize="16" FontAttributes="Bold"
-                                   VerticalTextAlignment="Center" />
+                            <HorizontalStackLayout Grid.Column="2"
+                                                   Spacing="8"
+                                                   VerticalOptions="Center">
+                                <HorizontalStackLayout Spacing="4"
+                                                       VerticalOptions="Center"
+                                                       IsVisible="{x:Static helpers:DesktopChrome.IsDesktop}">
+                                    <Image Source="{x:Static icons:AppIcons.Toggle}"
+                                           WidthRequest="{x:Static helpers:DesktopChrome.RowActionIconSize}"
+                                           HeightRequest="{x:Static helpers:DesktopChrome.RowActionIconSize}"
+                                           Aspect="AspectFit"
+                                           SemanticProperties.Description="{loc:Translate Btn_AktivInaktiv}">
+                                        <Image.GestureRecognizers>
+                                            <TapGestureRecognizer
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:RecurringTransactionsViewModel}}, Path=ToggleAktivCommand}"
+                                                CommandParameter="{Binding .}" />
+                                        </Image.GestureRecognizers>
+                                    </Image>
+                                    <Image Source="{x:Static icons:AppIcons.Delete}"
+                                           WidthRequest="{x:Static helpers:DesktopChrome.RowActionIconSize}"
+                                           HeightRequest="{x:Static helpers:DesktopChrome.RowActionIconSize}"
+                                           Aspect="AspectFit"
+                                           SemanticProperties.Description="{loc:Translate Btn_Loeschen}">
+                                        <Image.GestureRecognizers>
+                                            <TapGestureRecognizer
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:RecurringTransactionsViewModel}}, Path=DeleteDauerauftragCommand}"
+                                                CommandParameter="{Binding .}" />
+                                        </Image.GestureRecognizers>
+                                    </Image>
+                                </HorizontalStackLayout>
+                                <Label Text="{Binding ., Converter={StaticResource BetragDisplay}}"
+                                       TextColor="{Binding Typ, Converter={StaticResource TypToColor}}"
+                                       FontSize="16" FontAttributes="Bold"
+                                       VerticalTextAlignment="Center" />
+                            </HorizontalStackLayout>
                         </Grid>
                     </SwipeView>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>
     </RefreshView>
+        </controls:DesktopContentHost>
 
-        <!-- FAB -->
+        <!-- FAB (phone only; Mac uses toolbar #351) -->
         <Button Text="{loc:Translate Btn_Hinzufuegen}"
+            IsVisible="{x:Static helpers:DesktopChrome.IsPhone}"
             FontSize="28" TextColor="White"
             BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
             CornerRadius="28"

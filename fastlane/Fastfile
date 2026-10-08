@@ -37,7 +37,7 @@ def require_mac_screenshots!
   unless pngs.any?
     UI.user_error!(
       "No Mac screenshots in #{MAC_SCREENSHOTS_PATH}. " \
-      "Place 1280x800 (16:10) PNGs under screenshots-mac/<locale>/."
+      "Run: bundle exec fastlane screenshots_mac"
     )
   end
 end
@@ -160,6 +160,11 @@ platform :ios do
     )
   end
 
+  desc "Capture Mac Catalyst screenshots (de-DE + en-US, 16:10) into fastlane/screenshots-mac/"
+  lane :screenshots_mac do
+    sh("\"#{REPO_ROOT}/scripts/capture-mac-screenshots.sh\" --build")
+  end
+
   desc "Upload listing texts and iOS screenshots to App Store Connect (no binary, no review)"
   lane :upload_listing do
     require_asc_api_key!
@@ -177,25 +182,26 @@ platform :ios do
   lane :upload_listing_mac do
     require_asc_api_key!
     require_mac_screenshots!
-    upload_to_app_store(
-      listing_upload_options(
-        platform: "osx",
-        skip_screenshots: false,
-        screenshots_path: MAC_SCREENSHOTS_PATH
-      )
+    # Mac store line is 1.23 (iOS listing stays on ASC_APP_VERSION / 1.22).
+    opts = listing_upload_options(
+      platform: "osx",
+      skip_screenshots: false,
+      screenshots_path: MAC_SCREENSHOTS_PATH
     )
+    opts[:app_version] = ENV.fetch("ASC_MAC_APP_VERSION", "1.23")
+    upload_to_app_store(opts)
   end
 
   desc "Upload Mac listing texts only (no screenshots)"
   lane :upload_listing_text_mac do
     require_asc_api_key!
-    upload_to_app_store(
-      listing_upload_options(
-        platform: "osx",
-        skip_screenshots: true,
-        screenshots_path: MAC_SCREENSHOTS_PATH
-      )
+    opts = listing_upload_options(
+      platform: "osx",
+      skip_screenshots: true,
+      screenshots_path: MAC_SCREENSHOTS_PATH
     )
+    opts[:app_version] = ENV.fetch("ASC_MAC_APP_VERSION", "1.23")
+    upload_to_app_store(opts)
   end
 
   desc "Upload iOS listing+screenshots then Mac listing texts"

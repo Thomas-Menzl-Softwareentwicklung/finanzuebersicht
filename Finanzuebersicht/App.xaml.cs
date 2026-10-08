@@ -130,6 +130,8 @@ public partial class App : global::Microsoft.Maui.Controls.Application
 #if MACCATALYST
 		if (_screenshotDemoMode)
 			ApplyMacScreenshotDemoWindowSize(window);
+		else
+			ApplyMacDesktopWindowSize(window);
 #endif
 
 		// UIKit-Style nach Window-Erstellung setzen
@@ -139,6 +141,8 @@ public partial class App : global::Microsoft.Maui.Controls.Application
 #if MACCATALYST
 			if (_screenshotDemoMode)
 				ApplyMacScreenshotDemoWindowSize(window);
+			else
+				ApplyMacDesktopWindowSize(window);
 #endif
 		};
 
@@ -165,6 +169,28 @@ public partial class App : global::Microsoft.Maui.Controls.Application
 	}
 
 #if MACCATALYST
+	/// <summary>Keep list/filter layouts usable; default size for first launch.</summary>
+	private static void ApplyMacDesktopWindowSize(Window window)
+	{
+		const double minWidth = 960;
+		const double minHeight = 640;
+		const double defaultWidth = 1200;
+		const double defaultHeight = 800;
+
+		window.MinimumWidth = minWidth;
+		window.MinimumHeight = minHeight;
+		if (window.Width < minWidth)
+			window.Width = defaultWidth;
+		if (window.Height < minHeight)
+			window.Height = defaultHeight;
+
+		if (window.Handler?.PlatformView is UIKit.UIWindow uiWindow &&
+		    uiWindow.WindowScene?.SizeRestrictions is { } restrictions)
+		{
+			restrictions.MinimumSize = new CoreGraphics.CGSize(minWidth, minHeight);
+		}
+	}
+
 	/// <summary>
 	/// App Store Mac shots are 16:10 (1280×800 or 2560×1600). Lock the demo window so
 	/// a Retina capture of 1280×800 points lands on 2560×1600 pixels.

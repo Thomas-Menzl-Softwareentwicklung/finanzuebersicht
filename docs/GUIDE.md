@@ -209,24 +209,24 @@ nbgv set-version <version> # Version bumpen
 
 ## 12. Screenshots
 
-App-Store- und README-Screenshots lokal per **fastlane snapshot** + XCUITest (`Finanzuebersicht/Platforms/iOS/UITests/`). Kurzanleitung:
+**iOS** (App Store + optional README): **fastlane snapshot** + XCUITest (`Finanzuebersicht/Platforms/iOS/UITests/`).
 
 ```bash
-# 1. Host-App auf Simulator installieren (siehe docs/APP_STORE.md)
 dotnet build Finanzuebersicht/Finanzuebersicht.csproj \
   -f net10.0-ios -c Debug -p:RuntimeIdentifier=iossimulator-arm64
-xcrun simctl install booted \
-  Finanzuebersicht/bin/Debug/net10.0-ios/iossimulator-arm64/Finanzübersicht.app
-
-# 2. Aufnahmen (iPhone + iPad, de-DE + en-US)
-bundle install
 bundle exec fastlane screenshots
-
-# 3. Ausgewählte DE-iPhone-Shots ins README kopieren
-./scripts/copy-readme-screenshots.sh
+./scripts/copy-readme-screenshots.sh   # DE-iPhone → docs/screenshots/
 ```
 
-Roh-PNGs: `fastlane/screenshots/` (gitignored). README-Ziele: `docs/screenshots/`. Vollständige Schritte und ASC-Hinweise: [APP_STORE.md — Screenshot-Automatisierung](APP_STORE.md#screenshot-automatisierung).
+**Mac Catalyst** (Mac App Store + README): Fenster-Capture mit Demo-Daten.
+
+```bash
+bundle exec fastlane screenshots_mac   # oder ./scripts/capture-mac-screenshots.sh --build
+./scripts/copy-readme-screenshots-mac.sh
+# ASC: bundle exec fastlane upload_listing_mac
+```
+
+Roh-PNGs: `fastlane/screenshots/` bzw. `fastlane/screenshots-mac/` (gitignored). README-Ziele: `docs/screenshots/`. Details: [APP_STORE.md](APP_STORE.md#screenshot-automatisierung).
 
 ## 13. CI/CD
 

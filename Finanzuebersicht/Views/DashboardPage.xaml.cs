@@ -1,6 +1,9 @@
 using Finanzuebersicht.Charts;
+using Finanzuebersicht.Helpers;
 using Finanzuebersicht.Navigation;
 using Finanzuebersicht.Presentation.Services;
+using Finanzuebersicht.Resources.Strings;
+using Finanzuebersicht.Services;
 using Finanzuebersicht.ViewModels;
 using System.ComponentModel;
 
@@ -30,6 +33,8 @@ public partial class DashboardPage : ContentPage
         _navigationService = navigationService;
         _appEvents = appEvents;
 
+        AttachDesktopToolbar();
+
         MonthDonutChart.Drawable = _monthDonut;
         YearBarChart.Drawable = _yearBar;
         YearDonutChart.Drawable = _yearDonut;
@@ -45,9 +50,24 @@ public partial class DashboardPage : ContentPage
         _vm.PropertyChanged += OnViewModelPropertyChanged;
     }
 
+    void AttachDesktopToolbar()
+    {
+        DesktopChrome.AttachPageActions(this, () =>
+        {
+            var loc = LocalizationResourceManager.Current;
+            return (
+                loc[ResourceKeys.Menu_Aktionen],
+                [
+                    new DesktopChrome.DesktopAction(loc[ResourceKeys.Btn_Aktualisieren], _vm.LoadDashboardCommand, "R"),
+                    new DesktopChrome.DesktopAction(loc[ResourceKeys.Btn_SchnellAusgabe], _vm.QuickCaptureCommand, "N")
+                ]);
+        });
+    }
+
     protected override async void OnAppearing()
     {
         base.OnAppearing();
+        DesktopChrome.PublishPageActions(this);
         if (BindingContext is DashboardViewModel vm)
             vm.LoadDashboardCommand.Execute(null);
 
@@ -81,6 +101,7 @@ public partial class DashboardPage : ContentPage
         _vm.LoadDashboardCommand.Execute(null);
         if (BindingContext is ILocalizableViewModel locVm)
             locVm.RefreshLocalizedStrings();
+        DesktopChrome.RefreshPageActions(this);
     }
 
     private void OnAppDataChanged()
