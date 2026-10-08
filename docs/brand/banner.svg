@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900">
+  <defs>
+    <linearGradient id="band" x1="0" y1="0" x2="520" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0032C3"/>
+      <stop offset="1" stop-color="#0ACDDE"/>
+    </linearGradient>
+    <linearGradient id="stem" x1="75" y1="80" x2="75" y2="580" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0032C3"/>
+      <stop offset="1" stop-color="#0ACDDE"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="900" fill="#f7f8fb"/>
+  <g id="mark" transform="translate(130,200) scale(0.862)">
+    <path id="f-stem" fill="url(#stem)" d="M0 80H150V390L100 520L0 580Z"/>
+    <path id="f-top" fill="url(#band)" d="M0 40L520 0L500 100L150 130Z"/>
+    <path id="f-mid" fill="url(#band)" d="M150 230L430 185L412 270L150 310Z"/>
+    <path id="f-fold" fill="#0A0A73" d="M150 310L196 286L168 348Z"/>
+    <path id="euro-body" fill="url(#band)" d="M210 362L280 350L400 337L418 387L300 412L200 404L220 442L410 460L392 512L250 534L185 482L215 442L195 402Z"/>
+    <path id="euro-bar-top" fill="url(#band)" d="M168 390L330 370L324 396L174 412Z"/>
+    <path id="euro-bar-bottom" fill="url(#band)" d="M162 444L330 424L324 450L168 466Z"/>
+  </g>
+  <g id="brackets" fill="none" stroke="#0ACDDE" stroke-width="8" stroke-linecap="square">
+    <path d="M94 210V164H140"/>
+    <path d="M568 164H614V210"/>
+    <path d="M94 690V736H140"/>
+    <path d="M568 736H614V690"/>
+  </g>
+  <text x="710" y="400" fill="#152038" font-family="Arial, Helvetica, sans-serif" font-size="54" font-weight="700" letter-spacing="2.5">FINANZÜBERSICHT</text>
+  <text x="710" y="458" fill="#0A9FBF" font-family="Arial, Helvetica, sans-serif" font-size="24" letter-spacing="1.8">FINANZEN LOKAL. KLAR. PRIVAT.</text>
+</svg>
