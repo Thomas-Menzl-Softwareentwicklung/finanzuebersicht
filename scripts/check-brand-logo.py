@@ -38,7 +38,7 @@ def main() -> None:
     icon = ET.fromstring(icon_raw)
     if icon.get("viewBox") != "0 0 1024 1024":
         sys.exit(f"icon viewBox {icon.get('viewBox')!r}")
-    require_colors(icon_raw, ("#0032C3", "#0ACDDE", "#0A0A73", "#FFFFFF"), "icon")
+    require_colors(icon_raw, ("#0032C3", "#0ACDDE", "#FFFFFF"), "icon")
     if "FINANZÜBERSICHT" in icon_raw:
         sys.exit("icon must not contain the wordmark")
 
@@ -50,7 +50,7 @@ def main() -> None:
         sys.exit(f"banner viewBox {banner.get('viewBox')!r}")
     require_colors(
         banner_raw,
-        ("#0032C3", "#0ACDDE", "#0A0A73", "#f7f8fb", "#152038", "#0A9FBF"),
+        ("#0032C3", "#0ACDDE", "#f7f8fb", "#152038", "#0A9FBF"),
         "banner",
     )
     if "FINANZÜBERSICHT" not in banner_raw:

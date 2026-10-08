@@ -22,7 +22,7 @@ Eigenes Produktzeichen in der TM-Familie. Kein TM-Klon.
 - **F** wie im freigegebenen Icon: dicker Bandverlauf, Stamm links, zwei Querbalken nach rechts, untere Spitze des Stamms läuft weiter nach unten.
 - **€** etwa 36 % der F-Höhe, in der Tasche **unter dem unteren Querbalken**, linke Kante am Anfang dieses Balkens. Abstand zum Balken etwa 4–5 % der F-Höhe. Nicht daneben auf gleicher Höhe, nicht als zweites F.
 - Der Stamm bleibt links neben dem €. Die beiden Zeichen überlappen sich nicht.
-- Geometrie: eckig gefaltete Flächen, lineare Verläufe, keine Kontur, kein Schlagschatten, kein Glow.
+- Geometrie: Umriss der freigegebenen Vorschau, gefüllt mit dem Bandverlauf links nach rechts. Keine eigene Navy-Faltfläche, keine Kontur, kein Schlagschatten, kein Glow.
 
 ## Farbe
 
@@ -30,7 +30,7 @@ Eigenes Produktzeichen in der TM-Familie. Kein TM-Klon.
 |---|---|
 | Band, links / dunkel | `#0032C3` |
 | Band, rechts / hell | `#0ACDDE` |
-| Innere Falte | `#0A0A73` |
+| Füllung | Verlauf `#0032C3` → `#0ACDDE` über die ganze Marke |
 | Wordmark | `#152038` |
 | Tagline | `#0A9FBF` |
 | Banner-Grund | `#f7f8fb` |
