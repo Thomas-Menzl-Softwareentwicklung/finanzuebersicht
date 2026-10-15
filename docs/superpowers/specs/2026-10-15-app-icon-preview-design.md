@@ -15,8 +15,8 @@ Neues Markenzeichen als Standard-App-Icon einbauen und lokal auf Mac Catalyst pr
 | Asset light | Marke auf `#FFFFFF` → `appicon-light.png` |
 | Asset dark | Dieselbe Marke auf `#152038` → `appicon-dark.png` |
 | Asset tinted | Graustufen-Marke, transparent → `appicon-tinted.png` |
-| iOS / Mac Catalyst | SoT: `Platforms/{iOS,MacCatalyst}/Resources/Assets.xcassets/appicon.appiconset` |
-| MauiIcon | Nur Windows (`Resources/AppIcon/appicon.png`, `#FFFFFF`) — auf Apple kein MauiIcon, damit actool keinen zweiten Katalog bekommt |
+| iOS / Mac Catalyst | Appearances: `Platforms/{iOS,MacCatalyst}/Resources/Assets.xcassets/appicon.appiconset` |
+| MauiIcon | `Resources/AppIcon/appicon.png` (`#FFFFFF`) — nötig für actool/`Assets.car` + `CFBundleIconName`; Appearances kommen aus Platforms |
 | Alt-SVGs | `appicon.svg` / `appiconfg.svg` behalten (später Alternate Icons) |
 | Splash | `Resources/Images/brand_mark.png` auf `#F2F2F7` |
 | In-App | Über-Karte: `AppIcons.BrandMark` (~64 pt) |

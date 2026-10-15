@@ -83,9 +83,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<!-- App Icon: Apple SoT is Platforms/*/Assets.xcassets (light/dark/tinted). MauiIcon only for Windows. -->
-		<MauiIcon Include="Resources\AppIcon\appicon.png" Color="#FFFFFF"
-		          Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'" />
+		<!-- App Icon: MauiIcon compiles Assets.car + CFBundleIconName; Platforms/*/appicon.appiconset adds light/dark/tinted. -->
+		<MauiIcon Include="Resources\AppIcon\appicon.png" Color="#FFFFFF" />
 
 		<!-- Splash: same brand mark as About (no duplicate splash.png). -->
 		<MauiSplashScreen Include="Resources\Images\brand_mark.png" Color="#F2F2F7" BaseSize="128,128" />
@@ -319,7 +318,7 @@
 		<Message Text="Widget extension staged at $(_WidgetDestAppex)" Importance="high" />
 	</Target>
 
-	<!-- Fail fast if Apple appicon SoT is incomplete (MauiIcon is Windows-only). -->
+	<!-- Fail fast if Apple appearance masters are missing (Platforms catalog). -->
 	<Target Name="EnsurePlatformAppIconCatalog"
 			BeforeTargets="_CoreCompileImageAssets"
 			Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'
