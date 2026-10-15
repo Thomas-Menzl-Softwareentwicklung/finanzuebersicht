@@ -2,6 +2,10 @@
 
 ## [1.24] - Unreleased
 
+### Hinzugefügt
+
+- Einstellungen → Sprache: Hinweis und Mail-Link für weitere Sprachen auf Anfrage (#349)
+
 ### Geändert
 
 - Neues App-Icon (F+€ Markenzeichen): Light / Dark / Tinted auf iOS; Splash und Einstellungen → Über zeigen die Marke

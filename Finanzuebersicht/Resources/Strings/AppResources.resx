@@ -75,6 +75,8 @@
   <data name="Lbl_Verwendungszweck" xml:space="preserve"><value>Purpose</value></data>
   <data name="Lbl_DatenWerdenGespeichert" xml:space="preserve"><value>Data is stored here:</value></data>
   <data name="Lbl_Sprache" xml:space="preserve"><value>Language</value></data>
+  <data name="Hint_WeitereSprache" xml:space="preserve"><value>Need another language? Request it by email — no promised delivery date.</value></data>
+  <data name="Btn_SpracheAnfragen" xml:space="preserve"><value>Request a language</value></data>
   <data name="Lbl_Anzeigewaehrung" xml:space="preserve"><value>Display Currency</value></data>
   <data name="Lbl_KategorienColon" xml:space="preserve"><value>Categories:</value></data>
 

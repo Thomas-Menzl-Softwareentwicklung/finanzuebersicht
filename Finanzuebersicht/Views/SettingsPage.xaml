@@ -80,6 +80,17 @@
                                 BackgroundColor="{Binding Appearance.SelectedLanguageIndex, Converter={StaticResource ThemeButtonConverter}, ConverterParameter=2}"
                                 TextColor="{Binding Appearance.SelectedLanguageIndex, Converter={StaticResource ThemeButtonTextConverter}, ConverterParameter=2}" />
                     </Grid>
+
+                    <Label Text="{loc:Translate Hint_WeitereSprache}"
+                           FontSize="13"
+                           TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray400}}" />
+                    <Button Text="{loc:Translate Btn_SpracheAnfragen}"
+                            Command="{Binding Appearance.RequestAdditionalLanguageCommand}"
+                            FontSize="14"
+                            Padding="12,8"
+                            BackgroundColor="Transparent"
+                            TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                            HorizontalOptions="Start" />
                 </VerticalStackLayout>
             </Border>
 
