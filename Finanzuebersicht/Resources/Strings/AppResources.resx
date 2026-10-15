@@ -77,6 +77,7 @@
   <data name="Lbl_Sprache" xml:space="preserve"><value>Language</value></data>
   <data name="Hint_WeitereSprache" xml:space="preserve"><value>Need another language? Request it by email — no promised delivery date.</value></data>
   <data name="Btn_SpracheAnfragen" xml:space="preserve"><value>Request a language</value></data>
+  <data name="Mail_SubjectSpracheAnfragen" xml:space="preserve"><value>Finanzübersicht language request</value></data>
   <data name="Lbl_Anzeigewaehrung" xml:space="preserve"><value>Display Currency</value></data>
   <data name="Lbl_KategorienColon" xml:space="preserve"><value>Categories:</value></data>
 

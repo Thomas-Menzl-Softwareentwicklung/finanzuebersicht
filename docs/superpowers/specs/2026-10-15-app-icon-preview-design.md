@@ -15,11 +15,11 @@ Neues Markenzeichen als Standard-App-Icon einbauen und lokal auf Mac Catalyst pr
 | Asset light | Marke auf `#FFFFFF` → `appicon-light.png` |
 | Asset dark | Dieselbe Marke auf `#152038` → `appicon-dark.png` |
 | Asset tinted | Graustufen-Marke, transparent → `appicon-tinted.png` |
-| iOS / Mac Catalyst | Target `InjectAppIconAppearances` schreibt light/dark/tinted in das Resizetizer-`appiconset` vor actool |
-| MauiIcon | Weiter für alle Targets (`appicon.png`, `#FFFFFF`) — liefert Light-Basis |
+| iOS / Mac Catalyst | SoT: `Platforms/{iOS,MacCatalyst}/Resources/Assets.xcassets/appicon.appiconset` |
+| MauiIcon | Nur Windows (`Resources/AppIcon/appicon.png`, `#FFFFFF`) — auf Apple kein MauiIcon, damit actool keinen zweiten Katalog bekommt |
 | Alt-SVGs | `appicon.svg` / `appiconfg.svg` behalten (später Alternate Icons) |
-| Splash | Marke zentriert auf `#F2F2F7` (`Resources/Splash/splash.png`) |
-| In-App | Über-Karte: `brand_mark.png` (~64 pt) |
+| Splash | `Resources/Images/brand_mark.png` auf `#F2F2F7` |
+| In-App | Über-Karte: `AppIcons.BrandMark` (~64 pt) |
 | Out of scope | Banner, Alternate-Icon-Wahl neu/alt, Store-Upload, UI-Farben |
 
 ## Verification
@@ -29,4 +29,4 @@ dotnet build Finanzuebersicht/Finanzuebersicht.csproj -f net10.0-maccatalyst
 open ~/Applications/Finanzübersicht.app
 ```
 
-Dock-/App-Icon zeigt F+€ Bandlogo auf weiß.
+Dock-/App-Icon zeigt F+€ Bandlogo auf weiß. actool darf nur **einen** `appicon`-Katalog clonen (`…/Resources/Assets.xcassets/appicon.appiconset`).

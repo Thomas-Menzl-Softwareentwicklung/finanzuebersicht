@@ -59,6 +59,7 @@ public static class ResourceKeys
     public const string Lbl_Sprache = nameof(Lbl_Sprache);
     public const string Hint_WeitereSprache = nameof(Hint_WeitereSprache);
     public const string Btn_SpracheAnfragen = nameof(Btn_SpracheAnfragen);
+    public const string Mail_SubjectSpracheAnfragen = nameof(Mail_SubjectSpracheAnfragen);
     public const string Lbl_Anzeigewaehrung = nameof(Lbl_Anzeigewaehrung);
     public const string Lbl_KategorienColon = nameof(Lbl_KategorienColon);
 

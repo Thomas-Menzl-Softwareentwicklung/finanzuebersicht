@@ -8,6 +8,6 @@ public static class SupportContact
 {
     public const string Email = "info@thomasmenzl.de";
 
-    public const string LanguageRequestMailto =
-        "mailto:info@thomasmenzl.de?subject=Finanz%C3%BCbersicht%20Sprache";
+    public static string CreateLanguageRequestMailto(string subject) =>
+        $"mailto:{Email}?subject={Uri.EscapeDataString(subject)}";
 }

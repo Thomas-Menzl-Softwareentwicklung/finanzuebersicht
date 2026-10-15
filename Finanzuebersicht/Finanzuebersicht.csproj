@@ -83,11 +83,12 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<!-- App Icon: MauiIcon generates the light set; InjectAppIconAppearances adds dark/tinted for Apple. -->
-		<MauiIcon Include="Resources\AppIcon\appicon.png" Color="#FFFFFF" />
+		<!-- App Icon: Apple SoT is Platforms/*/Assets.xcassets (light/dark/tinted). MauiIcon only for Windows. -->
+		<MauiIcon Include="Resources\AppIcon\appicon.png" Color="#FFFFFF"
+		          Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'" />
 
-		<!-- Splash: brand mark on page background -->
-		<MauiSplashScreen Include="Resources\Splash\splash.png" Color="#F2F2F7" BaseSize="128,128" />
+		<!-- Splash: same brand mark as About (no duplicate splash.png). -->
+		<MauiSplashScreen Include="Resources\Images\brand_mark.png" Color="#F2F2F7" BaseSize="128,128" />
 
 		<!-- Images -->
 		<MauiImage Include="Resources\Images\*" />
@@ -318,34 +319,21 @@
 		<Message Text="Widget extension staged at $(_WidgetDestAppex)" Importance="high" />
 	</Target>
 
-	<!-- iOS 18+ / Mac: replace Resizetizer appiconset with light/dark/tinted masters before actool. -->
-	<Target Name="InjectAppIconAppearances"
-			AfterTargets="ResizetizeImages"
+	<!-- Fail fast if Apple appicon SoT is incomplete (MauiIcon is Windows-only). -->
+	<Target Name="EnsurePlatformAppIconCatalog"
 			BeforeTargets="_CoreCompileImageAssets"
 			Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'
 			           OR $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">
 		<PropertyGroup>
-			<_AppIconSet>$(IntermediateOutputPath)resizetizer/r/Assets.xcassets/appicon.appiconset</_AppIconSet>
-			<_AppIconSet Condition="!Exists('$(_AppIconSet)') And '$(RuntimeIdentifier)' != ''">$(IntermediateOutputPath)$(RuntimeIdentifier)/resizetizer/r/Assets.xcassets/appicon.appiconset</_AppIconSet>
-			<_AppIconAppearanceSource>$(MSBuildProjectDirectory)/Resources/AppIcon</_AppIconAppearanceSource>
-			<_AppIconContents>$(MSBuildProjectDirectory)/Platforms/iOS/Resources/Assets.xcassets/appicon.appiconset/Contents.json</_AppIconContents>
+			<_PlatformAppIconSet Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">$(MSBuildProjectDirectory)/Platforms/iOS/Resources/Assets.xcassets/appicon.appiconset</_PlatformAppIconSet>
+			<_PlatformAppIconSet Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">$(MSBuildProjectDirectory)/Platforms/MacCatalyst/Resources/Assets.xcassets/appicon.appiconset</_PlatformAppIconSet>
 		</PropertyGroup>
-		<Error Text="InjectAppIconAppearances: appicon set missing at $(_AppIconSet). Did ResizetizeImages run?"
-		       Condition="!Exists('$(_AppIconSet)')" />
-		<Error Text="InjectAppIconAppearances: missing $(_AppIconAppearanceSource)/appicon-dark.png"
-		       Condition="!Exists('$(_AppIconAppearanceSource)/appicon-dark.png')" />
-		<ItemGroup>
-			<_AppIconAppearance Include="$(_AppIconAppearanceSource)/appicon-light.png" />
-			<_AppIconAppearance Include="$(_AppIconAppearanceSource)/appicon-dark.png" />
-			<_AppIconAppearance Include="$(_AppIconAppearanceSource)/appicon-tinted.png" />
-			<_AppIconAppearance Include="$(_AppIconContents)" />
-		</ItemGroup>
-		<!-- Keep Resizetizer filenames present (item lists reference them); overwrite with light master. -->
-		<Copy SourceFiles="$(_AppIconAppearanceSource)/appicon-light.png"
-		      DestinationFiles="$(_AppIconSet)/appiconItunesArtwork.png"
-		      SkipUnchangedFiles="false" />
-		<Copy SourceFiles="@(_AppIconAppearance)" DestinationFolder="$(_AppIconSet)" SkipUnchangedFiles="false" />
-		<Message Text="Injected light/dark/tinted app icons into $(_AppIconSet)" Importance="high" />
+		<Error Text="Missing Apple appicon SoT: $(_PlatformAppIconSet)/appicon-light.png"
+		       Condition="!Exists('$(_PlatformAppIconSet)/appicon-light.png')" />
+		<Error Text="Missing Apple appicon SoT: $(_PlatformAppIconSet)/appicon-dark.png"
+		       Condition="!Exists('$(_PlatformAppIconSet)/appicon-dark.png')" />
+		<Error Text="Missing Apple appicon SoT: $(_PlatformAppIconSet)/appicon-tinted.png"
+		       Condition="!Exists('$(_PlatformAppIconSet)/appicon-tinted.png')" />
 	</Target>
 
 	<!-- Debug/maccatalyst: nach ~/Applications kopieren (Dev-Signatur startet unter macOS 26+ nicht aus /Applications) -->

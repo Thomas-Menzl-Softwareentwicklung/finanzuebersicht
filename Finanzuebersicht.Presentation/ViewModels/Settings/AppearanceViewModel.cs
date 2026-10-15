@@ -125,7 +125,8 @@ public partial class AppearanceViewModel : ObservableObject
     {
         try
         {
-            await _externalBrowser.OpenAsync(new Uri(SupportContact.LanguageRequestMailto));
+            var subject = _loc.GetString(ResourceKeys.Mail_SubjectSpracheAnfragen);
+            await _externalBrowser.OpenAsync(new Uri(SupportContact.CreateLanguageRequestMailto(subject)));
         }
         catch (Exception ex)
         {

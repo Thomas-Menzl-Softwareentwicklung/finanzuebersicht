@@ -1,5 +1,6 @@
 using Finanzuebersicht.Core.Licensing;
 using Finanzuebersicht.Presentation.Services;
+using Finanzuebersicht.Resources.Strings;
 using Finanzuebersicht.Tests.TestHelpers;
 using Finanzuebersicht.ViewModels;
 
@@ -94,15 +95,41 @@ public class AppearanceViewModelTests
     {
         using var settingsScope = new SettingsScope(nameof(AppearanceViewModelTests));
         var browser = Substitute.For<IExternalBrowser>();
+        var localization = CreateLocalizationService();
+        localization.GetString(ResourceKeys.Mail_SubjectSpracheAnfragen)
+            .Returns("Finanzübersicht language request");
         var sut = CreateSut(
             settingsScope.Settings,
             Substitute.For<IThemeService>(),
-            CreateLocalizationService(),
+            localization,
             browser: browser);
 
         await sut.RequestAdditionalLanguageCommand.ExecuteAsync(null);
 
-        await browser.Received(1).OpenAsync(new Uri(SupportContact.LanguageRequestMailto));
+        await browser.Received(1).OpenAsync(
+            new Uri(SupportContact.CreateLanguageRequestMailto("Finanzübersicht language request")));
+    }
+
+    [Fact]
+    public async Task RequestAdditionalLanguage_WhenOpenFails_ShowsAlert()
+    {
+        using var settingsScope = new SettingsScope(nameof(AppearanceViewModelTests));
+        var browser = Substitute.For<IExternalBrowser>();
+        browser.OpenAsync(Arg.Any<Uri>()).Returns(Task.FromException(new InvalidOperationException("no mail app")));
+        var dialog = Substitute.For<IDialogService>();
+        var localization = CreateLocalizationService();
+        localization.GetString(ResourceKeys.Err_Titel).Returns("Error");
+        localization.GetString(ResourceKeys.Btn_OK).Returns("OK");
+        var sut = CreateSut(
+            settingsScope.Settings,
+            Substitute.For<IThemeService>(),
+            localization,
+            browser: browser,
+            dialog: dialog);
+
+        await sut.RequestAdditionalLanguageCommand.ExecuteAsync(null);
+
+        await dialog.Received(1).ShowAlertAsync("Error", "no mail app", "OK");
     }
 
     private static AppearanceViewModel CreateSut(
