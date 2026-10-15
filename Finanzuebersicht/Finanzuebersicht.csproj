@@ -83,19 +83,21 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<!-- App Icon -->
-		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#007AFF" />
+		<!-- App Icon: MauiIcon generates the light set; InjectAppIconAppearances adds dark/tinted for Apple. -->
+		<MauiIcon Include="Resources\AppIcon\appicon.png" Color="#FFFFFF" />
 
-		<!-- Splash: plain app background (PageBackground), no .NET branding -->
-		<MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#F2F2F7" BaseSize="128,128" />
+		<!-- Splash: brand mark on page background -->
+		<MauiSplashScreen Include="Resources\Splash\splash.png" Color="#F2F2F7" BaseSize="128,128" />
 
 		<!-- Images -->
 		<MauiImage Include="Resources\Images\*" />
 		<MauiImage Update="Resources\Images\dotnet_bot.png" Resize="True" BaseSize="300,185" />
+		<MauiImage Update="Resources\Images\brand_mark.png" Resize="True" BaseSize="64,64" />
 		<!-- Row action glyphs: default SVG viewBox is 24pt — without BaseSize, Mac shows intrinsic size -->
 		<MauiImage Update="Resources\Images\icon_delete.svg" BaseSize="18,18" />
 		<MauiImage Update="Resources\Images\icon_duplicate.svg" BaseSize="18,18" />
 		<MauiImage Update="Resources\Images\icon_toggle.svg" BaseSize="18,18" />
+
 
 		<!-- Custom Fonts -->
 		<MauiFont Include="Resources\Fonts\*" />
@@ -314,6 +316,36 @@
 		<Error Text="Expected staged widget at $(_WidgetDestAppex). See Platforms/iOS/Widgets/README.md."
 		       Condition="!Exists('$(_WidgetDestAppex)')" />
 		<Message Text="Widget extension staged at $(_WidgetDestAppex)" Importance="high" />
+	</Target>
+
+	<!-- iOS 18+ / Mac: replace Resizetizer appiconset with light/dark/tinted masters before actool. -->
+	<Target Name="InjectAppIconAppearances"
+			AfterTargets="ResizetizeImages"
+			BeforeTargets="_CoreCompileImageAssets"
+			Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'
+			           OR $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">
+		<PropertyGroup>
+			<_AppIconSet>$(IntermediateOutputPath)resizetizer/r/Assets.xcassets/appicon.appiconset</_AppIconSet>
+			<_AppIconSet Condition="!Exists('$(_AppIconSet)') And '$(RuntimeIdentifier)' != ''">$(IntermediateOutputPath)$(RuntimeIdentifier)/resizetizer/r/Assets.xcassets/appicon.appiconset</_AppIconSet>
+			<_AppIconAppearanceSource>$(MSBuildProjectDirectory)/Resources/AppIcon</_AppIconAppearanceSource>
+			<_AppIconContents>$(MSBuildProjectDirectory)/Platforms/iOS/Resources/Assets.xcassets/appicon.appiconset/Contents.json</_AppIconContents>
+		</PropertyGroup>
+		<Error Text="InjectAppIconAppearances: appicon set missing at $(_AppIconSet). Did ResizetizeImages run?"
+		       Condition="!Exists('$(_AppIconSet)')" />
+		<Error Text="InjectAppIconAppearances: missing $(_AppIconAppearanceSource)/appicon-dark.png"
+		       Condition="!Exists('$(_AppIconAppearanceSource)/appicon-dark.png')" />
+		<ItemGroup>
+			<_AppIconAppearance Include="$(_AppIconAppearanceSource)/appicon-light.png" />
+			<_AppIconAppearance Include="$(_AppIconAppearanceSource)/appicon-dark.png" />
+			<_AppIconAppearance Include="$(_AppIconAppearanceSource)/appicon-tinted.png" />
+			<_AppIconAppearance Include="$(_AppIconContents)" />
+		</ItemGroup>
+		<!-- Keep Resizetizer filenames present (item lists reference them); overwrite with light master. -->
+		<Copy SourceFiles="$(_AppIconAppearanceSource)/appicon-light.png"
+		      DestinationFiles="$(_AppIconSet)/appiconItunesArtwork.png"
+		      SkipUnchangedFiles="false" />
+		<Copy SourceFiles="@(_AppIconAppearance)" DestinationFolder="$(_AppIconSet)" SkipUnchangedFiles="false" />
+		<Message Text="Injected light/dark/tinted app icons into $(_AppIconSet)" Importance="high" />
 	</Target>
 
 	<!-- Debug/maccatalyst: nach ~/Applications kopieren (Dev-Signatur startet unter macOS 26+ nicht aus /Applications) -->
