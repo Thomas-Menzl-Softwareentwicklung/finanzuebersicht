@@ -1,5 +1,12 @@
 # Änderungsverlauf
 
+## [1.24] - Unreleased
+
+### Geändert
+
+- Neues App-Icon (F+€ Markenzeichen): Light / Dark / Tinted auf iOS; Splash und Einstellungen → Über zeigen die Marke
+- Versionsbasis `1.24` (Nerdbank.GitVersioning) — geplanter Store-Upload iOS **und** Mac
+
 ## [1.23] - 2026-10-08
 
 ### Hinzugefügt
