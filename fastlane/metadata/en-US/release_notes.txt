@@ -1,1 +1,1 @@
-New app icon with light, dark, and tinted appearances (iOS). Brand mark on the splash screen and under Settings → About.
+New app icon with light, dark, and tinted appearances (iOS). Brand mark on the splash screen and under Settings → About. Under Language you can request an additional language by email.

@@ -1,6 +1,10 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Finanzuebersicht.Core.Constants;
+using Finanzuebersicht.Core.Licensing;
+using Finanzuebersicht.Presentation.Services;
+using Finanzuebersicht.Resources.Strings;
+using Microsoft.Extensions.Logging;
 
 namespace Finanzuebersicht.ViewModels;
 
@@ -10,6 +14,9 @@ public partial class AppearanceViewModel : ObservableObject
     private readonly IThemeService _themeService;
     private readonly ILocalizationService _loc;
     private readonly IDisplayCurrencyService _displayCurrency;
+    private readonly IExternalBrowser _externalBrowser;
+    private readonly IDialogService _dialogService;
+    private readonly ILogger<AppearanceViewModel>? _logger;
 
     [ObservableProperty]
     private int selectedThemeIndex;
@@ -24,12 +31,18 @@ public partial class AppearanceViewModel : ObservableObject
         ISettingsService settings,
         IThemeService themeService,
         ILocalizationService localizationService,
-        IDisplayCurrencyService displayCurrency)
+        IDisplayCurrencyService displayCurrency,
+        IExternalBrowser externalBrowser,
+        IDialogService dialogService,
+        ILogger<AppearanceViewModel>? logger = null)
     {
         _settings = settings;
         _themeService = themeService;
         _loc = localizationService;
         _displayCurrency = displayCurrency;
+        _externalBrowser = externalBrowser;
+        _dialogService = dialogService;
+        _logger = logger;
 
         var theme = _settings.Get(SettingsKeys.Theme, ThemeValues.System);
         selectedThemeIndex = theme switch
@@ -104,6 +117,23 @@ public partial class AppearanceViewModel : ObservableObject
         if (int.TryParse(indexStr, out var idx))
         {
             SelectedCurrencyIndex = idx;
+        }
+    }
+
+    [RelayCommand]
+    private async Task RequestAdditionalLanguageAsync()
+    {
+        try
+        {
+            await _externalBrowser.OpenAsync(new Uri(SupportContact.LanguageRequestMailto));
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogWarning(ex, "Failed to open language request mailto");
+            await _dialogService.ShowAlertAsync(
+                _loc.GetString(ResourceKeys.Err_Titel),
+                ex.Message,
+                _loc.GetString(ResourceKeys.Btn_OK));
         }
     }
 }
