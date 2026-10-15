@@ -1,3 +1,1 @@
-Mac-Desktop-UX: Anlegen und Aktualisieren über die Toolbar statt FAB, Rechtsklick-Kontextmenüs statt Wischen, zentrierte Anlege-Dialoge und volle Fensterbreite.
-
-Native Menüleiste mit Aktionen (inkl. Tastenkürzel), Gehe zu (⌘1–⌘5), Suchen (⌘F) und Einstellungen. Doppelklick öffnet Details, Esc schließt Dialoge; Zeilenaktionen als kompakte Icons neben dem Betrag.
+Neues App-Icon mit Hell-, Dunkel- und getönter Variante (iOS). Markenzeichen auf dem Startbildschirm und unter Einstellungen → Über.

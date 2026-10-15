@@ -427,6 +427,13 @@
                            FontAttributes="Bold"
                            TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
 
+                    <Image Source="brand_mark.png"
+                           WidthRequest="64"
+                           HeightRequest="64"
+                           Aspect="AspectFit"
+                           HorizontalOptions="Start"
+                           SemanticProperties.Description="{loc:Translate Title_AppName}" />
+
                     <Grid ColumnDefinitions="*, Auto" RowDefinitions="Auto, Auto" RowSpacing="4">
                            <Label Text="{loc:Translate Title_AppName}"
                                FontSize="16" FontAttributes="Bold"
