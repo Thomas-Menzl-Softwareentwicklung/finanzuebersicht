@@ -1,3 +1,1 @@
-Mac desktop UX: create and refresh from the toolbar instead of FABs, right-click context menus instead of swipe, centered create dialogs, and full window width.
-
-Native menu bar with Actions (including keyboard shortcuts), Go to (⌘1–⌘5), Find (⌘F), and Settings. Double-click opens details, Esc dismisses dialogs; row actions appear as compact icons next to the amount.
+New app icon with light, dark, and tinted appearances (iOS). Brand mark on the splash screen and under Settings → About. Under Language you can request an additional language by email.

@@ -5,6 +5,7 @@
              xmlns:loc="clr-namespace:Finanzuebersicht.Extensions"
              xmlns:controls="clr-namespace:Finanzuebersicht.Controls"
              xmlns:helpers="clr-namespace:Finanzuebersicht.Helpers"
+             xmlns:icons="clr-namespace:Finanzuebersicht.Resources"
              xmlns:screenshot="clr-namespace:Finanzuebersicht.Core.Constants;assembly=Finanzuebersicht.Core"
              x:Class="Finanzuebersicht.Views.SettingsPage"
              AutomationId="{x:Static screenshot:ScreenshotAutomationIds.PageSettings}"
@@ -80,6 +81,17 @@
                                 BackgroundColor="{Binding Appearance.SelectedLanguageIndex, Converter={StaticResource ThemeButtonConverter}, ConverterParameter=2}"
                                 TextColor="{Binding Appearance.SelectedLanguageIndex, Converter={StaticResource ThemeButtonTextConverter}, ConverterParameter=2}" />
                     </Grid>
+
+                    <Label Text="{loc:Translate Hint_WeitereSprache}"
+                           FontSize="13"
+                           TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray400}}" />
+                    <Button Text="{loc:Translate Btn_SpracheAnfragen}"
+                            Command="{Binding Appearance.RequestAdditionalLanguageCommand}"
+                            FontSize="14"
+                            Padding="12,8"
+                            BackgroundColor="Transparent"
+                            TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                            HorizontalOptions="Start" />
                 </VerticalStackLayout>
             </Border>
 
@@ -426,6 +438,13 @@
                            FontSize="18"
                            FontAttributes="Bold"
                            TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
+
+                    <Image Source="{x:Static icons:AppIcons.BrandMark}"
+                           WidthRequest="64"
+                           HeightRequest="64"
+                           Aspect="AspectFit"
+                           HorizontalOptions="Start"
+                           SemanticProperties.Description="{loc:Translate Title_AppName}" />
 
                     <Grid ColumnDefinitions="*, Auto" RowDefinitions="Auto, Auto" RowSpacing="4">
                            <Label Text="{loc:Translate Title_AppName}"

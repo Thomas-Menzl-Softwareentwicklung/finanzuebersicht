@@ -75,6 +75,9 @@
   <data name="Lbl_Verwendungszweck" xml:space="preserve"><value>Verwendungszweck</value></data>
   <data name="Lbl_DatenWerdenGespeichert" xml:space="preserve"><value>Daten werden hier gespeichert:</value></data>
   <data name="Lbl_Sprache" xml:space="preserve"><value>Sprache</value></data>
+  <data name="Hint_WeitereSprache" xml:space="preserve"><value>Weitere Sprache gewünscht? Per E-Mail anfragen — ohne Liefertermin-Zusage.</value></data>
+  <data name="Btn_SpracheAnfragen" xml:space="preserve"><value>Sprache anfragen</value></data>
+  <data name="Mail_SubjectSpracheAnfragen" xml:space="preserve"><value>Finanzübersicht Sprache</value></data>
   <data name="Lbl_Anzeigewaehrung" xml:space="preserve"><value>Anzeige-Währung</value></data>
   <data name="Lbl_KategorienColon" xml:space="preserve"><value>Kategorien:</value></data>
 

@@ -83,19 +83,21 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<!-- App Icon -->
-		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#007AFF" />
+		<!-- App Icon: MauiIcon compiles Assets.car + CFBundleIconName; Platforms/*/appicon.appiconset adds light/dark/tinted. -->
+		<MauiIcon Include="Resources\AppIcon\appicon.png" Color="#FFFFFF" />
 
-		<!-- Splash: plain app background (PageBackground), no .NET branding -->
-		<MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#F2F2F7" BaseSize="128,128" />
+		<!-- Splash: same brand mark as About (no duplicate splash.png). -->
+		<MauiSplashScreen Include="Resources\Images\brand_mark.png" Color="#F2F2F7" BaseSize="128,128" />
 
 		<!-- Images -->
 		<MauiImage Include="Resources\Images\*" />
 		<MauiImage Update="Resources\Images\dotnet_bot.png" Resize="True" BaseSize="300,185" />
+		<MauiImage Update="Resources\Images\brand_mark.png" Resize="True" BaseSize="64,64" />
 		<!-- Row action glyphs: default SVG viewBox is 24pt — without BaseSize, Mac shows intrinsic size -->
 		<MauiImage Update="Resources\Images\icon_delete.svg" BaseSize="18,18" />
 		<MauiImage Update="Resources\Images\icon_duplicate.svg" BaseSize="18,18" />
 		<MauiImage Update="Resources\Images\icon_toggle.svg" BaseSize="18,18" />
+
 
 		<!-- Custom Fonts -->
 		<MauiFont Include="Resources\Fonts\*" />
@@ -314,6 +316,23 @@
 		<Error Text="Expected staged widget at $(_WidgetDestAppex). See Platforms/iOS/Widgets/README.md."
 		       Condition="!Exists('$(_WidgetDestAppex)')" />
 		<Message Text="Widget extension staged at $(_WidgetDestAppex)" Importance="high" />
+	</Target>
+
+	<!-- Fail fast if Apple appearance masters are missing (Platforms catalog). -->
+	<Target Name="EnsurePlatformAppIconCatalog"
+			BeforeTargets="_CoreCompileImageAssets"
+			Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'
+			           OR $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">
+		<PropertyGroup>
+			<_PlatformAppIconSet Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">$(MSBuildProjectDirectory)/Platforms/iOS/Resources/Assets.xcassets/appicon.appiconset</_PlatformAppIconSet>
+			<_PlatformAppIconSet Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">$(MSBuildProjectDirectory)/Platforms/MacCatalyst/Resources/Assets.xcassets/appicon.appiconset</_PlatformAppIconSet>
+		</PropertyGroup>
+		<Error Text="Missing Apple appicon SoT: $(_PlatformAppIconSet)/appicon-light.png"
+		       Condition="!Exists('$(_PlatformAppIconSet)/appicon-light.png')" />
+		<Error Text="Missing Apple appicon SoT: $(_PlatformAppIconSet)/appicon-dark.png"
+		       Condition="!Exists('$(_PlatformAppIconSet)/appicon-dark.png')" />
+		<Error Text="Missing Apple appicon SoT: $(_PlatformAppIconSet)/appicon-tinted.png"
+		       Condition="!Exists('$(_PlatformAppIconSet)/appicon-tinted.png')" />
 	</Target>
 
 	<!-- Debug/maccatalyst: nach ~/Applications kopieren (Dev-Signatur startet unter macOS 26+ nicht aus /Applications) -->
