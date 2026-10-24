@@ -95,11 +95,12 @@ public class CsvImportOrchestrator(
                 continue;
             }
 
-            transaction.KategorieId = await ResolveCategoryIdForAnalyzeAsync(
+            var categoryMatch = await ResolveCategoryForAnalyzeAsync(
                 dto,
                 categories,
                 historicalCategories,
                 cancellationToken).ConfigureAwait(false);
+            transaction.KategorieId = categoryMatch.CategoryId;
 
             var status = string.IsNullOrWhiteSpace(transaction.KategorieId)
                 ? ImportPreviewRowStatus.Uncategorized
@@ -113,7 +114,9 @@ public class CsvImportOrchestrator(
                 StatusMessage = status == ImportPreviewRowStatus.Uncategorized
                     ? ImportMessageKeys.CategoryUnresolved
                     : null,
-                Transaction = transaction
+                Transaction = transaction,
+                CategoryMatchSource = categoryMatch.Source,
+                NormalizedPayeeKey = Normalize(GetPayee(dto))
             });
 
             batchTransactions.Add(transaction);
@@ -310,14 +313,14 @@ public class CsvImportOrchestrator(
         return result;
     }
 
-    private async Task<string> ResolveCategoryIdForAnalyzeAsync(
+    private async Task<(string CategoryId, ImportCategoryMatchSource Source)> ResolveCategoryForAnalyzeAsync(
         TransactionDto dto,
         IReadOnlyList<Category> categories,
         IReadOnlyDictionary<string, Category> historicalCategories,
         CancellationToken cancellationToken)
     {
         if (categories.Count == 0)
-            return string.Empty;
+            return (string.Empty, ImportCategoryMatchSource.None);
 
         if (_categorizationService is not null)
         {
@@ -329,16 +332,16 @@ public class CsvImportOrchestrator(
                 cancellationToken: cancellationToken).ConfigureAwait(false);
 
             if (category is not null)
-                return category.Id;
+                return (category.Id, ImportCategoryMatchSource.KeywordRule);
         }
 
         var payee = GetPayee(dto);
         if (string.IsNullOrWhiteSpace(payee))
-            return string.Empty;
+            return (string.Empty, ImportCategoryMatchSource.None);
 
         return historicalCategories.TryGetValue(Normalize(payee), out var historicalCategory)
-            ? historicalCategory.Id
-            : string.Empty;
+            ? (historicalCategory.Id, ImportCategoryMatchSource.History)
+            : (string.Empty, ImportCategoryMatchSource.None);
     }
 
     private async Task<List<Transaction>> LoadExistingTransactionsForDtosAsync(IReadOnlyList<TransactionDto> dtos)

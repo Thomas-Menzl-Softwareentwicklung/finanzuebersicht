@@ -47,6 +47,70 @@ public class CsvImportUseCaseTests
     }
 
     [Fact]
+    public async Task Analyze_CategoryMatchedByRule_ReportsKeywordSource()
+    {
+        var repo = Substitute.For<ITransactionRepository>();
+        repo.GetTransactionsAsync(Arg.Any<DateTime>(), Arg.Any<DateTime>()).Returns([]);
+        var categories = Substitute.For<ICategoryRepository>();
+        var food = new Category { Id = "food", Name = "Lebensmittel" };
+        categories.GetCategoriesAsync().Returns([food]);
+        var strategy = Substitute.For<ICategorizationStrategy>();
+        strategy.Priority.Returns(10);
+        strategy.TryCategorizAsync(Arg.Any<TransactionDto>(), Arg.Any<IEnumerable<Category>>(), Arg.Any<CancellationToken>())
+            .Returns(_ => Task.FromResult<Category?>(food));
+        var categorization = new CategorizationService([strategy]);
+
+        var preview = await BuildOrchestrator(repo, categories, categorization)
+            .AnalyzeDtosAsync([new TransactionDto { Buchungsdatum = DateTime.Today, Betrag = -12m, Zahlungsempfaenger = "REWE" }]);
+
+        var row = Assert.Single(preview.Rows);
+        Assert.Equal("food", row.Transaction.KategorieId);
+        Assert.Equal(ImportCategoryMatchSource.KeywordRule, row.CategoryMatchSource);
+    }
+
+    [Fact]
+    public async Task Analyze_CategoryMatchedByHistory_ReportsHistorySource()
+    {
+        var repo = Substitute.For<ITransactionRepository>();
+        repo.GetTransactionsAsync(Arg.Any<DateTime>(), Arg.Any<DateTime>()).Returns([
+            new Transaction
+            {
+                Id = "old",
+                Titel = "Cafe Central",
+                Datum = DateTime.Today.AddDays(-2),
+                Betrag = 20m,
+                KategorieId = "food"
+            }
+        ]);
+        var categories = Substitute.For<ICategoryRepository>();
+        categories.GetCategoriesAsync().Returns([new Category { Id = "food", Name = "Lebensmittel" }]);
+
+        var preview = await BuildOrchestrator(repo, categories)
+            .AnalyzeDtosAsync([new TransactionDto { Buchungsdatum = DateTime.Today, Betrag = -5m, Zahlungsempfaenger = "Cafe Central" }]);
+
+        var row = Assert.Single(preview.Rows);
+        Assert.Equal("food", row.Transaction.KategorieId);
+        Assert.Equal(ImportCategoryMatchSource.History, row.CategoryMatchSource);
+    }
+
+    [Fact]
+    public async Task Analyze_UnmatchedPayee_ReportsNoSourceAndNormalizedPayeeKey()
+    {
+        var repo = Substitute.For<ITransactionRepository>();
+        repo.GetTransactionsAsync(Arg.Any<DateTime>(), Arg.Any<DateTime>()).Returns([]);
+        var categories = Substitute.For<ICategoryRepository>();
+        categories.GetCategoriesAsync().Returns([new Category { Id = "food", Name = "Lebensmittel" }]);
+
+        var preview = await BuildOrchestrator(repo, categories)
+            .AnalyzeDtosAsync([new TransactionDto { Buchungsdatum = DateTime.Today, Betrag = -5m, Zahlungsempfaenger = " Café & Co. " }]);
+
+        var row = Assert.Single(preview.Rows);
+        Assert.Equal(ImportPreviewRowStatus.Uncategorized, row.Status);
+        Assert.Equal(ImportCategoryMatchSource.None, row.CategoryMatchSource);
+        Assert.Equal("cafe co", row.NormalizedPayeeKey);
+    }
+
+    [Fact]
     public async Task Analyze_DuplicateWithinBatch_MarksLaterRowAsDuplicate()
     {
         var repo = Substitute.For<ITransactionRepository>();
