@@ -33,6 +33,7 @@ public class SaveRecurringTransactionDetailUseCase(
         int intervalFactor = 1,
         int reminderDaysBefore = 0,
         List<RecurringException>? exceptions = null,
+        bool isVariableAmount = false,
         CancellationToken cancellationToken = default)
     {
         if (existing == null)
@@ -63,6 +64,7 @@ public class SaveRecurringTransactionDetailUseCase(
         recurring.Interval = interval;
         recurring.IntervalFactor = intervalFactor;
         recurring.ReminderDaysBefore = reminderDaysBefore;
+        recurring.IsVariableAmount = isVariableAmount;
         if (exceptions != null)
             recurring.Exceptions = exceptions;
         CloudSyncNotify.StampUpdatedAt(recurring);

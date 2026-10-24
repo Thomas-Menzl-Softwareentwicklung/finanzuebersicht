@@ -31,6 +31,7 @@
   <data name="Lbl_Farbe" xml:space="preserve"><value>Farbe</value></data>
   <data name="Lbl_Typ" xml:space="preserve"><value>Typ</value></data>
   <data name="Lbl_Betrag" xml:space="preserve"><value>Betrag</value></data>
+  <data name="Lbl_VariableAmount" xml:space="preserve"><value>Betrag variiert</value></data>
   <data name="Lbl_Titel" xml:space="preserve"><value>Titel</value></data>
   <data name="Lbl_Kategorie" xml:space="preserve"><value>Kategorie</value></data>
   <data name="Lbl_Konto" xml:space="preserve"><value>Konto</value></data>

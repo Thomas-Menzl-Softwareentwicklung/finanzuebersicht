@@ -7,6 +7,40 @@ namespace Finanzuebersicht.Tests.Application.UseCases;
 public class SaveRecurringTransactionDetailUseCaseTests
 {
     [Fact]
+    public async Task ExecuteAsync_SavesVariableAmountFlag_WithoutReplacingInitialAmount()
+    {
+        var recurringRepository = Substitute.For<IRecurringTransactionRepository>();
+        var recurringGenerationService = Substitute.For<IRecurringGenerationService>();
+        var accountRepository = Substitute.For<IAccountRepository>();
+        var sut = new SaveRecurringTransactionDetailUseCase(recurringRepository, recurringGenerationService, accountRepository);
+
+        await sut.ExecuteAsync(
+            existing: null,
+            betrag: 75m,
+            titel: "Energy",
+            kategorieId: "cat-1",
+            accountId: null,
+            typ: TransactionType.Ausgabe,
+            startdatum: new DateTime(2026, 3, 1),
+            enddatum: null,
+            aktiv: true,
+            isVariableAmount: true);
+
+        await recurringRepository.Received(1).SaveRecurringTransactionAsync(NonNullArg.Is<RecurringTransaction>(recurring =>
+            recurring.IsVariableAmount && recurring.Betrag == 75m && recurring.LastBookedAmount == null));
+    }
+
+    [Fact]
+    public void RecurringTransaction_LegacyJsonDefaultsToFixedAmount()
+    {
+        var recurring = System.Text.Json.JsonSerializer.Deserialize<RecurringTransaction>("{}");
+
+        Assert.NotNull(recurring);
+        Assert.False(recurring.IsVariableAmount);
+        Assert.Null(recurring.LastBookedAmount);
+    }
+
+    [Fact]
     public async Task ExecuteAsync_CreatesNewRecurring_WhenExistingIsNull()
     {
         var recurringRepository = Substitute.For<IRecurringTransactionRepository>();
@@ -55,7 +89,9 @@ public class SaveRecurringTransactionDetailUseCaseTests
             Typ = TransactionType.Ausgabe,
             Startdatum = new DateTime(2026, 1, 1),
             Enddatum = null,
-            Aktiv = false
+            Aktiv = false,
+            IsVariableAmount = true,
+            LastBookedAmount = 87.50m
         };
         var sut = new SaveRecurringTransactionDetailUseCase(recurringRepository, recurringGenerationService, accountRepository);
 
@@ -68,7 +104,8 @@ public class SaveRecurringTransactionDetailUseCaseTests
             typ: TransactionType.Einnahme,
             startdatum: new DateTime(2026, 4, 1),
             enddatum: null,
-            aktiv: true);
+            aktiv: true,
+            isVariableAmount: true);
 
         await recurringRepository.Received(1).SaveRecurringTransactionAsync(existing);
         Assert.Equal("r-1", existing.Id);
@@ -80,6 +117,8 @@ public class SaveRecurringTransactionDetailUseCaseTests
         Assert.Equal(new DateTime(2026, 4, 1), existing.Startdatum);
         Assert.Null(existing.Enddatum);
         Assert.True(existing.Aktiv);
+        Assert.True(existing.IsVariableAmount);
+        Assert.Equal(87.50m, existing.LastBookedAmount);
         await recurringGenerationService.Received(1).GeneratePendingRecurringTransactionsAsync();
     }
 }

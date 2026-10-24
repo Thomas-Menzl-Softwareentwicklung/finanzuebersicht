@@ -4,6 +4,8 @@ public class RecurringTransaction
 {
     public string Id { get; set; } = Guid.NewGuid().ToString();
     public decimal Betrag { get; set; }
+    public bool IsVariableAmount { get; set; }
+    public decimal? LastBookedAmount { get; set; }
     public string Titel { get; set; } = string.Empty;
     public string KategorieId { get; set; } = string.Empty;
     public string? AccountId { get; set; }

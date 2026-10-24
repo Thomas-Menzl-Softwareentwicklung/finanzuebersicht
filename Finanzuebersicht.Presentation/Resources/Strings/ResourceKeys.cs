@@ -31,6 +31,7 @@ public static class ResourceKeys
     public const string Lbl_Farbe = nameof(Lbl_Farbe);
     public const string Lbl_Typ = nameof(Lbl_Typ);
     public const string Lbl_Betrag = nameof(Lbl_Betrag);
+    public const string Lbl_VariableAmount = nameof(Lbl_VariableAmount);
     public const string Lbl_Titel = nameof(Lbl_Titel);
     public const string Lbl_Kategorie = nameof(Lbl_Kategorie);
     public const string Lbl_Datum = nameof(Lbl_Datum);
