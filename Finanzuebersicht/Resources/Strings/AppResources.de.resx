@@ -208,6 +208,8 @@
   <data name="Dlg_DauerauftragLoeschenFrage" xml:space="preserve"><value>"{0}" wirklich löschen?</value></data>
   <data name="Dlg_DauerauftragBuchen" xml:space="preserve"><value>Dauerauftrag buchen</value></data>
   <data name="Dlg_DauerauftragBuchenFrage" xml:space="preserve"><value>"{0}" für {1} als ausgeführt buchen?</value></data>
+  <data name="Dlg_VariableAmount" xml:space="preserve"><value>Betrag bestätigen</value></data>
+  <data name="Dlg_VariableAmountQuestion" xml:space="preserve"><value>Gib den Betrag für „{0}“ am {1} ein.</value></data>
   <data name="Dlg_DauerauftragUeberspringen" xml:space="preserve"><value>Termin überspringen</value></data>
   <data name="Dlg_DauerauftragUeberspringenFrage" xml:space="preserve"><value>"{0}" für diesen Termin überspringen?</value></data>
   <data name="Btn_AlsAusgefuehrtBuchen" xml:space="preserve"><value>Buchen</value></data>

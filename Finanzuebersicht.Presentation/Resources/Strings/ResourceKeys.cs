@@ -193,6 +193,8 @@ public static class ResourceKeys
     public const string Dlg_DauerauftragLoeschenFrage = nameof(Dlg_DauerauftragLoeschenFrage);
     public const string Dlg_DauerauftragBuchen = nameof(Dlg_DauerauftragBuchen);
     public const string Dlg_DauerauftragBuchenFrage = nameof(Dlg_DauerauftragBuchenFrage);
+    public const string Dlg_VariableAmount = nameof(Dlg_VariableAmount);
+    public const string Dlg_VariableAmountQuestion = nameof(Dlg_VariableAmountQuestion);
     public const string Dlg_DauerauftragUeberspringen = nameof(Dlg_DauerauftragUeberspringen);
     public const string Dlg_DauerauftragUeberspringenFrage = nameof(Dlg_DauerauftragUeberspringenFrage);
     public const string Btn_AlsAusgefuehrtBuchen = nameof(Btn_AlsAusgefuehrtBuchen);
