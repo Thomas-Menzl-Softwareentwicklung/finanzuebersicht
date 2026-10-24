@@ -9,6 +9,35 @@ namespace Finanzuebersicht.Tests.Application.UseCases.RecurringTransactions;
 public class BookDueRecurringInstanceUseCaseTests
 {
     [Fact]
+    public async Task ExecuteAsync_RemembersConfirmedVariableAmount_AndKeepsInitialAmount()
+    {
+        var recurring = new RecurringTransaction
+        {
+            Id = "rec-variable",
+            Titel = "Strom",
+            Betrag = 75m,
+            IsVariableAmount = true,
+            KategorieId = "cat-energy",
+            AccountId = "acc-1",
+            Typ = TransactionType.Ausgabe
+        };
+        var recurringRepository = Substitute.For<IRecurringTransactionRepository>();
+        recurringRepository.GetRecurringTransactionsAsync().Returns(new List<RecurringTransaction> { recurring });
+        var transactionRepository = Substitute.For<ITransactionRepository>();
+        transactionRepository.GetTransactionsAsync(Arg.Any<DateTime>(), Arg.Any<DateTime>())
+            .Returns(new List<Transaction>());
+        var sut = new BookDueRecurringInstanceUseCase(
+            recurringRepository, transactionRepository, Substitute.For<IAccountRepository>());
+
+        var result = await sut.ExecuteAsync("rec-variable", new DateTime(2026, 3, 1), 82.50m);
+
+        Assert.True(result.IsSuccess);
+        await transactionRepository.Received(1).SaveTransactionAsync(NonNullArg.Is<Transaction>(t => t.Betrag == 82.50m));
+        await recurringRepository.Received(1).SaveRecurringTransactionAsync(NonNullArg.Is<RecurringTransaction>(r =>
+            r.Betrag == 75m && r.LastBookedAmount == 82.50m));
+    }
+
+    [Fact]
     public async Task ExecuteAsync_CreatesTransactionAndUpdatesLastExecution()
     {
         var recurring = new RecurringTransaction
@@ -16,6 +45,7 @@ public class BookDueRecurringInstanceUseCaseTests
             Id = "rec-1",
             Titel = "Miete",
             Betrag = 800m,
+            LastBookedAmount = 740m,
             KategorieId = "cat-rent",
             AccountId = "acc-1",
             Typ = TransactionType.Ausgabe
