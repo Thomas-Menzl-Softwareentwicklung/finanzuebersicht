@@ -12,9 +12,11 @@ namespace Finanzuebersicht.Tests.ViewModels;
 
 public class ImportPreviewViewModelTests
 {
-    private static CommitCsvImportUseCase CreateCommitUseCase(ICategoryRepository categoryRepository)
+    private static CommitCsvImportUseCase CreateCommitUseCase(
+        ICategoryRepository categoryRepository,
+        ITransactionRepository? transactionRepository = null)
         => new(new CsvImportOrchestrator(
-            Substitute.For<ITransactionRepository>(),
+            transactionRepository ?? Substitute.For<ITransactionRepository>(),
             Substitute.For<ILogger<CsvImportOrchestrator>>(),
             categoryRepository,
             uncategorizedCategoryService: new UncategorizedCategoryService(categoryRepository)));
@@ -25,6 +27,12 @@ public class ImportPreviewViewModelTests
     private static async Task<ImportPreviewViewModel> CreateLoadedViewModel(
         ImportPreviewResult preview,
         params Category[] categories)
+        => await CreateLoadedViewModel(preview, null, categories);
+
+    private static async Task<ImportPreviewViewModel> CreateLoadedViewModel(
+        ImportPreviewResult preview,
+        ITransactionRepository? transactionRepository,
+        params Category[] categories)
     {
         var sessionStore = new ImportSessionStore();
         sessionStore.SetActiveSession(preview);
@@ -33,16 +41,20 @@ public class ImportPreviewViewModelTests
         var localization = Substitute.For<ILocalizationService>();
         localization.GetString(Arg.Any<string>()).Returns(call => call.ArgNotNull<string>());
         localization.GetString(Arg.Any<string>(), Arg.Any<object[]>()).Returns(call => call.ArgNotNull<string>());
+        var navigation = Substitute.For<INavigationService>();
+        navigation.GoBackAsync().Returns(Task.CompletedTask);
+        var feedback = Substitute.For<IFeedbackService>();
+        feedback.ShowSnackbarAsync(Arg.Any<string>()).Returns(Task.CompletedTask);
 
         var vm = new ImportPreviewViewModel(
-            CreateCommitUseCase(categoryRepository),
+            CreateCommitUseCase(categoryRepository, transactionRepository),
             sessionStore,
             CreateLoadCategoriesUseCase(categoryRepository),
-            Substitute.For<INavigationService>(),
+            navigation,
             Substitute.For<IDialogService>(),
             localization,
             Substitute.For<IAppEvents>(),
-            Substitute.For<IFeedbackService>(),
+            feedback,
             Substitute.For<ILogger<ImportPreviewViewModel>>());
         await vm.LoadPreviewCommand.ExecuteAsync(null);
         return vm;
@@ -266,6 +278,33 @@ public class ImportPreviewViewModelTests
         Assert.False(vm.IsCategorySelectionMode);
         Assert.Equal(0, vm.SelectedCategoryCount);
         Assert.False(vm.Rows[0].IsCategorizationSelected);
+    }
+
+    [Fact]
+    public async Task BulkCategoryAssignment_CommitsOnlyIncludedRowsWithAssignedCategory()
+    {
+        var transactionRepository = Substitute.For<ITransactionRepository>();
+        transactionRepository.GetTransactionsAsync(Arg.Any<DateTime>(), Arg.Any<DateTime>()).Returns([]);
+        transactionRepository.SaveTransactionAsync(Arg.Any<Transaction>()).Returns(Task.CompletedTask);
+        var food = new Category { Id = "food", Name = "Food", Icon = "🍎" };
+        var vm = await CreateLoadedViewModel(new ImportPreviewResult
+        {
+            Rows =
+            [
+                new() { Id = "r1", Status = ImportPreviewRowStatus.Uncategorized, IsIncluded = true, NormalizedPayeeKey = "merchant", Transaction = new Transaction { Id = "t1", Titel = "Merchant", Datum = DateTime.Today, Betrag = 10m } },
+                new() { Id = "r2", Status = ImportPreviewRowStatus.Uncategorized, IsIncluded = true, NormalizedPayeeKey = "merchant", Transaction = new Transaction { Id = "t2", Titel = "Merchant", Datum = DateTime.Today, Betrag = 20m } }
+            ]
+        }, transactionRepository, food);
+        vm.SelectSamePayeeCommand.Execute(vm.Rows[0]);
+        vm.SelectedBulkCategory = vm.BulkCategoryOptions.Single(option => option.Id == "food");
+        vm.ApplyCategoryToSelectionCommand.Execute(null);
+        vm.Rows[1].IsIncluded = false;
+        await vm.CommitImportCommand.ExecuteAsync(null);
+
+        await transactionRepository.Received(1).SaveTransactionAsync(NonNullArg.Is<Transaction>(transaction =>
+            transaction.Id == "t1" && transaction.KategorieId == "food"));
+        await transactionRepository.DidNotReceive().SaveTransactionAsync(NonNullArg.Is<Transaction>(transaction =>
+            transaction.Id == "t2"));
     }
 
     [Fact]
