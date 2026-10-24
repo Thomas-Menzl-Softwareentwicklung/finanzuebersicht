@@ -37,6 +37,40 @@ public class DashboardDueRecurringCoordinatorTests
     }
 
     [Fact]
+    public async Task TryBookAsync_UsesInitialAmountBeforeFirstVariableBooking()
+    {
+        var item = CreateItem(isVariable: true, initialAmount: 75m);
+        var (sut, dialog, transactionRepository) = CreateSut(item.Recurring);
+        dialog.ShowPromptAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>())
+            .Returns("75,00");
+
+        var result = await sut.TryBookAsync(item);
+
+        Assert.True(result);
+        await dialog.Received(1).ShowPromptAsync(
+            Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(),
+            75m.ToString("F2", System.Globalization.CultureInfo.CurrentCulture));
+        await transactionRepository.Received(1).SaveTransactionAsync(NonNullArg.Is<Transaction>(t => t.Betrag == 75m));
+    }
+
+    [Theory]
+    [InlineData("not-an-amount")]
+    [InlineData("0")]
+    public async Task TryBookAsync_InvalidOrNonPositiveVariableAmountDoesNotBook(string enteredAmount)
+    {
+        var item = CreateItem(isVariable: true, initialAmount: 75m);
+        var (sut, dialog, transactionRepository) = CreateSut(item.Recurring);
+        dialog.ShowPromptAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>())
+            .Returns(enteredAmount);
+
+        var result = await sut.TryBookAsync(item);
+
+        Assert.False(result);
+        await dialog.Received(1).ShowAlertAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>());
+        await transactionRepository.DidNotReceive().SaveTransactionAsync(Arg.Any<Transaction>());
+    }
+
+    [Fact]
     public async Task TryBookAsync_FixedAmountUsesConfirmation()
     {
         var item = CreateItem(isVariable: false, initialAmount: 75m, lastAmount: 88m);
