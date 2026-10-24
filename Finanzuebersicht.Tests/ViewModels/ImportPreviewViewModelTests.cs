@@ -21,6 +21,32 @@ public class ImportPreviewViewModelTests
     private static LoadCategoriesUseCase CreateLoadCategoriesUseCase(ICategoryRepository categoryRepository)
         => new(categoryRepository);
 
+    private static async Task<ImportPreviewViewModel> CreateLoadedViewModel(
+        ImportPreviewResult preview,
+        params Category[] categories)
+    {
+        var sessionStore = new ImportSessionStore();
+        sessionStore.SetActiveSession(preview);
+        var categoryRepository = Substitute.For<ICategoryRepository>();
+        categoryRepository.GetCategoriesAsync().Returns(categories.ToList());
+        var localization = Substitute.For<ILocalizationService>();
+        localization.GetString(Arg.Any<string>()).Returns(call => call.ArgNotNull<string>());
+        localization.GetString(Arg.Any<string>(), Arg.Any<object[]>()).Returns(call => call.ArgNotNull<string>());
+
+        var vm = new ImportPreviewViewModel(
+            CreateCommitUseCase(categoryRepository),
+            sessionStore,
+            CreateLoadCategoriesUseCase(categoryRepository),
+            Substitute.For<INavigationService>(),
+            Substitute.For<IDialogService>(),
+            localization,
+            Substitute.For<IAppEvents>(),
+            Substitute.For<IFeedbackService>(),
+            Substitute.For<ILogger<ImportPreviewViewModel>>());
+        await vm.LoadPreviewCommand.ExecuteAsync(null);
+        return vm;
+    }
+
     [Fact]
     public async Task LoadPreview_LoadsRowsAndDefaultFilterIsAll()
     {
@@ -147,6 +173,61 @@ public class ImportPreviewViewModelTests
         await navigation.Received(1).GoToAsync(Routes.ImportMapping, Arg.Any<IDictionary<string, object>>());
         Assert.NotNull(sessionStore.GetTable());
         Assert.NotNull(sessionStore.GetActiveSession());
+    }
+
+    [Fact]
+    public async Task SelectSamePayee_SelectsOnlyCommittableRowsWithSameNormalizedPayee()
+    {
+        var vm = await CreateLoadedViewModel(new ImportPreviewResult
+        {
+            Rows =
+            [
+                new() { Id = "r1", Status = ImportPreviewRowStatus.Uncategorized, IsIncluded = true, NormalizedPayeeKey = "cafe central", Transaction = new Transaction { Titel = "Cafe Central" } },
+                new() { Id = "r2", Status = ImportPreviewRowStatus.Ready, IsIncluded = true, NormalizedPayeeKey = "cafe central", Transaction = new Transaction { Titel = "CAFE CENTRAL" } },
+                new() { Id = "r3", Status = ImportPreviewRowStatus.Ready, IsIncluded = true, NormalizedPayeeKey = "other shop", Transaction = new Transaction { Titel = "Other Shop" } },
+                new() { Id = "r4", Status = ImportPreviewRowStatus.Duplicate, IsIncluded = false, NormalizedPayeeKey = "cafe central", Transaction = new Transaction { Titel = "Cafe Central" } },
+                new() { Id = "r5", Status = ImportPreviewRowStatus.Invalid, IsIncluded = false, NormalizedPayeeKey = "cafe central", Transaction = new Transaction { Titel = "Cafe Central" } }
+            ]
+        });
+
+        vm.SelectSamePayeeCommand.Execute(vm.Rows[0]);
+
+        Assert.True(vm.Rows[0].IsCategorizationSelected);
+        Assert.True(vm.Rows[1].IsCategorizationSelected);
+        Assert.False(vm.Rows[2].IsCategorizationSelected);
+        Assert.False(vm.Rows[3].IsCategorizationSelected);
+        Assert.False(vm.Rows[4].IsCategorizationSelected);
+    }
+
+    [Fact]
+    public async Task ApplyCategoryToSelection_UpdatesSelectedRowsAndLeavesUnselectedRowsUnchanged()
+    {
+        var vm = await CreateLoadedViewModel(new ImportPreviewResult
+        {
+            Rows =
+            [
+                new() { Id = "r1", Status = ImportPreviewRowStatus.Uncategorized, IsIncluded = true, NormalizedPayeeKey = "merchant", Transaction = new Transaction { Titel = "Merchant" } },
+                new() { Id = "r2", Status = ImportPreviewRowStatus.Uncategorized, IsIncluded = true, NormalizedPayeeKey = "merchant", Transaction = new Transaction { Titel = "Merchant" } },
+                new() { Id = "r3", Status = ImportPreviewRowStatus.Duplicate, IsIncluded = false, NormalizedPayeeKey = "merchant", Transaction = new Transaction { Titel = "Duplicate", KategorieId = "old" } }
+            ]
+        }, new Category { Id = "food", Name = "Food", Icon = "🍎" }, new Category { Id = "old", Name = "Old", Icon = "O" });
+
+        vm.Rows[0].IsCategorizationSelected = true;
+        vm.Rows[1].IsCategorizationSelected = true;
+        vm.SelectedBulkCategory = vm.Rows[0].CategoryOptions.Single(option => option.Id == "food");
+        vm.ApplyCategoryToSelectionCommand.Execute(null);
+
+        Assert.All(vm.Rows.Take(2), row =>
+        {
+            Assert.Equal("food", row.SelectedCategoryOption?.Id);
+            Assert.Equal(ImportPreviewRowStatus.Ready, row.Status);
+        });
+        Assert.Equal("old", vm.Rows[2].SelectedCategoryOption?.Id);
+        Assert.Equal(ImportPreviewRowStatus.Duplicate, vm.Rows[2].Status);
+
+        vm.ClearCategorizationSelectionCommand.Execute(null);
+        Assert.All(vm.Rows, row => Assert.False(row.IsCategorizationSelected));
+        Assert.All(vm.Rows.Take(2), row => Assert.Equal("food", row.SelectedCategoryOption?.Id));
     }
 
     [Fact]

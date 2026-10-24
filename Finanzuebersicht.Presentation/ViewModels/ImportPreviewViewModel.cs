@@ -67,7 +67,40 @@ public partial class ImportPreviewViewModel(
     [ObservableProperty]
     private bool canRemap;
 
+    [ObservableProperty]
+    private ImportPreviewCategoryOption? selectedBulkCategory;
+
     partial void OnSelectedFilterChanged(ImportPreviewFilterOption? value) => ApplyFilter();
+
+    [RelayCommand]
+    private void SelectSamePayee(ImportPreviewRowItemViewModel? row)
+    {
+        if (row is null || string.IsNullOrWhiteSpace(row.NormalizedPayeeKey))
+            return;
+
+        foreach (var candidate in Rows.Where(candidate => candidate.CanCommit
+                     && string.Equals(candidate.NormalizedPayeeKey, row.NormalizedPayeeKey, StringComparison.Ordinal)))
+        {
+            candidate.IsCategorizationSelected = true;
+        }
+    }
+
+    [RelayCommand]
+    private void ApplyCategoryToSelection()
+    {
+        if (SelectedBulkCategory is null)
+            return;
+
+        foreach (var row in Rows.Where(row => row.IsCategorizationSelected && row.CanCommit))
+            row.SelectedCategoryOption = SelectedBulkCategory;
+    }
+
+    [RelayCommand]
+    private void ClearCategorizationSelection()
+    {
+        foreach (var row in Rows)
+            row.IsCategorizationSelected = false;
+    }
 
     [RelayCommand]
     private async Task LoadPreview()
@@ -292,6 +325,7 @@ public partial class ImportPreviewRowItemViewModel : ObservableObject
     }
 
     public string Id => _row.Id;
+    public string NormalizedPayeeKey => _row.NormalizedPayeeKey;
     public ObservableCollection<ImportPreviewCategoryOption> CategoryOptions { get; }
     public string Title => _row.Transaction.Titel;
     public string Purpose => _row.Transaction.Verwendungszweck;
@@ -321,6 +355,9 @@ public partial class ImportPreviewRowItemViewModel : ObservableObject
 
     [ObservableProperty]
     private ImportPreviewCategoryOption? selectedCategoryOption;
+
+    [ObservableProperty]
+    private bool isCategorizationSelected;
 
     public string StatusText
     {
