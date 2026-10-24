@@ -413,6 +413,15 @@ Please restart the app.</value></data>
   <data name="Lbl_ImportDuplikateCount" xml:space="preserve"><value>Duplicates: {0}</value></data>
   <data name="Lbl_ImportProblemeCount" xml:space="preserve"><value>Problems: {0}</value></data>
   <data name="Lbl_ImportAusgewaehltCount" xml:space="preserve"><value>Selected: {0}</value></data>
+  <data name="Lbl_ImportCategorySourceRule" xml:space="preserve"><value>Category suggested by a keyword rule</value></data>
+  <data name="Lbl_ImportCategorySourceHistory" xml:space="preserve"><value>Category suggested from your booking history</value></data>
+  <data name="Lbl_ImportCategorySourceNone" xml:space="preserve"><value>No category suggestion</value></data>
+  <data name="Lbl_ImportCategorySelectionCount" xml:space="preserve"><value>Selected for category change: {0}</value></data>
+  <data name="Btn_ImportKategorienBearbeiten" xml:space="preserve"><value>Assign categories to multiple bookings</value></data>
+  <data name="Btn_ImportKategorienFertig" xml:space="preserve"><value>Done editing categories</value></data>
+  <data name="Btn_ImportGleicherZahlungspartner" xml:space="preserve"><value>Select same payee</value></data>
+  <data name="Btn_ImportKategorieZuweisen" xml:space="preserve"><value>Assign category</value></data>
+  <data name="Btn_ImportAuswahlAufheben" xml:space="preserve"><value>Clear selection</value></data>
   <data name="Msg_ImportStatusMissingDate" xml:space="preserve"><value>Missing booking date</value></data>
   <data name="Msg_ImportStatusUnparsableAmount" xml:space="preserve"><value>Amount could not be parsed</value></data>
   <data name="Msg_ImportStatusPossibleDuplicate" xml:space="preserve"><value>Possible duplicate</value></data>

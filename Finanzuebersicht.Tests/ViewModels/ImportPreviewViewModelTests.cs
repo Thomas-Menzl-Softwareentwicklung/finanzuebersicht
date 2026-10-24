@@ -4,6 +4,7 @@ using Finanzuebersicht.Core.Services;
 using Finanzuebersicht.Models;
 using Finanzuebersicht.Navigation;
 using Finanzuebersicht.Presentation.Services;
+using Finanzuebersicht.Resources.Strings;
 using Finanzuebersicht.ViewModels;
 using Microsoft.Extensions.Logging;
 
@@ -228,6 +229,43 @@ public class ImportPreviewViewModelTests
         vm.ClearCategorizationSelectionCommand.Execute(null);
         Assert.All(vm.Rows, row => Assert.False(row.IsCategorizationSelected));
         Assert.All(vm.Rows.Take(2), row => Assert.Equal("food", row.SelectedCategoryOption?.Id));
+    }
+
+    [Fact]
+    public async Task LoadPreview_ExposesLocalizedCategoryMatchSource()
+    {
+        var vm = await CreateLoadedViewModel(new ImportPreviewResult
+        {
+            Rows =
+            [
+                new() { Id = "rule", Status = ImportPreviewRowStatus.Ready, IsIncluded = true, CategoryMatchSource = ImportCategoryMatchSource.KeywordRule, Transaction = new Transaction { Titel = "Rule" } },
+                new() { Id = "history", Status = ImportPreviewRowStatus.Ready, IsIncluded = true, CategoryMatchSource = ImportCategoryMatchSource.History, Transaction = new Transaction { Titel = "History" } },
+                new() { Id = "none", Status = ImportPreviewRowStatus.Uncategorized, IsIncluded = true, CategoryMatchSource = ImportCategoryMatchSource.None, Transaction = new Transaction { Titel = "None" } }
+            ]
+        });
+
+        Assert.Equal(ResourceKeys.Lbl_ImportCategorySourceRule, vm.Rows[0].CategoryMatchSourceText);
+        Assert.Equal(ResourceKeys.Lbl_ImportCategorySourceHistory, vm.Rows[1].CategoryMatchSourceText);
+        Assert.Equal(ResourceKeys.Lbl_ImportCategorySourceNone, vm.Rows[2].CategoryMatchSourceText);
+    }
+
+    [Fact]
+    public async Task ToggleCategorySelectionMode_ClearsSelectionWhenClosed()
+    {
+        var vm = await CreateLoadedViewModel(new ImportPreviewResult
+        {
+            Rows = [new() { Id = "r1", Status = ImportPreviewRowStatus.Ready, IsIncluded = true, NormalizedPayeeKey = "payee", Transaction = new Transaction { Titel = "Payee" } }]
+        });
+
+        vm.ToggleCategorySelectionModeCommand.Execute(null);
+        vm.Rows[0].IsCategorizationSelected = true;
+        Assert.Equal(1, vm.SelectedCategoryCount);
+
+        vm.ToggleCategorySelectionModeCommand.Execute(null);
+
+        Assert.False(vm.IsCategorySelectionMode);
+        Assert.Equal(0, vm.SelectedCategoryCount);
+        Assert.False(vm.Rows[0].IsCategorizationSelected);
     }
 
     [Fact]

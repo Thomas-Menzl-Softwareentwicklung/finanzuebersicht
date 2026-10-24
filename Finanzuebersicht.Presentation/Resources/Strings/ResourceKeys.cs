@@ -419,6 +419,15 @@ public static class ResourceKeys
     public const string Lbl_ImportDuplikateCount = nameof(Lbl_ImportDuplikateCount);
     public const string Lbl_ImportProblemeCount = nameof(Lbl_ImportProblemeCount);
     public const string Lbl_ImportAusgewaehltCount = nameof(Lbl_ImportAusgewaehltCount);
+    public const string Lbl_ImportCategorySourceRule = nameof(Lbl_ImportCategorySourceRule);
+    public const string Lbl_ImportCategorySourceHistory = nameof(Lbl_ImportCategorySourceHistory);
+    public const string Lbl_ImportCategorySourceNone = nameof(Lbl_ImportCategorySourceNone);
+    public const string Lbl_ImportCategorySelectionCount = nameof(Lbl_ImportCategorySelectionCount);
+    public const string Btn_ImportKategorienBearbeiten = nameof(Btn_ImportKategorienBearbeiten);
+    public const string Btn_ImportKategorienFertig = nameof(Btn_ImportKategorienFertig);
+    public const string Btn_ImportGleicherZahlungspartner = nameof(Btn_ImportGleicherZahlungspartner);
+    public const string Btn_ImportKategorieZuweisen = nameof(Btn_ImportKategorieZuweisen);
+    public const string Btn_ImportAuswahlAufheben = nameof(Btn_ImportAuswahlAufheben);
     public const string Msg_ImportStatusMissingDate = nameof(Msg_ImportStatusMissingDate);
     public const string Msg_ImportStatusUnparsableAmount = nameof(Msg_ImportStatusUnparsableAmount);
     public const string Msg_ImportStatusPossibleDuplicate = nameof(Msg_ImportStatusPossibleDuplicate);
