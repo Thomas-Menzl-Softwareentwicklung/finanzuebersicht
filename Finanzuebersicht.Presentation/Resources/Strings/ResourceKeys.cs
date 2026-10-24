@@ -195,6 +195,7 @@ public static class ResourceKeys
     public const string Dlg_DauerauftragBuchenFrage = nameof(Dlg_DauerauftragBuchenFrage);
     public const string Dlg_VariableAmount = nameof(Dlg_VariableAmount);
     public const string Dlg_VariableAmountQuestion = nameof(Dlg_VariableAmountQuestion);
+    public const string Lbl_AmountEstimate = nameof(Lbl_AmountEstimate);
     public const string Dlg_DauerauftragUeberspringen = nameof(Dlg_DauerauftragUeberspringen);
     public const string Dlg_DauerauftragUeberspringenFrage = nameof(Dlg_DauerauftragUeberspringenFrage);
     public const string Btn_AlsAusgefuehrtBuchen = nameof(Btn_AlsAusgefuehrtBuchen);

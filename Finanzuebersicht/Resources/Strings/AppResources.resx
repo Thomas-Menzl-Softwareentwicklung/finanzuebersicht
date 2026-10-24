@@ -210,6 +210,7 @@
   <data name="Dlg_DauerauftragBuchenFrage" xml:space="preserve"><value>Book "{0}" for {1}?</value></data>
   <data name="Dlg_VariableAmount" xml:space="preserve"><value>Confirm amount</value></data>
   <data name="Dlg_VariableAmountQuestion" xml:space="preserve"><value>Enter the amount for "{0}" due {1}.</value></data>
+  <data name="Lbl_AmountEstimate" xml:space="preserve"><value>Estimate</value></data>
   <data name="Dlg_DauerauftragUeberspringen" xml:space="preserve"><value>Skip Instance</value></data>
   <data name="Dlg_DauerauftragUeberspringenFrage" xml:space="preserve"><value>Skip "{0}" for this due date?</value></data>
   <data name="Btn_AlsAusgefuehrtBuchen" xml:space="preserve"><value>Book</value></data>

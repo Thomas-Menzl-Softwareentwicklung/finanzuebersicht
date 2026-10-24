@@ -9,6 +9,7 @@ public class CashflowEntry
     public decimal Amount { get; set; }
     public TransactionType Typ { get; set; }
     public bool IsProjected { get; set; }
+    public bool IsEstimatedAmount { get; set; }
     public bool IsOverdue { get; set; }
 }
 
