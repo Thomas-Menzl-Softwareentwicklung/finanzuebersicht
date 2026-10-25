@@ -18,7 +18,9 @@ public class DashboardDueRecurringCoordinatorTests
         var result = await sut.TryBookAsync(item);
 
         Assert.True(result);
-        await dialog.Received(1).ShowPromptAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), "88,00");
+        await dialog.Received(1).ShowPromptAsync(
+            Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(),
+            88m.ToString("F2", System.Globalization.CultureInfo.CurrentCulture));
         await transactionRepository.Received(1).SaveTransactionAsync(NonNullArg.Is<Transaction>(t => t.Betrag == 92.40m));
     }
 
