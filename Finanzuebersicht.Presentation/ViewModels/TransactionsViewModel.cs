@@ -673,7 +673,7 @@ public partial class TransactionsViewModel(
             return;
         }
 
-        IsFilterPanelOpen = true;
+        IsFilterPanelOpen = false;
         SelectedKategorieFilterItem = AvailableKategorien.FirstOrDefault(k => k.Id == id)
             ?? new KategorieFilterItem(id, _loc.GetString(ResourceKeys.Lbl_ImportStatusUnkategorisiert));
         SelectedKategorieId = id;

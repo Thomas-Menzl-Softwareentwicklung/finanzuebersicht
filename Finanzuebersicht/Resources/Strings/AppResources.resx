@@ -325,6 +325,12 @@ Please restart the app.</value></data>
   <data name="Msg_BackupRestoreConfirmTitle" xml:space="preserve"><value>Restore backup</value></data>
   <data name="Msg_BackupRestoreConfirmBody" xml:space="preserve"><value>Restore backup from {0}? All current data will be overwritten.</value></data>
   <data name="Msg_BackupRestoreDesc" xml:space="preserve"><value>Create backups of your data and restore when needed.</value></data>
+  <data name="Btn_NeueTransaktion" xml:space="preserve"><value>+ Transaction</value></data>
+  <data name="Btn_ActionAusgabe" xml:space="preserve"><value>+ Expense</value></data>
+  <data name="Btn_ActionKategorie" xml:space="preserve"><value>+ Category</value></data>
+  <data name="Btn_ActionKonto" xml:space="preserve"><value>+ Account</value></data>
+  <data name="Btn_ActionSparziel" xml:space="preserve"><value>+ Savings goal</value></data>
+  <data name="Btn_ActionDauerauftrag" xml:space="preserve"><value>+ Recurring</value></data>
   <data name="Btn_Import" xml:space="preserve"><value>Import</value></data>
   <data name="Btn_Filter" xml:space="preserve"><value>Filter</value></data>
   <data name="Btn_Umbuchen" xml:space="preserve"><value>Transfer</value></data>

@@ -298,6 +298,12 @@ public static class ResourceKeys
     public const string Btn_ExportCSV = nameof(Btn_ExportCSV);
     public const string Msg_BackupRestoreTitle = nameof(Msg_BackupRestoreTitle);
     public const string Msg_BackupRestoreDesc = nameof(Msg_BackupRestoreDesc);
+    public const string Btn_NeueTransaktion = nameof(Btn_NeueTransaktion);
+    public const string Btn_ActionAusgabe = nameof(Btn_ActionAusgabe);
+    public const string Btn_ActionKategorie = nameof(Btn_ActionKategorie);
+    public const string Btn_ActionKonto = nameof(Btn_ActionKonto);
+    public const string Btn_ActionSparziel = nameof(Btn_ActionSparziel);
+    public const string Btn_ActionDauerauftrag = nameof(Btn_ActionDauerauftrag);
     public const string Btn_Import = nameof(Btn_Import);
     public const string Btn_Filter = nameof(Btn_Filter);
     public const string Btn_Umbuchen = nameof(Btn_Umbuchen);

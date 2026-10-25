@@ -133,6 +133,126 @@ final class FinanzuebersichtUITests: XCTestCase {
     // MARK: - Screenshot flow
 
     @MainActor
+    func testCompactTransactionHeader() throws {
+        let app = XCUIApplication(bundleIdentifier: Self.mauiBundleIdentifier)
+        app.launchArguments = ["--screenshot-demo", "-AppleLanguages", "(de)", "-AppleLocale", "de_DE"]
+        app.launch()
+        waitFor("page.dashboard", in: app, timeout: 30)
+        tapTab(Tab.transactions, in: app)
+        let list = waitFor("transactions.month-list", in: app)
+        let headerHeight = list.frame.minY - app.navigationBars.firstMatch.frame.maxY
+        print("Transaction header height: \(headerHeight)")
+        XCTAssertLessThanOrEqual(headerHeight, 112, "The default header should fit in two touch-sized rows")
+
+        let screenshot = XCTAttachment(screenshot: app.screenshot())
+        screenshot.name = "transactions-compact-header"
+        screenshot.lifetime = .keepAlways
+        self.add(screenshot)
+
+        let toggle = waitFor("transactions.search-toggle", in: app)
+        toggle.tap()
+        // MAUI puts the AutomationId on UISearchBar, not its inner search field.
+        let field = app.searchFields.firstMatch
+        XCTAssertTrue(field.waitForExistence(timeout: 5))
+        field.tap()
+        field.typeText("REWE")
+        waitFor("transactions.search-list", in: app)
+        toggle.tap()
+        XCTAssertFalse(field.exists)
+        XCTAssertTrue(element("transactions.search-list", in: app).exists, "Collapsing search must preserve its results")
+
+        toggle.tap()
+        XCTAssertTrue(field.waitForExistence(timeout: 5))
+        field.tap()
+        field.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: 4))
+        toggle.tap()
+        waitFor("transactions.month-list", in: app)
+        waitFor("transactions.all", in: app).tap()
+        waitFor("transactions.search-list", in: app)
+        waitFor("transactions.month", in: app).tap()
+        waitFor("transactions.month-list", in: app)
+    }
+
+    @MainActor
+    func testPhoneActionsWithLargeText() throws {
+        let app = XCUIApplication(bundleIdentifier: Self.mauiBundleIdentifier)
+        app.launchArguments = ["--screenshot-demo", "-AppleLanguages", "(de)", "-AppleLocale", "de_DE"]
+        app.launch()
+        waitFor("page.dashboard", in: app, timeout: 30)
+        tapTab(Tab.transactions, in: app)
+        let importButton = waitFor("transactions.import", in: app)
+        let transfer = waitFor("transactions.transfer", in: app)
+        let add = waitFor("transactions.add", in: app)
+        for button in [importButton, transfer, add] {
+            XCTAssertTrue(button.isHittable)
+            XCTAssertGreaterThanOrEqual(button.frame.minX, app.frame.minX)
+            XCTAssertLessThanOrEqual(button.frame.maxX, app.frame.maxX)
+            XCTAssertLessThanOrEqual(button.frame.maxY, app.tabBars.firstMatch.frame.minY)
+        }
+        XCTAssertFalse(importButton.frame.intersects(transfer.frame))
+        XCTAssertFalse(importButton.frame.intersects(add.frame))
+        XCTAssertFalse(transfer.frame.intersects(add.frame))
+        let screenshot = XCTAttachment(screenshot: app.screenshot())
+        screenshot.name = "layout-transactions-large-text"
+        screenshot.lifetime = .keepAlways
+        self.add(screenshot)
+    }
+
+    @MainActor
+    func testPhoneLayoutActionsAndPeriodNavigation() throws {
+        let app = XCUIApplication(bundleIdentifier: Self.mauiBundleIdentifier)
+        app.launchArguments = ["--screenshot-demo", "-AppleLanguages", "(de)", "-AppleLocale", "de_DE"]
+        app.launch()
+        waitFor("page.dashboard", in: app, timeout: 30)
+        waitForSeededContent(in: app)
+
+        let dashboardScreenshot = XCTAttachment(screenshot: app.screenshot())
+        dashboardScreenshot.name = "layout-dashboard"
+        dashboardScreenshot.lifetime = .keepAlways
+        self.add(dashboardScreenshot)
+
+        let year = waitFor("dashboard.period.year", in: app)
+        let month = waitFor("dashboard.period.month", in: app)
+        XCTAssertTrue(year.isHittable)
+        year.tap()
+        XCTAssertTrue(waitForAnyMarker(["Jahresausgaben", "Annual expenses"], in: app, timeout: 10))
+        month.tap()
+        app.scrollViews.firstMatch.swipeUp()
+        let categoriesScreenshot = XCTAttachment(screenshot: app.screenshot())
+        categoriesScreenshot.name = "layout-dashboard-categories"
+        categoriesScreenshot.lifetime = .keepAlways
+        self.add(categoriesScreenshot)
+        let quick = waitFor("fab.schnell", in: app)
+        XCTAssertTrue(quick.isHittable)
+        XCTAssertGreaterThan(quick.frame.midX, app.frame.midX)
+        XCTAssertLessThanOrEqual(quick.frame.maxY, app.tabBars.firstMatch.frame.minY)
+        quick.tap()
+        waitFor("sheet.quick-expense", in: app)
+        dismissQuickExpenseSheetIfPresent(in: app)
+
+        tapTab(Tab.transactions, in: app)
+        let add = waitFor("transactions.add", in: app)
+        let transfer = waitFor("transactions.transfer", in: app)
+        let importButton = waitFor("transactions.import", in: app)
+        XCTAssertTrue(add.isHittable)
+        XCTAssertTrue(transfer.isHittable)
+        XCTAssertTrue(importButton.isHittable)
+        XCTAssertLessThanOrEqual(add.frame.maxY, app.tabBars.firstMatch.frame.minY)
+        let list = waitFor("transactions.month-list", in: app)
+        let actionsTop = min(add.frame.minY, transfer.frame.minY, importButton.frame.minY)
+        XCTAssertLessThanOrEqual(list.frame.maxY, actionsTop)
+        let transactionsScreenshot = XCTAttachment(screenshot: app.screenshot())
+        transactionsScreenshot.name = "layout-transactions"
+        transactionsScreenshot.lifetime = .keepAlways
+        self.add(transactionsScreenshot)
+        list.swipeUp()
+        XCTAssertTrue(add.isHittable)
+        XCTAssertTrue(importButton.isHittable)
+        add.tap()
+        XCTAssertTrue(waitForAnyMarker(["Neue Transaktion", "New transaction", "Betrag", "Amount"], in: app, timeout: 10))
+    }
+
+    @MainActor
     func testScreenshots() throws {
         let app = XCUIApplication(bundleIdentifier: Self.mauiBundleIdentifier)
         setupSnapshot(app)

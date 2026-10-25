@@ -18,6 +18,32 @@ namespace Finanzuebersicht.Tests.ViewModels;
 
 public class TransactionsViewModelTests
 {
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task FilterUncategorized_SelectsCategoryWithoutExpandingFilterPanel(bool panelInitiallyOpen)
+    {
+        var categories = Substitute.For<ICategoryRepository>();
+        categories.GetCategoriesAsync().Returns(Task.FromResult(new List<Category>()));
+        var accounts = Substitute.For<IAccountRepository>();
+        accounts.GetAccountsAsync().Returns(Task.FromResult(new List<Account>()));
+        var transactions = Substitute.For<ITransactionRepository>();
+        transactions.GetTransactionsAsync(Arg.Any<DateTime>(), Arg.Any<DateTime>())
+            .Returns(Task.FromResult(new List<Transaction>()));
+        var uncategorized = Substitute.For<IUncategorizedCategoryService>();
+        uncategorized.FindIdAsync(Arg.Any<CancellationToken>()).Returns("cat-uncat");
+        var viewModel = CreateSut(transactions, categories, transactions, categories, accounts, accounts,
+            out _, out _, out _, out _, out _, out _, uncategorizedCategoryService: uncategorized);
+        viewModel.IsFilterPanelOpen = panelInitiallyOpen;
+
+        await viewModel.FilterUncategorizedCommand.ExecuteAsync(null);
+
+        Assert.Equal("cat-uncat", viewModel.SelectedKategorieId);
+        Assert.Equal("cat-uncat", viewModel.SelectedKategorieFilterItem?.Id);
+        Assert.True(viewModel.IsSearchActive);
+        Assert.False(viewModel.IsFilterPanelOpen);
+    }
+
     [Fact]
     public async Task ClearSearch_ResetsAllFiltersAndReloads()
     {
@@ -740,7 +766,8 @@ public class TransactionsViewModelTests
         ITransactionRepository? deleteTransactionRepository = null,
         IFilePicker? filePicker = null,
         PrepareCsvImportUseCase? prepareCsvImportUseCase = null,
-        IImportSessionStore? importSessionStore = null)
+        IImportSessionStore? importSessionStore = null,
+        IUncategorizedCategoryService? uncategorizedCategoryService = null)
     {
         dialogService = Substitute.For<IDialogService>();
         dialogService.ShowAlertAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>())
@@ -871,6 +898,7 @@ public class TransactionsViewModelTests
             feedbackService,
             localizationService,
             appEvents,
-            logger);
+            logger,
+            uncategorizedCategoryService: uncategorizedCategoryService);
     }
 }

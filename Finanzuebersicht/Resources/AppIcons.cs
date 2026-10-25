@@ -20,4 +20,6 @@ public static class AppIcons
     public const string Delete = "icon_delete.png";
     public const string Duplicate = "icon_duplicate.png";
     public const string Toggle = "icon_toggle.png";
+    public const string Search = "icon_search.png";
+    public const string Filter = "icon_filter.png";
 }
