@@ -64,6 +64,22 @@ public class AccountDetailViewModelTests
     }
 
     [Fact]
+    public async Task Save_WithNegativeOpeningBalance_PersistsSignedAmount()
+    {
+        var accountRepository = Substitute.For<IAccountRepository>();
+        accountRepository.SaveAccountAsync(Arg.Any<Account>()).Returns(Task.CompletedTask);
+
+        var viewModel = CreateSut(out _, accountRepository);
+        viewModel.Name = "Dispo";
+        viewModel.OpeningBalanceText = "-120,50";
+
+        await viewModel.SaveCommand.ExecuteAsync(null);
+
+        await accountRepository.Received(1).SaveAccountAsync(
+            NonNullArg.Is<Account>(a => a.Name == "Dispo" && a.OpeningBalance == -120.50m));
+    }
+
+    [Fact]
     public async Task Reconcile_WithInvalidActualBalance_ShowsValidationDialog()
     {
         var viewModel = CreateSut(out _, out var dialogService);

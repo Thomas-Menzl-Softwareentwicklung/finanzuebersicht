@@ -63,6 +63,12 @@ public static class MauiProgram
 				if (view is Microsoft.Maui.Controls.TimePicker timePicker)
 					timePicker.On<iOS>().SetUpdateMode(UpdateMode.WhenFinished);
 			});
+			// Runs after Keyboard.Numeric maps to the decimal pad, which cannot enter a minus.
+			Microsoft.Maui.Handlers.EntryHandler.Mapper.AppendToMapping(nameof(IEntry.Keyboard), (handler, view) =>
+			{
+				if (view is Microsoft.Maui.Controls.Entry entry)
+					Finanzuebersicht.Controls.SignedAmountEntry.Apply(entry);
+			});
 		});
 #endif
 

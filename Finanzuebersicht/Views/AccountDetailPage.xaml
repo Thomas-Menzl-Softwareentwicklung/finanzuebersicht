@@ -32,6 +32,7 @@
                 <Entry Text="{Binding OpeningBalanceText}"
                        Placeholder="{loc:Translate Hint_Betrag}"
                        Keyboard="Numeric"
+                       controls:SignedAmountEntry.AllowNegative="True"
                        FontSize="16" />
                 <Label Text="{loc:Translate Hint_Anfangssaldo}"
                        FontSize="12"
@@ -78,6 +79,7 @@
                 <Entry Text="{Binding ActualBalanceText}"
                        Placeholder="{loc:Translate Hint_Betrag}"
                        Keyboard="Numeric"
+                       controls:SignedAmountEntry.AllowNegative="True"
                        FontSize="16" />
                 <Label Text="{loc:Translate Hint_SaldoAbgleich}"
                        FontSize="12"

@@ -110,7 +110,7 @@ python3 scripts/check-asc-metadata.py
 bundle exec fastlane upload_listing
 ```
 
-`upload_listing` setzt Version **1.24** falls nötig, lädt DE/EN-Texte und überschreibt iOS-Screenshots. Kein Binary, kein Review. iOS und Mac teilen dieselbe ASC-Version (`ASC_APP_VERSION` in `fastlane/Fastfile`).
+`upload_listing` setzt Version **1.25** falls nötig, lädt DE/EN-Texte und überschreibt iOS-Screenshots. Kein Binary, kein Review. iOS und Mac teilen dieselbe ASC-Version (`ASC_APP_VERSION` in `fastlane/Fastfile`).
 
 Mac-Listing (Texte + Screenshots aus `fastlane/screenshots-mac/`, 16:10 — typisch Retina 2560×1600). Die macOS-App muss in ASC existieren, sonst schlägt die Lane fehl:
 

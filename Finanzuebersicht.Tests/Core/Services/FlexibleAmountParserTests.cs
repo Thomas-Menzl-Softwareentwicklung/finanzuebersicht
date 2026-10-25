@@ -13,6 +13,9 @@ public class FlexibleAmountParserTests
     [InlineData("1,234.56", 1234.56)]
     [InlineData("5.00", 5.00)]
     [InlineData("5,00", 5.00)]
+    [InlineData("-3,50", -3.50)]
+    [InlineData("-3.50", -3.50)]
+    [InlineData("-1.234,56", -1234.56)]
     public void TryParse_AcceptsCommaAndDot(string input, decimal expected)
     {
         Assert.True(FlexibleAmountParser.TryParse(input, out var amount));

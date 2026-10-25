@@ -1,15 +1,22 @@
 # Änderungsverlauf
 
-## [1.24] - Unreleased
+## [1.25] - Unreleased
 
 ### Hinzugefügt
 
 - Einstellungen → Sprache: Hinweis und Mail-Link für weitere Sprachen auf Anfrage (#349)
+- Import: Kategorie-Vorschläge zeigen ihre Quelle; gleiche Zahlungspartner lassen sich gemeinsam kategorisieren
+- Variable Daueraufträge: zuletzt bestätigter Betrag als Vorschlag, Cashflow-Vorschau markiert die Schätzung
+
+### Behoben
+
+- Konten: Anfangssaldo und Ist-Saldo akzeptieren negative Beträge (Dezimalblock ohne Minuszeichen)
 
 ### Geändert
 
 - Neues App-Icon (F+€ Markenzeichen): Light / Dark / Tinted auf iOS; Splash und Einstellungen → Über zeigen die Marke
-- Versionsbasis `1.24` (Nerdbank.GitVersioning) — geplanter Store-Upload iOS **und** Mac
+- Mac Catalyst Mindestversion 17.0 (macOS 14 Sonoma oder neuer); iOS bleibt bei 15.0
+- Versionsbasis `1.25` (Nerdbank.GitVersioning) — TestFlight / Mac App Store, weil `1.25` in App Store Connect angelegt ist
 
 ## [1.23] - 2026-10-08
 
