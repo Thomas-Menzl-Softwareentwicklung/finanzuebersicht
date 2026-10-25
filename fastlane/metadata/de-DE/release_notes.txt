@@ -1,1 +1,7 @@
-Die iPhone-Ansichten wurden übersichtlicher: Suche, Monatsauswahl und Filter nehmen in der Transaktionsliste weniger Platz ein. Schnellaktionen sind auf den iPhone-Bildschirmen jetzt einheitlich unten erreichbar.
+Neu in Version 1.25:
+• Beim CSV-Import siehst du, warum eine Kategorie vorgeschlagen wurde, kannst Buchungen gemeinsam kategorisieren und die Vorschau dabei geöffnet lassen.
+• Variable Daueraufträge merken den zuletzt bestätigten Betrag; die Cashflow-Vorschau kennzeichnet Schätzungen.
+• Konten unterstützen negative Anfangs- und Ist-Salden; der Saldoabgleich ist vom Speichern getrennt.
+• iPhone: kompaktere Transaktionssuche und einheitliche Schnellaktionen am unteren Rand.
+• Neues F+€-App-Icon mit heller, dunkler und getönter Darstellung. Weitere Sprachen kannst du unter Einstellungen → Sprache anfragen.
+• Mac: benötigt mindestens macOS 14 Sonoma.

@@ -1,1 +1,7 @@
-The iPhone screens are easier to scan: search, month selection, and filters take up less space in the transaction list. Quick actions are now consistently available at the bottom of iPhone screens.
+What's new in version 1.25:
+• CSV import explains category suggestions, supports bulk categorization, and keeps the preview open while you edit.
+• Variable recurring payments remember the last confirmed amount; the cash-flow forecast marks estimates.
+• Accounts accept negative opening and current balances; balance reconciliation is separate from saving.
+• iPhone: more compact transaction search and quick actions consistently available at the bottom.
+• New F+€ app icon with light, dark, and tinted appearances. Request additional languages under Settings → Language.
+• Mac: requires macOS 14 Sonoma or later.
