@@ -1,1 +1,1 @@
-New app icon with light, dark, and tinted appearances (iOS). Brand mark on the splash screen and under Settings → About. Under Language you can request an additional language by email.
+The iPhone screens are easier to scan: search, month selection, and filters take up less space in the transaction list. Quick actions are now consistently available at the bottom of iPhone screens.
