@@ -31,7 +31,7 @@
                 <Label Text="{loc:Translate Lbl_Anfangssaldo}" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
                 <Entry Text="{Binding OpeningBalanceText}"
                        Placeholder="{loc:Translate Hint_Betrag}"
-                       Keyboard="Numeric"
+                       Keyboard="Default"
                        controls:SignedAmountEntry.AllowNegative="True"
                        FontSize="16" />
                 <Label Text="{loc:Translate Hint_Anfangssaldo}"
@@ -71,27 +71,46 @@
                    TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}"
                    IsVisible="{Binding IsSystemAccount}" />
 
-            <VerticalStackLayout Spacing="8"
-                                 IsVisible="{Binding CanReconcile}">
-                <Label Text="{loc:Translate Lbl_BerechneterSaldo}" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
-                <Label Text="{Binding CalculatedBalanceText}" FontSize="16" FontAttributes="Bold" />
-                <Label Text="{loc:Translate Lbl_IstSaldo}" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
-                <Entry Text="{Binding ActualBalanceText}"
-                       Placeholder="{loc:Translate Hint_Betrag}"
-                       Keyboard="Numeric"
-                       controls:SignedAmountEntry.AllowNegative="True"
-                       FontSize="16" />
-                <Label Text="{loc:Translate Hint_SaldoAbgleich}"
-                       FontSize="12"
-                       TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
-                <Button Text="{loc:Translate Btn_Abgleichen}"
-                        Command="{Binding ReconcileCommand}"
-                        BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                        TextColor="White"
-                        CornerRadius="12"
-                        HeightRequest="44" />
-            </VerticalStackLayout>
+            <Border IsVisible="{Binding CanReconcile}"
+                    StrokeShape="RoundRectangle 12"
+                    Stroke="{AppThemeBinding Light={StaticResource Separator}, Dark={StaticResource SeparatorDark}}"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource CardBackground}, Dark={StaticResource CardBackgroundDark}}"
+                    Padding="16">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="{loc:Translate Lbl_SaldoAbgleich}"
+                           FontSize="16"
+                           FontAttributes="Bold" />
+                    <Label Text="{loc:Translate Lbl_BerechneterSaldo}" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
+                    <Label Text="{Binding CalculatedBalanceText}" FontSize="16" FontAttributes="Bold" />
+                    <Label Text="{loc:Translate Lbl_IstSaldo}" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
+                    <Entry Text="{Binding ActualBalanceText}"
+                           Placeholder="{loc:Translate Hint_IstSaldo}"
+                           Keyboard="Default"
+                           controls:SignedAmountEntry.AllowNegative="True"
+                           FontSize="16" />
+                    <Label Text="{loc:Translate Hint_SaldoAbgleich}"
+                           FontSize="12"
+                           TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
+                    <Button Text="{loc:Translate Btn_Abgleichen}"
+                            Command="{Binding ReconcileCommand}"
+                            BackgroundColor="Transparent"
+                            TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                            BorderColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                            BorderWidth="1"
+                            CornerRadius="12"
+                            HeightRequest="44" />
+                </VerticalStackLayout>
+            </Border>
 
+        </VerticalStackLayout>
+    </ScrollView>
+        <VerticalStackLayout Grid.Row="1" Padding="16,4,16,12" Spacing="4">
+            <Label Text="▼"
+                   FontSize="10"
+                   HorizontalTextAlignment="Center"
+                   InputTransparent="True"
+                   IsVisible="{x:Static helpers:DesktopChrome.IsPhone}"
+                   TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray600}}" />
             <Button Text="{loc:Translate Btn_Speichern}"
                     Command="{Binding SaveCommand}"
                     BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
@@ -99,18 +118,7 @@
                     CornerRadius="12"
                     HeightRequest="50"
                     FontSize="16"
-                    FontAttributes="Bold"
-                    Margin="0,20,0,0" />
-
+                    FontAttributes="Bold" />
         </VerticalStackLayout>
-    </ScrollView>
-        <Label Grid.Row="1"
-               Text="▼"
-               FontSize="10"
-               HorizontalTextAlignment="Center"
-               Padding="0,2,0,6"
-               InputTransparent="True"
-               IsVisible="{x:Static helpers:DesktopChrome.IsPhone}"
-               TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray600}}" />
     </Grid>
 </ContentPage>

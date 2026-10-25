@@ -112,6 +112,8 @@ public static class ResourceKeys
     // Error Messages
     public const string Err_Titel = nameof(Err_Titel);
     public const string Err_UngueltigerBetrag = nameof(Err_UngueltigerBetrag);
+    public const string Err_IstSaldoErforderlich = nameof(Err_IstSaldoErforderlich);
+    public const string Err_IstSaldoUngueltig = nameof(Err_IstSaldoUngueltig);
     public const string Err_BetragGroesserNull = nameof(Err_BetragGroesserNull);
     public const string Err_TitelErforderlich = nameof(Err_TitelErforderlich);
     public const string Err_KategorieErforderlich = nameof(Err_KategorieErforderlich);
@@ -489,6 +491,8 @@ public static class ResourceKeys
     public const string Btn_Rueckgaengig = nameof(Btn_Rueckgaengig);
     public const string Lbl_BerechneterSaldo = nameof(Lbl_BerechneterSaldo);
     public const string Lbl_IstSaldo = nameof(Lbl_IstSaldo);
+    public const string Lbl_SaldoAbgleich = nameof(Lbl_SaldoAbgleich);
+    public const string Hint_IstSaldo = nameof(Hint_IstSaldo);
     public const string Hint_SaldoAbgleich = nameof(Hint_SaldoAbgleich);
     public const string Msg_SaldoAbgeglichen = nameof(Msg_SaldoAbgeglichen);
     public const string Onboarding_PageTitle = nameof(Onboarding_PageTitle);

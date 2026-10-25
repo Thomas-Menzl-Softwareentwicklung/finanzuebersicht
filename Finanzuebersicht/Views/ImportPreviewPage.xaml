@@ -74,6 +74,7 @@
         <CollectionView Grid.Row="2"
                         IsVisible="{Binding HasRows}"
                         ItemsSource="{Binding FilteredRows}"
+                        ItemsUpdatingScrollMode="KeepScrollOffset"
                         SelectionMode="None">
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="vm:ImportPreviewRowItemViewModel">

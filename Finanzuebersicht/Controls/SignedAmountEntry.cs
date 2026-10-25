@@ -14,6 +14,10 @@ public static class SignedAmountEntry
             false,
             propertyChanged: OnAllowNegativeChanged);
 
+#if IOS || MACCATALYST
+    private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<UIKit.UITextField, object> SelectAllHooked = new();
+#endif
+
     public static bool GetAllowNegative(BindableObject view)
         => (bool)view.GetValue(AllowNegativeProperty);
 
@@ -32,8 +36,34 @@ public static class SignedAmountEntry
         if (!GetAllowNegative(entry))
             return;
 
-        if (entry.Handler is Microsoft.Maui.Handlers.EntryHandler handler)
-            handler.PlatformView.KeyboardType = UIKit.UIKeyboardType.NumbersAndPunctuation;
+        if (entry.Handler is not Microsoft.Maui.Handlers.EntryHandler handler)
+            return;
+
+        var field = handler.PlatformView;
+        field.KeyboardType = UIKit.UIKeyboardType.NumbersAndPunctuation;
+        field.SmartDashesType = UIKit.UITextSmartDashesType.No;
+        field.SmartQuotesType = UIKit.UITextSmartQuotesType.No;
+        field.SmartInsertDeleteType = UIKit.UITextSmartInsertDeleteType.No;
+
+        if (!SelectAllHooked.TryAdd(field, new object()))
+            return;
+
+        // Keyboard.Numeric keeps the typed minus in the native field but does not
+        // push it into Entry.Text when the field already has a value. Save then
+        // still sees the previous text or a partial "-".
+        field.EditingChanged += (_, _) => CopyNativeText(entry, field);
+        field.EditingDidEnd += (_, _) => CopyNativeText(entry, field);
+        field.EditingDidBegin += (_, _) =>
+            field.BeginInvokeOnMainThread(() => field.SelectAll(null));
 #endif
     }
+
+#if IOS || MACCATALYST
+    private static void CopyNativeText(Entry entry, UIKit.UITextField field)
+    {
+        var native = field.Text ?? string.Empty;
+        if (entry.Text != native)
+            entry.Text = native;
+    }
+#endif
 }

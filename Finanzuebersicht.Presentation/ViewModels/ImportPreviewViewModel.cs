@@ -178,11 +178,12 @@ public partial class ImportPreviewViewModel(
 
             Rows = new ObservableCollection<ImportPreviewRowItemViewModel>(
                 _activeSession.Rows.Select(row =>
-                    new ImportPreviewRowItemViewModel(row, _categoryOptions, _loc, OnRowsChanged)));
+                    new ImportPreviewRowItemViewModel(row, _categoryOptions, _loc, OnRowsChanged, UpdateCategorySelectionCount)));
 
             _loadedPreview = true;
             _loadedSessionId = _activeSession.SessionId;
             CanRemap = _importSessionStore.CanRemap;
+            RefreshFilterOptions();
             RefreshState();
         }
         catch (Exception ex)
@@ -267,8 +268,11 @@ public partial class ImportPreviewViewModel(
         await _navigationService.GoToAsync(Routes.ImportMapping);
     }
 
-    public void HandlePageDisappearing()
+    public void HandlePageDisappearing(bool retainSession = false)
     {
+        if (retainSession)
+            return;
+
         if (_keepSessionOnDisappear)
         {
             _keepSessionOnDisappear = false;
@@ -282,9 +286,14 @@ public partial class ImportPreviewViewModel(
 
     private void OnRowsChanged() => RefreshState();
 
+    private void UpdateCategorySelectionCount()
+    {
+        SelectedCategoryCount = Rows.Count(row => row.IsCategorizationSelected);
+        OnPropertyChanged(nameof(HasCategorizationSelection));
+    }
+
     private void RefreshState()
     {
-        RefreshFilterOptions();
         ApplyFilter();
         // HasRows should reflect currently visible rows after filtering
         HasRows = FilteredRows.Count > 0;
@@ -293,8 +302,7 @@ public partial class ImportPreviewViewModel(
             string.Format(_loc.GetString(ResourceKeys.Lbl_ImportDuplikateCount), Rows.Count(r => r.Status == ImportPreviewRowStatus.Duplicate)),
             string.Format(_loc.GetString(ResourceKeys.Lbl_ImportProblemeCount), Rows.Count(r => r.IsProblem)),
             string.Format(_loc.GetString(ResourceKeys.Lbl_ImportAusgewaehltCount), Rows.Count(r => r.IsIncluded && r.CanCommit)));
-        SelectedCategoryCount = Rows.Count(row => row.IsCategorizationSelected);
-        OnPropertyChanged(nameof(HasCategorizationSelection));
+        UpdateCategorySelectionCount();
     }
 
     private void RefreshFilterOptions()
@@ -317,21 +325,38 @@ public partial class ImportPreviewViewModel(
 
     private void ApplyFilter()
     {
-        IEnumerable<ImportPreviewRowItemViewModel> filtered = Rows;
+        IEnumerable<ImportPreviewRowItemViewModel> filteredRows = Rows;
         switch (SelectedFilter?.Filter ?? ImportPreviewFilter.All)
         {
             case ImportPreviewFilter.Ready:
-                filtered = Rows.Where(r => r.Status == ImportPreviewRowStatus.Ready || r.Status == ImportPreviewRowStatus.Uncategorized);
+                filteredRows = Rows.Where(r => r.Status == ImportPreviewRowStatus.Ready || r.Status == ImportPreviewRowStatus.Uncategorized);
                 break;
             case ImportPreviewFilter.Duplicates:
-                filtered = Rows.Where(r => r.Status == ImportPreviewRowStatus.Duplicate);
+                filteredRows = Rows.Where(r => r.Status == ImportPreviewRowStatus.Duplicate);
                 break;
             case ImportPreviewFilter.Problems:
-                filtered = Rows.Where(r => r.IsProblem);
+                filteredRows = Rows.Where(r => r.IsProblem);
                 break;
             case ImportPreviewFilter.Excluded:
-                filtered = Rows.Where(r => !r.IsIncluded);
+                filteredRows = Rows.Where(r => !r.IsIncluded);
                 break;
+        }
+
+        var filtered = filteredRows.ToList();
+        if (FilteredRows.Count == filtered.Count)
+        {
+            var unchanged = true;
+            for (var i = 0; i < filtered.Count; i++)
+            {
+                if (!ReferenceEquals(FilteredRows[i], filtered[i]))
+                {
+                    unchanged = false;
+                    break;
+                }
+            }
+
+            if (unchanged)
+                return;
         }
 
         FilteredRows = new ObservableCollection<ImportPreviewRowItemViewModel>(filtered);
@@ -352,17 +377,20 @@ public partial class ImportPreviewRowItemViewModel : ObservableObject
 {
     private readonly ImportPreviewRow _row;
     private readonly Action _onChanged;
+    private readonly Action _onSelectionChanged;
     private readonly ILocalizationService _loc;
 
     public ImportPreviewRowItemViewModel(
         ImportPreviewRow row,
         IReadOnlyList<ImportPreviewCategoryOption> categoryOptions,
         ILocalizationService localizationService,
-        Action onChanged)
+        Action onChanged,
+        Action onSelectionChanged)
     {
         _row = row;
         _loc = localizationService;
         _onChanged = onChanged;
+        _onSelectionChanged = onSelectionChanged;
         CategoryOptions = new ObservableCollection<ImportPreviewCategoryOption>(
             categoryOptions.Select(option => new ImportPreviewCategoryOption(option.Id, option.DisplayName)));
         status = row.Status;
@@ -451,7 +479,7 @@ public partial class ImportPreviewRowItemViewModel : ObservableObject
         _onChanged();
     }
 
-    partial void OnIsCategorizationSelectedChanged(bool value) => _onChanged();
+    partial void OnIsCategorizationSelectedChanged(bool value) => _onSelectionChanged();
 
     partial void OnStatusChanged(ImportPreviewRowStatus value)
     {
@@ -471,9 +499,19 @@ public partial class ImportPreviewRowItemViewModel : ObservableObject
 
         if (Status is not ImportPreviewRowStatus.Invalid and not ImportPreviewRowStatus.Duplicate)
         {
-            Status = string.IsNullOrWhiteSpace(value.Id)
-                ? ImportPreviewRowStatus.Uncategorized
-                : ImportPreviewRowStatus.Ready;
+            if (string.IsNullOrWhiteSpace(value.Id))
+            {
+                _row.StatusMessage = ResourceKeys.Msg_ImportStatusCategoryUnresolved;
+                Status = ImportPreviewRowStatus.Uncategorized;
+            }
+            else
+            {
+                if (_row.StatusMessage == ResourceKeys.Msg_ImportStatusCategoryUnresolved)
+                    _row.StatusMessage = null;
+                Status = ImportPreviewRowStatus.Ready;
+            }
+
+            OnPropertyChanged(nameof(StatusText));
         }
 
         _onChanged();

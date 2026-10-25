@@ -3,6 +3,7 @@ using Finanzuebersicht.Application.UseCases.Accounts;
 using Finanzuebersicht.Models;
 using Finanzuebersicht.Navigation;
 using Finanzuebersicht.Presentation.Services;
+using Finanzuebersicht.Resources.Strings;
 using Finanzuebersicht.ViewModels;
 
 namespace Finanzuebersicht.Tests.ViewModels;
@@ -80,6 +81,38 @@ public class AccountDetailViewModelTests
     }
 
     [Fact]
+    public async Task Save_WithTrailingMinusOnExistingAmount_PersistsSignedAmount()
+    {
+        var accountRepository = Substitute.For<IAccountRepository>();
+        accountRepository.SaveAccountAsync(Arg.Any<Account>()).Returns(Task.CompletedTask);
+
+        var viewModel = CreateSut(out _, accountRepository);
+        viewModel.Name = "Dispo";
+        viewModel.OpeningBalanceText = "250,00-";
+
+        await viewModel.SaveCommand.ExecuteAsync(null);
+
+        await accountRepository.Received(1).SaveAccountAsync(
+            NonNullArg.Is<Account>(a => a.Name == "Dispo" && a.OpeningBalance == -250.00m));
+    }
+
+    [Fact]
+    public async Task Save_WithTypographicMinusOpeningBalance_PersistsSignedAmount()
+    {
+        var accountRepository = Substitute.For<IAccountRepository>();
+        accountRepository.SaveAccountAsync(Arg.Any<Account>()).Returns(Task.CompletedTask);
+
+        var viewModel = CreateSut(out _, accountRepository);
+        viewModel.Name = "Dispo";
+        viewModel.OpeningBalanceText = "\u2212120,50";
+
+        await viewModel.SaveCommand.ExecuteAsync(null);
+
+        await accountRepository.Received(1).SaveAccountAsync(
+            NonNullArg.Is<Account>(a => a.Name == "Dispo" && a.OpeningBalance == -120.50m));
+    }
+
+    [Fact]
     public async Task Reconcile_WithInvalidActualBalance_ShowsValidationDialog()
     {
         var viewModel = CreateSut(out _, out var dialogService);
@@ -95,7 +128,22 @@ public class AccountDetailViewModelTests
 
         await dialogService.Received(1).ShowAlertAsync(
             Arg.Any<string>(),
+            ResourceKeys.Err_IstSaldoUngueltig,
+            Arg.Any<string>());
+    }
+
+    [Fact]
+    public async Task Reconcile_WithEmptyActualBalance_NamesThatField()
+    {
+        var viewModel = CreateSut(out _, out var dialogService);
+        viewModel.Account = new Account { Id = "acc-1", Name = "Giro", OpeningBalance = 1000m };
+        viewModel.ActualBalanceText = "";
+
+        await viewModel.ReconcileCommand.ExecuteAsync(null);
+
+        await dialogService.Received(1).ShowAlertAsync(
             Arg.Any<string>(),
+            ResourceKeys.Err_IstSaldoErforderlich,
             Arg.Any<string>());
     }
 

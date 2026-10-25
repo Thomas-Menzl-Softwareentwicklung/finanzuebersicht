@@ -128,6 +128,8 @@
   <!-- Error Messages -->
   <data name="Err_Titel" xml:space="preserve"><value>Error</value></data>
   <data name="Err_UngueltigerBetrag" xml:space="preserve"><value>Invalid Amount</value></data>
+  <data name="Err_IstSaldoErforderlich" xml:space="preserve"><value>Actual balance is empty. Enter the balance from your statement.</value></data>
+  <data name="Err_IstSaldoUngueltig" xml:space="preserve"><value>The actual balance is not a valid amount.</value></data>
   <data name="Err_BetragGroesserNull" xml:space="preserve"><value>Amount must be greater than 0</value></data>
   <data name="Err_TitelErforderlich" xml:space="preserve"><value>Title is required</value></data>
   <data name="Err_KategorieErforderlich" xml:space="preserve"><value>Category is required</value></data>
@@ -534,6 +536,8 @@ Please restart the app.</value></data>
   <data name="Btn_Rueckgaengig" xml:space="preserve"><value>Undo</value></data>
   <data name="Lbl_BerechneterSaldo" xml:space="preserve"><value>Calculated balance</value></data>
   <data name="Lbl_IstSaldo" xml:space="preserve"><value>Actual balance (bank)</value></data>
+  <data name="Lbl_SaldoAbgleich" xml:space="preserve"><value>Reconcile balance</value></data>
+  <data name="Hint_IstSaldo" xml:space="preserve"><value>from statement</value></data>
   <data name="Hint_SaldoAbgleich" xml:space="preserve"><value>Enter the balance from your bank statement. The opening balance will be adjusted automatically.</value></data>
   <data name="Msg_SaldoAbgeglichen" xml:space="preserve"><value>Balance reconciled</value></data>
   <data name="Onboarding_PageTitle" xml:space="preserve"><value>Welcome</value></data>

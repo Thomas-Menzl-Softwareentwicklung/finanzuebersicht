@@ -244,6 +244,76 @@ public class ImportPreviewViewModelTests
     }
 
     [Fact]
+    public async Task SelectingCategorizationRow_KeepsTheSameFilteredListInstance()
+    {
+        var vm = await CreateLoadedViewModel(new ImportPreviewResult
+        {
+            Rows =
+            [
+                new() { Id = "r1", Status = ImportPreviewRowStatus.Uncategorized, IsIncluded = true, Transaction = new Transaction { Titel = "A" } },
+                new() { Id = "r2", Status = ImportPreviewRowStatus.Uncategorized, IsIncluded = true, Transaction = new Transaction { Titel = "B" } },
+                new() { Id = "r3", Status = ImportPreviewRowStatus.Uncategorized, IsIncluded = true, Transaction = new Transaction { Titel = "C" } }
+            ]
+        });
+
+        var filtered = vm.FilteredRows;
+        vm.Rows[2].IsCategorizationSelected = true;
+
+        Assert.Same(filtered, vm.FilteredRows);
+        Assert.Equal(["r1", "r2", "r3"], vm.FilteredRows.Select(row => row.Id));
+        Assert.Equal(1, vm.SelectedCategoryCount);
+    }
+
+    [Fact]
+    public async Task AssigningCategory_ReplacesUnresolvedStatusText()
+    {
+        var sessionStore = new ImportSessionStore();
+        sessionStore.SetActiveSession(new ImportPreviewResult
+        {
+            Rows =
+            [
+                new()
+                {
+                    Id = "r1",
+                    Status = ImportPreviewRowStatus.Uncategorized,
+                    IsIncluded = true,
+                    StatusMessage = ImportMessageKeys.CategoryUnresolved,
+                    Transaction = new Transaction { Titel = "Merchant" }
+                }
+            ]
+        });
+        var categoryRepository = Substitute.For<ICategoryRepository>();
+        categoryRepository.GetCategoriesAsync().Returns([new Category { Id = "food", Name = "Food", Icon = "🍎" }]);
+        var localization = Substitute.For<ILocalizationService>();
+        localization.GetString(Arg.Any<string>()).Returns(call =>
+        {
+            var key = call.Arg<string>();
+            return key == ResourceKeys.Msg_ImportStatusCategoryUnresolved
+                ? "Kategorie nicht zugeordnet"
+                : key;
+        });
+        localization.GetString(Arg.Any<string>(), Arg.Any<object[]>()).Returns(call => call.Arg<string>());
+        var vm = new ImportPreviewViewModel(
+            CreateCommitUseCase(categoryRepository),
+            sessionStore,
+            CreateLoadCategoriesUseCase(categoryRepository),
+            Substitute.For<INavigationService>(),
+            Substitute.For<IDialogService>(),
+            localization,
+            Substitute.For<IAppEvents>(),
+            Substitute.For<IFeedbackService>(),
+            Substitute.For<ILogger<ImportPreviewViewModel>>());
+        await vm.LoadPreviewCommand.ExecuteAsync(null);
+
+        Assert.Equal("Kategorie nicht zugeordnet", vm.Rows[0].StatusText);
+
+        vm.Rows[0].SelectedCategoryOption = vm.Rows[0].CategoryOptions.Single(option => option.Id == "food");
+
+        Assert.Equal(ImportPreviewRowStatus.Ready, vm.Rows[0].Status);
+        Assert.Equal(ResourceKeys.Lbl_ImportStatusBereit, vm.Rows[0].StatusText);
+    }
+
+    [Fact]
     public async Task LoadPreview_ExposesLocalizedCategoryMatchSource()
     {
         var vm = await CreateLoadedViewModel(new ImportPreviewResult
@@ -341,5 +411,54 @@ public class ImportPreviewViewModelTests
         vm.HandlePageDisappearing();
 
         Assert.Null(sessionStore.GetActiveSession());
+    }
+
+    [Fact]
+    public async Task HandlePageDisappearing_WhenRetainingSession_KeepsPreviewAndSelection()
+    {
+        var sessionStore = new ImportSessionStore();
+        sessionStore.SetActiveSession(new ImportPreviewResult
+        {
+            Rows =
+            [
+                new ImportPreviewRow
+                {
+                    Id = "r1",
+                    Status = ImportPreviewRowStatus.Uncategorized,
+                    IsIncluded = true,
+                    Transaction = new Transaction { Id = "t1", Titel = "Merchant", Datum = DateTime.Today, Betrag = 10m }
+                }
+            ]
+        });
+
+        var categoryRepository = Substitute.For<ICategoryRepository>();
+        categoryRepository.GetCategoriesAsync().Returns([]);
+        var localization = Substitute.For<ILocalizationService>();
+        localization.GetString(Arg.Any<string>()).Returns(call => call.ArgNotNull<string>());
+        localization.GetString(Arg.Any<string>(), Arg.Any<object[]>()).Returns(call => call.ArgNotNull<string>());
+        var dialog = Substitute.For<IDialogService>();
+        dialog.ShowAlertAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>()).Returns(Task.CompletedTask);
+        var vm = new ImportPreviewViewModel(
+            CreateCommitUseCase(categoryRepository),
+            sessionStore,
+            CreateLoadCategoriesUseCase(categoryRepository),
+            Substitute.For<INavigationService>(),
+            dialog,
+            localization,
+            Substitute.For<IAppEvents>(),
+            Substitute.For<IFeedbackService>(),
+            Substitute.For<ILogger<ImportPreviewViewModel>>());
+
+        await vm.LoadPreviewCommand.ExecuteAsync(null);
+        vm.Rows[0].IsCategorizationSelected = true;
+
+        vm.HandlePageDisappearing(retainSession: true);
+
+        Assert.NotNull(sessionStore.GetActiveSession());
+        Assert.False(vm.ShouldAutoLoad);
+        Assert.True(vm.Rows[0].IsCategorizationSelected);
+
+        await vm.LoadPreviewCommand.ExecuteAsync(null);
+        await dialog.DidNotReceive().ShowAlertAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>());
     }
 }
