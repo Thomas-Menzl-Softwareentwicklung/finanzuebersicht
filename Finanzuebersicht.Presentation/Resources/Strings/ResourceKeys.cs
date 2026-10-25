@@ -31,6 +31,7 @@ public static class ResourceKeys
     public const string Lbl_Farbe = nameof(Lbl_Farbe);
     public const string Lbl_Typ = nameof(Lbl_Typ);
     public const string Lbl_Betrag = nameof(Lbl_Betrag);
+    public const string Lbl_VariableAmount = nameof(Lbl_VariableAmount);
     public const string Lbl_Titel = nameof(Lbl_Titel);
     public const string Lbl_Kategorie = nameof(Lbl_Kategorie);
     public const string Lbl_Datum = nameof(Lbl_Datum);
@@ -192,6 +193,9 @@ public static class ResourceKeys
     public const string Dlg_DauerauftragLoeschenFrage = nameof(Dlg_DauerauftragLoeschenFrage);
     public const string Dlg_DauerauftragBuchen = nameof(Dlg_DauerauftragBuchen);
     public const string Dlg_DauerauftragBuchenFrage = nameof(Dlg_DauerauftragBuchenFrage);
+    public const string Dlg_VariableAmount = nameof(Dlg_VariableAmount);
+    public const string Dlg_VariableAmountQuestion = nameof(Dlg_VariableAmountQuestion);
+    public const string Lbl_AmountEstimate = nameof(Lbl_AmountEstimate);
     public const string Dlg_DauerauftragUeberspringen = nameof(Dlg_DauerauftragUeberspringen);
     public const string Dlg_DauerauftragUeberspringenFrage = nameof(Dlg_DauerauftragUeberspringenFrage);
     public const string Btn_AlsAusgefuehrtBuchen = nameof(Btn_AlsAusgefuehrtBuchen);
@@ -419,6 +423,15 @@ public static class ResourceKeys
     public const string Lbl_ImportDuplikateCount = nameof(Lbl_ImportDuplikateCount);
     public const string Lbl_ImportProblemeCount = nameof(Lbl_ImportProblemeCount);
     public const string Lbl_ImportAusgewaehltCount = nameof(Lbl_ImportAusgewaehltCount);
+    public const string Lbl_ImportCategorySourceRule = nameof(Lbl_ImportCategorySourceRule);
+    public const string Lbl_ImportCategorySourceHistory = nameof(Lbl_ImportCategorySourceHistory);
+    public const string Lbl_ImportCategorySourceNone = nameof(Lbl_ImportCategorySourceNone);
+    public const string Lbl_ImportCategorySelectionCount = nameof(Lbl_ImportCategorySelectionCount);
+    public const string Btn_ImportKategorienBearbeiten = nameof(Btn_ImportKategorienBearbeiten);
+    public const string Btn_ImportKategorienFertig = nameof(Btn_ImportKategorienFertig);
+    public const string Btn_ImportGleicherZahlungspartner = nameof(Btn_ImportGleicherZahlungspartner);
+    public const string Btn_ImportKategorieZuweisen = nameof(Btn_ImportKategorieZuweisen);
+    public const string Btn_ImportAuswahlAufheben = nameof(Btn_ImportAuswahlAufheben);
     public const string Msg_ImportStatusMissingDate = nameof(Msg_ImportStatusMissingDate);
     public const string Msg_ImportStatusUnparsableAmount = nameof(Msg_ImportStatusUnparsableAmount);
     public const string Msg_ImportStatusPossibleDuplicate = nameof(Msg_ImportStatusPossibleDuplicate);

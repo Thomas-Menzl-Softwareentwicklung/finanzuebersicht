@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using Finanzuebersicht.Application.UseCases.RecurringTransactions;
 using Finanzuebersicht.Core.Services;
+using System.Globalization;
 using Finanzuebersicht.Models;
 using Finanzuebersicht.Navigation;
 using Finanzuebersicht.Presentation.Services;
@@ -57,16 +58,52 @@ public sealed class DashboardDueRecurringCoordinator(
     {
         if (item == null) return false;
 
-        var confirm = await _dialogService.ShowConfirmationAsync(
-            _loc.GetString(ResourceKeys.Dlg_DauerauftragBuchen),
-            _loc.GetString(ResourceKeys.Dlg_DauerauftragBuchenFrage, item.Recurring.Titel, item.DueDate.ToString("d")),
-            _loc.GetString(ResourceKeys.Btn_Ja),
-            _loc.GetString(ResourceKeys.Btn_Nein));
-        if (!confirm) return false;
+        decimal? amountOverride = null;
+        if (item.Recurring.IsVariableAmount)
+        {
+            var initialAmount = item.Recurring.LastBookedAmount ?? item.Recurring.Betrag;
+            var enteredAmount = await _dialogService.ShowPromptAsync(
+                _loc.GetString(ResourceKeys.Dlg_VariableAmount),
+                _loc.GetString(ResourceKeys.Dlg_VariableAmountQuestion, item.Recurring.Titel, item.DueDate.ToString("d")),
+                _loc.GetString(ResourceKeys.Btn_Ja),
+                _loc.GetString(ResourceKeys.Btn_Nein),
+                initialAmount.ToString("F2", CultureInfo.CurrentCulture));
+            if (enteredAmount is null) return false;
+
+            if (!FlexibleAmountParser.TryParse(enteredAmount, out var parsedAmount))
+            {
+                await _dialogService.ShowAlertAsync(
+                    _loc.GetString(ResourceKeys.Err_Titel),
+                    _loc.GetString(ResourceKeys.Err_UngueltigerBetrag),
+                    _loc.GetString(ResourceKeys.Btn_OK));
+                return false;
+            }
+
+            if (parsedAmount <= 0)
+            {
+                await _dialogService.ShowAlertAsync(
+                    _loc.GetString(ResourceKeys.Err_Titel),
+                    _loc.GetString(ResourceKeys.Err_BetragGroesserNull),
+                    _loc.GetString(ResourceKeys.Btn_OK));
+                return false;
+            }
+
+            amountOverride = parsedAmount;
+        }
+        else
+        {
+
+            var confirm = await _dialogService.ShowConfirmationAsync(
+                _loc.GetString(ResourceKeys.Dlg_DauerauftragBuchen),
+                _loc.GetString(ResourceKeys.Dlg_DauerauftragBuchenFrage, item.Recurring.Titel, item.DueDate.ToString("d")),
+                _loc.GetString(ResourceKeys.Btn_Ja),
+                _loc.GetString(ResourceKeys.Btn_Nein));
+            if (!confirm) return false;
+        }
 
         try
         {
-            var result = await _bookDueRecurringUseCase.ExecuteAsync(item.Recurring.Id, item.InstanceDate);
+            var result = await _bookDueRecurringUseCase.ExecuteAsync(item.Recurring.Id, item.InstanceDate, amountOverride);
             if (!result.IsSuccess)
             {
                 await UseCaseErrorPresenter.ShowAsync(_dialogService, _loc, result.Error!);

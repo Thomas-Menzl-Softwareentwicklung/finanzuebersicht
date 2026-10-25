@@ -91,9 +91,13 @@
                                     <DataTemplate x:DataType="dash:CashflowEntry">
                                         <Grid ColumnDefinitions="*, Auto">
                                             <Label Grid.Column="0" Text="{Binding Title}" FontSize="13" />
-                                            <Label Grid.Column="1"
-                                                   Text="{Binding Amount, Converter={StaticResource Currency}}"
-                                                   FontSize="13" />
+                                            <HorizontalStackLayout Grid.Column="1" Spacing="5" HorizontalOptions="End">
+                                                <Label Text="{loc:Translate Lbl_AmountEstimate}"
+                                                       FontSize="11" Opacity="0.7"
+                                                       IsVisible="{Binding IsEstimatedAmount}" />
+                                                <Label Text="{Binding Amount, Converter={StaticResource Currency}}"
+                                                       FontSize="13" />
+                                            </HorizontalStackLayout>
                                         </Grid>
                                     </DataTemplate>
                                 </BindableLayout.ItemTemplate>

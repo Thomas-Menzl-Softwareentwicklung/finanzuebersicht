@@ -126,6 +126,9 @@
                                                TextColor="{AppThemeBinding Light={StaticResource ReminderBannerText}, Dark={StaticResource ReminderBannerTextDark}}" />
                                         <Label Text="{Binding Hint}" FontSize="13" Opacity="0.85"
                                                TextColor="{AppThemeBinding Light={StaticResource ReminderBannerText}, Dark={StaticResource ReminderBannerTextDark}}" />
+                                        <Label Text="{loc:Translate Lbl_AmountEstimate}" FontSize="12" Opacity="0.8"
+                                               IsVisible="{Binding Recurring.IsVariableAmount}"
+                                               TextColor="{AppThemeBinding Light={StaticResource ReminderBannerText}, Dark={StaticResource ReminderBannerTextDark}}" />
                                         <Button Text="{loc:Translate Btn_Buchen}" FontSize="14" HeightRequest="44"
                                                 HorizontalOptions="Fill"
                                                 Command="{Binding Source={RelativeSource AncestorType={x:Type vm:DashboardViewModel}}, Path=BookDueRecurringCommand}"

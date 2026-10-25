@@ -29,7 +29,9 @@ public class BookDueRecurringInstanceUseCase(
             return UseCaseResult.Fail(UseCaseErrorCode.RecurringNotFound);
 
         var effectiveDate = RecurringScheduleCalculator.ApplyExceptions(recurring, instanceDate.Date);
-        var amount = amountOverride ?? recurring.Betrag;
+        var amount = amountOverride
+            ?? (recurring.IsVariableAmount ? recurring.LastBookedAmount : null)
+            ?? recurring.Betrag;
 
         var existing = await transactionRepository.GetTransactionsAsync(
             effectiveDate.Date,
@@ -69,6 +71,8 @@ public class BookDueRecurringInstanceUseCase(
             cancellationToken);
 
         recurring.LetzteAusfuehrung = instanceDate.Date;
+        if (recurring.IsVariableAmount)
+            recurring.LastBookedAmount = amount;
         CloudSyncNotify.StampUpdatedAt(recurring);
         await recurringTransactionRepository.SaveRecurringTransactionAsync(recurring);
         await CloudSyncNotify.NotifyUpsertAsync(

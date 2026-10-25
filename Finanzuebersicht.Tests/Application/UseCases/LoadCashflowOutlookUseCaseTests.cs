@@ -45,7 +45,50 @@ public class LoadCashflowOutlookUseCaseTests
 
         Assert.Contains(result.Days, d => d.Entries.Any(e => e.Title == "Gehalt" && !e.IsProjected));
         Assert.Contains(result.Days, d => d.Entries.Any(e => e.Title == "Miete" && e.IsProjected));
+        Assert.Contains(result.Days.SelectMany(d => d.Entries), e => e.Title == "Miete" && !e.IsEstimatedAmount);
         Assert.Equal(3000m, result.ProjectedIncome);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_UsesAndMarksEstimateForVariableRecurringAmounts()
+    {
+        var today = new DateTime(2026, 3, 1);
+        var transactionRepository = Substitute.For<ITransactionRepository>();
+        transactionRepository.GetTransactionsAsync(Arg.Any<DateTime>(), Arg.Any<DateTime>())
+            .Returns(new List<Transaction>
+            {
+                new() { Id = "tx-actual", Titel = "Paid", Betrag = 20m, Typ = TransactionType.Ausgabe, Datum = today, AccountId = "acc-1" }
+            });
+        var recurringRepository = Substitute.For<IRecurringTransactionRepository>();
+        recurringRepository.GetRecurringTransactionsAsync().Returns(new List<RecurringTransaction>
+        {
+            new()
+            {
+                Id = "rec-variable-first", Titel = "Water", Betrag = 35m,
+                IsVariableAmount = true, Typ = TransactionType.Ausgabe, Aktiv = true,
+                Startdatum = today, Interval = RecurrenceInterval.Monthly, AccountId = "acc-1"
+            },
+            new()
+            {
+                Id = "rec-variable-last", Titel = "Power", Betrag = 60m,
+                IsVariableAmount = true, LastBookedAmount = 72m, Typ = TransactionType.Ausgabe, Aktiv = true,
+                Startdatum = today, Interval = RecurrenceInterval.Monthly, AccountId = "acc-1"
+            }
+        });
+
+        var sut = new LoadCashflowOutlookUseCase(transactionRepository, recurringRepository, new FixedClock(today));
+        var result = await sut.ExecuteAsync(accountId: "acc-1");
+        var entries = result.Days.SelectMany(day => day.Entries).ToList();
+
+        var initialEstimate = Assert.Single(entries, entry => entry.Title == "Water");
+        Assert.Equal(35m, initialEstimate.Amount);
+        Assert.True(initialEstimate.IsProjected);
+        Assert.True(initialEstimate.IsEstimatedAmount);
+        var lastEstimate = Assert.Single(entries, entry => entry.Title == "Power");
+        Assert.Equal(72m, lastEstimate.Amount);
+        Assert.True(lastEstimate.IsEstimatedAmount);
+        var actual = Assert.Single(entries, entry => entry.Title == "Paid");
+        Assert.False(actual.IsEstimatedAmount);
     }
 
     [Fact]

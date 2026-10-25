@@ -66,9 +66,12 @@ public class LoadCashflowOutlookUseCase(
                 {
                     Date = day,
                     Title = recurring.Titel,
-                    Amount = Math.Abs(recurring.Betrag),
+                    Amount = Math.Abs(recurring.IsVariableAmount
+                        ? recurring.LastBookedAmount ?? recurring.Betrag
+                        : recurring.Betrag),
                     Typ = recurring.Typ,
-                    IsProjected = true
+                    IsProjected = true,
+                    IsEstimatedAmount = recurring.IsVariableAmount
                 });
             }
         }
@@ -142,10 +145,13 @@ public class LoadCashflowOutlookUseCase(
         {
             Date = from,
             Title = recurring.Titel,
-            Amount = Math.Abs(recurring.Betrag),
+            Amount = Math.Abs(recurring.IsVariableAmount
+                ? recurring.LastBookedAmount ?? recurring.Betrag
+                : recurring.Betrag),
             Typ = recurring.Typ,
             IsProjected = true,
-            IsOverdue = true
+            IsOverdue = true,
+            IsEstimatedAmount = recurring.IsVariableAmount
         });
     }
 

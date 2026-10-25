@@ -33,6 +33,12 @@
                    SemanticProperties.Hint="{loc:Translate A11y_HintBetrag}" />
         </VerticalStackLayout>
 
+        <Grid ColumnDefinitions="*, Auto" Padding="0">
+            <Label Text="{loc:Translate Lbl_VariableAmount}" FontSize="16"
+                   VerticalTextAlignment="Center" />
+            <Switch Grid.Column="1" IsToggled="{Binding IsVariableAmount}" />
+        </Grid>
+
         <VerticalStackLayout Spacing="4">
             <Label Text="{loc:Translate Lbl_Titel}" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
             <Entry Text="{Binding Titel}" Placeholder="{loc:Translate Hint_Titelbeispiel}"

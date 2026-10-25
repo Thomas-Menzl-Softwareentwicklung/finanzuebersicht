@@ -26,6 +26,7 @@ public class RecurringTransactionDetailViewModelTests
         var sut = CreateSut(categoryRepository, accountRepository);
         sut.SelectedKategorie = new Category { Id = "cat-old", Name = "Alt" };
         sut.SelectedAccount = new Account { Id = "acc-old", Name = "Alt" };
+        sut.IsVariableAmount = true;
 
         await sut.ResetForCreateAsync();
 
@@ -33,6 +34,26 @@ public class RecurringTransactionDetailViewModelTests
         Assert.NotEqual("acc-old", sut.SelectedAccount?.Id);
         Assert.Equal("acc-1", sut.SelectedAccount?.Id);
         Assert.False(sut.IsEditing);
+        Assert.False(sut.IsVariableAmount);
+    }
+
+    [Fact]
+    public void RecurringTransaction_LoadsVariableAmountFlag()
+    {
+        var categoryRepository = Substitute.For<ICategoryRepository>();
+        var accountRepository = Substitute.For<IAccountRepository>();
+        var sut = CreateSut(categoryRepository, accountRepository);
+
+        sut.RecurringTransaction = new RecurringTransaction
+        {
+            Id = "rec-1",
+            Betrag = 75m,
+            IsVariableAmount = true,
+            LastBookedAmount = 80m
+        };
+
+        Assert.True(sut.IsVariableAmount);
+        Assert.Equal(75m.ToString("F2", System.Globalization.CultureInfo.CurrentCulture), sut.BetragText);
     }
 
     private static RecurringTransactionDetailViewModel CreateSut(
