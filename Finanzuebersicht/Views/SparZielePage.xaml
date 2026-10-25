@@ -20,8 +20,8 @@
         <conv:SparZielRowAccessibilityConverter x:Key="SparZielAccessibility" />
     </views:BaseContentPage.Resources>
 
-    <Grid>
-        <controls:DesktopContentHost>
+    <Grid RowDefinitions="*, Auto">
+        <controls:DesktopContentHost Grid.Row="0">
         <RefreshView Command="{Binding LoadSparZieleCommand}"
                      IsRefreshing="{Binding IsLoading}">
             <CollectionView ItemsSource="{Binding SparZiele}"
@@ -142,16 +142,14 @@
         </RefreshView>
         </controls:DesktopContentHost>
 
-        <Button Text="{loc:Translate Btn_Hinzufuegen}"
+        <Border Grid.Row="1"
                 IsVisible="{x:Static helpers:DesktopChrome.IsPhone}"
-                FontSize="28" TextColor="White"
-                BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                CornerRadius="28"
-                WidthRequest="56" HeightRequest="56"
-                HorizontalOptions="End" VerticalOptions="End"
-                Margin="0,0,20,20"
-                SemanticProperties.Description="{loc:Translate A11y_SparZielHinzufuegen}"
-                Shadow="{Shadow Brush='#40000000', Offset='0,4', Radius=8}"
-                Command="{Binding OpenCreateFormCommand}" />
+                Style="{StaticResource PhoneActionDock}">
+            <Button Text="{loc:Translate Btn_ActionSparziel}"
+                    Style="{StaticResource PhonePrimaryAction}"
+                    HorizontalOptions="End"
+                    SemanticProperties.Description="{loc:Translate A11y_SparZielHinzufuegen}"
+                    Command="{Binding OpenCreateFormCommand}" />
+        </Border>
     </Grid>
 </views:BaseContentPage>

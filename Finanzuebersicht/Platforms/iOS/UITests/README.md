@@ -117,6 +117,30 @@ The test passes `--screenshot-demo` after `setupSnapshot(app)` so demo mode wins
 
 Snapshot flow (`testScreenshots`): `01-dashboard` → `07-settings` — see `FinanzuebersichtUITests.swift`.
 
+## Phone layout regression checks
+
+After building and installing the MAUI app, run `testPhoneLayoutActionsAndPeriodNavigation`
+to check the month/year switch, quick capture, transaction creation and the separation
+between the scrolling list and its action row. The test keeps screenshots of the
+dashboard, category list and transactions in the result bundle.
+
+Run `testPhoneActionsWithLargeText` with the simulator configured for enlarged text.
+It checks that all three transaction actions remain reachable and within the screen;
+inspect its retained screenshot to confirm that the labels are complete. For example:
+
+```bash
+xcrun simctl ui <simulator-udid> content_size accessibility-large
+xcrun simctl ui <simulator-udid> appearance dark
+xcodebuild test \
+  -project FinanzuebersichtUITests.xcodeproj \
+  -scheme FinanzuebersichtUITests \
+  -destination 'platform=iOS Simulator,id=<simulator-udid>' \
+  -only-testing:FinanzuebersichtUITests/FinanzuebersichtUITests/testPhoneActionsWithLargeText
+```
+
+Record the simulator's original `content_size` and `appearance` before changing them,
+and restore those values after the check.
+
 ## fastlane snapshot
 
 From repo root (`fastlane/Fastfile` installs the MAUI `.app` on each Snapfile simulator before capture):

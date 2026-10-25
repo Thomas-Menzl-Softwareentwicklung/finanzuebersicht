@@ -23,6 +23,7 @@
         <conv:KategorieIdToNameConverter x:Key="KategorieIdToName" />
         <conv:AccountIdToNameConverter x:Key="AccountIdToName" />
         <conv:InvertBoolConverter x:Key="InvertBool" />
+        <conv:StringToBoolConverter x:Key="StringToBool" />
         <conv:TransactionRowAccessibilityConverter x:Key="TransactionAccessibility" />
         <conv:CategoryRowAccessibilityConverter x:Key="CategoryAccessibility" />
         <conv:AccountRowAccessibilityConverter x:Key="AccountAccessibility" />
@@ -161,127 +162,88 @@
 
     <Grid>
     <controls:DesktopContentHost>
-    <Grid RowDefinitions="Auto, Auto, Auto, Auto, Auto, *">
+    <Grid RowDefinitions="Auto, Auto, Auto, *, Auto">
 
-        <!-- Row 0: Suchleiste + Filter-Button -->
-        <Grid Grid.Row="0" ColumnDefinitions="*, Auto" Padding="12,8,12,4" ColumnSpacing="8">
-            <SearchBar x:Name="TransactionSearchBar"
-                       Grid.Column="0"
-                       Text="{Binding SearchText}"
-                       Placeholder="{loc:Translate Hint_SucheTransaktionen}"
-                       CancelButtonColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
-            <Button Grid.Column="1"
-                    Text="{loc:Translate Btn_Filter}"
-                    FontSize="14"
-                    Command="{Binding ToggleFilterPanelCommand}"
-                    BackgroundColor="Transparent"
-                    TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                    BorderWidth="0"
-                    CornerRadius="10"
-                    Padding="12,8"
-                    VerticalOptions="Center"
-                    SemanticProperties.Description="{loc:Translate A11y_FilterUmschalten}">
-                <Button.Triggers>
-                    <DataTrigger TargetType="Button" Binding="{Binding IsFilterActive}" Value="True">
-                        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
-                        <Setter Property="TextColor" Value="White" />
-                    </DataTrigger>
-                </Button.Triggers>
-            </Button>
-        </Grid>
-
-        <!-- Row 1: Monats-Chips (Vormonat / Aktuell / Nächster / Gesamt) — immer sichtbar,
-             damit Gesamt auch im Suchmodus erreichbar bleibt. -->
-        <ScrollView Grid.Row="1" Orientation="Horizontal" HorizontalScrollBarVisibility="Never"
-                    Padding="16,8,16,8">
-            <HorizontalStackLayout Spacing="8">
-                <!-- Vormonat -->
-                <Border StrokeShape="RoundRectangle 99" Stroke="Transparent" Padding="14,7"
-                        MinimumHeightRequest="44" MinimumWidthRequest="44"
-                        BackgroundColor="{AppThemeBinding Light={StaticResource CardBackground}, Dark={StaticResource CardBackgroundDark}}">
-                    <SemanticProperties.Description>
-                        <MultiBinding StringFormat="{}{0}, {1}">
-                            <Binding Path="VormonatChipLabel" />
-                            <loc:Translate Key="A11y_VorherigerMonat" />
-                        </MultiBinding>
-                    </SemanticProperties.Description>
-                    <Border.GestureRecognizers>
-                        <TapGestureRecognizer Command="{Binding PreviousMonthCommand}" />
-                    </Border.GestureRecognizers>
-                    <Label Text="{Binding VormonatChipLabel}" FontSize="13" FontAttributes="Bold"
-                           HorizontalOptions="Center" VerticalOptions="Center"
-                           TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
-                </Border>
-                <!-- Aktuell -->
-                <Border StrokeShape="RoundRectangle 99" Stroke="Transparent" Padding="14,7"
-                        MinimumHeightRequest="44" MinimumWidthRequest="44">
-                    <Border.Triggers>
-                        <DataTrigger TargetType="Border" Binding="{Binding IsCurrentMonthChipActive}" Value="True">
+        <!-- Two default phone rows; the search field appears only while needed. -->
+        <VerticalStackLayout Grid.Row="0" Padding="12,4" Spacing="2">
+            <Grid ColumnDefinitions="44, *, 44, Auto, 44" ColumnSpacing="2">
+                <Button Text="‹" FontSize="26" Padding="0" MinimumHeightRequest="44"
+                        Command="{Binding PreviousMonthCommand}" BackgroundColor="Transparent"
+                        TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}"
+                        SemanticProperties.Description="{loc:Translate A11y_VorherigerMonat}" />
+                <Button Grid.Column="1" AutomationId="transactions.month"
+                        Text="{Binding MonatAnzeige}" FontSize="15" FontAttributes="Bold"
+                        Padding="0,6" MinimumHeightRequest="44" LineBreakMode="WordWrap"
+                        Command="{Binding SelectCurrentMonthChipCommand}" BackgroundColor="Transparent"
+                        TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}"
+                        SemanticProperties.Hint="{loc:Translate A11y_AktuellerMonat}" />
+                <Button Grid.Column="2" Text="›" FontSize="26" Padding="0" MinimumHeightRequest="44"
+                        Command="{Binding NextMonthCommand}" BackgroundColor="Transparent"
+                        TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}"
+                        SemanticProperties.Description="{loc:Translate A11y_NaechsterMonat}" />
+                <ImageButton Grid.Column="3" AutomationId="transactions.search-toggle"
+                             Source="{x:Static icons:AppIcons.Search}" WidthRequest="44" HeightRequest="44" Padding="12"
+                             BackgroundColor="Transparent" CornerRadius="10"
+                             IsVisible="{x:Static helpers:DesktopChrome.IsPhone}"
+                             Clicked="OnToggleSearchClicked"
+                             SemanticProperties.Description="{loc:Translate Menu_Suchen}">
+                    <ImageButton.Triggers>
+                        <DataTrigger TargetType="ImageButton" Binding="{Binding SearchText, Converter={StaticResource StringToBool}}" Value="True">
                             <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource PrimaryTint}, Dark={StaticResource PrimaryTintDark}}" />
                         </DataTrigger>
-                        <DataTrigger TargetType="Border" Binding="{Binding IsCurrentMonthChipActive}" Value="False">
-                            <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource CardBackground}, Dark={StaticResource CardBackgroundDark}}" />
-                        </DataTrigger>
-                    </Border.Triggers>
-                    <SemanticProperties.Description>
-                        <MultiBinding StringFormat="{}{0}, {1}">
-                            <Binding Path="MonatAnzeige" />
-                            <loc:Translate Key="A11y_AktuellerMonat" />
-                        </MultiBinding>
-                    </SemanticProperties.Description>
-                    <Border.GestureRecognizers>
-                        <TapGestureRecognizer Command="{Binding SelectCurrentMonthChipCommand}" />
-                    </Border.GestureRecognizers>
-                    <Label Text="{Binding MonatAnzeige}" FontSize="13" FontAttributes="Bold"
-                           HorizontalOptions="Center" VerticalOptions="Center"
-                           TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
-                </Border>
-                <!-- Nächster -->
-                <Border StrokeShape="RoundRectangle 99" Stroke="Transparent" Padding="14,7"
-                        MinimumHeightRequest="44" MinimumWidthRequest="44"
-                        BackgroundColor="{AppThemeBinding Light={StaticResource CardBackground}, Dark={StaticResource CardBackgroundDark}}">
-                    <SemanticProperties.Description>
-                        <MultiBinding StringFormat="{}{0}, {1}">
-                            <Binding Path="NaechsterChipLabel" />
-                            <loc:Translate Key="A11y_NaechsterMonat" />
-                        </MultiBinding>
-                    </SemanticProperties.Description>
-                    <Border.GestureRecognizers>
-                        <TapGestureRecognizer Command="{Binding NextMonthCommand}" />
-                    </Border.GestureRecognizers>
-                    <Label Text="{Binding NaechsterChipLabel}" FontSize="13" FontAttributes="Bold"
-                           HorizontalOptions="Center" VerticalOptions="Center"
-                           TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}" />
-                </Border>
-                <!-- Gesamt -->
-                <Border StrokeShape="RoundRectangle 99" Stroke="Transparent" Padding="14,7"
-                        MinimumHeightRequest="44" MinimumWidthRequest="44">
-                    <Border.Triggers>
-                        <DataTrigger TargetType="Border" Binding="{Binding IsGesamtChipActive}" Value="True">
+                        <DataTrigger TargetType="ImageButton" Binding="{Binding Source={x:Reference TransactionSearchContainer}, Path=IsVisible}" Value="True">
                             <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource PrimaryTint}, Dark={StaticResource PrimaryTintDark}}" />
                         </DataTrigger>
-                        <DataTrigger TargetType="Border" Binding="{Binding IsGesamtChipActive}" Value="False">
-                            <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource CardBackground}, Dark={StaticResource CardBackgroundDark}}" />
+                    </ImageButton.Triggers>
+                </ImageButton>
+                <ImageButton Grid.Column="4" AutomationId="transactions.filter-toggle"
+                             Source="{x:Static icons:AppIcons.Filter}" WidthRequest="44" HeightRequest="44" Padding="12"
+                             BackgroundColor="Transparent" CornerRadius="10"
+                             Command="{Binding ToggleFilterPanelCommand}"
+                             SemanticProperties.Description="{loc:Translate A11y_FilterUmschalten}">
+                    <ImageButton.Triggers>
+                        <DataTrigger TargetType="ImageButton" Binding="{Binding IsFilterActive}" Value="True">
+                            <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource PrimaryTint}, Dark={StaticResource PrimaryTintDark}}" />
                         </DataTrigger>
-                    </Border.Triggers>
-                    <SemanticProperties.Description>
-                        <MultiBinding StringFormat="{}{0}, {1}">
-                            <Binding Path="GesamtChipLabel" />
-                            <loc:Translate Key="A11y_GesamtAnzeigen" />
-                        </MultiBinding>
-                    </SemanticProperties.Description>
-                    <Border.GestureRecognizers>
-                        <TapGestureRecognizer Command="{Binding EnterGesamtModeCommand}" />
-                    </Border.GestureRecognizers>
-                    <Label Text="{Binding GesamtChipLabel}" FontSize="13" FontAttributes="Bold"
-                           HorizontalOptions="Center" VerticalOptions="Center"
-                           TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
-                </Border>
-            </HorizontalStackLayout>
-        </ScrollView>
+                        <DataTrigger TargetType="ImageButton" Binding="{Binding IsFilterPanelOpen}" Value="True">
+                            <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource PrimaryTint}, Dark={StaticResource PrimaryTintDark}}" />
+                        </DataTrigger>
+                    </ImageButton.Triggers>
+                </ImageButton>
+            </Grid>
 
-        <!-- Row 2: Filter-Panel (collapsible) -->
-        <Border Grid.Row="2"
+            <Grid x:Name="TransactionSearchContainer" IsVisible="{OnIdiom Phone=False, Default=True}">
+                <SearchBar x:Name="TransactionSearchBar" AutomationId="transactions.search"
+                           Text="{Binding SearchText}" Placeholder="{loc:Translate Hint_SucheTransaktionen}"
+                           SearchButtonPressed="OnTransactionSearchSubmitted"
+                           CancelButtonColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+            </Grid>
+
+            <Grid ColumnDefinitions="Auto, *" ColumnSpacing="8">
+                <Button AutomationId="transactions.all" Text="{Binding GesamtChipLabel}"
+                        FontSize="13" Padding="12,6" MinimumHeightRequest="44" CornerRadius="18"
+                        Command="{Binding EnterGesamtModeCommand}"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource CardBackground}, Dark={StaticResource CardBackgroundDark}}"
+                        TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                        SemanticProperties.Description="{loc:Translate A11y_GesamtAnzeigen}">
+                    <Button.Triggers>
+                        <DataTrigger TargetType="Button" Binding="{Binding IsGesamtChipActive}" Value="True">
+                            <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource PrimaryTint}, Dark={StaticResource PrimaryTintDark}}" />
+                        </DataTrigger>
+                    </Button.Triggers>
+                </Button>
+                <Button Grid.Column="1" AutomationId="transactions.uncategorized"
+                        Text="{Binding UncategorizedBadgeText}" IsVisible="{Binding HasUncategorizedTransactions}"
+                        FontSize="13" Padding="12,6" MinimumHeightRequest="44" CornerRadius="18"
+                        HorizontalOptions="Start" LineBreakMode="WordWrap"
+                        TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource CardBackground}, Dark={StaticResource CardBackgroundDark}}"
+                        Command="{Binding FilterUncategorizedCommand}" />
+            </Grid>
+        </VerticalStackLayout>
+
+        <!-- Filter-Panel (collapsible) -->
+        <Border Grid.Row="1"
                 StrokeShape="RoundRectangle 0"
                 Stroke="Transparent"
                 BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}"
@@ -355,7 +317,7 @@
         </Border>
 
         <!-- Row 3: Häufig verwendet — kompakte Chips (Name = Aktion, × = löschen) -->
-        <VerticalStackLayout Grid.Row="3"
+        <VerticalStackLayout Grid.Row="2"
                              Spacing="4"
                              Padding="12,2,12,2"
                              IsVisible="{Binding ShowTransactionTemplates}">
@@ -406,31 +368,14 @@
             </CollectionView>
         </VerticalStackLayout>
 
-        <!-- Row 4: Unkategorisiert-Hinweis (opake Leiste) -->
-        <Border Grid.Row="4"
-                StrokeShape="RoundRectangle 0"
-                Stroke="Transparent"
-                BackgroundColor="{AppThemeBinding Light={StaticResource CardBackground}, Dark={StaticResource CardBackgroundDark}}"
-                Padding="12,8"
-                IsVisible="{Binding HasUncategorizedTransactions}">
-            <Button Text="{Binding UncategorizedBadgeText}"
-                    FontSize="13"
-                    TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                    BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}"
-                    Padding="10,6"
-                    CornerRadius="8"
-                    HorizontalOptions="Start"
-                    Command="{Binding FilterUncategorizedCommand}" />
-        </Border>
-
-        <!-- Row 5: Content -->
-        <Grid Grid.Row="5">
+        <!-- Scrolling transaction content -->
+        <Grid Grid.Row="3">
 
             <!-- Monatsansicht (normal) -->
             <RefreshView Command="{Binding LoadTransaktionenCommand}"
                          IsRefreshing="{Binding IsLoading}"
                          IsVisible="{Binding IsMonthMode}">
-                <CollectionView ItemsSource="{Binding TransaktionsGruppen}"
+                <CollectionView AutomationId="transactions.month-list" ItemsSource="{Binding TransaktionsGruppen}"
                                 IsGrouped="False"
                                 SelectionMode="None"
                                 ItemTemplate="{StaticResource TransactionGroupCardTemplate}">
@@ -465,7 +410,7 @@
                        Margin="0,40,0,0"
                        IsVisible="{Binding HasSearchResults, Converter={StaticResource InvertBool}}" />
 
-                <CollectionView Grid.Row="1"
+                <CollectionView Grid.Row="1" AutomationId="transactions.search-list"
                                 ItemsSource="{Binding SearchErgebnisGruppen}"
                                 IsGrouped="False"
                                 SelectionMode="None"
@@ -475,63 +420,36 @@
 
         </Grid>
 
-        <!-- FABs: Import, Umbuchen, Neue Transaktion (phone only; Mac uses toolbar #351).
-             CascadeInputTransparent=False: parent stays pass-through for the list,
-             but children must receive taps (default cascade would disable all FABs;
-             taps then hit list rows → TransactionDetail). -->
-        <VerticalStackLayout Grid.Row="5"
-                             IsVisible="{x:Static helpers:DesktopChrome.IsPhone}"
-                             HorizontalOptions="End"
-                             VerticalOptions="End"
-                             Padding="20,0,20,20"
-                             Spacing="12"
-                             InputTransparent="True"
-                             CascadeInputTransparent="False">
-            <Border StrokeShape="RoundRectangle 24"
-                    Stroke="Transparent"
-                    BackgroundColor="{AppThemeBinding Light={StaticResource CardBackground}, Dark={StaticResource CardBackgroundDark}}"
-                    WidthRequest="48"
-                    HeightRequest="48"
-                    Padding="11"
-                    SemanticProperties.Description="{loc:Translate A11y_CsvImport}"
-                    Shadow="{Shadow Brush='#40000000', Offset='0,3', Radius=6}">
-                <Border.GestureRecognizers>
-                    <TapGestureRecognizer Command="{Binding ImportCsvCommand}" />
-                </Border.GestureRecognizers>
-                <Image Source="fab_import.png"
-                       Aspect="AspectFit"
-                       HorizontalOptions="Center"
-                       VerticalOptions="Center"
-                       InputTransparent="True" />
-            </Border>
-            <Border StrokeShape="RoundRectangle 24"
-                    Stroke="Transparent"
-                    BackgroundColor="{AppThemeBinding Light={StaticResource CardBackground}, Dark={StaticResource CardBackgroundDark}}"
-                    WidthRequest="48"
-                    HeightRequest="48"
-                    Padding="11"
-                    SemanticProperties.Description="{loc:Translate A11y_UmbuchungHinzufuegen}"
-                    Shadow="{Shadow Brush='#40000000', Offset='0,3', Radius=6}">
-                <Border.GestureRecognizers>
-                    <TapGestureRecognizer Command="{Binding GoToTransferCommand}" />
-                </Border.GestureRecognizers>
-                <Image Source="fab_transfer.png"
-                       Aspect="AspectFit"
-                       HorizontalOptions="Center"
-                       VerticalOptions="Center"
-                       InputTransparent="True" />
-            </Border>
-            <Button Text="{loc:Translate Btn_Hinzufuegen}"
-                    FontSize="28"
-                    TextColor="White"
-                    BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                    CornerRadius="28"
-                    WidthRequest="56"
-                    HeightRequest="56"
-                    SemanticProperties.Description="{loc:Translate A11y_TransaktionHinzufuegen}"
-                    Shadow="{Shadow Brush='#40000000', Offset='0,4', Radius=8}"
-                    Command="{Binding GoToDetailCommand}" />
-        </VerticalStackLayout>
+        <!-- A separate row keeps phone actions reachable without covering list content. -->
+        <Border Grid.Row="4"
+                IsVisible="{x:Static helpers:DesktopChrome.IsPhone}"
+                Style="{StaticResource PhoneActionDock}">
+            <Grid x:Name="PhoneActionsGrid" ColumnDefinitions="Auto, Auto, *" RowDefinitions="Auto"
+                  ColumnSpacing="8" RowSpacing="8" SizeChanged="OnPhoneActionSizeChanged">
+                <Button x:Name="ImportActionButton" AutomationId="transactions.import"
+                        Text="{loc:Translate Btn_Import}" FontSize="13" Padding="12,8"
+                        MinimumHeightRequest="44" LineBreakMode="WordWrap" SizeChanged="OnPhoneActionSizeChanged"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource PageBackground}, Dark={StaticResource PageBackgroundDark}}"
+                        TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}"
+                        SemanticProperties.Description="{loc:Translate A11y_CsvImport}"
+                        Command="{Binding ImportCsvCommand}" />
+                <Button Grid.Column="1" x:Name="TransferActionButton" AutomationId="transactions.transfer"
+                        Text="{loc:Translate Btn_Umbuchen}" FontSize="13" Padding="12,8"
+                        MinimumHeightRequest="44" LineBreakMode="WordWrap" SizeChanged="OnPhoneActionSizeChanged"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource PageBackground}, Dark={StaticResource PageBackgroundDark}}"
+                        TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}"
+                        SemanticProperties.Description="{loc:Translate A11y_UmbuchungHinzufuegen}"
+                        Command="{Binding GoToTransferCommand}" />
+                <Button Grid.Column="2" x:Name="AddActionButton" AutomationId="transactions.add"
+                        Style="{StaticResource PhonePrimaryAction}"
+                        Text="{loc:Translate Btn_NeueTransaktion}" FontSize="14" FontAttributes="Bold"
+                        Padding="12,8" MinimumHeightRequest="44" LineBreakMode="WordWrap" SizeChanged="OnPhoneActionSizeChanged"
+                        TextColor="White"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                        SemanticProperties.Description="{loc:Translate A11y_TransaktionHinzufuegen}"
+                        Command="{Binding GoToDetailCommand}" />
+            </Grid>
+        </Border>
 
     </Grid>
     </controls:DesktopContentHost>

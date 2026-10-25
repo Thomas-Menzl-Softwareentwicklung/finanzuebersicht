@@ -325,6 +325,12 @@ Bitte starte die App neu.</value></data>
   <data name="Msg_BackupRestoreConfirmTitle" xml:space="preserve"><value>Backup wiederherstellen</value></data>
   <data name="Msg_BackupRestoreConfirmBody" xml:space="preserve"><value>Backup vom {0} wiederherstellen? Alle aktuellen Daten werden überschrieben.</value></data>
   <data name="Msg_BackupRestoreDesc" xml:space="preserve"><value>Erstelle Sicherungen deiner Daten und stelle sie bei Bedarf wieder her.</value></data>
+  <data name="Btn_NeueTransaktion" xml:space="preserve"><value>+ Transaktion</value></data>
+  <data name="Btn_ActionAusgabe" xml:space="preserve"><value>+ Ausgabe</value></data>
+  <data name="Btn_ActionKategorie" xml:space="preserve"><value>+ Kategorie</value></data>
+  <data name="Btn_ActionKonto" xml:space="preserve"><value>+ Konto</value></data>
+  <data name="Btn_ActionSparziel" xml:space="preserve"><value>+ Sparziel</value></data>
+  <data name="Btn_ActionDauerauftrag" xml:space="preserve"><value>+ Dauerauftrag</value></data>
   <data name="Btn_Import" xml:space="preserve"><value>Import</value></data>
   <data name="Btn_Filter" xml:space="preserve"><value>Filter</value></data>
   <data name="Btn_Umbuchen" xml:space="preserve"><value>Umbuchen</value></data>
