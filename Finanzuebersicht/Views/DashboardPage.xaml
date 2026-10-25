@@ -538,10 +538,10 @@
     </controls:DesktopContentHost>
 
         <Border Grid.Row="1"
-                AutomationId="{x:Static screenshot:ScreenshotAutomationIds.FabSchnell}"
                 IsVisible="{x:Static helpers:DesktopChrome.IsPhone}"
                 Style="{StaticResource PhoneActionDock}">
-            <Button Text="{loc:Translate Btn_ActionAusgabe}"
+            <Button AutomationId="{x:Static screenshot:ScreenshotAutomationIds.FabSchnell}"
+                    Text="{loc:Translate Btn_ActionAusgabe}"
                     Style="{StaticResource PhonePrimaryAction}"
                     HorizontalOptions="End"
                     SemanticProperties.Description="{loc:Translate A11y_SchnellAusgabe}"

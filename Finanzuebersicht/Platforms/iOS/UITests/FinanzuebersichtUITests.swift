@@ -1,4 +1,5 @@
 import XCTest
+import UIKit
 
 /// App Store screenshot automation for the MAUI iOS app.
 /// Host app bundle id: `de.thomasmenzl.finanzuebersicht` (built by `dotnet build`, not this Xcode project).
@@ -134,6 +135,10 @@ final class FinanzuebersichtUITests: XCTestCase {
 
     @MainActor
     func testCompactTransactionHeader() throws {
+        guard UIDevice.current.userInterfaceIdiom == .phone else {
+            throw XCTSkip("Compact transaction header checks apply to iPhone layout")
+        }
+
         let app = XCUIApplication(bundleIdentifier: Self.mauiBundleIdentifier)
         app.launchArguments = ["--screenshot-demo", "-AppleLanguages", "(de)", "-AppleLocale", "de_DE"]
         app.launch()
