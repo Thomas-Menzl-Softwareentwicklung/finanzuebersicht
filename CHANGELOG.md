@@ -10,6 +10,8 @@
 
 ### Behoben
 
+- Währungsanzeige: Registrierungen für die Aktualisierung offener Ansichten gehen bei parallelen Zugriffen nicht mehr verloren.
+- Variable Daueraufträge bleiben beim Speichern und bei App-Start/Fortsetzen bis zur Betragsbestätigung offen; Schätzbeträge werden nicht automatisch gebucht.
 - Konten: Anfangssaldo und Ist-Saldo akzeptieren negative Beträge (Dezimalblock ohne Minuszeichen)
 
 ### Geändert

@@ -20,6 +20,7 @@
         <conv:BoolToOpacityConverter x:Key="BoolToOpacity" />
         <conv:BetragDisplayConverter x:Key="BetragDisplay" />
         <conv:AktivTextConverter x:Key="AktivText" />
+        <conv:TransactionTypeToLocalizedStringConverter x:Key="TypeText" />
         <conv:RecurringRowAccessibilityConverter x:Key="RecurringAccessibility" />
     </views:BaseContentPage.Resources>
 
@@ -95,7 +96,7 @@
                                 <Label FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}">
                                     <Label.Text>
                                         <MultiBinding StringFormat="{}{0} · {1}">
-                                            <Binding Path="Typ" />
+                                            <Binding Path="Typ" Converter="{StaticResource TypeText}" />
                                             <Binding Path="Aktiv"
                                                      Converter="{StaticResource AktivText}" />
                                         </MultiBinding>

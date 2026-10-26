@@ -1,3 +1,5 @@
+using Finanzuebersicht.Core.Services;
+using Finanzuebersicht.Tests.TestHelpers;
 using Finanzuebersicht.Application.UseCases.RecurringTransactions;
 using Finanzuebersicht.Models;
 using NSubstitute;
@@ -6,6 +8,53 @@ namespace Finanzuebersicht.Tests.Application.UseCases;
 
 public class SaveRecurringTransactionDetailUseCaseTests
 {
+    [Fact]
+    public async Task ExecuteAsync_WithRealGenerator_KeepsVariablePendingUntilConfirmedBooking()
+    {
+        var today = new DateTime(2026, 10, 26);
+        var recurringItems = new List<RecurringTransaction>();
+        var transactions = new List<Transaction>();
+        var recurringRepository = Substitute.For<IRecurringTransactionRepository>();
+        recurringRepository.GetRecurringTransactionsAsync().Returns(_ => recurringItems);
+        recurringRepository.When(r => r.SaveRecurringTransactionAsync(Arg.Any<RecurringTransaction>()))
+            .Do(call =>
+            {
+                var item = call.ArgNotNull<RecurringTransaction>();
+                if (!recurringItems.Contains(item)) recurringItems.Add(item);
+            });
+        var transactionRepository = Substitute.For<ITransactionRepository>();
+        transactionRepository.GetAllTransactionsAsync(Arg.Any<CancellationToken>()).Returns(_ => transactions.ToList());
+        transactionRepository.GetTransactionsAsync(Arg.Any<DateTime>(), Arg.Any<DateTime>()).Returns(_ => transactions.ToList());
+        transactionRepository.When(r => r.SaveTransactionAsync(Arg.Any<Transaction>()))
+            .Do(call => transactions.Add(call.ArgNotNull<Transaction>()));
+        var accounts = Substitute.For<IAccountRepository>();
+        accounts.GetAccountsAsync().Returns([new Account { Id = "acc-1" }]);
+        var generator = new RecurringGenerationService(recurringRepository, transactionRepository, new FixedClock(today));
+        var save = new SaveRecurringTransactionDetailUseCase(recurringRepository, generator, accounts);
+
+        var saved = await save.ExecuteAsync(null, 75m, "Electricity", "energy", "acc-1",
+            TransactionType.Ausgabe, today, null, true, isVariableAmount: true);
+
+        Assert.True(saved.IsSuccess);
+        var recurring = Assert.Single(recurringItems);
+        Assert.Empty(transactions);
+        Assert.Null(recurring.LetzteAusfuehrung);
+        await generator.GeneratePendingRecurringTransactionsAsync();
+        Assert.Empty(transactions);
+
+        var book = new BookDueRecurringInstanceUseCase(recurringRepository, transactionRepository, accounts);
+        Assert.True((await book.ExecuteAsync(recurring.Id, today, 82.50m)).IsSuccess);
+        Assert.Equal(82.50m, Assert.Single(transactions).Betrag);
+        Assert.Equal(82.50m, recurring.LastBookedAmount);
+        Assert.Equal(today, recurring.LetzteAusfuehrung);
+
+        var nextStartup = new RecurringGenerationService(recurringRepository, transactionRepository,
+            new FixedClock(today.AddMonths(1)));
+        await nextStartup.GeneratePendingRecurringTransactionsAsync();
+        Assert.Single(transactions);
+        Assert.Equal(today, recurring.LetzteAusfuehrung);
+    }
+
     [Fact]
     public async Task ExecuteAsync_SavesVariableAmountFlag_WithoutReplacingInitialAmount()
     {

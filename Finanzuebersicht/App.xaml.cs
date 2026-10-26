@@ -232,6 +232,8 @@ public partial class App : global::Microsoft.Maui.Controls.Application
 				{
 					await Task.Delay(500);
 					_appEvents.NotifyDataChanged();
+					try { await ScreenshotDemoBootstrap.TryOpenSceneAsync(); }
+					catch (Exception ex) { CrashLog.Write("Screenshot scene failed", ex); }
 				});
 			}
 			await _licenseService.RefreshAsync();

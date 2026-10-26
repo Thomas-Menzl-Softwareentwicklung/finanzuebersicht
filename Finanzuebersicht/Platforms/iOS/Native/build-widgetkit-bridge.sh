@@ -39,7 +39,7 @@ mkdir -p "$OUT_ROOT"
 build_one() {
   local sdk="$1"
   local triple="$2"
-  local dest_dir="$OUT_ROOT/Release-$sdk"
+  local dest_dir="$OUT_ROOT/${3:-Release-$sdk}"
   mkdir -p "$dest_dir"
   local sdk_path
   sdk_path="$(xcrun --sdk "$sdk" --show-sdk-path)"
@@ -55,6 +55,12 @@ build_one() {
 
 # Match MAUI SupportedOSPlatformVersion 15.0
 build_one iphoneos arm64-apple-ios15.0
-build_one iphonesimulator arm64-apple-ios15.0-simulator
+build_one iphonesimulator arm64-apple-ios15.0-simulator Release-iphonesimulator-arm64
+build_one iphonesimulator x86_64-apple-ios15.0-simulator Release-iphonesimulator-x64
+mkdir -p "$OUT_ROOT/Release-iphonesimulator"
+xcrun lipo -create \
+  "$OUT_ROOT/Release-iphonesimulator-arm64/libWidgetKitBridge.a" \
+  "$OUT_ROOT/Release-iphonesimulator-x64/libWidgetKitBridge.a" \
+  -output "$OUT_ROOT/Release-iphonesimulator/libWidgetKitBridge.a"
 
 echo "Done. MAUI links via NativeReference (ForceLoad) + P/Invoke __Internal."

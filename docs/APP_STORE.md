@@ -112,10 +112,10 @@ bundle exec fastlane upload_listing
 
 `upload_listing` setzt Version **1.25** falls nötig, lädt DE/EN-Texte und überschreibt iOS-Screenshots. Kein Binary, kein Review. iOS und Mac teilen dieselbe ASC-Version (`ASC_APP_VERSION` in `fastlane/Fastfile`).
 
-Mac-Listing (Texte + Screenshots aus `fastlane/screenshots-mac/`, 16:10 — typisch Retina 2560×1600). Die macOS-App muss in ASC existieren, sonst schlägt die Lane fehl:
+Mac-Listing (Texte + Store-Kompositionen aus `fastlane/screenshots-mac-store/`, 16:10 — typisch Retina 2560×1600). Die macOS-App muss in ASC existieren, sonst schlägt die Lane fehl:
 
 ```bash
-# Aufnahmen (Debug-App + --screenshot-demo, ⌘1–⌘5 / ⌘,)
+# Rohaufnahmen + Store-Kompositionen (isolierte Debug-Demo-Szenen)
 bundle exec fastlane screenshots_mac
 # oder: ./scripts/capture-mac-screenshots.sh [--build]
 
@@ -170,7 +170,7 @@ xcrun simctl install booted \
   Finanzuebersicht/bin/Debug/net10.0-ios/iossimulator-arm64/Finanzübersicht.app
 ```
 
-2. **Screenshots aufnehmen** (fastlane snapshot, 7 Screens × 3 Geräte × 2 Sprachen — iPhone 17 Pro Max für ASC **6,9″** / skaliert **6,5″**, iPhone 17 für 6,3″, iPad Pro 13″):
+2. **Screenshots aufnehmen** (fastlane snapshot, 9 Rohaufnahmen × 3 Geräte × 2 Sprachen; daraus 7 Store-Motive pro Gerät/Sprache — iPhone 17 Pro Max für ASC **6,9″** / skaliert **6,5″**, iPhone 17 für 6,3″, iPad Pro 13″):
 
 ```bash
 bundle exec fastlane screenshots
@@ -189,6 +189,46 @@ git add docs/screenshots/
 
 Das Skript mappt sechs der sieben Aufnahmen. Die leere Schnellerfassung (`03-quick-expense`) wird bewusst nicht in der README gezeigt. Der iOS-Screenshot-Lauf aus Schritt 2 dient separat den App-Store-Bildern und wird nicht in `docs/screenshots/` kopiert.
 
-4. **App Store Connect:** `bundle exec fastlane upload_listing` (siehe [Listing hochladen](#listing-hochladen-app-store-connect)). Kein `frameit`.
+4. **App Store Connect:** `bundle exec fastlane upload_listing` (siehe [Listing hochladen](#listing-hochladen-app-store-connect)). Die Store-Kompositionen erzeugt `scripts/render-store-screenshots.py` mit Pillow.
 
 Demo-Daten: Launch-Argument `--screenshot-demo` (nur Debug; isolierter Demo-Pfad). Release/Store-Builds sind nicht betroffen.
+
+
+### Store-Bilder mit Nutzenüberschriften (ab 1.25)
+
+`fastlane screenshots` baut die aktuelle Debug-App automatisch, installiert sie auf den drei konfigurierten Simulatoren, erstellt neun Rohaufnahmen pro Sprache/Gerät und rendert sieben Store-Bilder. Die Simulatorarchitektur wird passend zum Ruby-Host gewählt (`iossimulator-x64` auf Intel, `iossimulator-arm64` auf Apple Silicon). Bei Rosetta oder abweichenden Setups kann `SCREENSHOT_SIMULATOR_RID` explizit gesetzt werden. Die Simulator-Bridges und das Widget werden für Intel und Apple Silicon gebaut; Geräte-/Store-Artefakte bleiben ARM64. Alle Store-Motive zeigen die App selbst.
+
+Voraussetzung für den Bild-Renderer:
+
+```bash
+python3 -m venv /tmp/finanz-screenshot-venv
+/tmp/finanz-screenshot-venv/bin/pip install -r scripts/requirements-screenshots.txt
+export SCREENSHOT_PYTHON=/tmp/finanz-screenshot-venv/bin/python
+```
+
+Falls `python3` bereits Pillow enthält, ist kein zusätzliches venv nötig. Die lokalisierten Überschriften, Zusatztexte und Pro-Hinweise stehen in `fastlane/screenshot-storyboard.json`.
+
+```bash
+bundle exec fastlane screenshots
+bundle exec fastlane screenshots_mac
+# Nur neu komponieren, ohne erneute App-Aufnahme:
+bundle exec fastlane render_store_screenshots
+bundle exec fastlane render_store_screenshots_mac
+```
+
+Rohdaten bleiben in `fastlane/screenshots/` bzw. `fastlane/screenshots-mac/`. Die Upload-Lanes rendern vor dem Upload erneut und verwenden ausschließlich `fastlane/screenshots-store/` bzw. `fastlane/screenshots-mac-store/`. Text-only-Lanes verändern keine Bilder. Alle vier Verzeichnisse sind gitignored. README-Skripte greifen weiterhin auf Rohdaten zu.
+
+Store-Reihenfolge: Dashboard, Konten, CSV-Vorschau (Pro), Transaktionen, wiederkehrende Zahlungen, Sparziele (mehrere mit Pro), ausgefüllte Schnellerfassung. Die Rohaufnahmen von Kategorien/Einstellungen bleiben für README und interne Prüfung erhalten, gelangen aber nicht in das Store-Set.
+
+Die CSV-Vorschau verwendet im isolierten **Debug-/Nicht-Store-Demomodus** einen fiktiven CSV-Stream und durchläuft die echte Import-Pipeline. Es wird nichts importiert. Die Daten des normalen App-Profils bleiben unberührt. Mac-Aufnahmen warten auf eine Bereitschaftsmarkierung nach Seitennavigation/Datenladen und wählen das größte normale App-Fenster, keine Tooltips.
+
+Lokale Prüfungen:
+
+```bash
+python3 scripts/test_render_store_screenshots.py
+dotnet test Finanzuebersicht.Tests/Finanzuebersicht.Tests.csproj
+```
+
+Der Renderer bewahrt die Pixelmaße und das Seitenverhältnis der Rohbilder, fügt Überschriften hinzu und verändert die App-Inhalte nicht. Fehlende Motive/Sprachen oder inkonsistente Bildgrößen brechen vor dem Ersetzen vorhandener Store-Bilder ab. Vor einem Upload die gerenderten Sets visuell prüfen.
+
+Der Renderer erstellt außerdem eine `index.html` im jeweiligen Store-Ausgabeverzeichnis als lokale Bildgalerie. Die iOS-Aufnahme öffnet Sparziele in einer eigenen Demo-Szene und prüft die Höhe der vollständig geladenen Karte, damit die iPad-Aufnahme nicht während einer unvollständigen Listenanordnung entsteht.

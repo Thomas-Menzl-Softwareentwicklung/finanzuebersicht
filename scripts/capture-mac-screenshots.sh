@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Capture Mac Catalyst App Store screenshots (16:10) into fastlane/screenshots-mac/.
-# Uses Debug app + --screenshot-demo, navigates via ⌘1–⌘5 / ⌘,, captures the app window.
+# Uses Debug app + --screenshot-demo, opens isolated real demo scenes, captures the app window.
 #
 # Prerequisite (or pass --build):
 #   dotnet build Finanzuebersicht/Finanzuebersicht.csproj -f net10.0-maccatalyst -c Debug
@@ -46,13 +46,23 @@ window_id() {
 import Cocoa
 let opts: CGWindowListOption = [.optionOnScreenOnly, .excludeDesktopElements]
 guard let info = CGWindowListCopyWindowInfo(opts, kCGNullWindowID) as? [[String: Any]] else { exit(1) }
-for w in info {
-  let owner = w[kCGWindowOwnerName as String] as? String ?? ""
-  let layer = w[kCGWindowLayer as String] as? Int ?? -1
-  if owner == "Finanzübersicht", layer == 0, let id = w[kCGWindowNumber as String] as? Int {
-    print(id)
-    exit(0)
-  }
+// Ignore tooltips and transient controls; the first layer-0 window may be tiny.
+let windows = info.filter { w in
+  guard w[kCGWindowOwnerName as String] as? String == "Finanzübersicht",
+        w[kCGWindowLayer as String] as? Int == 0,
+        let bounds = w[kCGWindowBounds as String] as? [String: Any],
+        let width = bounds["Width"] as? Double,
+        let height = bounds["Height"] as? Double else { return false }
+  return width >= 600 && height >= 400
+}.sorted { lhs, rhs in
+  let a = lhs[kCGWindowBounds as String] as! [String: Any]
+  let b = rhs[kCGWindowBounds as String] as! [String: Any]
+  return (a["Width"] as! Double) * (a["Height"] as! Double) >
+         (b["Width"] as! Double) * (b["Height"] as! Double)
+}
+if let w = windows.first, let id = w[kCGWindowNumber as String] as? Int {
+  print(id)
+  exit(0)
 }
 exit(2)
 '
@@ -67,11 +77,6 @@ tell application "System Events"
   end tell
 end tell
 EOF
-}
-
-key_cmd() {
-  local key="$1"
-  osascript -e "tell application \"System Events\" to keystroke \"${key}\" using command down"
 }
 
 capture_shot() {
@@ -92,74 +97,48 @@ capture_shot() {
 }
 
 launch_demo() {
-  local lang="$1"
+  local lang="$1" scene="$2"
+  local marker="${HOME}/Library/Application Support/Finanzuebersicht/screenshot-demo/capture-ready-${lang}-${scene}"
   quit_app
-  # AppleLanguages + screenshot demo; window size locked in App.xaml.cs
-  open "$APP" --args --screenshot-demo -AppleLanguages "(${lang})"
-  # Wait until the window exists and seed has settled
+  rm -f "$marker"
+  open "$APP" --args --screenshot-demo --screenshot-scene "$scene" -AppleLanguages "(${lang})"
   local i
-  for i in $(seq 1 40); do
-    if window_id >/dev/null 2>&1; then
-      sleep 3
+  for i in $(seq 1 120); do
+    if [[ -f "$marker" ]] && window_id >/dev/null 2>&1; then
+      sleep 0.5
       return 0
     fi
     sleep 0.5
   done
-  echo "Timed out waiting for Finanzübersicht window (${lang})" >&2
+  echo "Timed out waiting for screenshot scene ${lang}/${scene}; check crash.log" >&2
   return 1
 }
 
 capture_locale() {
   local lang="$1"
   local dir="${OUT}/${lang}"
-  rm -rf "$dir"
   mkdir -p "$dir"
-
-  echo "=== ${lang} ==="
-  launch_demo "$lang"
-  activate_app
-  sleep 1
-
-  # ⌘1 Dashboard
-  key_cmd "1"
-  sleep 1.5
-  capture_shot "${dir}/01-dashboard.png"
-
-  # ⌘2 Transactions
-  key_cmd "2"
-  sleep 1.5
-  capture_shot "${dir}/02-transactions.png"
-
-  # ⌘3 Recurring
-  key_cmd "3"
-  sleep 1.5
-  capture_shot "${dir}/04-recurring.png"
-
-  # ⌘4 Management
-  key_cmd "4"
-  sleep 1.5
-  capture_shot "${dir}/05-management.png"
-
-  # ⌘5 Savings
-  key_cmd "5"
-  sleep 1.5
-  capture_shot "${dir}/06-savings.png"
-
-  # ⌘, Settings
-  key_cmd ","
-  sleep 1.5
-  capture_shot "${dir}/07-settings.png"
-
-  # Quick expense: back to dashboard then Aktionen›Schnell via ⌘N (Dashboard registers N)
-  key_cmd "1"
-  sleep 1.2
-  key_cmd "n"
-  sleep 1.5
-  capture_shot "${dir}/03-quick-expense.png"
-  # Dismiss sheet (Esc)
-  osascript -e 'tell application "System Events" to key code 53'
-  sleep 0.5
-
+  # Stage a complete run before replacing previous raw screenshots.
+  local staging
+  staging="$(mktemp -d "${OUT}/.capture-${lang}.XXXXXX")"
+  local pair scene name
+  for pair in \
+    "dashboard:01-dashboard" \
+    "transactions:02-transactions" \
+    "quick-expense:03-quick-expense" \
+    "recurring:04-recurring" \
+    "management:05-management" \
+    "savings:06-savings" \
+    "settings:07-settings" \
+    "accounts:08-accounts" \
+    "import:09-import"; do
+    scene="${pair%%:*}"
+    name="${pair#*:}"
+    launch_demo "$lang" "$scene"
+    capture_shot "${staging}/${name}.png"
+  done
+  cp "${staging}/"*.png "$dir/"
+  rm -r "$staging"
   quit_app
 }
 
@@ -167,7 +146,6 @@ mkdir -p "$OUT"
 capture_locale "de-DE"
 capture_locale "en-US"
 
-echo
-echo "Done. PNGs under ${OUT}/{de-DE,en-US}/"
-echo "Upload: bundle exec fastlane upload_listing_mac"
+echo "Done. Raw PNGs under ${OUT}/{de-DE,en-US}/"
+echo "Render store images: bundle exec fastlane render_store_screenshots_mac"
 echo "README: ./scripts/copy-readme-screenshots-mac.sh"

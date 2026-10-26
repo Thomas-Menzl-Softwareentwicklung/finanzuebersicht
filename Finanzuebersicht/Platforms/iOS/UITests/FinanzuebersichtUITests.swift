@@ -89,6 +89,19 @@ final class FinanzuebersichtUITests: XCTestCase {
         tab.tap()
     }
 
+    private func waitForSavingsCardLayout(in app: XCUIApplication) {
+        // Require the full accessible card, not just a page title or a single label.
+        let predicate = NSPredicate(format:
+            "(label CONTAINS %@ OR label CONTAINS %@) AND label CONTAINS %@",
+            "Urlaub 2027", "Vacation 2027", "56")
+        let card = app.descendants(matching: .any).matching(predicate).firstMatch
+        XCTAssertTrue(card.waitForExistence(timeout: elementTimeout))
+        let laidOut = NSPredicate { _, _ in card.exists && card.frame.height >= 100 }
+        let ready = XCTNSPredicateExpectation(predicate: laidOut, object: card)
+        XCTAssertEqual(XCTWaiter.wait(for: [ready], timeout: 15), .completed,
+                       "Savings card is still clipped; do not save an incomplete store screenshot")
+    }
+
     private func tapSettings(in app: XCUIApplication) {
         let candidates = [
             app.navigationBars.buttons["toolbar.settings"],
@@ -275,26 +288,50 @@ final class FinanzuebersichtUITests: XCTestCase {
         // Capture remaining tabs before opening the sheet so a stuck sheet cannot block iPad.
         tapTab(Tab.recurring, in: app)
         waitFor("page.recurring", in: app)
+        if app.staticTexts["Rent"].exists {
+            XCTAssertFalse(app.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "Ausgabe")).firstMatch.exists,
+                           "English recurring rows must not show the German enum name")
+        }
+        XCTAssertTrue(waitForAnyMarker(["-950", "-$950", "-€950"], in: app, timeout: 10),
+                      "Recurring expenses must show their amount with an expense sign")
         snapshot("04-recurring")
 
         tapTab(Tab.management, in: app)
         waitFor("page.management", in: app)
         snapshot("05-management")
+        waitFor("management.accounts", in: app).tap()
+        XCTAssertTrue(waitForAnyMarker(["Girokonto", "Checking Account"], in: app, timeout: 10))
+        snapshot("08-accounts")
 
         tapTab(Tab.savings, in: app)
         waitFor("page.savings", in: app)
-        snapshot("06-savings")
+        // Capture the savings motif later in its own fully loaded scene.
 
         tapSettings(in: app)
         waitFor("page.settings", in: app)
         snapshot("07-settings")
 
-        // Quick-expense last (filename still 03-*).
-        tapTab(Tab.dashboard, in: app)
-        waitFor("page.dashboard", in: app)
-        waitFor("fab.schnell", in: app).tap()
-        waitFor("sheet.quick-expense", in: app)
+        // Use the real import flow; isolated screenshot sessions provide a fictional CSV.
+        tapTab(Tab.transactions, in: app)
+        waitFor("transactions.import", in: app).tap()
+        waitFor("page.import-preview", in: app, timeout: 30)
+        XCTAssertTrue(waitForAnyMarker(["REWE", "Netflix"], in: app, timeout: 15))
+        snapshot("09-import")
+
+        let captureArguments = app.launchArguments
+        app.terminate()
+        app.launchArguments = captureArguments + ["--screenshot-scene", "savings"]
+        app.launch()
+        waitFor("page.savings", in: app, timeout: 30)
+        waitForSavingsCardLayout(in: app)
+        snapshot("06-savings")
+
+        // Relaunch into a filled real quick-entry page; no keyboard or empty modal.
+        app.terminate()
+        app.launchArguments = captureArguments + ["--screenshot-scene", "quick-expense"]
+        app.launch()
+        waitFor("page.quick-expense", in: app, timeout: 30)
+        XCTAssertTrue(waitForAnyMarker(["Kaffee und Kuchen", "Coffee and cake"], in: app, timeout: 15))
         snapshot("03-quick-expense")
-        dismissQuickExpenseSheetIfPresent(in: app)
     }
 }

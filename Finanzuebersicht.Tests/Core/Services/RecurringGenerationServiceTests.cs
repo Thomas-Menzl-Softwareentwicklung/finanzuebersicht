@@ -12,6 +12,67 @@ namespace Finanzuebersicht.Tests.Services;
 
 public class RecurringGenerationServiceTests
 {
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task VariableDue_RequiresConfirmation_OnInitialAndRepeatedGeneration(bool previouslyBooked)
+    {
+        var today = new DateTime(2026, 10, 26);
+        var recurringRepository = Substitute.For<IRecurringTransactionRepository>();
+        var transactionRepository = Substitute.For<ITransactionRepository>();
+        var variable = new RecurringTransaction
+        {
+            Id = "variable-electricity", Titel = "Electricity", Betrag = 75m,
+            Typ = TransactionType.Ausgabe, IsVariableAmount = true, LastBookedAmount = 68.50m,
+            Startdatum = today.AddMonths(-2), Aktiv = true,
+            LetzteAusfuehrung = previouslyBooked ? today.AddMonths(-1) : null,
+            Interval = RecurrenceInterval.Monthly
+        };
+        var originalExecution = variable.LetzteAusfuehrung;
+        recurringRepository.GetRecurringTransactionsAsync().Returns([variable]);
+        transactionRepository.GetAllTransactionsAsync(Arg.Any<CancellationToken>()).Returns([]);
+        var service = new RecurringGenerationService(recurringRepository, transactionRepository, new FixedClock(today));
+
+        // Same service is called by save, startup and resume. None may confirm an estimate.
+        await service.GeneratePendingRecurringTransactionsAsync();
+        await service.GeneratePendingRecurringTransactionsAsync();
+
+        await transactionRepository.DidNotReceive().SaveTransactionAsync(Arg.Any<Transaction>());
+        await recurringRepository.DidNotReceive().SaveRecurringTransactionAsync(Arg.Any<RecurringTransaction>());
+        Assert.Equal(originalExecution, variable.LetzteAusfuehrung);
+        Assert.Equal(68.50m, variable.LastBookedAmount);
+    }
+
+    [Fact]
+    public async Task MixedDue_AutoBooksFixedEntry_AndLeavesVariableEntryPending()
+    {
+        var today = new DateTime(2026, 10, 26);
+        var recurringRepository = Substitute.For<IRecurringTransactionRepository>();
+        var transactionRepository = Substitute.For<ITransactionRepository>();
+        var variable = new RecurringTransaction
+        {
+            Id = "variable", Titel = "Electricity", Betrag = 75m, IsVariableAmount = true,
+            Startdatum = today, Typ = TransactionType.Ausgabe, Aktiv = true
+        };
+        var fixedEntry = new RecurringTransaction
+        {
+            Id = "fixed", Titel = "Rent", Betrag = 950m,
+            Startdatum = today, Typ = TransactionType.Ausgabe, Aktiv = true
+        };
+        recurringRepository.GetRecurringTransactionsAsync().Returns([variable, fixedEntry]);
+        transactionRepository.GetAllTransactionsAsync(Arg.Any<CancellationToken>()).Returns([]);
+        var service = new RecurringGenerationService(recurringRepository, transactionRepository, new FixedClock(today));
+
+        await service.GeneratePendingRecurringTransactionsAsync();
+
+        await transactionRepository.Received(1).SaveTransactionAsync(
+            NonNullArg.Is<Transaction>(t => t.DauerauftragId == "fixed" && t.Betrag == 950m));
+        await transactionRepository.DidNotReceive().SaveTransactionAsync(
+            NonNullArg.Is<Transaction>(t => t.DauerauftragId == "variable"));
+        Assert.Null(variable.LetzteAusfuehrung);
+        Assert.Equal(today, fixedEntry.LetzteAusfuehrung);
+    }
+
     [Fact]
     public async Task Weekly_GeneratesExpectedTransactions()
     {

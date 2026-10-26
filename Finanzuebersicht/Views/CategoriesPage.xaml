@@ -47,6 +47,7 @@
                             TextColor="{Binding IsKategorienVisible, Converter={StaticResource ToggleActiveText}}"
                             SemanticProperties.Hint="{loc:Translate A11y_SegmentUmschalten}" />
                     <Button Grid.Column="1"
+                            AutomationId="management.accounts"
                             Text="{loc:Translate Lbl_Konten}"
                             Command="{Binding ShowKontenCommand}"
                             BackgroundColor="{Binding IsKontenVisible, Converter={StaticResource ToggleActiveColor}}"

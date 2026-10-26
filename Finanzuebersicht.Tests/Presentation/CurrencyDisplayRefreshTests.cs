@@ -6,6 +6,7 @@ using Finanzuebersicht.ViewModels;
 
 namespace Finanzuebersicht.Tests.Presentation;
 
+[Collection(nameof(CurrencyRefreshRegistryCollection))]
 public class CurrencyDisplayRefreshTests
 {
     [Fact]
@@ -47,6 +48,19 @@ public class CurrencyDisplayRefreshTests
         Assert.Equal(1, viewModel.RefreshCount);
     }
 
+    [Fact]
+    public void Registry_ConcurrentRegistration_RetainsEveryViewModel()
+    {
+        var models = Enumerable.Range(0, 256).Select(_ => new TestCurrencyRefreshViewModel()).ToArray();
+
+        Parallel.ForEach(models, new ParallelOptions { MaxDegreeOfParallelism = 8 },
+            model => CurrencyRefreshRegistry.Register(model));
+        CurrencyRefreshRegistry.RefreshAll();
+
+        Assert.All(models, model => Assert.Equal(1, model.RefreshCount));
+        GC.KeepAlive(models);
+    }
+
     private sealed class TestCurrencyRefreshViewModel : ObservableObject, ICurrencyRefreshViewModel
     {
         public int RefreshCount { get; private set; }
@@ -54,3 +68,7 @@ public class CurrencyDisplayRefreshTests
         public void RefreshCurrencyDisplay() => RefreshCount++;
     }
 }
+
+// Other view-model tests also touch the global weak registry through their constructors.
+[CollectionDefinition(nameof(CurrencyRefreshRegistryCollection), DisableParallelization = true)]
+public sealed class CurrencyRefreshRegistryCollection;

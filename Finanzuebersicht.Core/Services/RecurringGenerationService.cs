@@ -29,7 +29,9 @@ public class RecurringGenerationService(
             .Select(t => t.Id)
             .ToHashSet(StringComparer.Ordinal);
 
-        foreach (var recurring in recurringItems.Where(item => item.Aktiv))
+        // Variable amounts are estimates until explicitly confirmed in the dashboard.
+        // Leave their execution date untouched so they remain due after save/start/resume.
+        foreach (var recurring in recurringItems.Where(item => item.Aktiv && !item.IsVariableAmount))
         {
             cancellationToken.ThrowIfCancellationRequested();
 

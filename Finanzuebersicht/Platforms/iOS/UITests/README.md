@@ -167,3 +167,12 @@ fastlane snapshot update
 ## Widget builds
 
 This folder is independent of `Platforms/iOS/Widgets/`. MAUI widget embed (`BuildWidgetExtension`) is unchanged.
+
+
+## Marketing-Screenshots ab 1.25
+
+`bundle exec fastlane screenshots` baut die aktuelle App selbst und führt ausschließlich `testScreenshots` aus. Für Intel wird `iossimulator-x64`, für Apple Silicon `iossimulator-arm64` verwendet; mit `SCREENSHOT_SIMULATOR_RID` überschreibbar. Simulator-Bridges und Widget unterstützen beide Architekturen; Geräte-Builds bleiben ARM64.
+
+Neue Rohmotive: `08-accounts` und `09-import`. Die Import-Schaltfläche öffnet ausschließlich im isolierten Debug-Demomodus die echte Vorschau mit fiktiver CSV. `03-quick-expense` zeigt eine befüllte Seite ohne Tastatur. Die englische Dauerauftragsaufnahme prüft zusätzlich, dass der interne Enum-Name „Ausgabe“ nicht sichtbar ist.
+
+Rohbilder bleiben in `fastlane/screenshots/`. Der anschließende Pillow-Schritt stellt die sieben Store-Motive mit lokalisierten Nutzenüberschriften in `fastlane/screenshots-store/` zusammen. Details und Python-Voraussetzungen: `docs/APP_STORE.md`, Abschnitt „Store-Bilder mit Nutzenüberschriften“.
