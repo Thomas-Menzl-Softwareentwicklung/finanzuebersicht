@@ -31,6 +31,7 @@
   <data name="Lbl_Farbe" xml:space="preserve"><value>Color</value></data>
   <data name="Lbl_Typ" xml:space="preserve"><value>Type</value></data>
   <data name="Lbl_Betrag" xml:space="preserve"><value>Amount</value></data>
+  <data name="Lbl_VariableAmount" xml:space="preserve"><value>Amount varies</value></data>
   <data name="Lbl_Titel" xml:space="preserve"><value>Title</value></data>
   <data name="Lbl_Kategorie" xml:space="preserve"><value>Category</value></data>
   <data name="Lbl_Konto" xml:space="preserve"><value>Account</value></data>
@@ -127,6 +128,8 @@
   <!-- Error Messages -->
   <data name="Err_Titel" xml:space="preserve"><value>Error</value></data>
   <data name="Err_UngueltigerBetrag" xml:space="preserve"><value>Invalid Amount</value></data>
+  <data name="Err_IstSaldoErforderlich" xml:space="preserve"><value>Actual balance is empty. Enter the balance from your statement.</value></data>
+  <data name="Err_IstSaldoUngueltig" xml:space="preserve"><value>The actual balance is not a valid amount.</value></data>
   <data name="Err_BetragGroesserNull" xml:space="preserve"><value>Amount must be greater than 0</value></data>
   <data name="Err_TitelErforderlich" xml:space="preserve"><value>Title is required</value></data>
   <data name="Err_KategorieErforderlich" xml:space="preserve"><value>Category is required</value></data>
@@ -207,6 +210,9 @@
   <data name="Dlg_DauerauftragLoeschenFrage" xml:space="preserve"><value>Really delete "{0}"?</value></data>
   <data name="Dlg_DauerauftragBuchen" xml:space="preserve"><value>Book Recurring Transaction</value></data>
   <data name="Dlg_DauerauftragBuchenFrage" xml:space="preserve"><value>Book "{0}" for {1}?</value></data>
+  <data name="Dlg_VariableAmount" xml:space="preserve"><value>Confirm amount</value></data>
+  <data name="Dlg_VariableAmountQuestion" xml:space="preserve"><value>Enter the amount for "{0}" due {1}.</value></data>
+  <data name="Lbl_AmountEstimate" xml:space="preserve"><value>Estimate</value></data>
   <data name="Dlg_DauerauftragUeberspringen" xml:space="preserve"><value>Skip Instance</value></data>
   <data name="Dlg_DauerauftragUeberspringenFrage" xml:space="preserve"><value>Skip "{0}" for this due date?</value></data>
   <data name="Btn_AlsAusgefuehrtBuchen" xml:space="preserve"><value>Book</value></data>
@@ -319,6 +325,12 @@ Please restart the app.</value></data>
   <data name="Msg_BackupRestoreConfirmTitle" xml:space="preserve"><value>Restore backup</value></data>
   <data name="Msg_BackupRestoreConfirmBody" xml:space="preserve"><value>Restore backup from {0}? All current data will be overwritten.</value></data>
   <data name="Msg_BackupRestoreDesc" xml:space="preserve"><value>Create backups of your data and restore when needed.</value></data>
+  <data name="Btn_NeueTransaktion" xml:space="preserve"><value>+ Transaction</value></data>
+  <data name="Btn_ActionAusgabe" xml:space="preserve"><value>+ Expense</value></data>
+  <data name="Btn_ActionKategorie" xml:space="preserve"><value>+ Category</value></data>
+  <data name="Btn_ActionKonto" xml:space="preserve"><value>+ Account</value></data>
+  <data name="Btn_ActionSparziel" xml:space="preserve"><value>+ Savings goal</value></data>
+  <data name="Btn_ActionDauerauftrag" xml:space="preserve"><value>+ Recurring</value></data>
   <data name="Btn_Import" xml:space="preserve"><value>Import</value></data>
   <data name="Btn_Filter" xml:space="preserve"><value>Filter</value></data>
   <data name="Btn_Umbuchen" xml:space="preserve"><value>Transfer</value></data>
@@ -413,6 +425,15 @@ Please restart the app.</value></data>
   <data name="Lbl_ImportDuplikateCount" xml:space="preserve"><value>Duplicates: {0}</value></data>
   <data name="Lbl_ImportProblemeCount" xml:space="preserve"><value>Problems: {0}</value></data>
   <data name="Lbl_ImportAusgewaehltCount" xml:space="preserve"><value>Selected: {0}</value></data>
+  <data name="Lbl_ImportCategorySourceRule" xml:space="preserve"><value>Category suggested by a keyword rule</value></data>
+  <data name="Lbl_ImportCategorySourceHistory" xml:space="preserve"><value>Category suggested from your booking history</value></data>
+  <data name="Lbl_ImportCategorySourceNone" xml:space="preserve"><value>No category suggestion</value></data>
+  <data name="Lbl_ImportCategorySelectionCount" xml:space="preserve"><value>Selected for category change: {0}</value></data>
+  <data name="Btn_ImportKategorienBearbeiten" xml:space="preserve"><value>Assign categories to multiple bookings</value></data>
+  <data name="Btn_ImportKategorienFertig" xml:space="preserve"><value>Done editing categories</value></data>
+  <data name="Btn_ImportGleicherZahlungspartner" xml:space="preserve"><value>Select same payee</value></data>
+  <data name="Btn_ImportKategorieZuweisen" xml:space="preserve"><value>Assign category</value></data>
+  <data name="Btn_ImportAuswahlAufheben" xml:space="preserve"><value>Clear selection</value></data>
   <data name="Msg_ImportStatusMissingDate" xml:space="preserve"><value>Missing booking date</value></data>
   <data name="Msg_ImportStatusUnparsableAmount" xml:space="preserve"><value>Amount could not be parsed</value></data>
   <data name="Msg_ImportStatusPossibleDuplicate" xml:space="preserve"><value>Possible duplicate</value></data>
@@ -521,6 +542,8 @@ Please restart the app.</value></data>
   <data name="Btn_Rueckgaengig" xml:space="preserve"><value>Undo</value></data>
   <data name="Lbl_BerechneterSaldo" xml:space="preserve"><value>Calculated balance</value></data>
   <data name="Lbl_IstSaldo" xml:space="preserve"><value>Actual balance (bank)</value></data>
+  <data name="Lbl_SaldoAbgleich" xml:space="preserve"><value>Reconcile balance</value></data>
+  <data name="Hint_IstSaldo" xml:space="preserve"><value>from statement</value></data>
   <data name="Hint_SaldoAbgleich" xml:space="preserve"><value>Enter the balance from your bank statement. The opening balance will be adjusted automatically.</value></data>
   <data name="Msg_SaldoAbgeglichen" xml:space="preserve"><value>Balance reconciled</value></data>
   <data name="Onboarding_PageTitle" xml:space="preserve"><value>Welcome</value></data>

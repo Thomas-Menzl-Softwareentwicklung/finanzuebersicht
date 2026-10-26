@@ -1,0 +1,25 @@
+{
+  "asset": "finanzuebersicht-universal-v1-5244x2950.png",
+  "width": 5244,
+  "height": 2950,
+  "format": "PNG",
+  "color": "RGB",
+  "alpha": false,
+  "sha256": "edff424f6ebe21604958688970dd7baf776be002d6db3646909f640b949fda7b",
+  "source": "finanzuebersicht-universal-v1-source.png",
+  "source_dimensions": [
+    1672,
+    941
+  ],
+  "upscaled": true,
+  "tool": "built-in image_gen",
+  "localizations": [
+    "de-DE"
+  ],
+  "placements": [
+    "product_page_header",
+    "search_results"
+  ],
+  "uploaded_to_asc": true,
+  "asc_upload_scope": "iOS 1.25, de-DE, product_page_header; not submitted for review"
+}

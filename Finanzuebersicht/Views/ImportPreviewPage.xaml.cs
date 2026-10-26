@@ -1,3 +1,4 @@
+using Finanzuebersicht.Controls;
 using Finanzuebersicht.ViewModels;
 
 namespace Finanzuebersicht.Views;
@@ -13,7 +14,7 @@ public partial class ImportPreviewPage : BaseContentPage
     protected override void OnDisappearing()
     {
         if (BindingContext is ImportPreviewViewModel viewModel)
-            viewModel.HandlePageDisappearing();
+            viewModel.HandlePageDisappearing(retainSession: TransientPageOverlay.IsActive(this));
 
         base.OnDisappearing();
     }

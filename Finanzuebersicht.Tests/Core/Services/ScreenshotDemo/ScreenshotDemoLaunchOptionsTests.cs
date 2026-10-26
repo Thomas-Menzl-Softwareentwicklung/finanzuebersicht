@@ -17,6 +17,21 @@ public class ScreenshotDemoLaunchOptionsTests
     }
 
 #if DEBUG
+    [Theory]
+    [InlineData(true, "accounts", "accounts")]
+    [InlineData(true, "import", "import")]
+    [InlineData(true, "quick-expense", "quick-expense")]
+    [InlineData(true, "unknown", null)]
+    [InlineData(false, "import", null)]
+    public void Scene_IsWhitelistedAndRequiresDemoSession(bool demo, string scene, string? expected)
+    {
+        ScreenshotDemoLaunchOptions.CommandLineArgsOverride = () => demo
+            ? ["app", ScreenshotDemoLaunchOptions.LaunchArgument, "--screenshot-scene", scene]
+            : ["app", "--screenshot-scene", scene];
+        try { Assert.Equal(expected, ScreenshotDemoLaunchOptions.TryGetRequestedScene()); }
+        finally { ScreenshotDemoLaunchOptions.CommandLineArgsOverride = null; }
+    }
+
     [Fact]
     public void IsRequested_ReturnsTrue_WhenLaunchArgumentPresent()
     {

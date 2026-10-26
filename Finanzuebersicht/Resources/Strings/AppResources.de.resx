@@ -31,6 +31,7 @@
   <data name="Lbl_Farbe" xml:space="preserve"><value>Farbe</value></data>
   <data name="Lbl_Typ" xml:space="preserve"><value>Typ</value></data>
   <data name="Lbl_Betrag" xml:space="preserve"><value>Betrag</value></data>
+  <data name="Lbl_VariableAmount" xml:space="preserve"><value>Betrag variiert</value></data>
   <data name="Lbl_Titel" xml:space="preserve"><value>Titel</value></data>
   <data name="Lbl_Kategorie" xml:space="preserve"><value>Kategorie</value></data>
   <data name="Lbl_Konto" xml:space="preserve"><value>Konto</value></data>
@@ -127,6 +128,8 @@
   <!-- Error Messages -->
   <data name="Err_Titel" xml:space="preserve"><value>Fehler</value></data>
   <data name="Err_UngueltigerBetrag" xml:space="preserve"><value>Ungültiger Betrag</value></data>
+  <data name="Err_IstSaldoErforderlich" xml:space="preserve"><value>Ist-Saldo ist leer. Trage den Saldo laut Kontoauszug ein.</value></data>
+  <data name="Err_IstSaldoUngueltig" xml:space="preserve"><value>Der Ist-Saldo ist kein gültiger Betrag.</value></data>
   <data name="Err_BetragGroesserNull" xml:space="preserve"><value>Betrag muss größer als 0 sein</value></data>
   <data name="Err_TitelErforderlich" xml:space="preserve"><value>Titel ist erforderlich</value></data>
   <data name="Err_KategorieErforderlich" xml:space="preserve"><value>Kategorie ist erforderlich</value></data>
@@ -207,6 +210,9 @@
   <data name="Dlg_DauerauftragLoeschenFrage" xml:space="preserve"><value>"{0}" wirklich löschen?</value></data>
   <data name="Dlg_DauerauftragBuchen" xml:space="preserve"><value>Dauerauftrag buchen</value></data>
   <data name="Dlg_DauerauftragBuchenFrage" xml:space="preserve"><value>"{0}" für {1} als ausgeführt buchen?</value></data>
+  <data name="Dlg_VariableAmount" xml:space="preserve"><value>Betrag bestätigen</value></data>
+  <data name="Dlg_VariableAmountQuestion" xml:space="preserve"><value>Gib den Betrag für „{0}“ am {1} ein.</value></data>
+  <data name="Lbl_AmountEstimate" xml:space="preserve"><value>Schätzung</value></data>
   <data name="Dlg_DauerauftragUeberspringen" xml:space="preserve"><value>Termin überspringen</value></data>
   <data name="Dlg_DauerauftragUeberspringenFrage" xml:space="preserve"><value>"{0}" für diesen Termin überspringen?</value></data>
   <data name="Btn_AlsAusgefuehrtBuchen" xml:space="preserve"><value>Buchen</value></data>
@@ -319,6 +325,12 @@ Bitte starte die App neu.</value></data>
   <data name="Msg_BackupRestoreConfirmTitle" xml:space="preserve"><value>Backup wiederherstellen</value></data>
   <data name="Msg_BackupRestoreConfirmBody" xml:space="preserve"><value>Backup vom {0} wiederherstellen? Alle aktuellen Daten werden überschrieben.</value></data>
   <data name="Msg_BackupRestoreDesc" xml:space="preserve"><value>Erstelle Sicherungen deiner Daten und stelle sie bei Bedarf wieder her.</value></data>
+  <data name="Btn_NeueTransaktion" xml:space="preserve"><value>+ Transaktion</value></data>
+  <data name="Btn_ActionAusgabe" xml:space="preserve"><value>+ Ausgabe</value></data>
+  <data name="Btn_ActionKategorie" xml:space="preserve"><value>+ Kategorie</value></data>
+  <data name="Btn_ActionKonto" xml:space="preserve"><value>+ Konto</value></data>
+  <data name="Btn_ActionSparziel" xml:space="preserve"><value>+ Sparziel</value></data>
+  <data name="Btn_ActionDauerauftrag" xml:space="preserve"><value>+ Dauerauftrag</value></data>
   <data name="Btn_Import" xml:space="preserve"><value>Import</value></data>
   <data name="Btn_Filter" xml:space="preserve"><value>Filter</value></data>
   <data name="Btn_Umbuchen" xml:space="preserve"><value>Umbuchen</value></data>
@@ -413,6 +425,15 @@ Bitte starte die App neu.</value></data>
   <data name="Lbl_ImportDuplikateCount" xml:space="preserve"><value>Duplikate: {0}</value></data>
   <data name="Lbl_ImportProblemeCount" xml:space="preserve"><value>Probleme: {0}</value></data>
   <data name="Lbl_ImportAusgewaehltCount" xml:space="preserve"><value>Ausgewählt: {0}</value></data>
+  <data name="Lbl_ImportCategorySourceRule" xml:space="preserve"><value>Kategorie anhand einer Schlüsselwortregel vorgeschlagen</value></data>
+  <data name="Lbl_ImportCategorySourceHistory" xml:space="preserve"><value>Kategorie anhand früherer Buchungen vorgeschlagen</value></data>
+  <data name="Lbl_ImportCategorySourceNone" xml:space="preserve"><value>Kein Kategorievorschlag</value></data>
+  <data name="Lbl_ImportCategorySelectionCount" xml:space="preserve"><value>Für Kategorieänderung ausgewählt: {0}</value></data>
+  <data name="Btn_ImportKategorienBearbeiten" xml:space="preserve"><value>Mehrere Buchungen kategorisieren</value></data>
+  <data name="Btn_ImportKategorienFertig" xml:space="preserve"><value>Kategorisierung abschließen</value></data>
+  <data name="Btn_ImportGleicherZahlungspartner" xml:space="preserve"><value>Gleichen Zahlungspartner auswählen</value></data>
+  <data name="Btn_ImportKategorieZuweisen" xml:space="preserve"><value>Kategorie zuweisen</value></data>
+  <data name="Btn_ImportAuswahlAufheben" xml:space="preserve"><value>Auswahl aufheben</value></data>
   <data name="Msg_ImportStatusMissingDate" xml:space="preserve"><value>Buchungsdatum fehlt</value></data>
   <data name="Msg_ImportStatusUnparsableAmount" xml:space="preserve"><value>Betrag konnte nicht gelesen werden</value></data>
   <data name="Msg_ImportStatusPossibleDuplicate" xml:space="preserve"><value>Mögliches Duplikat</value></data>
@@ -521,6 +542,8 @@ Bitte starte die App neu.</value></data>
   <data name="Btn_Rueckgaengig" xml:space="preserve"><value>Rückgängig</value></data>
   <data name="Lbl_BerechneterSaldo" xml:space="preserve"><value>Berechneter Saldo</value></data>
   <data name="Lbl_IstSaldo" xml:space="preserve"><value>Ist-Saldo (Bank)</value></data>
+  <data name="Lbl_SaldoAbgleich" xml:space="preserve"><value>Saldo abgleichen</value></data>
+  <data name="Hint_IstSaldo" xml:space="preserve"><value>laut Kontoauszug</value></data>
   <data name="Hint_SaldoAbgleich" xml:space="preserve"><value>Trage den Saldo laut Kontoauszug ein. Der Anfangssaldo wird automatisch angepasst.</value></data>
   <data name="Msg_SaldoAbgeglichen" xml:space="preserve"><value>Saldo abgeglichen</value></data>
   <data name="Onboarding_PageTitle" xml:space="preserve"><value>Willkommen</value></data>

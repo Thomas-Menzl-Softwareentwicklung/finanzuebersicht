@@ -8,4 +8,6 @@ public class ImportPreviewRow
     public ImportPreviewRowStatus Status { get; set; }
     public string? StatusMessage { get; set; }
     public Transaction Transaction { get; set; } = new();
+    public ImportCategoryMatchSource CategoryMatchSource { get; set; }
+    public string NormalizedPayeeKey { get; set; } = string.Empty;
 }

@@ -81,12 +81,16 @@ mkdir -p "$STAGE_ROOT"
 
 for SDK in iphoneos iphonesimulator; do
   echo "Building QuickExpenseWidget for $SDK..."
+  ARCH_FLAGS=(-arch arm64)
+  if [[ "$SDK" == "iphonesimulator" ]]; then
+    ARCH_FLAGS=("ARCHS=arm64 x86_64" "ONLY_ACTIVE_ARCH=NO")
+  fi
   xcodebuild -quiet \
     -project QuickExpenseWidget.xcodeproj \
     -target QuickExpenseWidget \
     -configuration Release \
     -sdk "$SDK" \
-    -arch arm64 \
+    "${ARCH_FLAGS[@]}" \
     MARKETING_VERSION="$MARKETING_VERSION" \
     CURRENT_PROJECT_VERSION="$CURRENT_PROJECT_VERSION" \
     CODE_SIGN_IDENTITY="-" \

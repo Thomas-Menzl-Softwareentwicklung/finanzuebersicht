@@ -1,1 +1,1 @@
-Finanzen,Budget,Ausgaben,Sparziele,Dauerauftrag,Konto,CSV,Privat,lokal,iCloud
+ausgaben,einnahmen,fixkosten,sparziele,konto,kassenbuch,offline,csv,dauerauftrag,geld,sparen

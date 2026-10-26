@@ -32,6 +32,10 @@ public static class ScreenshotDemoFixture
         public required string CafeAmMarkt { get; init; }
         public required string DeutscheBahn { get; init; }
         public required string Urlaub { get; init; }
+        public required string EmergencyFund { get; init; }
+        public required string Laptop { get; init; }
+        public required string Electricity { get; init; }
+        public required string Internet { get; init; }
     }
 
     private static class Ids
@@ -98,7 +102,11 @@ public static class ScreenshotDemoFixture
                 Apotheke = "Pharmacy",
                 CafeAmMarkt = "Café at Market",
                 DeutscheBahn = "Deutsche Bahn",
-                Urlaub = "Vacation 2027"
+                Urlaub = "Vacation 2027",
+                EmergencyFund = "Emergency fund",
+                Laptop = "New laptop",
+                Electricity = "Electricity",
+                Internet = "Internet"
             }
             : new Labels
             {
@@ -115,7 +123,11 @@ public static class ScreenshotDemoFixture
                 Apotheke = "Apotheke",
                 CafeAmMarkt = "Café am Markt",
                 DeutscheBahn = "Deutsche Bahn",
-                Urlaub = "Urlaub 2027"
+                Urlaub = "Urlaub 2027",
+                EmergencyFund = "Notgroschen",
+                Laptop = "Neuer Laptop",
+                Electricity = "Strom",
+                Internet = "Internet"
             };
     }
 
@@ -263,29 +275,32 @@ public static class ScreenshotDemoFixture
         DateTime today,
         Labels labels)
     {
-        var currentMonth = new DateTime(today.Year, today.Month, 1);
-        var currentMonthMiete = currentMonth.AddDays(2);
-        var lastRun = currentMonthMiete <= today
-            ? currentMonthMiete
-            : currentMonthMiete.AddMonths(-1);
-
+        var due = new DateTime(today.Year, today.Month, 3);
+        var lastRun = due <= today ? due : due.AddMonths(-1);
+        RecurringTransaction Recurring(string id, string title, decimal amount, string category, bool variable = false) => new()
+        {
+            Id = id,
+            Titel = title,
+            Betrag = Math.Abs(amount),
+            KategorieId = categoryIds[category],
+            AccountId = giroAccountId,
+            Typ = amount > 0 ? TransactionType.Einnahme : TransactionType.Ausgabe,
+            Startdatum = lastRun.AddYears(-1),
+            LetzteAusfuehrung = lastRun,
+            Aktiv = true,
+            Interval = RecurrenceInterval.Monthly,
+            IntervalFactor = 1,
+            ReminderDaysBefore = 3,
+            IsVariableAmount = variable,
+            LastBookedAmount = variable ? Math.Abs(amount) : null
+        };
         return
         [
-            new RecurringTransaction
-            {
-                Id = Ids.RecurringMiete,
-                Betrag = -950m,
-                Titel = labels.Miete,
-                KategorieId = categoryIds[SystemCategoryKeys.Wohnen],
-                AccountId = giroAccountId,
-                Typ = TransactionType.Ausgabe,
-                Startdatum = today.AddYears(-1),
-                LetzteAusfuehrung = lastRun,
-                Aktiv = true,
-                Interval = RecurrenceInterval.Monthly,
-                IntervalFactor = 1,
-                ReminderDaysBefore = 3
-            }
+            Recurring(Ids.RecurringMiete, labels.Miete, -950m, SystemCategoryKeys.Wohnen),
+            Recurring("screenshot-rec-salary", labels.Gehalt, 4200m, SystemCategoryKeys.Gehalt),
+            Recurring("screenshot-rec-electricity", labels.Electricity, -78.50m, SystemCategoryKeys.Wohnen, variable: true),
+            Recurring("screenshot-rec-internet", labels.Internet, -39.90m, SystemCategoryKeys.Wohnen),
+            Recurring("screenshot-rec-streaming", "Netflix", -12.99m, SystemCategoryKeys.Unterhaltung)
         ];
     }
 
@@ -300,6 +315,16 @@ public static class ScreenshotDemoFixture
             Betrag = 400m,
             Monat = today.Month,
             Jahr = today.Year
+        },
+        new CategoryBudget
+        {
+            Id = "screenshot-budget-transport", KategorieId = categoryIds[SystemCategoryKeys.Transport],
+            Betrag = 150m, Monat = today.Month, Jahr = today.Year
+        },
+        new CategoryBudget
+        {
+            Id = "screenshot-budget-entertainment", KategorieId = categoryIds[SystemCategoryKeys.Unterhaltung],
+            Betrag = 100m, Monat = today.Month, Jahr = today.Year
         }
     ];
 
@@ -314,6 +339,18 @@ public static class ScreenshotDemoFixture
             AktuellerBetrag = 2800m,
             Faelligkeitsdatum = new DateTime(today.Year + 1, 6, 1),
             MonatlicheSparrate = 250m
+        },
+        new SparZiel
+        {
+            Id = "screenshot-spar-emergency", Titel = labels.EmergencyFund, Icon = "🛟",
+            ZielBetrag = 10000m, AktuellerBetrag = 6500m,
+            MonatlicheSparrate = 300m, Faelligkeitsdatum = today.AddYears(1)
+        },
+        new SparZiel
+        {
+            Id = "screenshot-spar-laptop", Titel = labels.Laptop, Icon = "💻",
+            ZielBetrag = 1800m, AktuellerBetrag = 450m,
+            MonatlicheSparrate = 150m, Faelligkeitsdatum = today.AddMonths(9)
         }
     ];
 }

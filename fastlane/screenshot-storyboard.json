@@ -1,0 +1,80 @@
+{
+  "de-DE": [
+    {
+      "source": "01-dashboard",
+      "title": "Deine Ausgaben.\nDein Überblick.",
+      "detail": "Ohne Bank-Login, Werbung oder Tracking"
+    },
+    {
+      "source": "08-accounts",
+      "title": "Alle Konten.\nEin Überblick.",
+      "detail": "Girokonto und Ersparnisse gemeinsam verwalten"
+    },
+    {
+      "source": "09-import",
+      "title": "Importieren\nstatt abtippen.",
+      "detail": "CSV-Vorschau mit Kategorievorschlägen",
+      "feature": "PRO · EINMALKAUF"
+    },
+    {
+      "source": "02-transactions",
+      "title": "Jede Buchung\nschnell gefunden.",
+      "detail": "Einnahmen und Ausgaben durchsuchen"
+    },
+    {
+      "source": "04-recurring",
+      "title": "Fixkosten\nim Blick behalten.",
+      "detail": "Gehalt, Miete und regelmäßige Zahlungen"
+    },
+    {
+      "source": "06-savings",
+      "title": "Deine Ziele.\nDein Fortschritt.",
+      "detail": "Sparziele planen und Fortschritte verfolgen",
+      "feature": "MEHRERE SPARZIELE MIT PRO"
+    },
+    {
+      "source": "03-quick-expense",
+      "title": "Ausgaben\nschnell erfassen.",
+      "detail": "Betrag und Notiz – Details später ergänzen"
+    }
+  ],
+  "en-US": [
+    {
+      "source": "01-dashboard",
+      "title": "Your spending.\nYour overview.",
+      "detail": "No bank login, ads, or tracking"
+    },
+    {
+      "source": "08-accounts",
+      "title": "All your accounts.\nOne overview.",
+      "detail": "Manage everyday money and savings together"
+    },
+    {
+      "source": "09-import",
+      "title": "Import transactions.\nSkip the typing.",
+      "detail": "CSV preview with category suggestions",
+      "feature": "PRO · ONE-TIME PURCHASE"
+    },
+    {
+      "source": "02-transactions",
+      "title": "Find the transaction\nyou need.",
+      "detail": "Search your income and expenses"
+    },
+    {
+      "source": "04-recurring",
+      "title": "Stay on top\nof regular bills.",
+      "detail": "Keep track of salary, rent, and recurring payments"
+    },
+    {
+      "source": "06-savings",
+      "title": "Your goals.\nYour progress.",
+      "detail": "Plan savings goals and follow your progress",
+      "feature": "MULTIPLE SAVINGS GOALS WITH PRO"
+    },
+    {
+      "source": "03-quick-expense",
+      "title": "Capture expenses\nin seconds.",
+      "detail": "Add an amount and note; fill in the details later"
+    }
+  ]
+}

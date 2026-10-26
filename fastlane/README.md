@@ -15,13 +15,29 @@ For _fastlane_ installation instructions, see [Installing _fastlane_](https://do
 
 ## iOS
 
+### ios render_store_screenshots
+
+```sh
+[bundle exec] fastlane ios render_store_screenshots
+```
+
+Render localized iPhone/iPad store screenshots from existing raw captures
+
+### ios render_store_screenshots_mac
+
+```sh
+[bundle exec] fastlane ios render_store_screenshots_mac
+```
+
+Render localized Mac store screenshots from existing raw captures
+
 ### ios screenshots
 
 ```sh
 [bundle exec] fastlane ios screenshots
 ```
 
-Capture App Store screenshots (2 devices × 2 locales)
+Capture raw App Store screenshots (3 devices × 2 locales) and render captions
 
 ### ios screenshots_mac
 

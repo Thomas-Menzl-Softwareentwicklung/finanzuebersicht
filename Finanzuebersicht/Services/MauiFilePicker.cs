@@ -1,3 +1,6 @@
+using System.Globalization;
+using Finanzuebersicht.Core.Services;
+using Finanzuebersicht.Core.Services.ScreenshotDemo;
 using Microsoft.Maui.Storage;
 
 namespace Finanzuebersicht.Services;
@@ -31,6 +34,16 @@ public class MauiFilePicker : Finanzuebersicht.Presentation.Services.IFilePicker
 
     private static async Task<PickFileResult?> PickCoreAsync()
     {
+#if DEBUG && !APP_DISTRIBUTION_STORE
+        // Gate here too: the Core assembly does not receive the MAUI Store build symbol.
+        if (ScreenshotDemoLaunchOptions.IsActive())
+        {
+            var bytes = ScreenshotDemoCsv.Create(SystemClock.Instance, CultureInfo.CurrentUICulture);
+            return new PickFileResult("demo-transactions.csv",
+                () => Task.FromResult<Stream>(new MemoryStream(bytes, writable: false)));
+        }
+
+#endif
         var result = await FilePicker.Default.PickAsync(CsvPickOptions);
         if (result is null) return null;
         return new PickFileResult(result.FileName, () => result.OpenReadAsync());

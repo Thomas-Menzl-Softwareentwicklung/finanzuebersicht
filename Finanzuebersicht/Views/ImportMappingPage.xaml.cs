@@ -1,3 +1,4 @@
+using Finanzuebersicht.Controls;
 using Finanzuebersicht.ViewModels;
 
 namespace Finanzuebersicht.Views;
@@ -12,7 +13,7 @@ public partial class ImportMappingPage : BaseContentPage
 
     protected override void OnDisappearing()
     {
-        if (BindingContext is ImportMappingViewModel viewModel)
+        if (BindingContext is ImportMappingViewModel viewModel && !TransientPageOverlay.IsActive(this))
             viewModel.HandlePageDisappearing();
 
         base.OnDisappearing();

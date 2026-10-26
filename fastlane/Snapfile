@@ -28,3 +28,6 @@ launch_arguments(["--screenshot-demo"])
 concurrent_simulators(false)
 
 # MAUI host app is built separately (dotnet build) and installed via simctl before snapshot.
+
+# Keep layout regression tests separate from the marketing capture run.
+only_testing(["FinanzuebersichtUITests/FinanzuebersichtUITests/testScreenshots"])

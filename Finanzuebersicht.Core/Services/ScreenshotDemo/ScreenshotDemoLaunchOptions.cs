@@ -80,6 +80,23 @@ public static class ScreenshotDemoLaunchOptions
 #endif
     }
 
+    /// <summary>Only recognized inside an isolated non-Store Debug screenshot session.</summary>
+    public static string? TryGetRequestedScene()
+    {
+#if DEBUG && !APP_DISTRIBUTION_STORE
+        if (!IsActive()) return null;
+        var args = GetEffectiveArgs().ToList();
+        var index = args.IndexOf("--screenshot-scene");
+        if (index < 0 || index + 1 >= args.Count) return null;
+        var scene = args[index + 1];
+        return scene is "dashboard" or "transactions" or "accounts" or "import" or
+            "recurring" or "management" or "savings" or "settings" or "quick-expense"
+            ? scene : null;
+#else
+        return null;
+#endif
+    }
+
     public static string GetIsolatedDataPath()
     {
         var root = Path.Combine(AppPaths.GetDefaultDataDir(), "screenshot-demo");

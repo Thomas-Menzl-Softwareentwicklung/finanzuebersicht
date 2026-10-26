@@ -158,12 +158,22 @@ public partial class SelectionField : ContentView
         if (page is null)
             return;
 
-        var popupResult = await page.ShowPopupAsync<object>(popup);
-        if (popupResult.WasDismissedByTappingOutsideOfPopup || popupResult.Result is null)
-            return;
+        // Pushing the popup calls OnDisappearing on the host page. Mark that
+        // disappearance so import preview does not drop its session.
+        TransientPageOverlay.Push(page);
+        try
+        {
+            var popupResult = await page.ShowPopupAsync<object>(popup);
+            if (popupResult.WasDismissedByTappingOutsideOfPopup || popupResult.Result is null)
+                return;
 
-        SelectedItem = popupResult.Result;
-        UpdateResolvedDisplay();
+            SelectedItem = popupResult.Result;
+            UpdateResolvedDisplay();
+        }
+        finally
+        {
+            TransientPageOverlay.Pop(page);
+        }
     }
 
     private Page? GetParentPage()

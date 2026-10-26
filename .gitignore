@@ -71,3 +71,8 @@ scripts/install-maccatalyst-dev-app.sh
 # Isolated git worktrees and SDD scratch
 .worktrees/
 .superpowers/
+
+# Generated App Store compositions (raw images remain separate)
+fastlane/screenshots-store/
+fastlane/screenshots-mac-store/
+scripts/__pycache__/

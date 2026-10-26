@@ -67,7 +67,81 @@ public partial class ImportPreviewViewModel(
     [ObservableProperty]
     private bool canRemap;
 
+    [ObservableProperty]
+    private ImportPreviewCategoryOption? selectedBulkCategory;
+
+    [ObservableProperty]
+    private ObservableCollection<ImportPreviewCategoryOption> bulkCategoryOptions = [];
+
+    [ObservableProperty]
+    private bool isCategorySelectionMode;
+
+    [ObservableProperty]
+    private int selectedCategoryCount;
+
+    public bool HasCategorizationSelection => SelectedCategoryCount > 0;
+    public string CategorySelectionCountText => string.Format(
+        CultureInfo.CurrentCulture,
+        _loc.GetString(ResourceKeys.Lbl_ImportCategorySelectionCount),
+        SelectedCategoryCount);
+
+    public string CategorySelectionModeButtonText => _loc.GetString(
+        IsCategorySelectionMode
+            ? ResourceKeys.Btn_ImportKategorienFertig
+            : ResourceKeys.Btn_ImportKategorienBearbeiten);
+
+    partial void OnSelectedCategoryCountChanged(int value)
+        => OnPropertyChanged(nameof(CategorySelectionCountText));
+
     partial void OnSelectedFilterChanged(ImportPreviewFilterOption? value) => ApplyFilter();
+
+    partial void OnIsCategorySelectionModeChanged(bool value)
+    {
+        if (!value)
+            ClearCategorizationSelection();
+        OnPropertyChanged(nameof(CategorySelectionModeButtonText));
+        RefreshState();
+    }
+
+    [RelayCommand]
+    private void ToggleCategorySelectionMode()
+        => IsCategorySelectionMode = !IsCategorySelectionMode;
+
+    [RelayCommand]
+    private void SelectSamePayee(ImportPreviewRowItemViewModel? row)
+    {
+        if (row is null || string.IsNullOrWhiteSpace(row.NormalizedPayeeKey))
+            return;
+
+        IsCategorySelectionMode = true;
+
+        foreach (var candidate in Rows.Where(candidate => candidate.CanCommit
+                     && string.Equals(candidate.NormalizedPayeeKey, row.NormalizedPayeeKey, StringComparison.Ordinal)))
+        {
+            candidate.IsCategorizationSelected = true;
+        }
+    }
+
+    [RelayCommand]
+    private void ApplyCategoryToSelection()
+    {
+        if (SelectedBulkCategory is null)
+            return;
+
+        foreach (var row in Rows.Where(row => row.IsCategorizationSelected && row.CanCommit))
+        {
+            var categoryOption = row.CategoryOptions.FirstOrDefault(option => option.Id == SelectedBulkCategory.Id);
+            if (categoryOption is not null)
+                row.SelectedCategoryOption = categoryOption;
+        }
+    }
+
+    [RelayCommand]
+    private void ClearCategorizationSelection()
+    {
+        foreach (var row in Rows)
+            row.IsCategorizationSelected = false;
+    }
 
     [RelayCommand]
     private async Task LoadPreview()
@@ -99,14 +173,17 @@ public partial class ImportPreviewViewModel(
                     .OrderBy(c => c.Name)
                     .Select(c => new ImportPreviewCategoryOption(c.Id, $"{c.Icon} {c.Name}"))
             ];
+            BulkCategoryOptions = new ObservableCollection<ImportPreviewCategoryOption>(
+                _categoryOptions.Select(option => new ImportPreviewCategoryOption(option.Id, option.DisplayName)));
 
             Rows = new ObservableCollection<ImportPreviewRowItemViewModel>(
                 _activeSession.Rows.Select(row =>
-                    new ImportPreviewRowItemViewModel(row, _categoryOptions, _loc, OnRowsChanged)));
+                    new ImportPreviewRowItemViewModel(row, _categoryOptions, _loc, OnRowsChanged, UpdateCategorySelectionCount)));
 
             _loadedPreview = true;
             _loadedSessionId = _activeSession.SessionId;
             CanRemap = _importSessionStore.CanRemap;
+            RefreshFilterOptions();
             RefreshState();
         }
         catch (Exception ex)
@@ -191,8 +268,11 @@ public partial class ImportPreviewViewModel(
         await _navigationService.GoToAsync(Routes.ImportMapping);
     }
 
-    public void HandlePageDisappearing()
+    public void HandlePageDisappearing(bool retainSession = false)
     {
+        if (retainSession)
+            return;
+
         if (_keepSessionOnDisappear)
         {
             _keepSessionOnDisappear = false;
@@ -206,9 +286,14 @@ public partial class ImportPreviewViewModel(
 
     private void OnRowsChanged() => RefreshState();
 
+    private void UpdateCategorySelectionCount()
+    {
+        SelectedCategoryCount = Rows.Count(row => row.IsCategorizationSelected);
+        OnPropertyChanged(nameof(HasCategorizationSelection));
+    }
+
     private void RefreshState()
     {
-        RefreshFilterOptions();
         ApplyFilter();
         // HasRows should reflect currently visible rows after filtering
         HasRows = FilteredRows.Count > 0;
@@ -217,6 +302,7 @@ public partial class ImportPreviewViewModel(
             string.Format(_loc.GetString(ResourceKeys.Lbl_ImportDuplikateCount), Rows.Count(r => r.Status == ImportPreviewRowStatus.Duplicate)),
             string.Format(_loc.GetString(ResourceKeys.Lbl_ImportProblemeCount), Rows.Count(r => r.IsProblem)),
             string.Format(_loc.GetString(ResourceKeys.Lbl_ImportAusgewaehltCount), Rows.Count(r => r.IsIncluded && r.CanCommit)));
+        UpdateCategorySelectionCount();
     }
 
     private void RefreshFilterOptions()
@@ -239,21 +325,38 @@ public partial class ImportPreviewViewModel(
 
     private void ApplyFilter()
     {
-        IEnumerable<ImportPreviewRowItemViewModel> filtered = Rows;
+        IEnumerable<ImportPreviewRowItemViewModel> filteredRows = Rows;
         switch (SelectedFilter?.Filter ?? ImportPreviewFilter.All)
         {
             case ImportPreviewFilter.Ready:
-                filtered = Rows.Where(r => r.Status == ImportPreviewRowStatus.Ready || r.Status == ImportPreviewRowStatus.Uncategorized);
+                filteredRows = Rows.Where(r => r.Status == ImportPreviewRowStatus.Ready || r.Status == ImportPreviewRowStatus.Uncategorized);
                 break;
             case ImportPreviewFilter.Duplicates:
-                filtered = Rows.Where(r => r.Status == ImportPreviewRowStatus.Duplicate);
+                filteredRows = Rows.Where(r => r.Status == ImportPreviewRowStatus.Duplicate);
                 break;
             case ImportPreviewFilter.Problems:
-                filtered = Rows.Where(r => r.IsProblem);
+                filteredRows = Rows.Where(r => r.IsProblem);
                 break;
             case ImportPreviewFilter.Excluded:
-                filtered = Rows.Where(r => !r.IsIncluded);
+                filteredRows = Rows.Where(r => !r.IsIncluded);
                 break;
+        }
+
+        var filtered = filteredRows.ToList();
+        if (FilteredRows.Count == filtered.Count)
+        {
+            var unchanged = true;
+            for (var i = 0; i < filtered.Count; i++)
+            {
+                if (!ReferenceEquals(FilteredRows[i], filtered[i]))
+                {
+                    unchanged = false;
+                    break;
+                }
+            }
+
+            if (unchanged)
+                return;
         }
 
         FilteredRows = new ObservableCollection<ImportPreviewRowItemViewModel>(filtered);
@@ -263,6 +366,8 @@ public partial class ImportPreviewViewModel(
     {
         RefreshFilterOptions();
         RefreshState();
+        OnPropertyChanged(nameof(CategorySelectionModeButtonText));
+        OnPropertyChanged(nameof(CategorySelectionCountText));
         foreach (var row in Rows)
             row.RefreshLocalizedStrings();
     }
@@ -272,17 +377,20 @@ public partial class ImportPreviewRowItemViewModel : ObservableObject
 {
     private readonly ImportPreviewRow _row;
     private readonly Action _onChanged;
+    private readonly Action _onSelectionChanged;
     private readonly ILocalizationService _loc;
 
     public ImportPreviewRowItemViewModel(
         ImportPreviewRow row,
         IReadOnlyList<ImportPreviewCategoryOption> categoryOptions,
         ILocalizationService localizationService,
-        Action onChanged)
+        Action onChanged,
+        Action onSelectionChanged)
     {
         _row = row;
         _loc = localizationService;
         _onChanged = onChanged;
+        _onSelectionChanged = onSelectionChanged;
         CategoryOptions = new ObservableCollection<ImportPreviewCategoryOption>(
             categoryOptions.Select(option => new ImportPreviewCategoryOption(option.Id, option.DisplayName)));
         status = row.Status;
@@ -292,6 +400,7 @@ public partial class ImportPreviewRowItemViewModel : ObservableObject
     }
 
     public string Id => _row.Id;
+    public string NormalizedPayeeKey => _row.NormalizedPayeeKey;
     public ObservableCollection<ImportPreviewCategoryOption> CategoryOptions { get; }
     public string Title => _row.Transaction.Titel;
     public string Purpose => _row.Transaction.Verwendungszweck;
@@ -312,6 +421,14 @@ public partial class ImportPreviewRowItemViewModel : ObservableObject
     public bool CanCommit => Status is ImportPreviewRowStatus.Ready or ImportPreviewRowStatus.Uncategorized or ImportPreviewRowStatus.SaveError;
     public bool IsProblem => Status is ImportPreviewRowStatus.Duplicate or ImportPreviewRowStatus.Invalid or ImportPreviewRowStatus.Uncategorized;
     public bool CanEditCategory => Status != ImportPreviewRowStatus.Invalid;
+    public bool ShowCategoryMatchSource => CanCommit;
+    public bool HasNormalizedPayeeKey => !string.IsNullOrWhiteSpace(_row.NormalizedPayeeKey);
+    public string CategoryMatchSourceText => _loc.GetString(_row.CategoryMatchSource switch
+    {
+        ImportCategoryMatchSource.KeywordRule => ResourceKeys.Lbl_ImportCategorySourceRule,
+        ImportCategoryMatchSource.History => ResourceKeys.Lbl_ImportCategorySourceHistory,
+        _ => ResourceKeys.Lbl_ImportCategorySourceNone
+    });
 
     [ObservableProperty]
     private bool isIncluded;
@@ -321,6 +438,9 @@ public partial class ImportPreviewRowItemViewModel : ObservableObject
 
     [ObservableProperty]
     private ImportPreviewCategoryOption? selectedCategoryOption;
+
+    [ObservableProperty]
+    private bool isCategorizationSelected;
 
     public string StatusText
     {
@@ -348,6 +468,7 @@ public partial class ImportPreviewRowItemViewModel : ObservableObject
     public void RefreshLocalizedStrings()
     {
         OnPropertyChanged(nameof(StatusText));
+        OnPropertyChanged(nameof(CategoryMatchSourceText));
         OnPropertyChanged(nameof(AmountText));
         OnPropertyChanged(nameof(DateText));
     }
@@ -358,12 +479,15 @@ public partial class ImportPreviewRowItemViewModel : ObservableObject
         _onChanged();
     }
 
+    partial void OnIsCategorizationSelectedChanged(bool value) => _onSelectionChanged();
+
     partial void OnStatusChanged(ImportPreviewRowStatus value)
     {
         _row.Status = value;
         OnPropertyChanged(nameof(StatusText));
         OnPropertyChanged(nameof(CanCommit));
         OnPropertyChanged(nameof(IsProblem));
+        OnPropertyChanged(nameof(ShowCategoryMatchSource));
     }
 
     partial void OnSelectedCategoryOptionChanged(ImportPreviewCategoryOption? value)
@@ -375,9 +499,19 @@ public partial class ImportPreviewRowItemViewModel : ObservableObject
 
         if (Status is not ImportPreviewRowStatus.Invalid and not ImportPreviewRowStatus.Duplicate)
         {
-            Status = string.IsNullOrWhiteSpace(value.Id)
-                ? ImportPreviewRowStatus.Uncategorized
-                : ImportPreviewRowStatus.Ready;
+            if (string.IsNullOrWhiteSpace(value.Id))
+            {
+                _row.StatusMessage = ResourceKeys.Msg_ImportStatusCategoryUnresolved;
+                Status = ImportPreviewRowStatus.Uncategorized;
+            }
+            else
+            {
+                if (_row.StatusMessage == ResourceKeys.Msg_ImportStatusCategoryUnresolved)
+                    _row.StatusMessage = null;
+                Status = ImportPreviewRowStatus.Ready;
+            }
+
+            OnPropertyChanged(nameof(StatusText));
         }
 
         _onChanged();

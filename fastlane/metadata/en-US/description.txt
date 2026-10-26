@@ -1,22 +1,24 @@
-Finanzübersicht keeps income, expenses, and recurring payments locally on your device. Data is stored as JSON on the device — no Finanzübersicht account, no bank login, no account linking, no ads, no tracking.
+Keep track of your income, expenses, and budgets with Meine Finanzübersicht. Log transactions, organize recurring payments, and follow your savings goals — without a bank login, ads, or tracking.
 
-DASHBOARD AND ACCOUNTS
-Month and year overview, accounts with balances, transfers, budgets, and a 30-day cash-flow preview. Categories with icon, color, and monthly budget.
-
-TRANSACTIONS
-Create, search, filter, duplicate, and save as templates. CSV import with column mapping and saved profiles (e.g. DKB), preview, auto-categorization, and duplicate detection. Quick capture in the app; on iPhone optionally as a Home Screen widget (Pro).
+YOUR EVERYDAY EXPENSE TRACKER
+See where your money goes with monthly and yearly overviews, categories, and budgets. Manage multiple accounts and record transfers between them. Add income and expenses directly in the app, search your transactions, and use templates for frequent entries.
 
 RECURRING PAYMENTS AND SAVINGS GOALS
-Recurring transactions with reminders. Savings goals with progress and forecast. Backup and restore including schema migration.
+Keep track of your salary, rent, and other recurring transactions. Reminders help you record payments when they are due. Follow your progress toward savings goals. The app does not execute bank transfers.
 
-ICLOUD SYNC
-Optional between iPhone, iPad, and Mac via your private iCloud. No first-party server, no Finanzübersicht account. Yearly subscription, independent of Pro. Local use still works without a subscription.
+LOCAL STORAGE, NO SIGN-UP
+Your financial data is stored on your device. No additional app account is required. Use the backup feature to save your data and restore it when needed.
 
-FREE AND PRO
-Free covers everyday use: unlimited transactions, a few accounts, recurring payments, and savings goals. Pro is a one-time purchase for unlimited accounts, CSV import, widget presets, and other power features. Core features do not require a subscription.
+START FOR FREE
+Record unlimited transactions and use up to 3 accounts, 8 recurring transactions, 1 savings goal, and 3 transaction templates.
 
-iPhone, iPad, and Mac. German and English. Dark Mode. VoiceOver.
+UNLOCK PRO WITH A ONE-TIME PURCHASE
+Pro gives you unlimited accounts, recurring transactions, savings goals, and templates. Import CSV files with column mapping, a preview, automatic category suggestions, and duplicate detection. Plan ahead with the 30-day cash-flow forecast and capture expenses using the iPhone Home Screen widget.
 
-LEGAL
+OPTIONAL ICLOUD SYNC
+Keep your data up to date across iPhone, iPad, and Mac using your private iCloud. Sync is a separate yearly subscription and does not require Pro. Local use does not require a subscription.
+
+For iPhone, iPad, and Mac. Available in German and English. With Dark Mode and VoiceOver support.
+
 Privacy Policy: https://finanzuebersicht.thomasmenzl.de/en/privacy.html
-Terms of Use (Apple Standard EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
+Terms of Use: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/

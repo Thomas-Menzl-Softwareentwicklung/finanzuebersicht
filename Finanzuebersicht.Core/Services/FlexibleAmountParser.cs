@@ -39,7 +39,7 @@ public static class FlexibleAmountParser
         if (string.IsNullOrWhiteSpace(amountText))
             return false;
 
-        var s = amountText.Trim().Replace("\u00A0", "").Replace(" ", "");
+        var s = NormalizeInput(amountText);
         if (s.Length == 0)
             return false;
 
@@ -60,5 +60,28 @@ public static class FlexibleAmountParser
         }
 
         return decimal.TryParse(s, NumberStyles.Number, CultureInfo.InvariantCulture, out amount);
+    }
+
+    /// <summary>
+    /// iOS inserts invisible format characters (LRM, bidi isolates) when a minus is typed
+    /// into a field that already has a value. Those characters are not visible, and
+    /// <see cref="decimal.TryParse"/> rejects them. A new, empty field does not get them.
+    /// </summary>
+    private static string NormalizeInput(string s)
+    {
+        var buffer = new char[s.Length];
+        var count = 0;
+        foreach (var c in s.Trim())
+        {
+            var category = char.GetUnicodeCategory(c);
+            if (category is UnicodeCategory.Format or UnicodeCategory.SpaceSeparator or UnicodeCategory.Control)
+                continue;
+
+            buffer[count++] = category == UnicodeCategory.DashPunctuation || c == '\u2212'
+                ? '-'
+                : c;
+        }
+
+        return new string(buffer, 0, count);
     }
 }

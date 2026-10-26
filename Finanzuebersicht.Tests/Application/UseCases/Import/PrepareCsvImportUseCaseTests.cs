@@ -72,6 +72,23 @@ public class PrepareCsvImportUseCaseTests
         }
     };
 
+    [Theory]
+    [InlineData("de-DE")]
+    [InlineData("en-US")]
+    public async Task Prepare_ScreenshotCsv_UsesRealProfileAndProducesPreview(string language)
+    {
+        var useCase = BuildPrepare(new InMemoryCsvImportProfileStore(), EmptyRepo());
+        var bytes = Finanzuebersicht.Core.Services.ScreenshotDemo.ScreenshotDemoCsv.Create(
+            new Finanzuebersicht.Tests.TestHelpers.FixedClock(new DateTime(2026, 10, 26)),
+            new System.Globalization.CultureInfo(language));
+        using var stream = new MemoryStream(bytes);
+        var result = await useCase.ExecuteAsync(stream);
+        Assert.Null(result.ErrorMessage);
+        Assert.False(result.NeedsMapping);
+        Assert.NotNull(result.Preview);
+        Assert.Equal(5, result.Preview.Rows.Count);
+    }
+
     [Fact]
     public async Task Prepare_DkbSample_ReturnsPreview()
     {

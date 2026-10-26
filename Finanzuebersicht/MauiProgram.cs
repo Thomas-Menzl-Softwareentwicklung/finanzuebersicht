@@ -63,6 +63,12 @@ public static class MauiProgram
 				if (view is Microsoft.Maui.Controls.TimePicker timePicker)
 					timePicker.On<iOS>().SetUpdateMode(UpdateMode.WhenFinished);
 			});
+			// Signed amounts use the numbers-and-punctuation keyboard and mirror the native text.
+			Microsoft.Maui.Handlers.EntryHandler.Mapper.AppendToMapping(nameof(IEntry.Keyboard), (handler, view) =>
+			{
+				if (view is Microsoft.Maui.Controls.Entry entry)
+					Finanzuebersicht.Controls.SignedAmountEntry.Apply(entry);
+			});
 		});
 #endif
 

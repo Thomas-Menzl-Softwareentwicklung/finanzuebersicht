@@ -111,6 +111,9 @@ public partial class RecurringTransactionDetailViewModel(
 
     public bool IsEditing => _existing != null;
 
+    [ObservableProperty]
+    private bool isVariableAmount;
+
     partial void OnIntervalChanged(RecurrenceInterval value)
     {
         SelectedIntervalOption = VerfuegbareIntervalle.FirstOrDefault(option => option.Value == value);
@@ -130,6 +133,7 @@ public partial class RecurringTransactionDetailViewModel(
             {
                 _existing = value;
                 BetragText = value.Betrag.ToString("F2", System.Globalization.CultureInfo.CurrentCulture);
+                IsVariableAmount = value.IsVariableAmount;
                 Titel = value.Titel;
                 Typ = value.Typ;
                 Startdatum = value.Startdatum;
@@ -190,6 +194,7 @@ public partial class RecurringTransactionDetailViewModel(
     {
         _existing = null;
         BetragText = string.Empty;
+        IsVariableAmount = false;
         Titel = string.Empty;
         Typ = TransactionType.Ausgabe;
         Startdatum = _clock.Today;
@@ -264,7 +269,8 @@ public partial class RecurringTransactionDetailViewModel(
                 Interval,
                 IntervalFactor,
                 ReminderDaysBefore,
-                Exceptions.ToList());
+                Exceptions.ToList(),
+                IsVariableAmount);
             if (!result.IsSuccess)
             {
                 await UseCaseErrorPresenter.ShowAsync(_dialogService, _loc, result.Error!);

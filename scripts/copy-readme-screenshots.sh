@@ -29,11 +29,11 @@ declare -a PAIRS=(
   "07-settings.png:einstellungen.png"
 )
 
-# 03-quick-expense has no README slot yet.
-# Legacy README assets without automation counterpart (left unchanged):
-#   dashboard-jahr, dashboard-dauerauftrag, transaktionen-filter/swipe/detail,
-#   umbuchung, import-vorschau, dauerauftrag-detail, verwaltung-konten,
-#   konto-bearbeiten, sparziel-neu, einstellungen-ueber
+# 03-quick-expense has no README slot yet because the captured form is empty.
+# The README curates six current main views; older detail-only screenshots are
+# intentionally not retained in docs/screenshots/.
+# Running this optional iPhone copy replaces the Mac frames; update the README
+# screenshot caption to identify iPhone as the source if you use it.
 
 find_iphone_shot() {
   local shot_name="$1"

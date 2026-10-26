@@ -1,1 +1,8 @@
-Neues App-Icon mit Hell-, Dunkel- und getönter Variante (iOS). Markenzeichen auf dem Startbildschirm und unter Einstellungen → Über. Unter Sprache kann eine weitere Sprache per E-Mail angefragt werden.
+Neu in Version 1.25:
+
+• CSV-Import: Sieh, woher ein Kategorievorschlag kommt, und kategorisiere Buchungen gleicher Zahlungspartner gemeinsam. Die Vorschau bleibt beim Bearbeiten geöffnet.
+• Variable wiederkehrende Buchungen: Der zuletzt bestätigte Betrag wird vorgeschlagen. Die 30-Tage-Cashflow-Vorschau macht geschätzte Beträge erkennbar.
+• Konten: Negative Anfangs- und Ist-Salden lassen sich erfassen. Den Kontostand kannst du unabhängig vom Speichern abgleichen.
+• iPhone: Die kompaktere Transaktionssuche schafft mehr Platz für deine Buchungen. Schnellaktionen sind einheitlich am unteren Rand erreichbar.
+• Neues F+€-App-Icon mit heller, dunkler und getönter Darstellung auf iOS. Weitere Sprachen kannst du unter Einstellungen → Sprache anfragen.
+• Mac: Ab dieser Version wird macOS 14 Sonoma oder neuer benötigt.

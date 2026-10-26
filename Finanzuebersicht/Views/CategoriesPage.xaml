@@ -31,8 +31,8 @@
         <conv:InvertBoolConverter x:Key="InvertBool" />
     </views:BaseContentPage.Resources>
 
-    <Grid>
-        <controls:DesktopContentHost>
+    <Grid RowDefinitions="*, Auto">
+        <controls:DesktopContentHost Grid.Row="0">
         <Grid RowDefinitions="Auto, *">
             <Border Grid.Row="0"
                     Margin="16,12"
@@ -47,6 +47,7 @@
                             TextColor="{Binding IsKategorienVisible, Converter={StaticResource ToggleActiveText}}"
                             SemanticProperties.Hint="{loc:Translate A11y_SegmentUmschalten}" />
                     <Button Grid.Column="1"
+                            AutomationId="management.accounts"
                             Text="{loc:Translate Lbl_Konten}"
                             Command="{Binding ShowKontenCommand}"
                             BackgroundColor="{Binding IsKontenVisible, Converter={StaticResource ToggleActiveColor}}"
@@ -295,16 +296,14 @@
         </Grid>
         </controls:DesktopContentHost>
 
-        <Button Text="{loc:Translate Btn_Hinzufuegen}"
+        <Border Grid.Row="1"
                 IsVisible="{x:Static helpers:DesktopChrome.IsPhone}"
-                FontSize="28" TextColor="White"
-                BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                CornerRadius="28"
-                WidthRequest="56" HeightRequest="56"
-                HorizontalOptions="End" VerticalOptions="End"
-                Margin="0,0,20,20"
-                SemanticProperties.Description="{Binding FabAccessibilityDescription}"
-                Shadow="{Shadow Brush='#40000000', Offset='0,4', Radius=8}"
-                Command="{Binding GoToDetailCommand}" />
+                Style="{StaticResource PhoneActionDock}">
+            <Button Text="{Binding PhoneActionText}"
+                    Style="{StaticResource PhonePrimaryAction}"
+                    HorizontalOptions="End"
+                    SemanticProperties.Description="{Binding FabAccessibilityDescription}"
+                    Command="{Binding GoToDetailCommand}" />
+        </Border>
     </Grid>
 </views:BaseContentPage>

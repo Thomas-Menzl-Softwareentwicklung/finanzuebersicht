@@ -31,6 +31,7 @@ public static class ResourceKeys
     public const string Lbl_Farbe = nameof(Lbl_Farbe);
     public const string Lbl_Typ = nameof(Lbl_Typ);
     public const string Lbl_Betrag = nameof(Lbl_Betrag);
+    public const string Lbl_VariableAmount = nameof(Lbl_VariableAmount);
     public const string Lbl_Titel = nameof(Lbl_Titel);
     public const string Lbl_Kategorie = nameof(Lbl_Kategorie);
     public const string Lbl_Datum = nameof(Lbl_Datum);
@@ -111,6 +112,8 @@ public static class ResourceKeys
     // Error Messages
     public const string Err_Titel = nameof(Err_Titel);
     public const string Err_UngueltigerBetrag = nameof(Err_UngueltigerBetrag);
+    public const string Err_IstSaldoErforderlich = nameof(Err_IstSaldoErforderlich);
+    public const string Err_IstSaldoUngueltig = nameof(Err_IstSaldoUngueltig);
     public const string Err_BetragGroesserNull = nameof(Err_BetragGroesserNull);
     public const string Err_TitelErforderlich = nameof(Err_TitelErforderlich);
     public const string Err_KategorieErforderlich = nameof(Err_KategorieErforderlich);
@@ -192,6 +195,9 @@ public static class ResourceKeys
     public const string Dlg_DauerauftragLoeschenFrage = nameof(Dlg_DauerauftragLoeschenFrage);
     public const string Dlg_DauerauftragBuchen = nameof(Dlg_DauerauftragBuchen);
     public const string Dlg_DauerauftragBuchenFrage = nameof(Dlg_DauerauftragBuchenFrage);
+    public const string Dlg_VariableAmount = nameof(Dlg_VariableAmount);
+    public const string Dlg_VariableAmountQuestion = nameof(Dlg_VariableAmountQuestion);
+    public const string Lbl_AmountEstimate = nameof(Lbl_AmountEstimate);
     public const string Dlg_DauerauftragUeberspringen = nameof(Dlg_DauerauftragUeberspringen);
     public const string Dlg_DauerauftragUeberspringenFrage = nameof(Dlg_DauerauftragUeberspringenFrage);
     public const string Btn_AlsAusgefuehrtBuchen = nameof(Btn_AlsAusgefuehrtBuchen);
@@ -292,6 +298,12 @@ public static class ResourceKeys
     public const string Btn_ExportCSV = nameof(Btn_ExportCSV);
     public const string Msg_BackupRestoreTitle = nameof(Msg_BackupRestoreTitle);
     public const string Msg_BackupRestoreDesc = nameof(Msg_BackupRestoreDesc);
+    public const string Btn_NeueTransaktion = nameof(Btn_NeueTransaktion);
+    public const string Btn_ActionAusgabe = nameof(Btn_ActionAusgabe);
+    public const string Btn_ActionKategorie = nameof(Btn_ActionKategorie);
+    public const string Btn_ActionKonto = nameof(Btn_ActionKonto);
+    public const string Btn_ActionSparziel = nameof(Btn_ActionSparziel);
+    public const string Btn_ActionDauerauftrag = nameof(Btn_ActionDauerauftrag);
     public const string Btn_Import = nameof(Btn_Import);
     public const string Btn_Filter = nameof(Btn_Filter);
     public const string Btn_Umbuchen = nameof(Btn_Umbuchen);
@@ -419,6 +431,15 @@ public static class ResourceKeys
     public const string Lbl_ImportDuplikateCount = nameof(Lbl_ImportDuplikateCount);
     public const string Lbl_ImportProblemeCount = nameof(Lbl_ImportProblemeCount);
     public const string Lbl_ImportAusgewaehltCount = nameof(Lbl_ImportAusgewaehltCount);
+    public const string Lbl_ImportCategorySourceRule = nameof(Lbl_ImportCategorySourceRule);
+    public const string Lbl_ImportCategorySourceHistory = nameof(Lbl_ImportCategorySourceHistory);
+    public const string Lbl_ImportCategorySourceNone = nameof(Lbl_ImportCategorySourceNone);
+    public const string Lbl_ImportCategorySelectionCount = nameof(Lbl_ImportCategorySelectionCount);
+    public const string Btn_ImportKategorienBearbeiten = nameof(Btn_ImportKategorienBearbeiten);
+    public const string Btn_ImportKategorienFertig = nameof(Btn_ImportKategorienFertig);
+    public const string Btn_ImportGleicherZahlungspartner = nameof(Btn_ImportGleicherZahlungspartner);
+    public const string Btn_ImportKategorieZuweisen = nameof(Btn_ImportKategorieZuweisen);
+    public const string Btn_ImportAuswahlAufheben = nameof(Btn_ImportAuswahlAufheben);
     public const string Msg_ImportStatusMissingDate = nameof(Msg_ImportStatusMissingDate);
     public const string Msg_ImportStatusUnparsableAmount = nameof(Msg_ImportStatusUnparsableAmount);
     public const string Msg_ImportStatusPossibleDuplicate = nameof(Msg_ImportStatusPossibleDuplicate);
@@ -476,6 +497,8 @@ public static class ResourceKeys
     public const string Btn_Rueckgaengig = nameof(Btn_Rueckgaengig);
     public const string Lbl_BerechneterSaldo = nameof(Lbl_BerechneterSaldo);
     public const string Lbl_IstSaldo = nameof(Lbl_IstSaldo);
+    public const string Lbl_SaldoAbgleich = nameof(Lbl_SaldoAbgleich);
+    public const string Hint_IstSaldo = nameof(Hint_IstSaldo);
     public const string Hint_SaldoAbgleich = nameof(Hint_SaldoAbgleich);
     public const string Msg_SaldoAbgeglichen = nameof(Msg_SaldoAbgeglichen);
     public const string Onboarding_PageTitle = nameof(Onboarding_PageTitle);

@@ -20,11 +20,12 @@
         <conv:BoolToOpacityConverter x:Key="BoolToOpacity" />
         <conv:BetragDisplayConverter x:Key="BetragDisplay" />
         <conv:AktivTextConverter x:Key="AktivText" />
+        <conv:TransactionTypeToLocalizedStringConverter x:Key="TypeText" />
         <conv:RecurringRowAccessibilityConverter x:Key="RecurringAccessibility" />
     </views:BaseContentPage.Resources>
 
-    <Grid>
-        <controls:DesktopContentHost>
+    <Grid RowDefinitions="*, Auto">
+        <controls:DesktopContentHost Grid.Row="0">
         <RefreshView Command="{Binding LoadDauerauftraegeCommand}"
                      IsRefreshing="{Binding IsLoading}">
         <CollectionView ItemsSource="{Binding Dauerauftraege}"
@@ -95,7 +96,7 @@
                                 <Label FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}">
                                     <Label.Text>
                                         <MultiBinding StringFormat="{}{0} · {1}">
-                                            <Binding Path="Typ" />
+                                            <Binding Path="Typ" Converter="{StaticResource TypeText}" />
                                             <Binding Path="Aktiv"
                                                      Converter="{StaticResource AktivText}" />
                                         </MultiBinding>
@@ -145,17 +146,14 @@
     </RefreshView>
         </controls:DesktopContentHost>
 
-        <!-- FAB (phone only; Mac uses toolbar #351) -->
-        <Button Text="{loc:Translate Btn_Hinzufuegen}"
-            IsVisible="{x:Static helpers:DesktopChrome.IsPhone}"
-            FontSize="28" TextColor="White"
-            BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-            CornerRadius="28"
-            WidthRequest="56" HeightRequest="56"
-            HorizontalOptions="End" VerticalOptions="End"
-            Margin="0,0,20,20"
-            SemanticProperties.Description="{loc:Translate A11y_DauerauftragHinzufuegen}"
-            Shadow="{Shadow Brush='#40000000', Offset='0,4', Radius=8}"
-            Command="{Binding GoToDetailCommand}" />
+        <Border Grid.Row="1"
+                IsVisible="{x:Static helpers:DesktopChrome.IsPhone}"
+                Style="{StaticResource PhoneActionDock}">
+            <Button Text="{loc:Translate Btn_ActionDauerauftrag}"
+                    Style="{StaticResource PhonePrimaryAction}"
+                    HorizontalOptions="End"
+                    SemanticProperties.Description="{loc:Translate A11y_DauerauftragHinzufuegen}"
+                    Command="{Binding GoToDetailCommand}" />
+        </Border>
     </Grid>
 </views:BaseContentPage>

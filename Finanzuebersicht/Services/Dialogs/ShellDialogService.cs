@@ -21,4 +21,13 @@ public class ShellDialogService : IDialogService
             return await Shell.Current.DisplayAlertAsync(title, message, accept, cancel);
         });
     }
+
+    public async Task<string?> ShowPromptAsync(string title, string message, string accept, string cancel, string initialValue)
+    {
+        if (Shell.Current is null) return null;
+
+        return await MainThread.InvokeOnMainThreadAsync(async () =>
+            await Shell.Current.DisplayPromptAsync(
+                title, message, accept, cancel, initialValue: initialValue, keyboard: Keyboard.Numeric));
+    }
 }

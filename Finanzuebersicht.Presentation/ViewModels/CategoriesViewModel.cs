@@ -59,14 +59,20 @@ public partial class CategoriesViewModel(
         ? _loc.GetString(ResourceKeys.A11y_KontoHinzufuegen)
         : _loc.GetString(ResourceKeys.A11y_KategorieHinzufuegen);
 
+    public string PhoneActionText => IsKontenVisible
+        ? _loc.GetString(ResourceKeys.Btn_ActionKonto)
+        : _loc.GetString(ResourceKeys.Btn_ActionKategorie);
+
     partial void OnSelectedSectionIndexChanged(int value)
     {
         OnPropertyChanged(nameof(FabAccessibilityDescription));
+        OnPropertyChanged(nameof(PhoneActionText));
     }
 
     public void RefreshLocalizedStrings()
     {
         OnPropertyChanged(nameof(FabAccessibilityDescription));
+        OnPropertyChanged(nameof(PhoneActionText));
         _ = LoadKategorienCore();
     }
 

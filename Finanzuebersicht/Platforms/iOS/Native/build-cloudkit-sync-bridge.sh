@@ -63,7 +63,14 @@ build_one() {
 # Match MAUI SupportedOSPlatformVersion 15.0 so the static lib links into the app;
 # CKSyncEngine itself is behind @available(iOS 17, macOS 14, *) in the Swift source.
 build_one iphoneos arm64-apple-ios15.0 Release-iphoneos
-build_one iphonesimulator arm64-apple-ios15.0-simulator Release-iphonesimulator
+# Both Apple Silicon and Intel hosts can run the Fastlane simulator capture lane.
+build_one iphonesimulator arm64-apple-ios15.0-simulator Release-iphonesimulator-arm64
+build_one iphonesimulator x86_64-apple-ios15.0-simulator Release-iphonesimulator-x64
+mkdir -p "$OUT_ROOT/Release-iphonesimulator"
+xcrun lipo -create \
+  "$OUT_ROOT/Release-iphonesimulator-arm64/libCloudKitSyncBridge.a" \
+  "$OUT_ROOT/Release-iphonesimulator-x64/libCloudKitSyncBridge.a" \
+  -output "$OUT_ROOT/Release-iphonesimulator/libCloudKitSyncBridge.a"
 
 # Mac Catalyst: iOS triples with the -macabi environment, compiled against the macOS SDK's
 # iOSSupport overlay (that is where the Catalyst flavour of CloudKit lives).

@@ -1,22 +1,24 @@
-Finanzübersicht verwaltet Einnahmen, Ausgaben und Daueraufträge lokal auf dem Gerät. Daten liegen als JSON bei dir — ohne Finanzübersicht-Konto, ohne Bank-Login, ohne Kontoanbindung, ohne Werbung, ohne Tracking.
+Mit Meine Finanzübersicht behältst du Einnahmen, Ausgaben und Budgets im Blick. Erfasse deine Buchungen, plane regelmäßige Zahlungen und verfolge deine Sparziele – ohne Bank-Login, Werbung oder Tracking.
 
-DASHBOARD UND KONTEN
-Monats- und Jahresübersicht, Konten mit Salden, Umbuchungen, Budgets und eine 30-Tage-Cashflow-Vorschau. Kategorien mit Icon, Farbe und Monatsbudget.
+DEIN HAUSHALTSBUCH IM ALLTAG
+Sieh, wohin dein Geld fließt: mit Monats- und Jahresübersichten, Kategorien und Budgets. Verwalte mehrere Konten und buche Geld zwischen ihnen um. Erfasse Einnahmen und Ausgaben direkt in der App, suche nach Buchungen und nutze Vorlagen für wiederkehrende Eingaben.
 
-TRANSAKTIONEN
-Anlegen, suchen, filtern, duplizieren und als Vorlage speichern. CSV-Import mit Spaltenzuordnung und gespeicherten Profilen (z. B. DKB), Vorschau, Auto-Kategorisierung und Duplikat-Erkennung. Schnellerfassung in der App; auf dem iPhone optional als Home-Screen-Widget (Pro).
+REGELMÄSSIGE ZAHLUNGEN UND SPARZIELE
+Behalte Gehalt, Miete und andere wiederkehrende Buchungen im Blick. Erinnerungen helfen dir beim Erfassen fälliger Zahlungen. Mit Sparzielen siehst du deinen Fortschritt. Die App führt keine Banküberweisungen aus.
 
-DAUERAUFTRÄGE UND SPARZIELE
-Wiederkehrende Buchungen mit Erinnerung. Sparziele mit Fortschritt und Prognose. Backup und Restore inklusive Schema-Migration.
+LOKAL UND OHNE REGISTRIERUNG
+Deine Finanzdaten werden auf deinem Gerät gespeichert. Du brauchst kein zusätzliches Benutzerkonto für die App. Sichere deine Daten über die Backup-Funktion und stelle sie bei Bedarf wieder her.
 
-ICLOUD-SYNC
-Optional zwischen iPhone, iPad und Mac über deine private iCloud. Kein eigener Server, kein Finanzübersicht-Account. Jahresabo, unabhängig von Pro. Lokal weiter ohne Abo nutzbar.
+KOSTENLOS STARTEN
+Erfasse unbegrenzt Transaktionen und nutze bis zu 3 Konten, 8 wiederkehrende Buchungen, 1 Sparziel und 3 Buchungsvorlagen.
 
-FREE UND PRO
-Free reicht für den Alltag: Transaktionen unbegrenzt, wenige Konten, Daueraufträge und Sparziele. Pro ist ein Einmalkauf für unbegrenzt Konten, CSV-Import, Widget-Presets und weitere Power-Features. Die Kernfunktionen brauchen kein Abo.
+PRO EINMALIG FREISCHALTEN
+Mit Pro erhältst du unbegrenzt Konten, wiederkehrende Buchungen, Sparziele und Vorlagen. Importiere CSV-Dateien mit Spaltenzuordnung, Vorschau, automatischen Kategorievorschlägen und Duplikaterkennung. Plane mit der 30-Tage-Cashflow-Vorschau und nutze die Schnellerfassung per iPhone-Widget.
 
-iPhone, iPad und Mac. Deutsch und Englisch. Dark Mode. VoiceOver.
+OPTIONAL ÜBER ICLOUD SYNCHRONISIEREN
+Halte deine Daten auf iPhone, iPad und Mac über deine private iCloud aktuell. Sync ist ein separates Jahresabo und setzt Pro nicht voraus. Für die lokale Nutzung brauchst du kein Abo.
 
-RECHTLICHES
+Für iPhone, iPad und Mac. Auf Deutsch und Englisch. Mit Dark Mode und VoiceOver-Unterstützung.
+
 Datenschutz: https://finanzuebersicht.thomasmenzl.de/privacy.html
-Nutzungsbedingungen (Terms of Use, Apple-Standard-EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
+Nutzungsbedingungen: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/

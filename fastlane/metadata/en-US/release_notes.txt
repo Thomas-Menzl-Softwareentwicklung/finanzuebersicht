@@ -1,1 +1,8 @@
-New app icon with light, dark, and tinted appearances (iOS). Brand mark on the splash screen and under Settings → About. Under Language you can request an additional language by email.
+What's new in version 1.25:
+
+• CSV import: See where category suggestions come from and categorize transactions with the same payee together. The preview stays open while you edit.
+• Variable recurring transactions: The last confirmed amount is suggested for your next entry. The 30-day cash-flow forecast clearly identifies estimated amounts.
+• Accounts: Enter negative opening and current balances. Reconcile your balance independently of saving account details.
+• iPhone: More compact transaction search leaves more room for your entries. Quick actions are consistently available at the bottom.
+• New F+€ app icon with light, dark, and tinted appearances on iOS. Request additional languages under Settings → Language.
+• Mac: This version requires macOS 14 Sonoma or later.

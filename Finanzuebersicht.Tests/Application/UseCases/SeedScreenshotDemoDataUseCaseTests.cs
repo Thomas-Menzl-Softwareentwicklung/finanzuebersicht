@@ -107,6 +107,26 @@ public class SeedScreenshotDemoDataUseCaseTests
         Assert.Equal(snapshot.Accounts.Select(a => a.Id), ScreenshotDemoFixture.Create(clock).Accounts.Select(a => a.Id));
     }
 
+    [Theory]
+    [InlineData("de-DE")]
+    [InlineData("en-US")]
+    public void Fixture_ShowsSeveralRealisticPlanningExamples(string culture)
+    {
+        var snapshot = ScreenshotDemoFixture.Create(new FixedClock(FixedToday), new CultureInfo(culture));
+
+        Assert.True(snapshot.RecurringTransactions.Count >= 5);
+        Assert.Contains(snapshot.RecurringTransactions, r => r.Typ == TransactionType.Einnahme);
+        Assert.Contains(snapshot.RecurringTransactions, r => r.IsVariableAmount && r.LastBookedAmount.HasValue);
+        Assert.True(snapshot.SparZiele.Count >= 3);
+        Assert.True(snapshot.Budgets.Count >= 3);
+        Assert.All(snapshot.RecurringTransactions, r =>
+        {
+            Assert.Contains(snapshot.Accounts, a => a.Id == r.AccountId);
+            Assert.Contains(snapshot.Categories, c => c.Id == r.KategorieId);
+        });
+        Assert.All(snapshot.SparZiele, goal => Assert.InRange(goal.AktuellerBetrag, 1m, goal.ZielBetrag));
+    }
+
     [Fact]
     public void Fixture_Create_IsDeterministicForSameClock()
     {

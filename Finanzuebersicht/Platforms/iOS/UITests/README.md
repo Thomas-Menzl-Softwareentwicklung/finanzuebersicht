@@ -117,6 +117,30 @@ The test passes `--screenshot-demo` after `setupSnapshot(app)` so demo mode wins
 
 Snapshot flow (`testScreenshots`): `01-dashboard` → `07-settings` — see `FinanzuebersichtUITests.swift`.
 
+## Phone layout regression checks
+
+After building and installing the MAUI app, run `testPhoneLayoutActionsAndPeriodNavigation`
+to check the month/year switch, quick capture, transaction creation and the separation
+between the scrolling list and its action row. The test keeps screenshots of the
+dashboard, category list and transactions in the result bundle.
+
+Run `testPhoneActionsWithLargeText` with the simulator configured for enlarged text.
+It checks that all three transaction actions remain reachable and within the screen;
+inspect its retained screenshot to confirm that the labels are complete. For example:
+
+```bash
+xcrun simctl ui <simulator-udid> content_size accessibility-large
+xcrun simctl ui <simulator-udid> appearance dark
+xcodebuild test \
+  -project FinanzuebersichtUITests.xcodeproj \
+  -scheme FinanzuebersichtUITests \
+  -destination 'platform=iOS Simulator,id=<simulator-udid>' \
+  -only-testing:FinanzuebersichtUITests/FinanzuebersichtUITests/testPhoneActionsWithLargeText
+```
+
+Record the simulator's original `content_size` and `appearance` before changing them,
+and restore those values after the check.
+
 ## fastlane snapshot
 
 From repo root (`fastlane/Fastfile` installs the MAUI `.app` on each Snapfile simulator before capture):
@@ -143,3 +167,12 @@ fastlane snapshot update
 ## Widget builds
 
 This folder is independent of `Platforms/iOS/Widgets/`. MAUI widget embed (`BuildWidgetExtension`) is unchanged.
+
+
+## Marketing-Screenshots ab 1.25
+
+`bundle exec fastlane screenshots` baut die aktuelle App selbst und führt ausschließlich `testScreenshots` aus. Für Intel wird `iossimulator-x64`, für Apple Silicon `iossimulator-arm64` verwendet; mit `SCREENSHOT_SIMULATOR_RID` überschreibbar. Simulator-Bridges und Widget unterstützen beide Architekturen; Geräte-Builds bleiben ARM64.
+
+Neue Rohmotive: `08-accounts` und `09-import`. Die Import-Schaltfläche öffnet ausschließlich im isolierten Debug-Demomodus die echte Vorschau mit fiktiver CSV. `03-quick-expense` zeigt eine befüllte Seite ohne Tastatur. Die englische Dauerauftragsaufnahme prüft zusätzlich, dass der interne Enum-Name „Ausgabe“ nicht sichtbar ist.
+
+Rohbilder bleiben in `fastlane/screenshots/`. Der anschließende Pillow-Schritt stellt die sieben Store-Motive mit lokalisierten Nutzenüberschriften in `fastlane/screenshots-store/` zusammen. Details und Python-Voraussetzungen: `docs/APP_STORE.md`, Abschnitt „Store-Bilder mit Nutzenüberschriften“.

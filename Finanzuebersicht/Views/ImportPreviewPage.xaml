@@ -6,7 +6,8 @@
               xmlns:loc="clr-namespace:Finanzuebersicht.Extensions"
               xmlns:conv="clr-namespace:Finanzuebersicht.Converters"
               xmlns:controls="clr-namespace:Finanzuebersicht.Controls"
-              x:Class="Finanzuebersicht.Views.ImportPreviewPage"
+              AutomationId="page.import-preview"
+             x:Class="Finanzuebersicht.Views.ImportPreviewPage"
               x:DataType="vm:ImportPreviewViewModel"
               Title="{loc:Translate Ttl_ImportVorschau}">
 
@@ -29,6 +30,31 @@
                                          SelectedItem="{Binding SelectedFilter, Mode=TwoWay}"
                                          DisplayMemberPath="DisplayName"
                                          Placeholder="{loc:Translate Lbl_ImportFilterAlle}" />
+                <Button Text="{Binding CategorySelectionModeButtonText}"
+                        Command="{Binding ToggleCategorySelectionModeCommand}"
+                        IsVisible="{Binding HasRows}"
+                        BackgroundColor="Transparent"
+                        TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                        FontSize="13"
+                        Padding="0"
+                        HorizontalOptions="Start" />
+                <VerticalStackLayout IsVisible="{Binding IsCategorySelectionMode}" Spacing="8">
+                    <Label Text="{Binding CategorySelectionCountText}"
+                           FontSize="12" />
+                    <controls:SelectionField ItemsSource="{Binding BulkCategoryOptions}"
+                                             SelectedItem="{Binding SelectedBulkCategory, Mode=TwoWay}"
+                                             DisplayMemberPath="DisplayName"
+                                             Placeholder="{loc:Translate Hint_KategorieWaehlen}" />
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                        <Button Text="{loc:Translate Btn_ImportKategorieZuweisen}"
+                                Command="{Binding ApplyCategoryToSelectionCommand}"
+                                IsEnabled="{Binding HasCategorizationSelection}" />
+                        <Button Grid.Column="1"
+                                Text="{loc:Translate Btn_ImportAuswahlAufheben}"
+                                Command="{Binding ClearCategorizationSelectionCommand}"
+                                IsEnabled="{Binding HasCategorizationSelection}" />
+                    </Grid>
+                </VerticalStackLayout>
                 <Button Text="{loc:Translate Btn_ImportSpaltenNeu}"
                         Command="{Binding RemapColumnsCommand}"
                         IsVisible="{Binding CanRemap}"
@@ -49,6 +75,7 @@
         <CollectionView Grid.Row="2"
                         IsVisible="{Binding HasRows}"
                         ItemsSource="{Binding FilteredRows}"
+                        ItemsUpdatingScrollMode="KeepScrollOffset"
                         SelectionMode="None">
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="vm:ImportPreviewRowItemViewModel">
@@ -58,6 +85,23 @@
                             Padding="12"
                             Margin="0,0,0,10">
                         <VerticalStackLayout Spacing="8">
+                            <Grid ColumnDefinitions="Auto,*"
+                                  ColumnSpacing="8"
+                                  IsVisible="{Binding Source={RelativeSource AncestorType={x:Type vm:ImportPreviewViewModel}}, Path=IsCategorySelectionMode}">
+                                <CheckBox IsChecked="{Binding IsCategorizationSelected, Mode=TwoWay}"
+                                          IsEnabled="{Binding CanCommit}"
+                                          VerticalOptions="Center" />
+                                <Button Grid.Column="1"
+                                        Text="{loc:Translate Btn_ImportGleicherZahlungspartner}"
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:ImportPreviewViewModel}}, Path=SelectSamePayeeCommand}"
+                                        CommandParameter="{Binding .}"
+                                        IsVisible="{Binding HasNormalizedPayeeKey}"
+                                        BackgroundColor="Transparent"
+                                        TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                        FontSize="12"
+                                        Padding="0"
+                                        HorizontalOptions="Start" />
+                            </Grid>
                             <Grid ColumnDefinitions="*, Auto" ColumnSpacing="8">
                                 <VerticalStackLayout Spacing="2">
                                     <Label Text="{Binding Title}"
@@ -106,6 +150,10 @@
                                                          IsEnabled="{Binding CanEditCategory}"
                                                          Placeholder="{loc:Translate Hint_KategorieWaehlen}" />
                             </Grid>
+                            <Label Text="{Binding CategoryMatchSourceText}"
+                                   FontSize="11"
+                                   TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray600}}"
+                                   IsVisible="{Binding ShowCategoryMatchSource}" />
                         </VerticalStackLayout>
                     </Border>
                 </DataTemplate>

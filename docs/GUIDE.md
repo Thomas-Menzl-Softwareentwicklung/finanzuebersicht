@@ -209,13 +209,12 @@ nbgv set-version <version> # Version bumpen
 
 ## 12. Screenshots
 
-**iOS** (App Store + optional README): **fastlane snapshot** + XCUITest (`Finanzuebersicht/Platforms/iOS/UITests/`).
+**iOS** (App Store): **fastlane snapshot** + XCUITest (`Finanzuebersicht/Platforms/iOS/UITests/`).
 
 ```bash
 dotnet build Finanzuebersicht/Finanzuebersicht.csproj \
   -f net10.0-ios -c Debug -p:RuntimeIdentifier=iossimulator-arm64
 bundle exec fastlane screenshots
-./scripts/copy-readme-screenshots.sh   # DE-iPhone → docs/screenshots/
 ```
 
 **Mac Catalyst** (Mac App Store + README): Fenster-Capture mit Demo-Daten.

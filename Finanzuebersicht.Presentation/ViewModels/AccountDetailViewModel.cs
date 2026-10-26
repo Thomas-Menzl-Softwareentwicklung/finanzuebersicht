@@ -237,11 +237,20 @@ public partial class AccountDetailViewModel(
     {
         if (_existingAccount == null) return;
 
+        if (string.IsNullOrWhiteSpace(ActualBalanceText))
+        {
+            await _dialogService.ShowAlertAsync(
+                _loc.GetString(ResourceKeys.Err_Titel),
+                _loc.GetString(ResourceKeys.Err_IstSaldoErforderlich),
+                _loc.GetString(ResourceKeys.Btn_OK));
+            return;
+        }
+
         if (!FlexibleAmountParser.TryParse(ActualBalanceText, out var actualBalance))
         {
             await _dialogService.ShowAlertAsync(
                 _loc.GetString(ResourceKeys.Err_Titel),
-                _loc.GetString(ResourceKeys.Err_UngueltigerBetrag),
+                _loc.GetString(ResourceKeys.Err_IstSaldoUngueltig),
                 _loc.GetString(ResourceKeys.Btn_OK));
             return;
         }

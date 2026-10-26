@@ -18,6 +18,13 @@ public class BetragDisplayConverter : IValueConverter
             return $"{sign}{formatted}";
         }
 
+        if (value is RecurringTransaction recurring)
+        {
+            var formatted = Math.Abs(recurring.Betrag).ToString("C", ci);
+            var sign = recurring.Typ == TransactionType.Einnahme ? "+" : "-";
+            return $"{sign}{formatted}";
+        }
+
         if (value is TransactionTemplate tpl)
         {
             var abs = Math.Abs(tpl.Betrag);
