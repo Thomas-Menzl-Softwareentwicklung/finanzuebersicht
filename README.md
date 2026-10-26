@@ -38,69 +38,19 @@ Hinweis: Die Benutzeroberfläche unterstützt Deutsch und Englisch; weitere Spra
 
 ## Screenshots
 
-*Stand **v1.23** — sechs Hauptansichten (Dashboard, Transaktionen, Daueraufträge, Verwaltung, Sparziele, Einstellungen) frisch von **Mac Catalyst** (`bundle exec fastlane screenshots_mac` → `./scripts/copy-readme-screenshots-mac.sh`). Übrige Detail-/Filter-Aufnahmen noch älter (iPhone).*
+*Stand **v1.25** — kuratierte Hauptansichten von **Mac Catalyst**. Die sechs aktuellen Aufnahmen decken Dashboard, Transaktionen, Daueraufträge, Verwaltung, Sparziele und Einstellungen ab. App-Store-Aufnahmen für iPhone und iPad werden separat in App Store Connect gepflegt; diese Übersicht zeigt repräsentative Mac-Ansichten.*
 
-### Dashboard
-
-Hero-Saldo, Monats-KPIs und eine Analytics-Karte mit Budget-Balken, Donut-Chart und Kategorieliste. Monat/Jahr-Umschalter in der Karte; fällige Daueraufträge als Hinweis mit Schnellaktionen.
-
-| Monatsansicht | Jahresansicht |
+| Dashboard | Transaktionen |
 |:---:|:---:|
-| ![Dashboard Monatsansicht](docs/screenshots/dashboard-monat.png) | ![Dashboard Jahresansicht](docs/screenshots/dashboard-jahr.png) |
+| ![Aktuelles Dashboard](docs/screenshots/dashboard-monat.png) | ![Aktuelle Transaktionsliste](docs/screenshots/transaktionen.png) |
 
-Fällige Daueraufträge aufklappen und direkt buchen, überspringen oder verschieben:
-
-![Dauerauftrag auf dem Dashboard](docs/screenshots/dashboard-dauerauftrag.png)
-
-### Transaktionen & Import
-
-Liste mit Vorlagen, Filter, Swipe-Aktionen und CSV-Import mit Duplikat-Erkennung. (Aktuell zusätzlich Monats-Chips, Tageskarten und Anlegen per Modal-Sheet — noch ohne aktualisierte Screenshots.)
-
-| Transaktionsliste | Filter & Suche | Swipe-Aktionen |
-|:---:|:---:|:---:|
-| ![Transaktionsliste](docs/screenshots/transaktionen.png) | ![Filter](docs/screenshots/transaktionen-filter.png) | ![Swipe](docs/screenshots/transaktionen-swipe.png) |
-
-| Neue Transaktion | Umbuchung | Import-Vorschau |
-|:---:|:---:|:---:|
-| ![Transaktion erfassen](docs/screenshots/transaktion-detail.png) | ![Umbuchung](docs/screenshots/umbuchung.png) | ![Import-Vorschau](docs/screenshots/import-vorschau.png) |
-
-### Daueraufträge
-
-Übersicht wiederkehrender Buchungen und Detailansicht mit Intervall und Erinnerung.
-
-| Übersicht | Detail |
+| Daueraufträge | Verwaltung |
 |:---:|:---:|
-| ![Daueraufträge](docs/screenshots/dauerauftraege.png) | ![Dauerauftrag bearbeiten](docs/screenshots/dauerauftrag-detail.png) |
+| ![Aktuelle Daueraufträge](docs/screenshots/dauerauftraege.png) | ![Aktuelle Kategorienverwaltung](docs/screenshots/verwaltung-kategorien.png) |
 
-### Verwaltung
-
-Kategorien und Konten im einheitlichen Kartenlayout — inkl. Gesamtsaldo, Typ-Icons und Archivieren.
-
-| Kategorien | Konten |
+| Sparziele | Einstellungen |
 |:---:|:---:|
-| ![Kategorien](docs/screenshots/verwaltung-kategorien.png) | ![Konten](docs/screenshots/verwaltung-konten.png) |
-
-Konto bearbeiten (Anfangssaldo):
-
-![Anfangssaldo](docs/screenshots/konto-bearbeiten.png)
-
-### Sparziele
-
-Fortschritt zu Sparzielen mit Prognose.
-
-![Sparziele](docs/screenshots/sparziele.png)
-
-Neues Sparziel anlegen:
-
-![Neues Sparziel](docs/screenshots/sparziel-neu.png)
-
-### Einstellungen
-
-Darstellung, Sprache, Anzeige-Währung, Speicherort, Backup & Restore und App-Info.
-
-| Allgemein | Über & Bibliotheken |
-|:---:|:---:|
-| ![Einstellungen](docs/screenshots/einstellungen.png) | ![Einstellungen Über](docs/screenshots/einstellungen-ueber.png) |
+| ![Aktuelle Sparziele](docs/screenshots/sparziele.png) | ![Aktuelle Einstellungen](docs/screenshots/einstellungen.png) |
 
 ## Plattformen
 

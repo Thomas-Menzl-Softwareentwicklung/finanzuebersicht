@@ -151,7 +151,7 @@ Siehe `MONETIZATION.md`. Kurz: Direct = immer Pro, kein Sync. Store = Free-Limit
 
 ## Screenshot-Automatisierung
 
-Lokal App-Store-Screenshots (iPhone + iPad, `de-DE` + `en-US`) und ausgewählte DE-iPhone-Frames fürs README erzeugen. Rohdaten unter `fastlane/screenshots/` sind **gitignored**; kuratierte README-PNGs liegen in `docs/screenshots/`.
+Lokal App-Store-Screenshots (iPhone + iPad, `de-DE` + `en-US`) und ausgewählte DE-Mac-Captures fürs README erzeugen. Rohdaten unter `fastlane/screenshots/` und `fastlane/screenshots-mac/` sind **gitignored**; kuratierte README-PNGs liegen in `docs/screenshots/`.
 
 ### Voraussetzungen
 
@@ -179,14 +179,15 @@ bundle exec fastlane screenshots
 PNG-Ausgabe: `fastlane/screenshots/<locale>/<Gerät>-<shot>.png` (flaches Layout, z. B. `de-DE/iPhone 17-01-dashboard.png` … `07-settings.png`).  
 Details zu UITest-Flow und Simulator-Pfaden: `Finanzuebersicht/Platforms/iOS/UITests/README.md`.
 
-3. **README-Bilder aktualisieren** (nur DE-iPhone → bestehende `docs/screenshots/`-Namen):
+3. **README-Bilder aktualisieren** (DE-Mac Catalyst → sechs kuratierte `docs/screenshots/`-Namen):
 
 ```bash
-./scripts/copy-readme-screenshots.sh
+bundle exec fastlane screenshots_mac
+./scripts/copy-readme-screenshots-mac.sh
 git add docs/screenshots/
 ```
 
-Das Skript mappt sechs der sieben Aufnahmen (`03-quick-expense` hat noch keinen README-Slot). Legacy-README-Assets ohne Gegenstück (z. B. `dashboard-jahr.png`, Filter/Swipe/Detail) bleiben unverändert, bis passende Flows ergänzt werden.
+Das Skript mappt sechs der sieben Aufnahmen. Die leere Schnellerfassung (`03-quick-expense`) wird bewusst nicht in der README gezeigt. Der iOS-Screenshot-Lauf aus Schritt 2 dient separat den App-Store-Bildern und wird nicht in `docs/screenshots/` kopiert.
 
 4. **App Store Connect:** `bundle exec fastlane upload_listing` (siehe [Listing hochladen](#listing-hochladen-app-store-connect)). Kein `frameit`.
 
