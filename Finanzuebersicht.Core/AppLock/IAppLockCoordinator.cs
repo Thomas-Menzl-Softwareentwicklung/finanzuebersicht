@@ -4,6 +4,7 @@ public interface IAppLockCoordinator
 {
     AppLockState State { get; }
     bool CanAccessContent { get; }
+    AuthenticationResult? LatestAuthenticationResult { get; }
     event Action? StateChanged;
 
     Task InitializeAsync(CancellationToken cancellationToken = default);

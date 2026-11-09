@@ -570,6 +570,8 @@ Bitte starte die App neu.</value></data>
   <data name="AppLock_FiveMinutes" xml:space="preserve"><value>5 Minuten</value></data>
   <data name="AppLock_FifteenMinutes" xml:space="preserve"><value>15 Minuten</value></data>
   <data name="AppLock_UnlockLabel" xml:space="preserve"><value>Entsperren</value></data>
+  <data name="AppLock_UnlockUnavailable" xml:space="preserve"><value>Die Geräteauthentifizierung ist nicht verfügbar. Prüfe, ob ein Gerätecode eingerichtet ist, und versuche es erneut.</value></data>
+  <data name="AppLock_AuthenticationFailed" xml:space="preserve"><value>Die Authentifizierung ist fehlgeschlagen. Bitte versuche es erneut.</value></data>
   <data name="AppLock_RetryLabel" xml:space="preserve"><value>Erneut versuchen</value></data>
   <data name="AppLock_UnlockReason" xml:space="preserve"><value>Entsperre Finanzübersicht, um deine Finanzdaten anzuzeigen.</value></data>
   <data name="AppLock_AuthenticationUnavailable" xml:space="preserve"><value>Die Systemauthentifizierung ist auf diesem Gerät nicht verfügbar.</value></data>

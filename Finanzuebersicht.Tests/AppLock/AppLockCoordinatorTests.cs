@@ -17,6 +17,57 @@ public class AppLockCoordinatorTests
     }
 
     [Fact]
+    public async Task InitializeAsync_UnsupportedPlatform_DoesNotBlockEvenWithStoredEnabledPolicy()
+    {
+        var coordinator = CreateCoordinator(new AppLockOptions(true, 300), new TestAuthenticator { IsSupported = false });
+        Assert.True(coordinator.CanAccessContent);
+        await coordinator.InitializeAsync();
+        Assert.True(coordinator.CanAccessContent);
+        Assert.Equal(AppLockState.Disabled, coordinator.State);
+    }
+
+    [Theory]
+    [InlineData(AuthenticationResult.Cancelled)]
+    [InlineData(AuthenticationResult.Unavailable)]
+    [InlineData(AuthenticationResult.Failed)]
+    public async Task UnlockAsync_ReportsAttemptResult(AuthenticationResult result)
+    {
+        var coordinator = CreateCoordinator(new AppLockOptions(true, 300), new TestAuthenticator { Result = result });
+        await coordinator.InitializeAsync();
+        await coordinator.UnlockAsync("Unlock");
+        Assert.Equal(result, coordinator.LatestAuthenticationResult);
+    }
+
+    [Fact]
+    public async Task EnterBackground_WhileAvailabilityIsPending_DoesNotStartAuthentication()
+    {
+        var availability = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var authenticator = new TestAuthenticator { AvailabilityTask = availability.Task };
+        var coordinator = CreateCoordinator(new AppLockOptions(true, 300), authenticator);
+        await coordinator.InitializeAsync();
+        var unlock = coordinator.UnlockAsync("Unlock");
+        coordinator.EnterBackground();
+        availability.SetResult(true);
+        await unlock;
+        Assert.Equal(0, authenticator.CallCount);
+        Assert.Equal(AppLockState.Locked, coordinator.State);
+    }
+
+    [Fact]
+    public async Task EnterBackground_CancelsNativeAuthentication()
+    {
+        var completion = new TaskCompletionSource<AuthenticationResult>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var authenticator = new TestAuthenticator { ResultTask = completion.Task };
+        var coordinator = CreateCoordinator(new AppLockOptions(true, 300), authenticator);
+        await coordinator.InitializeAsync();
+        var unlock = coordinator.UnlockAsync("Unlock");
+        coordinator.EnterBackground();
+        Assert.True(authenticator.ReceivedToken.IsCancellationRequested);
+        completion.SetResult(AuthenticationResult.Succeeded);
+        await unlock;
+    }
+
+    [Fact]
     public async Task InitializeAsync_Enabled_RequiresUnlockOnEveryProcessStart()
     {
         var settings = new TestSettingsStore(new AppLockOptions(true, 300));
@@ -165,7 +216,7 @@ public class AppLockCoordinatorTests
     public async Task ChangeOptionsAsync_ShorterDelay_DoesNotRequireAuthentication()
     {
         var settings = new TestSettingsStore(new AppLockOptions(true, 900));
-        var authenticator = new TestAuthenticator { Result = AuthenticationResult.Cancelled };
+        var authenticator = new TestAuthenticator();
         var coordinator = CreateCoordinator(settings, authenticator);
         await coordinator.InitializeAsync();
         await coordinator.UnlockAsync("Unlock");
@@ -175,6 +226,40 @@ public class AppLockCoordinatorTests
         Assert.True(changed);
         Assert.Equal(1, authenticator.CallCount);
         Assert.Equal(AppLockState.Unlocked, coordinator.State);
+    }
+
+    [Theory]
+    [InlineData(300)]
+    [InlineData(900)]
+    public async Task ChangeOptionsAsync_WhileLocked_DoesNotSaveOrUnlock(int delay)
+    {
+        var settings = new TestSettingsStore(new AppLockOptions(true, 900));
+        var coordinator = CreateCoordinator(settings);
+        await coordinator.InitializeAsync();
+
+        var changed = await coordinator.ChangeOptionsAsync(new AppLockOptions(true, delay), "Change");
+
+        Assert.False(changed);
+        Assert.Equal(0, settings.SaveCount);
+        Assert.Equal(AppLockState.Locked, coordinator.State);
+    }
+
+    [Fact]
+    public async Task ActivateAsync_QueuedBeforeNewBackground_DoesNotAuthenticate()
+    {
+        var completion = new TaskCompletionSource<AuthenticationResult>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var authenticator = new TestAuthenticator { ResultTask = completion.Task };
+        var coordinator = CreateCoordinator(new AppLockOptions(true, 0), authenticator);
+        await coordinator.InitializeAsync();
+        var unlock = coordinator.UnlockAsync("Unlock");
+        coordinator.EnterBackground();
+        var activation = coordinator.ActivateAsync("Unlock");
+        coordinator.EnterBackground();
+        completion.SetResult(AuthenticationResult.Succeeded);
+        await Task.WhenAll(unlock, activation);
+
+        Assert.Equal(1, authenticator.CallCount);
+        Assert.Equal(AppLockState.Locked, coordinator.State);
     }
 
     [Fact]
@@ -238,14 +323,18 @@ public class AppLockCoordinatorTests
 
     private sealed class TestAuthenticator : IDeviceAuthenticationService
     {
+        public bool IsSupported { get; init; } = true;
+        public Task<bool>? AvailabilityTask { get; init; }
+        public CancellationToken ReceivedToken { get; private set; }
         public AuthenticationResult Result { get; set; } = AuthenticationResult.Succeeded;
         public Task<AuthenticationResult>? ResultTask { get; init; }
         public TaskCompletionSource<AuthenticationResult> ResultSource { get; init; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
         public int CallCount { get; private set; }
-        public Task<bool> IsAvailableAsync(CancellationToken cancellationToken = default) => Task.FromResult(true);
+        public Task<bool> IsAvailableAsync(CancellationToken cancellationToken = default) => AvailabilityTask ?? Task.FromResult(true);
         public Task<AuthenticationResult> AuthenticateAsync(string reason, CancellationToken cancellationToken = default)
         {
             CallCount++;
+            ReceivedToken = cancellationToken;
             return ResultTask ?? Task.FromResult(Result);
         }
     }

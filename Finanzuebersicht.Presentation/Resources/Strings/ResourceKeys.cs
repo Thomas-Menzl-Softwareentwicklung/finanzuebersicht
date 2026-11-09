@@ -222,6 +222,8 @@ public static class ResourceKeys
     public const string AppLock_FiveMinutes = nameof(AppLock_FiveMinutes);
     public const string AppLock_FifteenMinutes = nameof(AppLock_FifteenMinutes);
     public const string AppLock_UnlockLabel = nameof(AppLock_UnlockLabel);
+    public const string AppLock_UnlockUnavailable = nameof(AppLock_UnlockUnavailable);
+    public const string AppLock_AuthenticationFailed = nameof(AppLock_AuthenticationFailed);
     public const string AppLock_RetryLabel = nameof(AppLock_RetryLabel);
     public const string AppLock_UnlockReason = nameof(AppLock_UnlockReason);
     public const string AppLock_AuthenticationUnavailable = nameof(AppLock_AuthenticationUnavailable);

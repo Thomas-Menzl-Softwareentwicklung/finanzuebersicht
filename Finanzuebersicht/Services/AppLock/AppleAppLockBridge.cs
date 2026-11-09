@@ -191,6 +191,7 @@ public sealed class AppleAppLockBridge : IAppLockLifecycleBridge, IDisposable
 
     private async void OnSceneBackgrounded(SceneShield shield)
     {
+        shield.TransitionGeneration++;
         shield.IsActive = false;
         shield.IsInForeground = false;
         ShowShield(shield, locked: !_coordinator.CanAccessContent);
@@ -208,6 +209,7 @@ public sealed class AppleAppLockBridge : IAppLockLifecycleBridge, IDisposable
 
     private async void OnSceneActivated(SceneShield shield)
     {
+        var generation = ++shield.TransitionGeneration;
         try
         {
             await _sceneRegistry.SetInForegroundAsync(shield.Scene, isInForeground: true, GetUnlockReason());
@@ -219,6 +221,10 @@ public sealed class AppleAppLockBridge : IAppLockLifecycleBridge, IDisposable
             ShowShield(shield, locked: true);
             return;
         }
+        if (generation != shield.TransitionGeneration
+            || !_shields.TryGetValue(shield.Scene, out var current) || !ReferenceEquals(current, shield)
+            || shield.Scene.ActivationState != UISceneActivationState.ForegroundActive)
+            return;
         shield.IsInForeground = true;
         shield.IsActive = true;
         RefreshShield(shield.Scene);
@@ -226,6 +232,7 @@ public sealed class AppleAppLockBridge : IAppLockLifecycleBridge, IDisposable
 
     private void OnSceneWillDeactivate(SceneShield shield)
     {
+        shield.TransitionGeneration++;
         shield.IsActive = false;
         ShowShield(shield, locked: _coordinator.State == AppLockState.Locked);
     }
@@ -251,6 +258,12 @@ public sealed class AppleAppLockBridge : IAppLockLifecycleBridge, IDisposable
         if (!_shields.TryGetValue(scene, out var shield))
             return;
 
+        var attemptMessage = _coordinator.LatestAuthenticationResult switch
+        {
+            AuthenticationResult.Unavailable => _localization.GetString(ResourceKeys.AppLock_UnlockUnavailable),
+            AuthenticationResult.Failed => _localization.GetString(ResourceKeys.AppLock_AuthenticationFailed),
+            _ => null
+        };
         if (shield.ErrorMessage is not null)
         {
             shield.ErrorLabel.Text = shield.ErrorMessage;
@@ -265,6 +278,12 @@ public sealed class AppleAppLockBridge : IAppLockLifecycleBridge, IDisposable
         else
         {
             ShowShield(shield, locked: _coordinator.State == AppLockState.Locked);
+            if (attemptMessage is not null && _coordinator.State == AppLockState.Locked)
+            {
+                shield.ErrorLabel.Text = attemptMessage;
+                shield.ErrorLabel.Hidden = false;
+                shield.UnlockButton.SetTitle(GetRetryLabel(), UIControlState.Normal);
+            }
         }
     }
 
@@ -277,6 +296,7 @@ public sealed class AppleAppLockBridge : IAppLockLifecycleBridge, IDisposable
             shield.ErrorMessage is null ? GetUnlockLabel() : GetRetryLabel(),
             UIControlState.Normal);
         shield.UnlockButton.Hidden = !locked;
+        shield.UnlockButton.Enabled = _coordinator.State != AppLockState.Authenticating;
         shield.ErrorLabel.Hidden = shield.ErrorMessage is null;
     }
 
@@ -353,6 +373,7 @@ public sealed class AppleAppLockBridge : IAppLockLifecycleBridge, IDisposable
         public UILabel ErrorLabel { get; } = errorLabel;
         public List<NSObject> Observers { get; } = [];
         public string? ErrorMessage { get; set; }
+        public long TransitionGeneration { get; set; }
         public bool IsInForeground { get; set; }
         public bool IsActive { get; set; }
     }

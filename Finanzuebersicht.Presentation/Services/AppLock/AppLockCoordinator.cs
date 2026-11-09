@@ -14,15 +14,23 @@ public class AppLockCoordinator : IAppLockCoordinator
     private bool _enteredBackground;
     private bool _initialized;
     private long _generation;
+    private readonly object _authenticationSync = new();
+    private CancellationTokenSource? _activeAuthentication;
 
     public AppLockCoordinator(IAppLockSettingsStore settings, IDeviceAuthenticationService authentication, TimeProvider timeProvider)
     {
         _settings = settings;
         _authentication = authentication;
         _timeProvider = timeProvider;
+        if (!_authentication.IsSupported)
+        {
+            _initialized = true;
+            _state = AppLockState.Disabled;
+        }
     }
 
     public AppLockState State => _state;
+    public AuthenticationResult? LatestAuthenticationResult { get; private set; }
     public bool CanAccessContent => _state is AppLockState.Disabled or AppLockState.Unlocked;
     public event Action? StateChanged;
 
@@ -51,7 +59,11 @@ public class AppLockCoordinator : IAppLockCoordinator
 
     public void EnterBackground()
     {
-        _generation++;
+        lock (_authenticationSync)
+        {
+            _generation++;
+            _activeAuthentication?.Cancel();
+        }
         _backgroundTimestamp = _timeProvider.GetTimestamp();
         _enteredBackground = true;
     }
@@ -61,10 +73,11 @@ public class AppLockCoordinator : IAppLockCoordinator
         if (!_initialized)
             return;
 
+        var generation = _generation;
         await _operationGate.WaitAsync(cancellationToken);
         try
         {
-            if (!_enteredBackground)
+            if (generation != _generation || !_enteredBackground)
                 return;
 
             var elapsed = _timeProvider.GetElapsedTime(_backgroundTimestamp);
@@ -73,7 +86,7 @@ public class AppLockCoordinator : IAppLockCoordinator
                 SetState(AppLockState.Locked);
 
             if (_state == AppLockState.Locked)
-                await AuthenticateAndUpdateStateAsync(reason, cancellationToken, _generation);
+                await AuthenticateAndUpdateStateAsync(reason, cancellationToken, generation);
         }
         finally
         {
@@ -86,11 +99,12 @@ public class AppLockCoordinator : IAppLockCoordinator
         if (!_initialized || _state != AppLockState.Locked)
             return;
 
+        var generation = _generation;
         await _operationGate.WaitAsync(cancellationToken);
         try
         {
-            if (_state == AppLockState.Locked)
-                await AuthenticateAndUpdateStateAsync(reason, cancellationToken, _generation);
+            if (generation == _generation && _state == AppLockState.Locked)
+                await AuthenticateAndUpdateStateAsync(reason, cancellationToken, generation);
         }
         finally
         {
@@ -107,6 +121,9 @@ public class AppLockCoordinator : IAppLockCoordinator
             if (!_initialized)
                 return false;
 
+            if (!_authentication.IsSupported || _state is AppLockState.Locked or AppLockState.Authenticating)
+                return false;
+
             var requiresAuthentication = value.Enabled != _options.Enabled
                 || (value.Enabled && value.DelaySeconds > _options.DelaySeconds);
             if (requiresAuthentication)
@@ -116,11 +133,13 @@ public class AppLockCoordinator : IAppLockCoordinator
             }
 
             var generation = _generation;
+            var previousState = _state;
             await _settings.SaveAsync(value, cancellationToken);
             _options = value;
-            _enteredBackground = false;
+            if (generation == _generation)
+                _enteredBackground = false;
             SetState(generation == _generation
-                ? value.Enabled ? AppLockState.Unlocked : AppLockState.Disabled
+                ? requiresAuthentication ? value.Enabled ? AppLockState.Unlocked : AppLockState.Disabled : previousState
                 : value.Enabled ? AppLockState.Locked : AppLockState.Disabled);
             return true;
         }
@@ -132,6 +151,7 @@ public class AppLockCoordinator : IAppLockCoordinator
 
     private async Task AuthenticateAndUpdateStateAsync(string reason, CancellationToken cancellationToken, long generation)
     {
+        LatestAuthenticationResult = null;
         SetState(AppLockState.Authenticating);
         var succeeded = await AuthenticateAsync(reason, cancellationToken, generation);
         SetState(succeeded && generation == _generation ? AppLockState.Unlocked : AppLockState.Locked);
@@ -139,21 +159,48 @@ public class AppLockCoordinator : IAppLockCoordinator
 
     private async Task<bool> AuthenticateAsync(string reason, CancellationToken cancellationToken, long generation)
     {
+        using var attempt = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        lock (_authenticationSync)
+        {
+            if (generation != _generation)
+                return false;
+            _activeAuthentication = attempt;
+        }
+        AuthenticationResult result;
         try
         {
-            if (!await _authentication.IsAvailableAsync(cancellationToken))
-                return false;
-            var result = await _authentication.AuthenticateAsync(reason, cancellationToken);
-            return result == AuthenticationResult.Succeeded && generation == _generation;
+            var available = await _authentication.IsAvailableAsync(attempt.Token);
+            if (attempt.IsCancellationRequested || generation != _generation)
+                result = AuthenticationResult.Cancelled;
+            else
+                result = available
+                    ? await _authentication.AuthenticateAsync(reason, attempt.Token)
+                    : AuthenticationResult.Unavailable;
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
             throw;
         }
+        catch (OperationCanceledException) when (attempt.IsCancellationRequested)
+        {
+            result = AuthenticationResult.Cancelled;
+        }
         catch (Exception)
         {
-            return false;
+            result = AuthenticationResult.Failed;
         }
+        finally
+        {
+            lock (_authenticationSync)
+            {
+                if (ReferenceEquals(_activeAuthentication, attempt))
+                    _activeAuthentication = null;
+            }
+        }
+        if (generation != _generation)
+            return false;
+        LatestAuthenticationResult = result;
+        return result == AuthenticationResult.Succeeded;
     }
 
     private void SetState(AppLockState value)

@@ -4,6 +4,8 @@ namespace Finanzuebersicht.Services.AppLock;
 
 public sealed class UnavailableDeviceAuthenticationService : IDeviceAuthenticationService
 {
+    public bool IsSupported => false;
+
     public Task<bool> IsAvailableAsync(CancellationToken cancellationToken = default)
         => Task.FromResult(false);
 

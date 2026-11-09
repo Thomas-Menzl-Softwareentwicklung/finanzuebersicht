@@ -45,9 +45,15 @@ Die folgenden Punkte müssen auf einem echten Gerät vor Freigabe einzeln abgeha
 
 | Prüfschritt | Ergebnis | Einschränkung |
 |---|---|---|
-| Mac Catalyst x64 Debug | Build erfolgreich, 24 Warnungen, 0 Fehler | MAUIG2045 zu Reflection-Fallbacks in XAML-Bindings auf SettingsPage/TransactionsPage; unsigned Debug; App-Sperre bleibt bis zum signierten Mac-Test deaktiviert |
-| iOS Simulator x64 Debug | Build erfolgreich, 24 Warnungen, 0 Fehler | MAUIG2045 zu Reflection-Fallbacks in XAML-Bindings auf SettingsPage/TransactionsPage; unsigned Simulator-Build; kein Start: CoreSimulatorService am Host nicht verfügbar |
-| Tests nach Implementierung | 721 bestanden, 0 Fehler | `dotnet test Finanzuebersicht.Tests/Finanzuebersicht.Tests.csproj -c Release --no-restore -m:1`, 2026-11-09 |
+| Mac Catalyst x64 Debug | Build erfolgreich, 28 Warnungen, 0 Fehler | MAUIG2045 zu Reflection-Fallbacks in XAML-Bindings auf SettingsPage/TransactionsPage; unsigned Debug; App-Sperre bleibt bis zum signierten Mac-Test deaktiviert |
+| iOS Simulator x64 Debug | Build erfolgreich, 28 Warnungen, 0 Fehler | MAUIG2045 zu Reflection-Fallbacks in XAML-Bindings auf SettingsPage/TransactionsPage; unsigned Simulator-Build; kein Start: CoreSimulatorService am Host nicht verfügbar |
+| Tests nach Implementierung | 730 bestanden, 0 Fehler | `dotnet test Finanzuebersicht.Tests/Finanzuebersicht.Tests.csproj -c Release --no-restore -m:1`, 2026-11-09 |
 | Lokalisierte Face-ID-Nutzungstexte | In Root-`de.lproj` und `en.lproj` im iOS-Bundle vorhanden | Build-Bundle geprüft, 2026-11-09 |
 | iOS-/Mac Catalyst Signierung | Keine Code-Signing-Identität am Host | Echter Gerätebuild und Systemdialog bleiben offen |
 | iOS Simulator | CoreSimulatorService war für den Host nicht verfügbar | Kein Simulatorlauf; kein Face-ID-Code-Fallback-Nachweis |
+
+## Offene Review-Abnahme
+
+Die Geräteprüfung bleibt Merge-Voraussetzung: erster Frame und App-Switcher, Tastatur und Zubehör, offene Sheets und Modals, VoiceOver sowie mehrere Scenes/Fenster müssen auf echter Hardware geprüft werden. Schnelle Hintergrund-/Vordergrundwechsel einschließlich eines laufenden Systemdialogs und ein nach Gerätecode-Entfernung nicht verfügbarer Authentifizierungsversuch sind ebenfalls offen. Windows-Build und Windows-Spike bleiben mangels Windows-Gerät offen; Mac-Catalyst-Authentifizierung bleibt nicht freigegeben.
+
+Für die Zustellung eines ausstehenden Deep-Links nach Freigabe gibt es noch keinen deterministischen Host-Integrationstest. Der Kaltstart-Deep-Link und der zuletzt ausstehende Link müssen bis zu einem solchen Test auf dem Gerät geprüft werden; Gate- und Coordinator-Tests ersetzen diese Prüfung nicht.
