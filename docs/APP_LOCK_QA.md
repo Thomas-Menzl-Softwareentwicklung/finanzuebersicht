@@ -45,8 +45,8 @@ Die folgenden Punkte müssen auf einem echten Gerät vor Freigabe einzeln abgeha
 
 | Prüfschritt | Ergebnis | Einschränkung |
 |---|---|---|
-| Mac Catalyst x64 Debug | Build erfolgreich, 28 Warnungen, 0 Fehler | MAUIG2045 zu Reflection-Fallbacks in XAML-Bindings auf SettingsPage/TransactionsPage; unsigned Debug; App-Sperre bleibt bis zum signierten Mac-Test deaktiviert |
-| iOS Simulator x64 Debug | Build erfolgreich, 28 Warnungen, 0 Fehler | MAUIG2045 zu Reflection-Fallbacks in XAML-Bindings auf SettingsPage/TransactionsPage; unsigned Simulator-Build; kein Start: CoreSimulatorService am Host nicht verfügbar |
+| Mac Catalyst x64 Debug | Build erfolgreich, 28 Warnungen, 0 Fehler | MAUIG2045 zu Reflection-Fallbacks in XAML-Bindings und actool-Hinweise zu doppelten `appicon`-Setnamen; unsigned Debug; App-Sperre bleibt bis zum signierten Mac-Test deaktiviert |
+| iOS Simulator x64 Debug | Build erfolgreich, 28 Warnungen, 0 Fehler | MAUIG2045 zu Reflection-Fallbacks in XAML-Bindings und actool-Hinweise zu doppelten `appicon`-Setnamen; unsigned Simulator-Build; kein Start: CoreSimulatorService am Host nicht verfügbar |
 | Tests nach Implementierung | 730 bestanden, 0 Fehler | `dotnet test Finanzuebersicht.Tests/Finanzuebersicht.Tests.csproj -c Release --no-restore -m:1`, 2026-11-09 |
 | Lokalisierte Face-ID-Nutzungstexte | In Root-`de.lproj` und `en.lproj` im iOS-Bundle vorhanden | Build-Bundle geprüft, 2026-11-09 |
 | iOS-/Mac Catalyst Signierung | Keine Code-Signing-Identität am Host | Echter Gerätebuild und Systemdialog bleiben offen |
