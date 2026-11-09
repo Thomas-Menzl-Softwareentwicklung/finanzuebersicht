@@ -75,6 +75,21 @@ public static class MauiProgram
 		// Services
 		// Clock for testable current time
 		builder.Services.AddSingleton<Finanzuebersicht.Core.Services.IClock, Finanzuebersicht.Core.Services.SystemClock>();
+		builder.Services.AddSingleton<TimeProvider>(TimeProvider.System);
+		builder.Services.AddSingleton<Finanzuebersicht.Core.AppLock.IAppLockSettingsStore, Finanzuebersicht.Services.AppLock.DeviceAppLockSettingsStore>();
+#if IOS && !MACCATALYST
+		builder.Services.AddSingleton<Finanzuebersicht.Core.AppLock.IDeviceAuthenticationService, Finanzuebersicht.Services.AppLock.AppleDeviceAuthenticationService>();
+#else
+		builder.Services.AddSingleton<Finanzuebersicht.Core.AppLock.IDeviceAuthenticationService, Finanzuebersicht.Services.AppLock.UnavailableDeviceAuthenticationService>();
+#endif
+		builder.Services.AddSingleton<Finanzuebersicht.Core.AppLock.IAppLockCoordinator, Finanzuebersicht.Presentation.Services.AppLock.AppLockCoordinator>();
+		builder.Services.AddSingleton<Finanzuebersicht.Presentation.Services.AppLock.AppLockEntryGate>();
+		builder.Services.AddSingleton<Finanzuebersicht.Presentation.Services.AppLock.AppLockSceneRegistry>();
+#if IOS || MACCATALYST
+		builder.Services.AddSingleton<Finanzuebersicht.Services.AppLock.IAppLockLifecycleBridge, Finanzuebersicht.Services.AppLock.AppleAppLockBridge>();
+#else
+		builder.Services.AddSingleton<Finanzuebersicht.Services.AppLock.IAppLockLifecycleBridge, Finanzuebersicht.Services.AppLock.UnavailableAppLockLifecycleBridge>();
+#endif
 #if APP_DISTRIBUTION_STORE
 		builder.Services.AddSingleton<Finanzuebersicht.Core.Licensing.IDistributionChannelProvider>(
 			_ => new Finanzuebersicht.Core.Licensing.FixedDistributionChannelProvider(

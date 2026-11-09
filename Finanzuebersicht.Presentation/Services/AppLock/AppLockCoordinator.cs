@@ -31,11 +31,13 @@ public class AppLockCoordinator : IAppLockCoordinator
         await _operationGate.WaitAsync(cancellationToken);
         try
         {
+            if (_initialized)
+                return;
             SetState(AppLockState.Locked);
             var loaded = await _settings.LoadAsync(cancellationToken);
             var delay = AppLockOptions.AllowedDelaysSeconds.Contains(loaded.DelaySeconds)
                 ? loaded.DelaySeconds
-                : loaded.DelaySeconds == 0 ? 0 : 300;
+                : 0;
             _options = new AppLockOptions(loaded.Enabled, delay);
             _initialized = true;
             _enteredBackground = false;

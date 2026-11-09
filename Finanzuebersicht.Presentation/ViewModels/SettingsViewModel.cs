@@ -12,6 +12,7 @@ public partial class SettingsViewModel(
     AboutViewModel about,
     LicenseViewModel license,
     QuickExpenseWidgetPresetsViewModel widgetPresets,
+    AppLockViewModel appLock,
     INavigationService navigationService) : ObservableObject
 {
     public AppearanceViewModel Appearance { get; } = appearance;
@@ -20,6 +21,7 @@ public partial class SettingsViewModel(
     public AboutViewModel About { get; } = about;
     public LicenseViewModel License { get; } = license;
     public QuickExpenseWidgetPresetsViewModel WidgetPresets { get; } = widgetPresets;
+    public AppLockViewModel AppLock { get; } = appLock;
 
     [RelayCommand]
     private Task ShowOnboardingAgain()

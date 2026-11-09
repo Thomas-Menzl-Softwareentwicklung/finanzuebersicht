@@ -226,6 +226,8 @@ public static class DesktopChrome
                 Key: action.AcceleratorKey,
                 Execute: () =>
                 {
+                    if (Microsoft.Maui.Controls.Application.Current is Finanzuebersicht.App app && !app.AppLockCanAccessContent)
+                        return;
                     if (command?.CanExecute(null) == true)
                         command.Execute(null);
                 }));
@@ -275,6 +277,8 @@ public static class DesktopChrome
         var wrapped = new Command(
             execute: () =>
             {
+                if (Microsoft.Maui.Controls.Application.Current is Finanzuebersicht.App app && !app.AppLockCanAccessContent)
+                    return;
                 if (inner.CanExecute(null))
                     inner.Execute(null);
             },

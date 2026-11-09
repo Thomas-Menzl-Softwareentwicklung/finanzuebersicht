@@ -29,6 +29,22 @@ public class AppLockCoordinatorTests
         Assert.Equal(0, settings.SaveCount);
     }
 
+    [Fact]
+    public async Task InitializeAsync_InvalidStoredDelay_UsesImmediateLock()
+    {
+        var authenticator = new TestAuthenticator();
+        var coordinator = CreateCoordinator(new AppLockOptions(true, 42), authenticator);
+        await coordinator.InitializeAsync();
+        await coordinator.UnlockAsync("Unlock");
+        coordinator.EnterBackground();
+        authenticator.Result = AuthenticationResult.Cancelled;
+
+        await coordinator.ActivateAsync("Unlock");
+
+        Assert.Equal(AppLockState.Locked, coordinator.State);
+        Assert.Equal(2, authenticator.CallCount);
+    }
+
     [Theory]
     [InlineData(0, 0, true)]
     [InlineData(60, 59, false)]

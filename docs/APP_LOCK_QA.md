@@ -13,6 +13,15 @@ Issue: [#407](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersic
 | Windows 11 Gerät für Windows Hello Interop | Nicht vorhanden | Host ist macOS; Plattform-Spike nicht ausgeführt |
 | Signiertes iOS-Gerät mit Face ID/Touch ID und Gerätecode | Nicht verbunden | Echter Fallback-Nachweis offen |
 | Signierter Mac Catalyst Laufzeittest | Nicht ausgeführt | Simulator-/Buildnachweis ersetzt keinen signierten Laufzeittest |
+| Code-Signing-Identitäten | 0 gültige Identitäten | `security find-identity -v -p codesigning`, 2026-11-09 |
+
+## Freigabeumfang dieses Branches
+
+| Plattform | Status | Verhalten |
+|---|---|---|
+| iOS | Implementiert, Geräteabnahme offen | `DeviceOwnerAuthentication`, Gerätecode-Fallback gemäß System-Policy; Vorschau-Schutz unabhängig von der App-Sperre |
+| Mac Catalyst | App-Sperre nicht verfügbar | Authentifizierungsadapter bleibt bis zu einem signierten Laufzeittest deaktiviert; Apple-Vorschau bleibt geschützt |
+| Windows | App-Sperre nicht verfügbar | Windows Hello und HWND-gebundener Vorschau-Schutz benötigen einen separaten Spike und Folge-PR |
 
 ## Akzeptanzprotokoll für Geräte
 
@@ -29,5 +38,16 @@ Die folgenden Punkte müssen auf einem echten Gerät vor Freigabe einzeln abgeha
 | iPhone | Systemdialog/Kontrollzentrum/eigener Auth-Dialog | keine Fristverlängerung durch bloße Inaktivität; höchstens ein Systemdialog | Offen |
 | iPhone | Deep Link nach Kaltstart | bleibt bis zur Entsperrung ausstehend, danach richtige Route | Offen |
 | iPhone | offenes Formular oder Sheet | keine Daten sichtbar im Hintergrund; Zustand nach zulässigem Resume erhalten | Offen |
-| Mac Catalyst | Touch ID, kein Touch ID, macOS-Passwort | tatsächliche `DeviceOwnerAuthentication`-Policy dokumentieren | Offen |
-| Windows 11 | Hello verfügbar / nicht verfügbar, Alt-Tab | Auth-Interop und Vorschau anhand HWND verifizieren | Offen; separates Plattformgerät/PR erforderlich |
+| Mac Catalyst | Touch ID, kein Touch ID, macOS-Passwort | tatsächliche `DeviceOwnerAuthentication`-Policy dokumentieren | Nicht freigegeben; Adapter ist bis zum signierten Laufzeittest deaktiviert |
+| Windows 11 | Hello verfügbar / nicht verfügbar, Alt-Tab | Auth-Interop und Vorschau anhand HWND verifizieren | Nicht verfügbar; separates Plattformgerät/PR erforderlich |
+
+## Build-Evidenz des Umsetzungszweigs
+
+| Prüfschritt | Ergebnis | Einschränkung |
+|---|---|---|
+| Mac Catalyst x64 Debug | Build erfolgreich, 24 Warnungen, 0 Fehler | MAUIG2045 zu Reflection-Fallbacks in XAML-Bindings auf SettingsPage/TransactionsPage; unsigned Debug; App-Sperre bleibt bis zum signierten Mac-Test deaktiviert |
+| iOS Simulator x64 Debug | Build erfolgreich, 24 Warnungen, 0 Fehler | MAUIG2045 zu Reflection-Fallbacks in XAML-Bindings auf SettingsPage/TransactionsPage; unsigned Simulator-Build; kein Start: CoreSimulatorService am Host nicht verfügbar |
+| Tests nach Implementierung | 721 bestanden, 0 Fehler | `dotnet test Finanzuebersicht.Tests/Finanzuebersicht.Tests.csproj -c Release --no-restore -m:1`, 2026-11-09 |
+| Lokalisierte Face-ID-Nutzungstexte | In Root-`de.lproj` und `en.lproj` im iOS-Bundle vorhanden | Build-Bundle geprüft, 2026-11-09 |
+| iOS-/Mac Catalyst Signierung | Keine Code-Signing-Identität am Host | Echter Gerätebuild und Systemdialog bleiben offen |
+| iOS Simulator | CoreSimulatorService war für den Host nicht verfügbar | Kein Simulatorlauf; kein Face-ID-Code-Fallback-Nachweis |

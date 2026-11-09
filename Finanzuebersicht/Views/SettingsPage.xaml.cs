@@ -1,5 +1,7 @@
 using Finanzuebersicht.Helpers;
+using Finanzuebersicht.Presentation.Services;
 using Finanzuebersicht.ViewModels;
+using Microsoft.Extensions.DependencyInjection;
 #if IOS
 using ObjCRuntime;
 using UIKit;
@@ -9,6 +11,8 @@ namespace Finanzuebersicht.Views;
 
 public partial class SettingsPage : ContentPage
 {
+    private IAppEvents? _appEvents;
+
     public SettingsPage(SettingsViewModel viewModel)
     {
         InitializeComponent();
@@ -18,13 +22,32 @@ public partial class SettingsPage : ContentPage
     protected override async void OnAppearing()
     {
         base.OnAppearing();
+        _appEvents ??= Handler?.MauiContext?.Services.GetService<IAppEvents>()
+            ?? Microsoft.Maui.Controls.Application.Current?.Handler?.MauiContext?.Services.GetService<IAppEvents>();
+        if (_appEvents is not null)
+            _appEvents.LanguageChanged += OnLanguageChanged;
         // Clear stale tab Aktionen (Settings has none); Shell.Navigated may not always cover this path.
         DesktopChrome.PublishPageActions(this);
         if (BindingContext is SettingsViewModel vm)
         {
+            vm.AppLock.RefreshLocalizedStrings();
+            await vm.AppLock.LoadCommand.ExecuteAsync(null);
             await vm.License.InitializeAsync();
             await vm.WidgetPresets.LoadAsync();
         }
+    }
+
+    protected override void OnDisappearing()
+    {
+        if (_appEvents is not null)
+            _appEvents.LanguageChanged -= OnLanguageChanged;
+        base.OnDisappearing();
+    }
+
+    private void OnLanguageChanged()
+    {
+        if (BindingContext is SettingsViewModel vm)
+            vm.AppLock.RefreshLocalizedStrings();
     }
 
     /// <summary>
