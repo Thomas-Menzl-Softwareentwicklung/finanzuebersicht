@@ -10,6 +10,7 @@ using Finanzuebersicht.Navigation;
 using Finanzuebersicht.Presentation;
 using Finanzuebersicht.Presentation.Services;
 using Finanzuebersicht.Services;
+using Finanzuebersicht.Services.AppLock;
 using Microsoft.Extensions.Logging;
 
 namespace Finanzuebersicht;
@@ -23,6 +24,8 @@ public partial class App : global::Microsoft.Maui.Controls.Application
 	private readonly ILicenseService _licenseService;
 	private readonly INavigationService _navigationService;
 	private readonly IAppEvents _appEvents;
+	private readonly IAppLockLifecycleBridge _appLockLifecycleBridge;
+	private readonly Finanzuebersicht.Core.AppLock.IAppLockCoordinator _appLockCoordinator;
 	private readonly IQuickExpenseWidgetPresetStore? _quickExpenseWidgetPresetStore;
 	private readonly SeedScreenshotDemoDataUseCase _seedScreenshotDemoDataUseCase;
 	private readonly StartCloudSyncUseCase _startCloudSyncUseCase;
@@ -32,6 +35,7 @@ public partial class App : global::Microsoft.Maui.Controls.Application
 	private Uri? _pendingAppLink;
 	private bool _startupComplete;
 	private static Uri? _pendingAppLinkBeforeApp;
+	internal bool AppLockCanAccessContent => _appLockCoordinator.CanAccessContent;
 
 	/// <summary>
 	/// Entry from UIScene OpenUrl / WillConnect (custom scheme). Queues until Shell is ready.
@@ -57,10 +61,15 @@ public partial class App : global::Microsoft.Maui.Controls.Application
 		ILicenseService licenseService,
 		INavigationService navigationService,
 		IAppEvents appEvents,
+		IAppLockLifecycleBridge appLockLifecycleBridge,
+		Finanzuebersicht.Core.AppLock.IAppLockCoordinator appLockCoordinator,
 		IQuickExpenseWidgetPresetStore? quickExpenseWidgetPresetStore = null,
 		ILogger<App>? logger = null)
 	{
 		_appEvents = appEvents;
+		_appLockLifecycleBridge = appLockLifecycleBridge;
+		_appLockCoordinator = appLockCoordinator;
+		_appLockCoordinator.StateChanged += OnAppLockStateChanged;
 		_screenshotDemoMode = ScreenshotDemoBootstrap.IsActive();
 
 		// Sprache vor InitializeComponent setzen, damit XAML-Bindings korrekt aufgelöst werden
@@ -114,6 +123,12 @@ public partial class App : global::Microsoft.Maui.Controls.Application
 					return;
 				}
 
+				if (!_appLockCoordinator.CanAccessContent)
+				{
+					_pendingAppLink = uri;
+					return;
+				}
+
 				await HandleAppLinkAsync(uri);
 			}
 			catch (Exception ex)
@@ -121,6 +136,16 @@ public partial class App : global::Microsoft.Maui.Controls.Application
 				_logger?.LogError(ex, "App-Link (Scene) fehlgeschlagen: {Uri}", uri);
 			}
 		});
+	}
+
+	private void OnAppLockStateChanged()
+	{
+		if (!_appLockCoordinator.CanAccessContent || !_startupComplete || _pendingAppLink is null)
+			return;
+
+		var pending = _pendingAppLink;
+		_pendingAppLink = null;
+		ReceiveAppLink(pending);
 	}
 
 	protected override Window CreateWindow(IActivationState? activationState)
@@ -137,6 +162,7 @@ public partial class App : global::Microsoft.Maui.Controls.Application
 		// UIKit-Style nach Window-Erstellung setzen
 		window.Created += (_, _) =>
 		{
+			_appLockLifecycleBridge.Attach(window);
 			_themeService.Apply(_savedTheme);
 #if MACCATALYST
 			if (_screenshotDemoMode)
@@ -259,7 +285,10 @@ public partial class App : global::Microsoft.Maui.Controls.Application
 			{
 				try
 				{
-					await HandleAppLinkAsync(pending);
+					if (_appLockCoordinator.CanAccessContent)
+						await HandleAppLinkAsync(pending);
+					else
+						_pendingAppLink = pending;
 				}
 				catch (Exception ex)
 				{
@@ -277,6 +306,12 @@ public partial class App : global::Microsoft.Maui.Controls.Application
 
 	internal async Task HandleAppLinkAsync(Uri uri)
 	{
+		if (!_appLockCoordinator.CanAccessContent)
+		{
+			_pendingAppLink = uri;
+			return;
+		}
+
 		if (!string.Equals(uri.Scheme, "finanzuebersicht", StringComparison.OrdinalIgnoreCase))
 			return;
 

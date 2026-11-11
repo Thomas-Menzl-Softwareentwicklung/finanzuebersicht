@@ -213,6 +213,25 @@ public static class ResourceKeys
     public const string Dlg_SparZielLoeschenFrage = nameof(Dlg_SparZielLoeschenFrage);
 
     // Settings Messages
+    public const string AppLock_Title = nameof(AppLock_Title);
+    public const string AppLock_Description = nameof(AppLock_Description);
+    public const string AppLock_Enable = nameof(AppLock_Enable);
+    public const string AppLock_Delay = nameof(AppLock_Delay);
+    public const string AppLock_Immediately = nameof(AppLock_Immediately);
+    public const string AppLock_OneMinute = nameof(AppLock_OneMinute);
+    public const string AppLock_FiveMinutes = nameof(AppLock_FiveMinutes);
+    public const string AppLock_FifteenMinutes = nameof(AppLock_FifteenMinutes);
+    public const string AppLock_UnlockLabel = nameof(AppLock_UnlockLabel);
+    public const string AppLock_UnlockUnavailable = nameof(AppLock_UnlockUnavailable);
+    public const string AppLock_AuthenticationFailed = nameof(AppLock_AuthenticationFailed);
+    public const string AppLock_RetryLabel = nameof(AppLock_RetryLabel);
+    public const string AppLock_UnlockReason = nameof(AppLock_UnlockReason);
+    public const string AppLock_AuthenticationUnavailable = nameof(AppLock_AuthenticationUnavailable);
+    public const string AppLock_SettingsLoadError = nameof(AppLock_SettingsLoadError);
+    public const string AppLock_ChangeCancelled = nameof(AppLock_ChangeCancelled);
+    public const string AppLock_SettingsSaved = nameof(AppLock_SettingsSaved);
+    public const string AppLock_SaveError = nameof(AppLock_SaveError);
+    public const string AppLock_UpdateError = nameof(AppLock_UpdateError);
     public const string Stn_UngueltigerOrdner = nameof(Stn_UngueltigerOrdner);
     public const string Stn_UngueltigerOrdnerDesc = nameof(Stn_UngueltigerOrdnerDesc);
     public const string Stn_SpeicherortGeaendert = nameof(Stn_SpeicherortGeaendert);

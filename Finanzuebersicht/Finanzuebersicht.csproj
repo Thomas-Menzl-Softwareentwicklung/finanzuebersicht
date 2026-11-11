@@ -112,6 +112,8 @@
 		<EmbeddedResource Update="Resources\Strings\AppResources.de.resx">
 			<DependentUpon>AppResources.resx</DependentUpon>
 		</EmbeddedResource>
+		<BundleResource Include="Resources\Localization\de.lproj\InfoPlist.strings" Link="de.lproj\InfoPlist.strings" />
+		<BundleResource Include="Resources\Localization\en.lproj\InfoPlist.strings" Link="en.lproj\InfoPlist.strings" />
 	</ItemGroup>
 
 	<ItemGroup>

@@ -4,6 +4,7 @@
              xmlns:vm="clr-namespace:Finanzuebersicht.ViewModels"
              xmlns:loc="clr-namespace:Finanzuebersicht.Extensions"
              xmlns:controls="clr-namespace:Finanzuebersicht.Controls"
+             xmlns:conv="clr-namespace:Finanzuebersicht.Converters"
              xmlns:helpers="clr-namespace:Finanzuebersicht.Helpers"
              xmlns:icons="clr-namespace:Finanzuebersicht.Resources"
              xmlns:screenshot="clr-namespace:Finanzuebersicht.Core.Constants;assembly=Finanzuebersicht.Core"
@@ -13,10 +14,41 @@
              Title="{loc:Translate Nav_Einstellungen}"
              BackgroundColor="{AppThemeBinding Light={StaticResource PageBackground}, Dark={StaticResource PageBackgroundDark}}">
 
+    <ContentPage.Resources>
+        <conv:InvertBoolConverter x:Key="InvertBool" />
+    </ContentPage.Resources>
+
     <Grid RowDefinitions="*, Auto">
         <controls:DesktopContentHost Grid.Row="0">
         <ScrollView Padding="16">
             <VerticalStackLayout Spacing="24" Padding="0,0,0,24">
+
+            <!-- App lock -->
+            <Border StrokeShape="RoundRectangle 12"
+                    Stroke="{AppThemeBinding Light={StaticResource Separator}, Dark={StaticResource SeparatorDark}}"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource CardBackground}, Dark={StaticResource CardBackgroundDark}}"
+                    Padding="16">
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="{loc:Translate AppLock_Title}" FontSize="18" FontAttributes="Bold"
+                           TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimaryDark}}" />
+                    <Label Text="{loc:Translate AppLock_Description}" FontSize="13"
+                           TextColor="{AppThemeBinding Light={StaticResource TextSecondary}, Dark={StaticResource TextSecondaryDark}}" />
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                        <Label Text="{loc:Translate AppLock_Enable}" VerticalTextAlignment="Center" />
+                        <Switch Grid.Column="1" IsToggled="{Binding AppLock.IsEnabled}"
+                                IsEnabled="{Binding AppLock.IsAvailable}" />
+                    </Grid>
+                    <controls:SelectionField ItemsSource="{Binding AppLock.DelayOptions}"
+                                             SelectedItem="{Binding AppLock.SelectedDelayOption}"
+                                             DisplayMemberPath="Name"
+                                             FieldLabel="{loc:Translate AppLock_Delay}" />
+                    <Button Text="{loc:Translate Btn_Speichern}"
+                            Command="{Binding AppLock.ApplyCommand}"
+                            IsEnabled="{Binding AppLock.IsBusy, Converter={StaticResource InvertBool}}" />
+                    <Label Text="{Binding AppLock.StatusText}" FontSize="12"
+                           TextColor="{AppThemeBinding Light={StaticResource TextTertiary}, Dark={StaticResource Gray400}}" />
+                </VerticalStackLayout>
+            </Border>
 
             <!-- Darstellung -->
             <Border StrokeShape="RoundRectangle 12"

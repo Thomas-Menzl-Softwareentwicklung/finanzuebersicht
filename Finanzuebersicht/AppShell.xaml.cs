@@ -47,6 +47,13 @@ public partial class AppShell : Shell
 		}
 	}
 
+	protected override void OnNavigating(ShellNavigatingEventArgs args)
+	{
+		base.OnNavigating(args);
+		if (App.Current is App app && !app.AppLockCanAccessContent && args.CanCancel)
+			args.Cancel();
+	}
+
 	void OnDesktopHandlerChanged(object? sender, EventArgs e)
 	{
 		if (_desktopLanguageHooked || Handler?.MauiContext?.Services is null)
@@ -106,6 +113,8 @@ public partial class AppShell : Shell
 				Key: action.AcceleratorKey,
 				Execute: () =>
 				{
+					if (App.Current is App app && !app.AppLockCanAccessContent)
+						return;
 					if (command?.CanExecute(null) == true)
 						command.Execute(null);
 				}));
@@ -119,6 +128,8 @@ public partial class AppShell : Shell
 
 	static async Task OpenSettingsAsync()
 	{
+		if (App.Current is App app && !app.AppLockCanAccessContent)
+			return;
 		var location = Shell.Current.CurrentState.Location.ToString();
 		if (location.EndsWith(Routes.Settings))
 			return;
@@ -127,6 +138,8 @@ public partial class AppShell : Shell
 
 	static async Task GoToTabAsync(string route)
 	{
+		if (App.Current is App app && !app.AppLockCanAccessContent)
+			return;
 		if (Shell.Current is null || string.IsNullOrWhiteSpace(route))
 			return;
 		await Shell.Current.GoToAsync(route);
@@ -139,6 +152,8 @@ public partial class AppShell : Shell
 
 	static async Task FocusTransactionsSearchAsync()
 	{
+		if (App.Current is App app && !app.AppLockCanAccessContent)
+			return;
 		if (Shell.Current is null)
 			return;
 

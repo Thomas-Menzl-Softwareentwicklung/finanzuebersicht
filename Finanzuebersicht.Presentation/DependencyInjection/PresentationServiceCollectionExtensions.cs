@@ -44,6 +44,7 @@ public static class PresentationServiceCollectionExtensions
         services.AddTransient<BackupViewModel>();
         services.AddTransient<LicenseViewModel>();
         services.AddTransient<QuickExpenseWidgetPresetsViewModel>();
+        services.AddTransient<AppLockViewModel>();
         services.AddTransient<AboutViewModel>(sp =>
             new AboutViewModel(appAssembly, sp.GetService<Microsoft.Extensions.Logging.ILogger<AboutViewModel>>()));
         services.AddTransient<SettingsViewModel>(sp =>
@@ -54,6 +55,7 @@ public static class PresentationServiceCollectionExtensions
                 sp.GetRequiredService<AboutViewModel>(),
                 sp.GetRequiredService<LicenseViewModel>(),
                 sp.GetRequiredService<QuickExpenseWidgetPresetsViewModel>(),
+                sp.GetRequiredService<AppLockViewModel>(),
                 sp.GetRequiredService<INavigationService>()));
         services.AddTransient<SparZieleViewModel>();
         services.AddTransient<SparZielDetailViewModel>();

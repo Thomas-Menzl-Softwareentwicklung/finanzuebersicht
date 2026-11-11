@@ -561,4 +561,23 @@ Bitte starte die App neu.</value></data>
   <data name="Onboarding_Btn_ErsteTransaktion" xml:space="preserve"><value>Transaktion hinzufügen</value></data>
   <data name="Onboarding_Btn_Einstellungen" xml:space="preserve"><value>Einstellungen öffnen</value></data>
   <data name="Onboarding_Btn_ZumDashboard" xml:space="preserve"><value>Zum Dashboard</value></data>
+  <data name="AppLock_Title" xml:space="preserve"><value>App-Sperre</value></data>
+  <data name="AppLock_Description" xml:space="preserve"><value>Schütze die App mit der Geräteauthentifizierung. Die Datendateien werden dadurch nicht verschlüsselt.</value></data>
+  <data name="AppLock_Enable" xml:space="preserve"><value>Beim Öffnen authentifizieren</value></data>
+  <data name="AppLock_Delay" xml:space="preserve"><value>Nach Rückkehr aus dem Hintergrund sperren</value></data>
+  <data name="AppLock_Immediately" xml:space="preserve"><value>Sofort</value></data>
+  <data name="AppLock_OneMinute" xml:space="preserve"><value>1 Minute</value></data>
+  <data name="AppLock_FiveMinutes" xml:space="preserve"><value>5 Minuten</value></data>
+  <data name="AppLock_FifteenMinutes" xml:space="preserve"><value>15 Minuten</value></data>
+  <data name="AppLock_UnlockLabel" xml:space="preserve"><value>Entsperren</value></data>
+  <data name="AppLock_UnlockUnavailable" xml:space="preserve"><value>Die Geräteauthentifizierung ist nicht verfügbar. Prüfe, ob ein Gerätecode eingerichtet ist, und versuche es erneut.</value></data>
+  <data name="AppLock_AuthenticationFailed" xml:space="preserve"><value>Die Authentifizierung ist fehlgeschlagen. Bitte versuche es erneut.</value></data>
+  <data name="AppLock_RetryLabel" xml:space="preserve"><value>Erneut versuchen</value></data>
+  <data name="AppLock_UnlockReason" xml:space="preserve"><value>Entsperre Finanzübersicht, um deine Finanzdaten anzuzeigen.</value></data>
+  <data name="AppLock_AuthenticationUnavailable" xml:space="preserve"><value>Die Systemauthentifizierung ist auf diesem Gerät nicht verfügbar.</value></data>
+  <data name="AppLock_SettingsLoadError" xml:space="preserve"><value>Die App-Sperreinstellungen konnten nicht gelesen werden.</value></data>
+  <data name="AppLock_ChangeCancelled" xml:space="preserve"><value>Änderung abgebrochen. Die Einstellungen bleiben unverändert.</value></data>
+  <data name="AppLock_SettingsSaved" xml:space="preserve"><value>App-Sperreinstellungen gespeichert.</value></data>
+  <data name="AppLock_SaveError" xml:space="preserve"><value>Die Einstellung konnte nicht gespeichert werden.</value></data>
+  <data name="AppLock_UpdateError" xml:space="preserve"><value>Die App-Sperre konnte nicht sicher aktualisiert werden. Bitte starte die App neu.</value></data>
 </root>

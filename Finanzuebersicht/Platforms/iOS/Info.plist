@@ -7,6 +7,8 @@
 	<false/>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSFaceIDUsageDescription</key>
+	<string>Unlock Finanzübersicht to view your financial data.</string>
 	<key>UIDeviceFamily</key>
 	<array>
 		<integer>1</integer>
