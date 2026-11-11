@@ -2,6 +2,14 @@
 
 Issue: [#407](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/407)
 
+## Reviewkorrekturen – 2026-11-11
+
+- Die Apple-Targets verwenden für die Sperrfrist `AppleContinuousTimeProvider` mit Darwins `CLOCK_MONOTONIC_RAW`. Diese monotone Nanosekunden-Uhr zählt Geräteschlaf mit; `TimeProvider.System` / `CLOCK_UPTIME_RAW` lässt Schlafzeit aus und ist dafür ungeeignet.
+- Der native Mac-Escape-Pfad prüft die Zugriffsfreigabe innerhalb des tatsächlich ausgeführten UI-Callbacks. Eine bereits bestehende oder zwischen Tastendruck und Ausführung eingetretene Sperre kann das offene Formular dadurch nicht mehr verwerfen.
+- Regressionen vor Korrektur nachgewiesen: 3 Escape-Tests fehlgeschlagen; beim bisherigen Apple-Uhrtyp 5 von 9 Uhrtests fehlgeschlagen. Danach vollständige Suite: 756 bestanden, 0 Fehler. Die Uhrtests modellieren Wach-/Schlafzeit getrennt, prüfen die Fristgrenzen und eine achtstündige Schlafphase; zusätzlich ist der native kontinuierliche Zeitstempel auf diesem Mac geprüft. Die Escape-Tests führen den echten Host-Bridge-Code mit ersetzten MAUI-App-/UI-Dispatcher-Grenzen aus.
+- Buildprüfung der Korrekturen: Mac Catalyst x64 Release erfolgreich (lokal ad-hoc signiert, 0 Warnungen, 0 Fehler im abschließenden inkrementellen Lauf); iOS ARM64 Store Release/AOT erfolgreich (28 bekannte XAML-/Icon-Warnungen, 0 Fehler). Beim iOS-Build waren IPA-Packaging und Archivierung deaktiviert; es wurde kein neuer TestFlight-Build hochgeladen.
+- Eine gezielte unabhängige Nachprüfung der Korrekturen ergab keine weiteren wesentlichen Befunde. Ein echter Schlaf-/Aufwach-Zyklus der ausgelieferten iOS-/Mac-App bleibt Teil der Geräte-QA; der deterministische Uhrtest ersetzt diesen Gerätetest nicht.
+
 ## Nachprüfung und Mac-Erweiterung – 2026-11-11
 
 - iOS 1.26.2: Nutzer bestätigt nach dem Settings-Fix einen stabilen TestFlight-Praxistest. Das ersetzt keine Einzelabnahme aller unten aufgeführten Szenarien.

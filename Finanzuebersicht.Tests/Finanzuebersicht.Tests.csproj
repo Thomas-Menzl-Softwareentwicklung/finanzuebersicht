@@ -28,6 +28,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Exercise the actual native-menu dispatch with only its MAUI boundaries substituted. -->
+    <Compile Include="..\Finanzuebersicht\Helpers\DesktopMenuBridge.cs" Link="Host\DesktopMenuBridge.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Include="Services\test_dkb_sample.csv">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

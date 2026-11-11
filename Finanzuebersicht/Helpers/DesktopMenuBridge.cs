@@ -79,6 +79,8 @@ public static class DesktopMenuBridge
     public static void DismissModal() =>
         MainThread.BeginInvokeOnMainThread(() =>
         {
+            if (Microsoft.Maui.Controls.Application.Current is Finanzuebersicht.App app && !app.AppLockCanAccessContent)
+                return;
             var dismiss = DismissModalAsync;
             if (dismiss is not null)
                 _ = dismiss();

@@ -75,12 +75,13 @@ public static class MauiProgram
 		// Services
 		// Clock for testable current time
 		builder.Services.AddSingleton<Finanzuebersicht.Core.Services.IClock, Finanzuebersicht.Core.Services.SystemClock>();
-		builder.Services.AddSingleton<TimeProvider>(TimeProvider.System);
 		builder.Services.AddSingleton<Finanzuebersicht.Core.AppLock.IAppLockSettingsStore, Finanzuebersicht.Services.AppLock.DeviceAppLockSettingsStore>();
 		// DeviceOwnerAuthentication provides the device-code fallback on iOS and the login-password fallback on Mac.
 #if IOS || MACCATALYST
+		builder.Services.AddSingleton<TimeProvider, Finanzuebersicht.Infrastructure.Services.AppleContinuousTimeProvider>();
 		builder.Services.AddSingleton<Finanzuebersicht.Core.AppLock.IDeviceAuthenticationService, Finanzuebersicht.Services.AppLock.AppleDeviceAuthenticationService>();
 #else
+		builder.Services.AddSingleton<TimeProvider>(TimeProvider.System);
 		builder.Services.AddSingleton<Finanzuebersicht.Core.AppLock.IDeviceAuthenticationService, Finanzuebersicht.Services.AppLock.UnavailableDeviceAuthenticationService>();
 #endif
 		builder.Services.AddSingleton<Finanzuebersicht.Core.AppLock.IAppLockCoordinator, Finanzuebersicht.Presentation.Services.AppLock.AppLockCoordinator>();
