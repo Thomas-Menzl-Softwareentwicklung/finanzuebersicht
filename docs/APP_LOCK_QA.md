@@ -2,7 +2,17 @@
 
 Issue: [#407](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersicht/issues/407)
 
-## Laufzeitumgebung dieses Umsetzungszweigs
+## Nachprüfung und Mac-Erweiterung – 2026-11-11
+
+- iOS 1.26.2: Nutzer bestätigt nach dem Settings-Fix einen stabilen TestFlight-Praxistest. Das ersetzt keine Einzelabnahme aller unten aufgeführten Szenarien.
+- Mac Catalyst registriert jetzt denselben `AppleDeviceAuthenticationService` wie iOS. `DeviceOwnerAuthentication` überlässt Touch ID und den macOS-Anmeldepasswort-Fallback dem Betriebssystem; eine eigene App-PIN wird nicht gespeichert. Die bestehenden Verzögerungen und der fensterbezogene Sichtschutz gelten weiter.
+- Tests: 744 bestanden, 0 Fehler (`dotnet test Finanzuebersicht.Tests/Finanzuebersicht.Tests.csproj --no-restore -m:1 -nodeReuse:false`).
+- Mac Catalyst x64 Release: Build erfolgreich, 29 Warnungen, 0 Fehler. Neben den bekannten XAML-/Icon-Warnungen meldet das lokale Entwicklungsprofil MT7151 zu `get-task-allow`.
+- Signierung: Apple-Identitäten sind außerhalb der Workspace-Sandbox vorhanden. Das installierte Mac-Entwicklungsprofil schließt diesen Mac aus; macOS verweigert deshalb den Start des unveränderten Entwicklungsbuilds. Für den UI-Test wurde ausschließlich eine separate Kopie unter `/private/tmp` ohne eingebettetes Profil und ohne profilgebundene iCloud-/Debug-Entitlements mit Apple Development signiert; die lokale Testkopie benötigt `com.apple.security.cs.allow-jit`. Die Projekt-Entitlements und die installierte App wurden dafür nicht geändert.
+- Echter Mac-Laufzeittest: Testkopie startet, Settings öffnen sich, Systemauthentifizierung wird zur Aktivierung angefordert. Nutzer bestätigt erfolgreiche Authentifizierung. Beim erneuten Öffnen der Einstellungen ist die App-Sperre weiterhin aktiviert.
+- Noch offen: getrennte Abnahme von Touch ID und Passwort-Fallback, Abbruch/Lockout, Kaltstart und Fristen auf dem Mac sowie ein sandboxed Mac-Store-/TestFlight-Build. Die lokale Testsignatur belegt diese Store-Konfiguration nicht.
+
+## Historische Laufzeitumgebung der Erstumsetzung – 2026-11-09
 
 | Prüfschritt | Ergebnis | Evidenz |
 |---|---|---|
@@ -20,7 +30,7 @@ Issue: [#407](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersic
 | Plattform | Status | Verhalten |
 |---|---|---|
 | iOS | Implementiert, Geräteabnahme offen | `DeviceOwnerAuthentication`, Gerätecode-Fallback gemäß System-Policy; Vorschau-Schutz unabhängig von der App-Sperre |
-| Mac Catalyst | App-Sperre nicht verfügbar | Authentifizierungsadapter bleibt bis zu einem signierten Laufzeittest deaktiviert; Apple-Vorschau bleibt geschützt |
+| Mac Catalyst | Implementiert, lokaler signierter Systemdialog erfolgreich getestet | Touch ID / macOS-Anmeldepasswort gemäß System-Policy; Store-/TestFlight-Abnahme und weitere Gerätefälle offen |
 | Windows | App-Sperre nicht verfügbar | Windows Hello und HWND-gebundener Vorschau-Schutz benötigen einen separaten Spike und Folge-PR |
 
 ## Akzeptanzprotokoll für Geräte
@@ -38,10 +48,10 @@ Die folgenden Punkte müssen auf einem echten Gerät vor Freigabe einzeln abgeha
 | iPhone | Systemdialog/Kontrollzentrum/eigener Auth-Dialog | keine Fristverlängerung durch bloße Inaktivität; höchstens ein Systemdialog | Offen |
 | iPhone | Deep Link nach Kaltstart | bleibt bis zur Entsperrung ausstehend, danach richtige Route | Offen |
 | iPhone | offenes Formular oder Sheet | keine Daten sichtbar im Hintergrund; Zustand nach zulässigem Resume erhalten | Offen |
-| Mac Catalyst | Touch ID, kein Touch ID, macOS-Passwort | tatsächliche `DeviceOwnerAuthentication`-Policy dokumentieren | Nicht freigegeben; Adapter ist bis zum signierten Laufzeittest deaktiviert |
+| Mac Catalyst | Touch ID, kein Touch ID, macOS-Passwort | tatsächliche `DeviceOwnerAuthentication`-Policy dokumentieren | Lokale Systemauthentifizierung erfolgreich; getrennte Methodenabnahme und Store-Test offen, siehe Nachprüfung |
 | Windows 11 | Hello verfügbar / nicht verfügbar, Alt-Tab | Auth-Interop und Vorschau anhand HWND verifizieren | Nicht verfügbar; separates Plattformgerät/PR erforderlich |
 
-## Build-Evidenz des Umsetzungszweigs
+## Historische Build-Evidenz der Erstumsetzung – 2026-11-09
 
 | Prüfschritt | Ergebnis | Einschränkung |
 |---|---|---|
@@ -54,6 +64,6 @@ Die folgenden Punkte müssen auf einem echten Gerät vor Freigabe einzeln abgeha
 
 ## Offene Review-Abnahme
 
-Die Geräteprüfung bleibt Merge-Voraussetzung: erster Frame und App-Switcher, Tastatur und Zubehör, offene Sheets und Modals, VoiceOver sowie mehrere Scenes/Fenster müssen auf echter Hardware geprüft werden. Schnelle Hintergrund-/Vordergrundwechsel einschließlich eines laufenden Systemdialogs und ein nach Gerätecode-Entfernung nicht verfügbarer Authentifizierungsversuch sind ebenfalls offen. Windows-Build und Windows-Spike bleiben mangels Windows-Gerät offen; Mac-Catalyst-Authentifizierung bleibt nicht freigegeben.
+Die Geräteprüfung bleibt Merge-Voraussetzung: erster Frame und App-Switcher, Tastatur und Zubehör, offene Sheets und Modals, VoiceOver sowie mehrere Scenes/Fenster müssen auf echter Hardware geprüft werden. Schnelle Hintergrund-/Vordergrundwechsel einschließlich eines laufenden Systemdialogs und ein nach Gerätecode-Entfernung nicht verfügbarer Authentifizierungsversuch sind ebenfalls offen. Windows-Build und Windows-Spike bleiben mangels Windows-Gerät offen. Mac Catalyst hat den lokalen signierten Authentifizierungstest bestanden; die übrigen Mac-Szenarien und die Store-Konfiguration sind noch abzunehmen.
 
 Für die Zustellung eines ausstehenden Deep-Links nach Freigabe gibt es noch keinen deterministischen Host-Integrationstest. Der Kaltstart-Deep-Link und der zuletzt ausstehende Link müssen bis zu einem solchen Test auf dem Gerät geprüft werden; Gate- und Coordinator-Tests ersetzen diese Prüfung nicht.

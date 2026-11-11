@@ -77,7 +77,8 @@ public static class MauiProgram
 		builder.Services.AddSingleton<Finanzuebersicht.Core.Services.IClock, Finanzuebersicht.Core.Services.SystemClock>();
 		builder.Services.AddSingleton<TimeProvider>(TimeProvider.System);
 		builder.Services.AddSingleton<Finanzuebersicht.Core.AppLock.IAppLockSettingsStore, Finanzuebersicht.Services.AppLock.DeviceAppLockSettingsStore>();
-#if IOS && !MACCATALYST
+		// DeviceOwnerAuthentication provides the device-code fallback on iOS and the login-password fallback on Mac.
+#if IOS || MACCATALYST
 		builder.Services.AddSingleton<Finanzuebersicht.Core.AppLock.IDeviceAuthenticationService, Finanzuebersicht.Services.AppLock.AppleDeviceAuthenticationService>();
 #else
 		builder.Services.AddSingleton<Finanzuebersicht.Core.AppLock.IDeviceAuthenticationService, Finanzuebersicht.Services.AppLock.UnavailableDeviceAuthenticationService>();
