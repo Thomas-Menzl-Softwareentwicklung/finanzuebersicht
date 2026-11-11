@@ -4,6 +4,7 @@
              xmlns:vm="clr-namespace:Finanzuebersicht.ViewModels"
              xmlns:loc="clr-namespace:Finanzuebersicht.Extensions"
              xmlns:controls="clr-namespace:Finanzuebersicht.Controls"
+             xmlns:conv="clr-namespace:Finanzuebersicht.Converters"
              xmlns:helpers="clr-namespace:Finanzuebersicht.Helpers"
              xmlns:icons="clr-namespace:Finanzuebersicht.Resources"
              xmlns:screenshot="clr-namespace:Finanzuebersicht.Core.Constants;assembly=Finanzuebersicht.Core"
@@ -12,6 +13,10 @@
              x:DataType="vm:SettingsViewModel"
              Title="{loc:Translate Nav_Einstellungen}"
              BackgroundColor="{AppThemeBinding Light={StaticResource PageBackground}, Dark={StaticResource PageBackgroundDark}}">
+
+    <ContentPage.Resources>
+        <conv:InvertBoolConverter x:Key="InvertBool" />
+    </ContentPage.Resources>
 
     <Grid RowDefinitions="*, Auto">
         <controls:DesktopContentHost Grid.Row="0">
