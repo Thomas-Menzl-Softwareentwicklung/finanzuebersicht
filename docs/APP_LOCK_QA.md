@@ -9,8 +9,8 @@ Issue: [#407](https://github.com/Thomas-Menzl-Softwareentwicklung/finanzuebersic
 - Tests: 744 bestanden, 0 Fehler (`dotnet test Finanzuebersicht.Tests/Finanzuebersicht.Tests.csproj --no-restore -m:1 -nodeReuse:false`).
 - Mac Catalyst x64 Release: Build erfolgreich, 29 Warnungen, 0 Fehler. Neben den bekannten XAML-/Icon-Warnungen meldet das lokale Entwicklungsprofil MT7151 zu `get-task-allow`.
 - Signierung: Apple-Identitäten sind außerhalb der Workspace-Sandbox vorhanden. Das installierte Mac-Entwicklungsprofil schließt diesen Mac aus; macOS verweigert deshalb den Start des unveränderten Entwicklungsbuilds. Für den UI-Test wurde ausschließlich eine separate Kopie unter `/private/tmp` ohne eingebettetes Profil und ohne profilgebundene iCloud-/Debug-Entitlements mit Apple Development signiert; die lokale Testkopie benötigt `com.apple.security.cs.allow-jit`. Die Projekt-Entitlements und die installierte App wurden dafür nicht geändert.
-- Echter Mac-Laufzeittest: Testkopie startet, Settings öffnen sich, Systemauthentifizierung wird zur Aktivierung angefordert. Nutzer bestätigt erfolgreiche Authentifizierung. Beim erneuten Öffnen der Einstellungen ist die App-Sperre weiterhin aktiviert.
-- Noch offen: getrennte Abnahme von Touch ID und Passwort-Fallback, Abbruch/Lockout, Kaltstart und Fristen auf dem Mac sowie ein sandboxed Mac-Store-/TestFlight-Build. Die lokale Testsignatur belegt diese Store-Konfiguration nicht.
+- Echter Mac-Laufzeittest: Testkopie startet, Settings öffnen sich, Systemauthentifizierung wird zur Aktivierung angefordert. Nutzer bestätigt erfolgreiche Authentifizierung mit dem macOS-Anmeldepasswort; der Passwort-Fallback ist damit lokal nachgewiesen. Beim erneuten Öffnen der Einstellungen ist die App-Sperre weiterhin aktiviert.
+- Noch offen: Touch ID, Abbruch/Lockout, Kaltstart und Fristen auf dem Mac sowie ein sandboxed Mac-Store-/TestFlight-Build. Die lokale Testsignatur belegt diese Store-Konfiguration nicht.
 
 ## Historische Laufzeitumgebung der Erstumsetzung – 2026-11-09
 
@@ -48,7 +48,7 @@ Die folgenden Punkte müssen auf einem echten Gerät vor Freigabe einzeln abgeha
 | iPhone | Systemdialog/Kontrollzentrum/eigener Auth-Dialog | keine Fristverlängerung durch bloße Inaktivität; höchstens ein Systemdialog | Offen |
 | iPhone | Deep Link nach Kaltstart | bleibt bis zur Entsperrung ausstehend, danach richtige Route | Offen |
 | iPhone | offenes Formular oder Sheet | keine Daten sichtbar im Hintergrund; Zustand nach zulässigem Resume erhalten | Offen |
-| Mac Catalyst | Touch ID, kein Touch ID, macOS-Passwort | tatsächliche `DeviceOwnerAuthentication`-Policy dokumentieren | Lokale Systemauthentifizierung erfolgreich; getrennte Methodenabnahme und Store-Test offen, siehe Nachprüfung |
+| Mac Catalyst | Touch ID, kein Touch ID, macOS-Passwort | tatsächliche `DeviceOwnerAuthentication`-Policy dokumentieren | macOS-Anmeldepasswort lokal erfolgreich bestätigt; Touch ID und Store-Test offen, siehe Nachprüfung |
 | Windows 11 | Hello verfügbar / nicht verfügbar, Alt-Tab | Auth-Interop und Vorschau anhand HWND verifizieren | Nicht verfügbar; separates Plattformgerät/PR erforderlich |
 
 ## Historische Build-Evidenz der Erstumsetzung – 2026-11-09
